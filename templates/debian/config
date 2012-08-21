@@ -1,0 +1,58 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+. /usr/share/debconf/confmodule
+
+CONFIG_FILE=/etc/opt/slapos/slapos.cfg
+
+MASTER_URL=
+COMPUTER_ID=
+SOFTWARE_ROOT=
+PARTITION_AMOUNT=
+IPV4_LOCAL_NETWORK=
+
+if [ -f "$CONFIG_FILE" ]; then
+    MASTER_URL="`sed -ne 's#^\s*master_url[^=]*=\s*\(.*\)$#\1#p' \"$CONFIG_FILE\"`"
+    COMPUTER_ID="`sed -ne 's#^\s*computer_id[^=]*=\s*\(.*\)$#\1#p' \"$CONFIG_FILE\"`"
+    PARTITION_AMOUNT="`sed -ne 's#^\s*partition_amount[^=]*=\s*\(.*\)$#\1#p' \"$CONFIG_FILE\"`"
+    IPV4_LOCAL_NETWORK="`sed -ne 's#^\s*ipv4_local_network[^=]*=\s*\(.*\)$#\1#p' \"$CONFIG_FILE\"`"
+fi
+
+if [ -n "$MASTER_URL" ]; then
+    db_set slapos-node/master_url "$MASTER_URL"
+    db_input medium slapos-node/master_url || true
+else
+    db_set slapos-node/master_url "https://slap.vifib.com"
+    db_input high slapos-node/master_url || true
+fi
+
+db_go || true
+db_get slapos-node/master_url
+( echo "$RET" | grep -q "^https://" ) && db_input high slapos-node/master_url_with_ssl_note || true
+
+if [ -n "$COMPUTER_ID" ]; then
+    db_set slapos-node/computer_id "$COMPUTER_ID"
+    db_input medium slapos-node/computer_id || true
+else
+    db_input high slapos-node/computer_id || true
+fi
+
+if [ -n "$PARTITION_AMOUNT" ]; then
+    db_set slapos-node/partition_amount "$PARTITION_AMOUNT"
+    db_input medium slapos-node/partition_amount || true
+else
+    db_input high slapos-node/partition_amount || true
+fi
+
+if [ -n "$IPV4_LOCAL_NETWORK" ]; then
+    db_set slapos-node/ipv4_local_network "$IPV4_LOCAL_NETWORK"
+    db_input medium slapos-node/ipv4_local_network || true
+else
+    db_input high slapos-node/ipv4_local_network || true
+fi
+
+db_go || true
+
+exit 0

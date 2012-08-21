@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+. /usr/share/debconf/confmodule
+
+case "$1" in
+    # Delete completely /opt/slapos directory as Python egg directory names
+    # include their versions (failed-upgrade is just there for old-prerm)
+    upgrade|failed-upgrade)
+        rm -rf /opt/slapos
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

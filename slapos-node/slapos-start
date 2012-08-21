@@ -1,0 +1,65 @@
+#!/bin/sh
+
+
+IPV6CHECK=ipv6.google.com
+IPV4CHECK=google.com
+IPV6WAITTIME=5
+
+# Execute slapformat
+SLAPOS_CONFIGURATION=/etc/opt/slapos
+
+
+echo "Starting slap script" 
+
+# Check ipv4
+ping -c 2 $IPV4CHECK
+while [ $? != 0 ]; do
+    sleep $(($i*5))
+    if [[ $i < 40 ]]; then
+	let i++
+    fi
+    ping -c 2 $IPV4CHECK
+done
+
+# Wait for ipv6 connection to be ready 
+i=0
+ping6 -c 2 $IPV6CHECK
+while [ $? != 0 ];
+do
+    sleep $(($i*10))
+    if [[ $i < 40 ]]; then
+	let i++
+    fi
+    ping6 -c 2 $IPV6CHECK
+done
+
+
+# Run slapformat
+i=1
+echo -n "Running slapformat..." 
+/opt/slapos/bin/slapformat  --now --console --verbose  $SLAPOS_CONFIGURATION/slapos.cfg 
+while [[ $? != 0 ]]; do
+    sleep $(($i*60))
+    if [[ $i < 20 ]]; then
+	let i++
+    fi
+    echo "Retrying slapformat"
+    /opt/slapos/bin/slapformat  --now --console --verbose  $SLAPOS_CONFIGURATION/slapos.cfg
+done
+
+# Run bang
+i=1
+echo -n "Banging..."
+/opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
+while [[ $? != 0 ]]; do
+    sleep $(($i*60))
+    if [[ $i < 20 ]]; then
+	let i++
+    fi
+    echo "Retrying Bang"
+    /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
+done
+echo "done."
+
+# Run slapgrid on all computer partitions
+/opt/slapos/bin/slapgrid-cp --verbose --develop --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1

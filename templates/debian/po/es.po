@@ -1,0 +1,127 @@
+# slapos.tool.format po-debconf translation to Spanish
+# Copyright (C) 2011 Software in the Public Interest
+# This file is distributed under the same license as the slapos.tool.format package.
+#
+# Changes:
+#   - Initial translation
+#       Francisco Javier Cuadrado <fcocuadrado@gmail.com>, 2011
+#
+# Traductores, si no conocen el formato PO, merece la pena leer la
+# documentación de gettext, especialmente las secciones dedicadas a este
+# formato, por ejemplo ejecutando:
+#          info -n '(gettext)PO Files'
+#          info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor, lean antes de traducir
+# los siguientes documentos:
+#
+#  - El proyecto de traducción de Debian al español
+#    http://www.debian.org/intl/spanish/
+#    especialmente las notas de traducción en
+#    http://www.debian.org/intl/spanish/notas
+#
+#  - La guía de traducción de po's de debconf:
+#    /usr/share/doc/po-debconf/README-trans
+#    o http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: slapos.tool.format 1.0~20110420+1.git67c5b39-2\n"
+"Report-Msgid-Bugs-To: slapos.node@packages.debian.org\n"
+"POT-Creation-Date: 2011-12-01 18:16+0900\n"
+"PO-Revision-Date: 2011-06-14 09:30+0100\n"
+"Last-Translator: Francisco Javier Cuadrado <fcocuadrado@gmail.com>\n"
+"Language-Team: Debian l10n Spanish <debian-l10n-spanish@lists.debian.org >\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: string
+#. Description
+#: ../templates:2001
+msgid "SlapOS master node URL:"
+msgstr "URL del nodo maestro de SlapOS:"
+
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid "Master node key and certificate mandatory"
+msgstr "La clave y el certificado del nodo maestro son obligatorios"
+
+#. Type: note
+#. Description
+#: ../templates:3001
+#, fuzzy
+#| msgid ""
+#| "You used an HTTPS URL for the SlapOS master node, so the corresponding "
+#| "certificate must be placed in /etc/opt/slapos/ssl/slapos.crt, and the key "
+#| "in /etc/opt/slapos/ssl/slapos.key, readable only to root."
+msgid ""
+"You used an HTTPS URL for the SlapOS master node, so the Computer "
+"certificate must be placed in /etc/opt/slapos/ssl/computer.crt, and the key "
+"in /etc/opt/slapos/ssl/computer.key, readable only to root. Also, your "
+"account certificate and key must be placed respectively in /etc/opt/slapos/"
+"ssl/account.crt and /etc/opt/slapos/ssl/account.key."
+msgstr ""
+"Ha utilizado una URL con HTTPS para el nodo maestro de SlapOS, de modo que "
+"se debe ubicar el certificado correspondiente en «/etc/opt/slapos/ssl/slapos."
+"crt», y la clave en «/etc/opt/slapos/ssl/slapos.key», con acceso de lectura "
+"sólo para el administrador."
+
+#. Type: string
+#. Description
+#: ../templates:4001
+msgid "SlapOS computer ID:"
+msgstr "Identificador de la máquina de SlapOS:"
+
+#. Type: string
+#. Description
+#: ../templates:4001
+msgid "Please specify a unique identifier for this SlapOS node."
+msgstr "Indique el identificador único para este nodo de SlapOS."
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid "Number of Computer Partitions on this computer:"
+msgstr "Número de «particiones de equipo» en este equipo:"
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid ""
+"A Computer Partition (CP) is an instance of a Software Release (SR). You can "
+"now define how many instances will be available on this computer."
+msgstr ""
+"Una «partición de equipo» («Computer Partition», CP) es una instancia de una "
+"«versión del software» («Software Release», SR). Puede definir cuántas "
+"instancias estarán disponibles en este equipo."
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid ""
+"Note that the Software Releases will be stored in /opt/slapgrid/, whereas "
+"the Computer Partition will be stored in /srv/slapgrid/."
+msgstr ""
+"Tenga en cuenta que las «versiones del software» se almacenan en «/opt/"
+"slapgrid/», mientras que las «particiones de equipo» se almacenarán en «/srv/"
+"slapgrid/»."
+
+#. Type: string
+#. Description
+#: ../templates:6001
+msgid "Local IPv4 network to be used for Computer Partitions:"
+msgstr "Red local IPv4 que se utilizará para las «particiones de equipo»:"
+
+#. Type: string
+#. Description
+#: ../templates:6001
+msgid ""
+"Every Computer Partition must have an address on the same IPv4 network. "
+"Please specify a network in CIDR notation (e.g.: 192.0.2.0/24)."
+msgstr ""
+"Cada «partición de equipo» debe tener una dirección en la misma red IPv4. "
+"Por favor, introduzca la red utilizando la notación CIDR (por ejemplo: "
+"192.0.2.0/24)."
