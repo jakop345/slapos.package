@@ -82,7 +82,7 @@ cd $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+0
 make
 
 %install
-cd $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+0/slapos/
+cd $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+0/
 make DESTDIR=$RPM_BUILD_ROOT install 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
 cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+0/template/slapos-node.cron.d $RPM_BUILD_ROOT/etc/cron.d/slapos-node
