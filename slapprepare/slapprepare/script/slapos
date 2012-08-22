@@ -137,6 +137,9 @@ sysctl -w \
   net.ipv6.neigh.default.gc_thresh2=1024 \
   net.ipv6.neigh.default.gc_thresh3=2048
 
+systemctl enable slapos-node.service
+systemctl start slapos-node.service
+
 # Increase default aio-max-nr for sql servers
 sysctl -w fs.aio-max-nr=262144 
 
@@ -158,6 +161,3 @@ modprobe f71882fg
 
 # Activate KSM (shared memory for KVM)
 echo 1 > /sys/kernel/mm/ksm/run
-
-systemctl enable slapos-node.service
-systemctl start slapos-node.service
