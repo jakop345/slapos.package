@@ -44,9 +44,9 @@ Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedr
 
 
 %if 0%{?suse_version} == 1210
-BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-distribute, systemd
+BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-distribute
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute, systemd
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute
 %else
 BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-setuptools
 
