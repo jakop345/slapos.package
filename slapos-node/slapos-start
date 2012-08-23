@@ -40,14 +40,14 @@ done
 # Run slapformat
 i=1
 echo -n "Running slapformat..." 
-/opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log   $SLAPOS_CONFIGURATION/slapos.cfg 
+/opt/slapos/bin/slapformat  --now --console --verbose --logfile=/opt/slapos/slapformat.log   $SLAPOS_CONFIGURATION/slapos.cfg 
 while [[ $? != 0 ]]; do
     sleep $(($i*60))
     if [[ $i < 20 ]]; then
 	let i++
     fi
     echo "Retrying slapformat"
-    /opt/slapos/bin/slapformat  --now --console --verbose --verbose --log_file=/opt/slapos/slapformat.log  $SLAPOS_CONFIGURATION/slapos.cfg
+    /opt/slapos/bin/slapformat  --now --console --verbose --verbose --logfile=/opt/slapos/slapformat.log  $SLAPOS_CONFIGURATION/slapos.cfg
 done
 
 # Run bang
