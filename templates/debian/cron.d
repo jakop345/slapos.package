@@ -5,4 +5,4 @@ MAILTO=root
 */5 * * * *	root	/opt/slapos/bin/slapgrid-cp --verbose --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid  /etc/opt/slapos/slapos.cfg
 */5 * * * *	root	/opt/slapos/bin/slapgrid-sr --verbose --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid /etc/opt/slapos/slapos.cfg
 0 0 * * *	root	/opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log  --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg
-0 0 * * *	root	/opt/slapos/bin/slapformat --verbose  --logfile=/opt/slapos/slapformat.log /etc/opt/slapos/slapos.cfg
+0 0 * * *	root	/opt/slapos/bin/slapformat --verbose  --log_file=/opt/slapos/slapformat.log /etc/opt/slapos/slapos.cfg
