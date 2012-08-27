@@ -39,28 +39,13 @@ import urllib2
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.WARNING)
 # create formatter
 formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 # add formatter to ch
 ch.setFormatter(formatter)
 
 
-class Upload:
-  def __init__(self):
-    self.data = {'download-binary-dir-url': 'http://www.shacache.org/shadir',
-                 'signature_certificate_file': '/etc/slapos-cache/signature.cert',
-                 'upload-dir-url': 'https://www.shacache.org/shadir',
-                 'shadir-cert-file': '/etc/slapos-cache/shacache.cert',
-                 'download-cache-url': 'https://www.shacache.org/shacache',
-                 'upload-cache-url': 'https://www.shacache.org/shacache', 
-                 'shacache-cert-file': '/etc/slapos-cache/shacache.cert', 
-                 'upload-binary-cache-url': 'https://www.shacache.org/shacache', 
-                 'shacache-key-file': '/etc/slapos-cache/shacache.key', 
-                 'download-binary-cache-url': 'http://www.shacache.org/shacache',
-                 'upload-binary-dir-url':'https://www.shacache.org/shadir', 
-                 'signature_private_key_file': '/etc/slapos-cache/signature.key', 
-                 'shadir-key-file': '/etc/slapos-cache/shacache.key'}
 
 class Parser(OptionParser):
   """
@@ -84,6 +69,10 @@ class Parser(OptionParser):
              help="Check if upload parameters are ok (do not check certificates)",
              default=False,
              action="store_true"),
+      Option("-v","--verbose",
+             default=False,
+             action="store_true",
+             help="Verbose output."),
       Option("-n", "--dry-run",
              help="Simulate the execution steps",
              default=False,
@@ -99,6 +88,9 @@ class Parser(OptionParser):
 
 
 def get_slapos_conf_example():
+  """
+  Get slapos.cfg.example and return its path
+  """
   register_server_url = "http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example"
   request = urllib2.Request(register_server_url)
   url = urllib2.urlopen(request)  
@@ -108,35 +100,12 @@ def get_slapos_conf_example():
   slapos_cfg_example.write(page)
   slapos_cfg_example.close()
   return path
+
   
-
-def slapos_conf_check (config):
-  # Define logger for register
-  logger = logging.getLogger('Checking slapos.cfg file:')
-  logger.setLevel(logging.INFO)
-  logger.addHandler(ch)
-  # Load configuration file
-  configuration_file_path = os.path.join (config.slapos_configuration
-                                          ,'slapos.cfg')
-  configuration_parser = ConfigParser.SafeConfigParser()
-  configuration_parser.read(configuration_file_path)
-  # 
-  for section in ("slapformat", "slapos"):
-    configuration_dict = dict(configuration_parser.items(section))
-    for key in configuration_dict:
-      if key in ("key_file","cert_file","certificate_repository_path"):
-        files = configuration_dict[key]
-        if not os.path.exists(files) :
-          logger.critical ("%s file for %s parameters does not exist " 
-                           % (files,key)) 
-        else :
-          logger.info ("%s parameter:%s is good" % (key,files))
-
-  check_networkcache(config,logger,configuration_parser)
-
-
 def check_networkcache(config,logger,configuration_parser):
-  # Check network cache download
+  """
+  Check network cache download
+  """
   slapos_cfg_example = get_slapos_conf_example()
   configuration_example_parser = ConfigParser.RawConfigParser()
   configuration_example_parser.read(slapos_cfg_example)  
@@ -149,14 +118,35 @@ def check_networkcache(config,logger,configuration_parser):
       if not configuration_dict[key] ==  configuration_example_dict[key] :
         logger.warn("%s parameter in %s section is out of date" % (key, section))
     except KeyError:
-      logger.warn ("No %s parameter in your file" % key)
+      logger.warn("No %s parameter in your file" % key)
       pass
   if config.check_upload == True :
     check_networkcache_upload(config,logger,configuration_dict)
 
+class Upload:
+  """
+  Class used as a reference to check network cache upload 
+  """
+  def __init__(self):
+    self.data = {'download-binary-dir-url': 'http://www.shacache.org/shadir',
+                 'signature_certificate_file': '/etc/slapos-cache/signature.cert',
+                 'upload-dir-url': 'https://www.shacache.org/shadir',
+                 'shadir-cert-file': '/etc/slapos-cache/shacache.cert',
+                 'download-cache-url': 'https://www.shacache.org/shacache',
+                 'upload-cache-url': 'https://www.shacache.org/shacache', 
+                 'shacache-cert-file': '/etc/slapos-cache/shacache.cert', 
+                 'upload-binary-cache-url': 'https://www.shacache.org/shacache', 
+                 'shacache-key-file': '/etc/slapos-cache/shacache.key', 
+                 'download-binary-cache-url': 'http://www.shacache.org/shacache',
+                 'upload-binary-dir-url':'https://www.shacache.org/shadir', 
+                 'signature_private_key_file': '/etc/slapos-cache/signature.key', 
+                 'shadir-key-file': '/etc/slapos-cache/shacache.key'}
+
 
 def check_networkcache_upload(config,logger,configuration_dict):
-  # Check network cache upload
+  """
+  Check network cache upload
+  """
   upload_parameters = Upload()
   for key in upload_parameters.data:
     try:
@@ -166,7 +156,7 @@ def check_networkcache_upload(config,logger,configuration_dict):
           logger.critical ("%s file for %s parameters does not exist " 
                          % (file,key)) 
         else :
-          logger.info ("%s parameter:%s is good" % (key,file))
+          logger.info ("%s parameter:%s does exists" % (key,file))
       else :
         if not configuration_dict[key] == upload_parameters.data[key]:
           logger.warn("%s is %s sould be %s" 
@@ -176,14 +166,100 @@ def check_networkcache_upload(config,logger,configuration_dict):
       logger.critical ("No %s parameter in your file" % key)
       pass
 
+
+def slapos_conf_check (config):
+  """
+  Check if slapos.cfg look good
+  """
+  # Define logger for slapos.cfg verification
+  logger = logging.getLogger('Checking slapos.cfg file:')
+  logger.setLevel(logging.INFO)
+  logger.addHandler(ch)
+  # Load configuration file
+  configuration_file_path = os.path.join (config.slapos_configuration
+                                          ,'slapos.cfg')
+  configuration_parser = ConfigParser.SafeConfigParser()
+  configuration_parser.read(configuration_file_path)
+  # Check if files for slapos and slapformat exists
+  for section in ("slapformat", "slapos"):
+    configuration_dict = dict(configuration_parser.items(section))
+    for key in configuration_dict:
+      if key in ("key_file","cert_file","certificate_repository_path"):
+        files = configuration_dict[key]
+        if not os.path.exists(files) :
+          logger.critical ("%s file for %s parameters does not exist " 
+                           % (files,key)) 
+        else :
+          logger.info ("%s parameter:%s does exists" % (key,files))
+  # Check networkcache
+  check_networkcache(config,logger,configuration_parser)
+
+
+class CronLine:
+  """
+  Class to analyse each cron line individualy
+  """
+  def __init__(self):
+    """ Init all value to None"""
+    self.command = None
+    self.pidfile = None
+    self.logfile = None
+    self.config = None
+
+  def parse(self,cron_line):
+    """ Parse cron line and give value to attributes """
+    line = cron_line.split()
+    self.command = line[6]
+    for word in line:
+      if "slapos.cfg" in word :
+        self.config = word
+      if "--pidfile" in word :
+        self.pidfile = word[word.find("=")+1:]
+      if "--log_file" in word and "format" in self.command:
+        self.logfile = word[word.find("=")+1:]
+      if "--logfile" in word and not "format" in self.command:
+        self.logfile = word[word.find("=")+1:]
+
+  def check(self,config,logger):
+    """ Check if all attributes are correctly set"""
+    if self.config != os.path.join(config.slapos_configuration,'slapos.cfg'):
+      logger.critical("For %s command: slapos.cfg is %s should be in  %s" 
+                       % (self.command,self.config,config.slapos_configuration))
+    if self.pidfile == None:
+      logger.warning("For %s command: No pidfile" 
+                       % (self.command))
+    if self.logfile == None:
+      logger.warning("For %s command: No logfile" 
+                       % (self.command))
+
+
+def cron_check (config):
+  """
+  Check cron file
+  """
+  # Define logger for cron file verification
+  logger = logging.getLogger('Checking slapos-node cron file:')
+  logger.setLevel(logging.INFO)
+  logger.addHandler(ch)
+  cron = open(config.slapos_cron,"r")  
+  for line in cron :
+    if "/opt/slapos" in line and not line[0]=="#":
+      cron_line = CronLine()
+      cron_line.parse(line)
+      cron_line.check(config,logger)
+
 def slapos_global_check (config):
-  # Define logger for register
+  """
+  Check for main files
+  """
+  # Define logger for computer chek
   logger = logging.getLogger('Checking your computer for SlapOS:')
   logger.setLevel(logging.INFO)
   logger.addHandler(ch)
   # checking slapos.cfg
-  if not os.path.exists(config.slapos_configuration) :
-    logger.critical("No slapos.cfg found")
+  if not os.path.exists(os.path.join(config.slapos_configuration,'slapos.cfg')) :
+    logger.critical("No slapos.cfg found in slapos configuration directory: %s" 
+                    % config.slapos_configuration )
   else :
     logger.info("SlapOS configuration file found")
     slapos_conf_check(config)
@@ -192,8 +268,7 @@ def slapos_global_check (config):
     logger.warn("No %s found for cron" % config.slapos_cron)
   else:
     logger.info("Cron file found at %s" %config.slapos_cron)
-
-
+    cron_check(config)
 
 # Class containing all parameters needed for configuration
 class Config:
@@ -209,6 +284,10 @@ class Config:
     self.logger.setLevel(logging.DEBUG)
     # add ch to logger
     self.logger.addHandler(ch)
+
+    if self.verbose :
+      ch.setLevel(logging.DEBUG)
+
 
   def displayUserConfig(self):
     self.logger.debug ("Slapos.cfg : %s" % self.slapos_configuration)
