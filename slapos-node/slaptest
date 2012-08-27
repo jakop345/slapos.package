@@ -69,6 +69,10 @@ class Parser(OptionParser):
              help="Check if upload parameters are ok (do not check certificates)",
              default=False,
              action="store_true"),
+      Option("--test-agent",
+             help="Check if parameters are good for a test agent",
+             default=False,
+             action="store_true"),
       Option("-v","--verbose",
              default=False,
              action="store_true",
@@ -84,6 +88,8 @@ class Parser(OptionParser):
     Check arguments
     """
     (options, args) = self.parse_args()
+    if options.test_agent :
+      options.check_upload = True
     return options
 
 
@@ -120,6 +126,13 @@ def check_networkcache(config,logger,configuration_parser):
     except KeyError:
       logger.warn("No %s parameter in your file" % key)
       pass
+  
+  if config.test_agent:
+    configuration_dict = dict(configuration_parser.items('slapformat'))
+    if int(configuration_dict['partition_amount']) < 60 :
+      logger.warn("Partition amount is to low for a test agent. Is %s but should be at least 60"
+                  % configuration_dict['partition_amount'] )
+
   if config.check_upload == True :
     check_networkcache_upload(config,logger,configuration_dict)
 
