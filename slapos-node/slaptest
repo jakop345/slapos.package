@@ -33,13 +33,15 @@ import logging
 from optparse import OptionParser, Option
 import os
 import sys
+import tempfile
+import urllib2
 
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 # create formatter
-formatter = logging.Formatter('%(levelname)s - %(message)s')
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 # add formatter to ch
 ch.setFormatter(formatter)
 
@@ -77,6 +79,18 @@ class Parser(OptionParser):
     return options
 
 
+def get_slapos_conf_example():
+  register_server_url = "http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example"
+  request = urllib2.Request(register_server_url)
+  url = urllib2.urlopen(request)  
+  page = url.read()
+  info, path = tempfile.mkstemp()
+  slapos_cfg_example = open(path,'w')
+  slapos_cfg_example.write(page)
+  slapos_cfg_example.close()
+  return path
+  
+
 def slapos_conf_check (config):
   # Define logger for register
   logger = logging.getLogger('Checking slapos.cfg file:')
@@ -87,28 +101,53 @@ def slapos_conf_check (config):
                                           ,'slapos.cfg')
   configuration_parser = ConfigParser.SafeConfigParser()
   configuration_parser.read(configuration_file_path)
-  # Merges the arguments and configuration
+  # 
   for section in ("slapformat", "slapos"):
     configuration_dict = dict(configuration_parser.items(section))
     for key in configuration_dict:
       if key in ("key_file","cert_file","certificate_repository_path"):
         files = configuration_dict[key]
         if not os.path.exists(files) :
-          logger.critical ("%s does not exist" % files) 
+          logger.critical ("%s file for %s parameters does not exist " 
+                           % (files,key)) 
         else :
-          logger.info ("%s does exist" % files)
+          logger.info ("%s parameter:%s is good" % (key,files))
 
+  # Check network cache
+  slapos_cfg_example = get_slapos_conf_example()
+  configuration_example_parser = ConfigParser.RawConfigParser()
+  configuration_example_parser.read(slapos_cfg_example)  
+  os.remove(slapos_cfg_example)
+
+  section = "networkcache"
+  configuration_example_dict = dict(configuration_example_parser.items(section))
+  configuration_dict = dict(configuration_parser.items(section))
+  for key in configuration_example_dict:
+    try:
+      if not configuration_dict[key] ==  configuration_example_dict[key] :
+        logger.warn("%s parameter in %s section is out of date" % (key, section))
+    except KeyError:
+      logger.warn ("No %s parameter in your file" % key)
+      pass
+  
 
 def slapos_global_check (config):
   # Define logger for register
   logger = logging.getLogger('Checking your computer for SlapOS:')
   logger.setLevel(logging.INFO)
   logger.addHandler(ch)
+  # checking slapos.cfg
   if not os.path.exists(config.slapos_configuration) :
     logger.critical("No slapos.cfg found")
   else :
     logger.info("SlapOS configuration file found")
     slapos_conf_check(config)
+  # checking cron file
+  if not os.path.exists(config.slapos_cron) :
+    logger.warn("No %s found for cron" % config.slapos_cron)
+  else:
+    logger.info("Cron file found at %s" %config.slapos_cron)
+
 
 
 # Class containing all parameters needed for configuration
