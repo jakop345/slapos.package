@@ -1,0 +1,146 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright (c) 2012 Vifib SARL and Contributors.
+# All Rights Reserved.
+#
+# WARNING: This program as such is intended to be used by professional
+# programmers who take the whole responsibility of assessing all potential
+# consequences resulting from its eventual inadequacies and bugs
+# End users who are looking for a ready-to-use solution with commercial
+# guarantees and support are strongly advised to contract a Free Software
+# Service Company
+#
+# This program is Free Software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 3
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+##############################################################################
+
+import ConfigParser
+import logging
+from optparse import OptionParser, Option
+import os
+import sys
+
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+# create formatter
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+# add formatter to ch
+ch.setFormatter(formatter)
+
+
+
+class Parser(OptionParser):
+  """
+  Parse all arguments.
+  """
+  def __init__(self, usage=None, version=None):
+    """
+    Initialize all options possibles.
+    """
+    OptionParser.__init__(self, usage=usage, version=version,
+                          option_list=[
+      Option("--slapos-configuration",
+             help="path to slapos configuration directory",
+             default='/etc/opt/slapos/',
+             type=str),
+      Option("--slapos-cron",
+             help="path to slapos cron file",
+             default='/etc/cron.d/slapos-node',
+             type=str),
+      Option("-n", "--dry-run",
+             help="Simulate the execution steps",
+             default=False,
+             action="store_true"),
+   ])
+
+  def check_args(self):
+    """
+    Check arguments
+    """
+    (options, args) = self.parse_args()
+    return options
+
+
+def slapos_conf_check (config):
+  # Define logger for register
+  logger = logging.getLogger('Checking slapos.cfg file:')
+  logger.setLevel(logging.INFO)
+  logger.addHandler(ch)
+  # Load configuration file
+  configuration_file_path = os.path.join (config.slapos_configuration
+                                          ,'slapos.cfg')
+  configuration_parser = ConfigParser.SafeConfigParser()
+  configuration_parser.read(configuration_file_path)
+  # Merges the arguments and configuration
+  for section in ("slapformat", "slapos"):
+    configuration_dict = dict(configuration_parser.items(section))
+    for key in configuration_dict:
+      if key in ("key_file","cert_file","certificate_repository_path"):
+        files = configuration_dict[key]
+        if not os.path.exists(files) :
+          logger.critical ("%s does not exist" % files) 
+        else :
+          logger.info ("%s does exist" % files)
+
+
+def slapos_global_check (config):
+  # Define logger for register
+  logger = logging.getLogger('Checking your computer for SlapOS:')
+  logger.setLevel(logging.INFO)
+  logger.addHandler(ch)
+  if not os.path.exists(config.slapos_configuration) :
+    logger.critical("No slapos.cfg found")
+  else :
+    logger.info("SlapOS configuration file found")
+    slapos_conf_check(config)
+
+
+# Class containing all parameters needed for configuration
+class Config:
+  def setConfig(self, option_dict):
+    """
+    Set options given by parameters.
+    """
+    # Set options parameters
+    for option, value in option_dict.__dict__.items():
+      setattr(self, option, value)
+    # Define logger for register
+    self.logger = logging.getLogger('slaptest configuration')
+    self.logger.setLevel(logging.DEBUG)
+    # add ch to logger
+    self.logger.addHandler(ch)
+
+  def displayUserConfig(self):
+    self.logger.debug ("Slapos.cfg : %s" % self.slapos_configuration)
+    self.logger.debug ("slapos cron file: %s" % self.slapos_cron)
+
+
+def main():
+  """Checking computer state to run slapos"""
+  usage = "usage: %s [options] " % sys.argv[0]
+  # Parse arguments
+  config = Config()
+  config.setConfig(Parser(usage=usage).check_args())
+  config.displayUserConfig()
+  slapos_global_check(config)
+  sys.exit()
+
+
+if __name__ == "__main__":
+  main()
