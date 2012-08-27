@@ -199,7 +199,8 @@ def slapserver(config):
     print "Creating %r" % path
     if not dry_run:
       open(path, 'w').write(pkg_resources.resource_stream(__name__,
-                                                          'script/%s' % 'slapos').read() )
+                                                          'script/%s' % 'slapos').read()% dict(
+          slapos_configuration=config.slapos_configuration) )
       os.chmod(path, 0755)
     path = os.path.join(mount_dir_path, 'etc', 'systemd', 'system','slapos-boot-dedicated.service')
     print "Creating %r" % path
