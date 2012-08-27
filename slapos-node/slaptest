@@ -235,9 +235,12 @@ class CronLine:
 
   def check(self,config,logger):
     """ Check if all attributes are correctly set"""
-    if self.config != os.path.join(config.slapos_configuration,'slapos.cfg'):
+    if not os.path.exists(self.config): 
       logger.critical("For %s command: slapos.cfg is %s should be in  %s" 
-                       % (self.command,self.config,config.slapos_configuration))
+                      % (self.command,self.config,config.slapos_configuration))      
+    elif not os.path.samefile(self.config,os.path.join(config.slapos_configuration,'slapos.cfg')):
+      logger.critical("For %s command: slapos.cfg is %s should be in  %s" 
+                      % (self.command,self.config,config.slapos_configuration))            
     if self.pidfile == None:
       logger.warning("For %s command: No pidfile" 
                        % (self.command))
