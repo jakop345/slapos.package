@@ -10,6 +10,7 @@ install: all
 	cd slapos; make install
 	mkdir -p $(DESTDIR)/usr/sbin/
 	cp slapos-start $(DESTDIR)/usr/sbin/
+	cp slaptest $(DESTDIR)/usr/sbin/
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/sbin/
 clean:
 #	cd slapos; make clean
