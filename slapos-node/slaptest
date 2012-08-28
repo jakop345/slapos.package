@@ -179,6 +179,27 @@ def check_networkcache_upload(config,logger,configuration_dict):
       logger.critical ("No %s parameter in your file" % key)
       pass
 
+def get_computer_name(certificate):
+  certificate = open(certificate,"r")
+  for line in certificate:
+    i=0
+    if "Subject" in line:
+      k=line.find("COMP-")
+      i=line.find("/email")
+      certificate.close()
+      return line[k:i]
+  return -1
+
+def check_computer_id(logger,computer_id,cert_file):
+  comp_cert = get_computer_name(cert_file)
+  if comp_cert == "":
+    logger.error("Certificate file indicated is corrupted (no computer id)")
+  elif comp_cert == computer_id :
+      logger.info("Certificate and slapos.cfg define same computer id: %s" 
+                   % computer_id)
+  else :
+    logger.critical("Computers id from cerificate (%s) is different from slapos.cfg (%s)"
+                    % (comp_cert,computer_id))
 
 def slapos_conf_check (config):
   """
@@ -194,7 +215,7 @@ def slapos_conf_check (config):
   configuration_parser = ConfigParser.SafeConfigParser()
   configuration_parser.read(configuration_file_path)
   # Check if files for slapos and slapformat exists
-  for section in ("slapformat", "slapos"):
+  for section in ("slapos","slapformat"):
     configuration_dict = dict(configuration_parser.items(section))
     for key in configuration_dict:
       if key in ("key_file","cert_file","certificate_repository_path"):
@@ -204,6 +225,9 @@ def slapos_conf_check (config):
                            % (files,key)) 
         else :
           logger.info ("%s parameter:%s does exists" % (key,files))
+          if key == "cert_file":
+            check_computer_id(logger,configuration_dict["computer_id"],
+                              configuration_dict["cert_file"])
   # Check networkcache
   check_networkcache(config,logger,configuration_parser)
 
