@@ -208,45 +208,50 @@ def slapos_conf_check (config):
   check_networkcache(config,logger,configuration_parser)
 
 
-class CronLine:
+class CronFile:
   """
   Class to analyse each cron line individualy
   """
   def __init__(self):
-    """ Init all value to None"""
-    self.command = None
-    self.pidfile = None
-    self.logfile = None
-    self.config = None
+    """ Init all values"""
+    self.slapformat  = -1
+    self.slapgrid_cp = -1
+    self.slapgrid_ur = -1
+    self.slapgrid_sr = -1
+    # cron file from slapos documentation
+    self.slapgrid_sr_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-sr --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1"""
+    self.slapgrid_cp_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-cp --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1"""
+    self.slapgrid_ur_base = """0 0 * * * root /opt/slapos/bin/slapgrid-ur --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1"""
+    self.slapformat_base = """0 0 * * * root /opt/slapos/bin/slapformat --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1"""
 
   def parse(self,cron_line):
     """ Parse cron line and give value to attributes """
     line = cron_line.split()
-    self.command = line[6]
-    for word in line:
-      if "slapos.cfg" in word :
-        self.config = word
-      if "--pidfile" in word :
-        self.pidfile = word[word.find("=")+1:]
-      if "--log_file" in word and "format" in self.command:
-        self.logfile = word[word.find("=")+1:]
-      if "--logfile" in word and not "format" in self.command:
-        self.logfile = word[word.find("=")+1:]
-
-  def check(self,config,logger):
-    """ Check if all attributes are correctly set"""
-    if not os.path.exists(self.config): 
-      logger.critical("For %s command: slapos.cfg is %s should be in  %s" 
-                      % (self.command,self.config,config.slapos_configuration))      
-    elif not os.path.samefile(self.config,os.path.join(config.slapos_configuration,'slapos.cfg')):
-      logger.critical("For %s command: slapos.cfg is %s should be in  %s" 
-                      % (self.command,self.config,config.slapos_configuration))            
-    if self.pidfile == None:
-      logger.warning("For %s command: No pidfile" 
-                       % (self.command))
-    if self.logfile == None:
-      logger.warning("For %s command: No logfile" 
-                       % (self.command))
+    command = line[6]
+    if "slapformat"  in command : self.slapformat  = self.compare(self.slapformat_base.split()  , line)
+    if "slapgrid-ur" in command : self.slapgrid_ur = self.compare(self.slapgrid_ur_base.split() , line)
+    if "slapgrid-cp" in command : self.slapgrid_cp = self.compare(self.slapgrid_cp_base.split() , line)
+    if "slapgrid-sr" in command : self.slapgrid_sr = self.compare(self.slapgrid_sr_base.split() , line)
+  
+  def compare(self,reference,cron_line):
+    for i in range(0,6):
+      if not reference[i] == cron_line[i] :
+        return 0
+    ref = len(reference[6:])
+    if not len(set(reference[6:]) & set(cron_line[6:])) == ref :
+      return 0
+    else: return 1
+                  
+  def check(self,logger):
+    elements = {"slapformat":self.slapformat,"slapgrid-ur":self.slapgrid_ur,
+                "slapgrid-sr":self.slapgrid_sr,"slapgrid-cp":self.slapgrid_cp}
+    for key in elements :
+      if elements[key] == 0 :
+        logger.error("Your line for %s command does not seem right" % key)
+      elif elements[key] == -1 :
+        logger.error("No line found for %s command" % key)
+      elif elements[key] == 1 :
+        logger.info("Line for %s command is good" % key)
 
 
 def cron_check (config):
@@ -257,12 +262,12 @@ def cron_check (config):
   logger = logging.getLogger('Checking slapos-node cron file:')
   logger.setLevel(logging.INFO)
   logger.addHandler(ch)
-  cron = open(config.slapos_cron,"r")  
+  cron = open(config.slapos_cron,"r")
+  cron_file = CronFile()
   for line in cron :
     if "/opt/slapos" in line and not line[0]=="#":
-      cron_line = CronLine()
-      cron_line.parse(line)
-      cron_line.check(config,logger)
+      cron_file.parse(line)
+  cron_file.check(logger)
 
 def slapos_global_check (config):
   """
