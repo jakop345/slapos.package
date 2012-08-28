@@ -122,6 +122,9 @@ MAILTO=root
 */5 * * * * root /opt/slapos/bin/slapgrid-sr --verbose --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1
 0 0 * * * root /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1
 0/10 * * * * root if [[ -f $SLAPOS_CONFIGURATION/openvpn-needed ]]; then ip -6 route del dev br0 ; fi
+
+# XXX: SlapContainer
+*/5 * * * *	root	if [ -x /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer ] ; then /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer --pid /opt/slapos/slapcontainer.pid /etc/opt/slapos/slapos.cfg /opt/slapos/slapcontainer.db > /opt/slapos/slapcontainer.log 2>&1 ; fi
 """ > /etc/cron.d/slapos-node
 
 # Setup more server like network parameters in order to avoid
