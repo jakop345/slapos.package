@@ -8,4 +8,4 @@ MAILTO=root
 0 0 * * * root /opt/slapos/bin/slapformat --verbose --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1
 
 # XXX: SlapContainer
-*/5 * * * *	root	if [ -x /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer ] ; then /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer --pid /opt/slapos/slapcontainer.pid /etc/opt/slapos/slapos.cfg /opt/slapos/slapcontainer.db > /opt/slapos/slapcontainer.log 2>&1 ; fi
+*/5 * * * *	root	if [ -x /opt/slapgrid/843c2b4de8c5579427b072d00ec2ec9e/bin/slapcontainer ] ; then /opt/slapgrid/843c2b4de8c5579427b072d00ec2ec9e/bin/slapcontainer --pid /opt/slapos/slapcontainer.pid /etc/opt/slapos/slapos.cfg /opt/slapos/slapcontainer.db > /opt/slapos/slapcontainer.log 2>&1 ; fi
