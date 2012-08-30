@@ -363,7 +363,7 @@ def slapprepare():
       config.userConfig()
       print "\nThis your configuration: \n"
       config.displayUserConfig()
-      if get_yes_no("\nDo you confirm?",True):
+      if get_yes_no("\nDo you confirm?"):
         break
 
     if config.certificates:      
@@ -386,7 +386,7 @@ def slapprepare():
 
     computer_id = get_computer_name(os.path.join('/',slapos_configuration,'slapos.cfg'))
     
-    print computer_id
+    print "Your Computer is : %s" % computer_id
 
     config.setConfig(mount_dir_path = '/',
                     slapos_configuration=slapos_configuration,
@@ -424,12 +424,3 @@ def slapprepare():
     print "Deleting directory: %s" % temp_directory
     _call(['rm','-rf',temp_directory])
   sys.exit(return_code)
-
-if __name__ == "__main__" :
-  config= Config()
-  while True :
-    config.userConfig()
-    print "\nThis your configuration: \n"
-    config.displayUserConfig()
-    if get_yes_no("\nDo you confirm?"):
-      break
