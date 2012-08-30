@@ -113,20 +113,27 @@ mkdir -v -p -m 0755 $repo
 
 # software detected, ready to run
 # Set up cron
+# Fix path in case of old config:
+SLAPOS_GOOD_CONFIGURATION=/etc/opt/slapos/
+if [ $SLAPOS_GOOD_CONFIGURATION != $SLAPOS_CONFIGURATION ]; then
+    sed -i "s|$SLAPOS_GOOD_CONFIGURATION|$SLAPOS_CONFIGURATION|g" /etc/cron.d/slapos-node
+
+
+# Remove default route for ipv6 in case of openvpn-needed
 echo """# BEWARE: This file will be automatically regenerated on each boot
 SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin
 MAILTO=root
 
-0 0 * * * root /opt/slapos/bin/slapformat --verbose --log_file=/opt/slapos/slapformat.log -c ${SLAPOS_CONFIGURATION}slapos.cfg >> /opt/slapos/slapformat.log 2>&1
-*/5 * * * * root /opt/slapos/bin/slapgrid-cp --verbose --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid ${SLAPOS_CONFIGURATION}slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
-*/5 * * * * root /opt/slapos/bin/slapgrid-sr --verbose --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid ${SLAPOS_CONFIGURATION}slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1
-0 0 * * * root /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid ${SLAPOS_CONFIGURATION}slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1
 0/10 * * * * root if [[ -f ${SLAPOS_CONFIGURATION}/openvpn-needed ]]; then ip -6 route del dev br0 ; fi
+"""> /etc/cron.d/slapos
 
+if [ -f ${SLAPOS_CONFIGURATION}/SlapContainer-needed ]; then
+    echo """
 # XXX: SlapContainer
-*/5 * * * *	root	if [ -x /opt/slapgrid/843c2b4de8c5579427b072d00ec2ec9e/bin/slapcontainer ] ; then /opt/slapgrid/843c2b4de8c5579427b072d00ec2ec9e/bin/slapcontainer --pid /opt/slapos/slapcontainer.pid ${SLAPOS_CONFIGURATION}slapos.cfg /opt/slapos/slapcontainer.db > /opt/slapos/slapcontainer.log 2>&1 ; fi
-""" > /etc/cron.d/slapos-node
+*/5 * * * *	root	if [ -x /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer ] ; then /opt/slapgrid/c436b64d40a48507801d06c53cc27fec/bin/slapcontainer --pid /opt/slapos/slapcontainer.pid ${SLAPOS_CONFIGURATION}slapos.cfg /opt/slapos/slapcontainer.db > /opt/slapos/slapcontainer.log 2>&1 ; fi
+""" >> /etc/cron.d/slapos
+fi
 
 # Setup more server like network parameters in order to avoid
 #    "Neighbour table overflow."

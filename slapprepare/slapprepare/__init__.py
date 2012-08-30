@@ -71,12 +71,19 @@ def _call(cmd_args, stdout=None, stderr=None, dry_run=False):
                       (str(e), ' '.join(cmd_args)))
 
 # Utility fonction to get yes/no answers
-def get_yes_no (prompt):
-  ok= 0
-  while not ok:
-    answer=raw_input( prompt + " [y,n]: " )
+def get_yes_no (prompt,default=None):
+  if default :
+    def_value = '/ Default yes'
+  elif default == False :
+    def_value = '/ Default no'
+  else :
+    def_value = ''
+  while True:
+    answer=raw_input( prompt + " [y,n] %s: " % def_value )
     if answer.upper() in [ 'Y','YES' ]: return True
     if answer.upper() in [ 'N', 'NO' ]: return False
+    if not default == None :
+      if answer == '' : return default
 
 # Return OpenSUSE version if it is SuSE
 def suse_version(): 
@@ -260,6 +267,12 @@ log /var/log/openvpn.log""" % dict(
       if not dry_run:
         open(os.path.join(config.slapos_configuration,'openvpn-needed'),'w')
 
+        # Put file to  force VPN if user asked
+    if config.force_slapcontainer :
+      if not dry_run:
+        open(os.path.join(config.slapos_configuration,'SlapContainer-needed'),'w')
+
+
     # Removing line in slapos script activating kvm in virtual 
     if config.virtual:
       if not dry_run:
@@ -309,21 +322,24 @@ class Config:
 
 
   def userConfig(self):
-    self.certificates = get_yes_no("Automatically register new computer to Vifib?")
+    self.certificates = get_yes_no("Automatically register new computer to Vifib?",True)
     if self.certificates:
       self.computer_name = raw_input("Define a unique name for this computer: ")
-      self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? """)
-    self.virtual = get_yes_no("Is this a virtual Machine?")
+      self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
+      if self.partition_amount == '':
+        self.partition_amount = 20
+    self.virtual = get_yes_no("Is this a virtual Machine?",False)
     if not self.virtual:
-      self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?")
+      self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
     else:
       self.one_disk=True
-    self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?") 
+    self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?",True) 
+    self.force_vpn = get_yes_no ("Do you want to force the use lxc on this computer?",False) 
     if self.force_vpn : 
       self.ipv6_interface = "tapVPN"
     else : 
       self.ipv6_interface = ""
-    self.need_ssh = get_yes_no("Do you want a remote ssh access?")
+    self.need_ssh = get_yes_no("Do you want a remote ssh access?",True)
 
   def displayUserConfig(self):
     if self.certificates:
@@ -347,7 +363,7 @@ def slapprepare():
       config.userConfig()
       print "\nThis your configuration: \n"
       config.displayUserConfig()
-      if get_yes_no("\nDo you confirm?"):
+      if get_yes_no("\nDo you confirm?",True):
         break
 
     if config.certificates:      
@@ -408,3 +424,12 @@ def slapprepare():
     print "Deleting directory: %s" % temp_directory
     _call(['rm','-rf',temp_directory])
   sys.exit(return_code)
+
+if __name__ == "__main__" :
+  config= Config()
+  while True :
+    config.userConfig()
+    print "\nThis your configuration: \n"
+    config.displayUserConfig()
+    if get_yes_no("\nDo you confirm?"):
+      break
