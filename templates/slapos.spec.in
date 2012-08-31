@@ -46,11 +46,11 @@ Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedr
 %if 0%{?suse_version} == 1210
 BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-distribute
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute, openvpn
 %else
 BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-setuptools
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools, openvpn
 %endif
 
 AutoReqProv: no
