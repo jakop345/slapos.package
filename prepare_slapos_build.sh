@@ -3,14 +3,11 @@
 VERSION=0.28.2
 RECIPE_VERSION=0.101
 
-CURRENT_RECIPE_VERSION=$(cat ./slapos-recipe-version)
-CURRENT_VERSION=$(cat ./slapos-version)
-
 CURRENT_DIRECTORY="$(pwd)"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+0
-OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
+OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 
 
 # Prepare directory for new version if needed 
@@ -49,11 +46,9 @@ osc add slapos.spec
 
 ##################### Prepare configuration file for .deb ############
 # Add entry to changelog
-if [ $RECIPE_VERSION != $CURRENT_RECIPE_VERSION ]
-then
 cd $TEMPLATES_DIRECTORY/debian
 dch -pm -v $VERSION+$RECIPE_VERSION+0  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION)"
-fi
+
 cd $TEMPLATES_DIRECTORY 
 tar -czf debian.tar.gz debian
 cd $OBS_DIRECTORY
