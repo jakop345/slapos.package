@@ -5,12 +5,7 @@ IPV6CHECK=ipv6.google.com
 IPV4CHECK=google.com
 IPV6WAITTIME=5
 
-# Execute slapformat
-if [ -f /etc/opt/slapos/slapos.cfg  ] ; then
-    SLAPOS_CONFIGURATION=/etc/opt/slapos
-else
-    SLAPOS_CONFIGURATION=/etc/slapos
-fi
+SLAPOS_CONFIGURATION=/etc/opt/slapos/
 
 echo "Starting slap script" 
 

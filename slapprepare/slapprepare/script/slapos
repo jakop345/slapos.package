@@ -111,13 +111,15 @@ done
 repo=`egrep ^certificate_repository_path $SLAPOS_CONFIGURATION/slapos.cfg | sed 's/^certificate_repository_path.*= *//'`
 mkdir -v -p -m 0755 $repo
 
-# software detected, ready to run
-# Set up cron
+
 # Fix path in case of old config:
 SLAPOS_GOOD_CONFIGURATION=/etc/opt/slapos/
 if [ $SLAPOS_GOOD_CONFIGURATION != $SLAPOS_CONFIGURATION ]; then
     sed -i "s|$SLAPOS_GOOD_CONFIGURATION|$SLAPOS_CONFIGURATION|g" /etc/cron.d/slapos-node
+    sed -i "s|$SLAPOS_GOOD_CONFIGURATION|$SLAPOS_CONFIGURATION|g" /usr/sbin/slapos-start
 
+
+# Set up cron
 
 # Remove default route for ipv6 in case of openvpn-needed
 echo """# BEWARE: This file will be automatically regenerated on each boot
@@ -148,6 +150,7 @@ sysctl -w \
   net.ipv6.neigh.default.gc_thresh2=1024 \
   net.ipv6.neigh.default.gc_thresh3=2048
 
+# software detected, ready to run
 systemctl enable slapos-node.service
 systemctl start slapos-node.service
 
