@@ -1,0 +1,71 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2 (0x2)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=FR, ST=PARIS, L=Paris, CN=Ipv6-provider/name=Ipv6-provider/emailAddress=leninivi@enst.fr
+        Validity
+            Not Before: Jan 24 14:52:25 2012 GMT
+            Not After : Jan 21 14:52:25 2022 GMT
+        Subject: C=FR, ST=CA, L=SanFrancisco, O=Fort-Funston, CN=CLient/name=Client
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:c8:bf:8d:ec:37:3f:c3:a3:53:57:a3:9f:c9:93:
+                    bf:bc:f4:ff:5b:b9:c2:ca:14:b9:21:2d:75:5d:46:
+                    d2:9a:52:31:83:3d:b8:a3:49:4f:2c:92:44:6e:e1:
+                    d6:43:27:c0:d6:31:43:7a:fc:4b:29:0f:29:5c:44:
+                    b5:c5:01:90:0f:99:ff:e4:e1:3d:37:04:06:7e:09:
+                    ae:d4:36:ac:4f:d9:37:7c:ac:e3:66:11:5d:78:48:
+                    b0:32:4d:c8:e1:72:a7:76:2e:3b:87:a3:43:33:5d:
+                    15:6c:33:f9:e0:ab:07:a1:20:d2:4b:12:33:69:33:
+                    ef:ee:3f:bc:a2:90:85:2f:53
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints:
+                CA:FALSE
+            Netscape Comment:
+                Easy-RSA Generated Certificate
+            X509v3 Subject Key Identifier:
+                47:C1:C8:5B:DD:E8:E7:90:66:B8:40:F3:CE:A7:BC:E5:E7:34:D8:CC
+            X509v3 Authority Key Identifier:
+                keyid:BA:D3:5A:0F:EF:44:0C:42:60:85:79:6A:4E:F9:0C:41:54:6B:9B:6E
+                DirName:/C=FR/ST=PARIS/L=Paris/CN=Ipv6-provider/name=Ipv6-provider/emailAddress=leninivi@enst.fr
+                serial:A7:60:21:44:EE:5C:E1:A4
+
+            X509v3 Extended Key Usage:
+                TLS Web Client Authentication
+            X509v3 Key Usage:
+                Digital Signature
+    Signature Algorithm: sha1WithRSAEncryption
+        4f:7f:eb:6f:86:49:17:9e:13:c1:5a:52:c3:8b:6b:1c:06:15:
+        06:d1:bd:c4:95:f4:4c:91:0c:4b:17:ea:fa:1d:00:72:fb:fd:
+        5c:1f:9d:26:fe:7a:66:2c:f4:3f:55:e6:21:7e:0f:b9:b7:27:
+        65:92:95:d5:38:e4:b9:75:b2:3b:ad:f4:24:67:da:8b:6e:10:
+        b5:ad:47:58:31:4e:c7:e5:3e:c0:be:99:59:65:89:bd:ff:93:
+        c7:11:1e:07:07:7a:23:33:3a:8d:bc:cb:6a:9a:07:45:3a:c4:
+        24:00:f5:37:f5:dc:e8:22:47:dc:6c:63:f5:61:0c:fb:b2:fd:
+        24:08
+-----BEGIN CERTIFICATE-----
+MIIDlDCCAv2gAwIBAgIBAjANBgkqhkiG9w0BAQUFADB+MQswCQYDVQQGEwJGUjEO
+MAwGA1UECBMFUEFSSVMxDjAMBgNVBAcTBVBhcmlzMRYwFAYDVQQDEw1JcHY2LXBy
+b3ZpZGVyMRYwFAYDVQQpEw1JcHY2LXByb3ZpZGVyMR8wHQYJKoZIhvcNAQkBFhBs
+ZW5pbml2aUBlbnN0LmZyMB4XDTEyMDEyNDE0NTIyNVoXDTIyMDEyMTE0NTIyNVow
+ajELMAkGA1UEBhMCRlIxCzAJBgNVBAgTAkNBMRUwEwYDVQQHEwxTYW5GcmFuY2lz
+Y28xFTATBgNVBAoTDEZvcnQtRnVuc3RvbjEPMA0GA1UEAxMGQ0xpZW50MQ8wDQYD
+VQQpEwZDbGllbnQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMi/jew3P8Oj
+U1ejn8mTv7z0/1u5wsoUuSEtdV1G0ppSMYM9uKNJTyySRG7h1kMnwNYxQ3r8SykP
+KVxEtcUBkA+Z/+ThPTcEBn4JrtQ2rE/ZN3ys42YRXXhIsDJNyOFyp3YuO4ejQzNd
+FWwz+eCrB6Eg0ksSM2kz7+4/vKKQhS9TAgMBAAGjggE0MIIBMDAJBgNVHRMEAjAA
+MC0GCWCGSAGG+EIBDQQgFh5FYXN5LVJTQSBHZW5lcmF0ZWQgQ2VydGlmaWNhdGUw
+HQYDVR0OBBYEFEfByFvd6OeQZrhA886nvOXnNNjMMIGyBgNVHSMEgaowgaeAFLrT
+Wg/vRAxCYIV5ak75DEFUa5tuoYGDpIGAMH4xCzAJBgNVBAYTAkZSMQ4wDAYDVQQI
+EwVQQVJJUzEOMAwGA1UEBxMFUGFyaXMxFjAUBgNVBAMTDUlwdjYtcHJvdmlkZXIx
+FjAUBgNVBCkTDUlwdjYtcHJvdmlkZXIxHzAdBgkqhkiG9w0BCQEWEGxlbmluaXZp
+QGVuc3QuZnKCCQCnYCFE7lzhpDATBgNVHSUEDDAKBggrBgEFBQcDAjALBgNVHQ8E
+BAMCB4AwDQYJKoZIhvcNAQEFBQADgYEAT3/rb4ZJF54TwVpSw4trHAYVBtG9xJX0
+TJEMSxfq+h0Acvv9XB+dJv56Ziz0P1XmIX4PubcnZZKV1TjkuXWyO630JGfai24Q
+ta1HWDFOx+U+wL6ZWWWJvf+TxxEeBwd6IzM6jbzLapoHRTrEJAD1N/Xc6CJH3Gxj
+9WEM+7L9JAg=
+-----END CERTIFICATE-----

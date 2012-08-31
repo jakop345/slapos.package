@@ -24,6 +24,12 @@ while [ $? != 0 ]; do
     ping -c 2 $IPV4CHECK
 done
 
+# Launch openvpn
+if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
+    /etc/init.d/openvpn start
+    sleep 10
+fi
+
 # Wait for ipv6 connection to be ready 
 i=0
 ping6 -c 2 $IPV6CHECK
@@ -41,9 +47,9 @@ done
 i=1
 echo -n "Running slapformat..." 
 /opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log   $SLAPOS_CONFIGURATION/slapos.cfg 
-while [[ $? != 0 ]]; do
+while [ $? != 0 ]; do
     sleep $(($i*60))
-    if [[ $i < 20 ]]; then
+    if [ $i < 20 ]; then
 	let i++
     fi
     echo "Retrying slapformat"
@@ -54,9 +60,9 @@ done
 i=1
 echo -n "Banging..."
 /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
-while [[ $? != 0 ]]; do
+while [ $? != 0 ]; do
     sleep $(($i*60))
-    if [[ $i < 20 ]]; then
+    if [ $i < 20 ]; then
 	let i++
     fi
     echo "Retrying Bang"

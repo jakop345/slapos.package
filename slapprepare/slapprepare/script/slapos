@@ -125,7 +125,6 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin
 MAILTO=root
 
-0/10 * * * * root if [[ -f ${SLAPOS_CONFIGURATION}/openvpn-needed ]]; then ip -6 route del dev br0 ; fi
 """> /etc/cron.d/slapos
 
 if [ -f ${SLAPOS_CONFIGURATION}/SlapContainer-needed ]; then
