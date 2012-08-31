@@ -327,14 +327,14 @@ class Config:
       self.computer_name = raw_input("Define a unique name for this computer: ")
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
       if self.partition_amount == '':
-        self.partition_amount = 20
+        self.partition_amount = '20'
     self.virtual = get_yes_no("Is this a virtual Machine?",False)
     if not self.virtual:
       self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
     else:
       self.one_disk=True
     self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?",True) 
-    self.force_vpn = get_yes_no ("Do you want to force the use lxc on this computer?",False) 
+    self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False) 
     if self.force_vpn : 
       self.ipv6_interface = "tapVPN"
     else : 
@@ -343,11 +343,13 @@ class Config:
 
   def displayUserConfig(self):
     if self.certificates:
+      print "Will register a computer on master"
       print "Number of partition: %s" % (self.partition_amount)
       print "Computer name: %s" % self.computer_name
+    print "Virtual Machine: %s" % self.virtual
     print "Ipv6 over VPN: %s" % self.force_vpn
     print "Remote ssh access: %s" % self.need_ssh
-    print "Virtual Machine: %s" % self.virtual
+    print "Prepared to use lxc: %s" % self.force_slapcontainer
     if not self.virtual:
       print "Use a second disk: %s" % (not self.one_disk)
       
@@ -406,6 +408,14 @@ def slapprepare():
     slapserver(config)
     if not config.one_disk:
       _call(['/etc/init.d/slapos_firstboot'])
+
+    try:
+      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
+             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
+    except ValueError :
+      print "SlapOS repository was already there"
+      pass
+
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
@@ -424,3 +434,13 @@ def slapprepare():
     print "Deleting directory: %s" % temp_directory
     _call(['rm','-rf',temp_directory])
   sys.exit(return_code)
+
+
+if __name__ == "__main__":
+  config= Config()
+  while True :
+    config.userConfig()
+    print "\nThis your configuration: \n"
+    config.displayUserConfig()
+    if get_yes_no("\nDo you confirm?"):
+      break
