@@ -31,12 +31,15 @@
 import ConfigParser
 import datetime
 import logging
+from slapos.networkcachehelper import helper_download_network_cached_to_file
 from optparse import OptionParser, Option
 import os
 import subprocess as sub
 import sys
 import tempfile
 import urllib2
+
+
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
@@ -45,7 +48,6 @@ ch.setLevel(logging.WARNING)
 formatter = logging.Formatter("%(levelname)s - %(name)s - %(message)s")
 # add formatter to ch
 ch.setFormatter(formatter)
-
 
 
 class Parser(OptionParser):
@@ -61,6 +63,9 @@ class Parser(OptionParser):
         Option("--server-url",
                default='https://perso.telecom-paristech.fr/~leninivi/update-info',
                help="status file url"),        
+        Option("--slapos-configuration",
+               default='/etc/opt/slapos/slapos.cfg',
+               help="Path to slapos configuration file"),        
         Option("--srv-file",
                default='/srv/slapupdate',
                help="Server status file."),        
@@ -81,6 +86,38 @@ class Parser(OptionParser):
     """
     (options, args) = self.parse_args()
     return options
+
+
+class NetworkCache ():
+  def __init__(self,slapos_conf):
+    if os.path.exists(slapos_conf):
+      network_cache_info = ConfigParser.RawConfigParser()
+      network_cache_info.read(slapos_conf)
+      self.download_binary_cache_url = network_cache_info.get('networkcache','download-binary-cache-url')
+      self.download_cache_url        = network_cache_info.get('networkcache','download-cache-url')
+      self.download_binary_dir_url   = network_cache_info.get('networkcache','download-binary-dir-url')
+      self.signature_certificate_list = network_cache_info.get('networkcache','signature-certificate-list')
+    else:
+      self.download_binary_cache_url = "http://www.shacache.org/shacache"
+      self.download_cache_url = "https://www.shacache.org/shacache"
+      self.download_binary_dir_url = "http://www.shacache.org/shadir"
+      self.signature_certificate_list =""
+    
+    self.signature_certificate_list = """
+-----BEGIN CERTIFICATE-----
+MIIB9jCCAV+gAwIBAgIJANd3qMXJcWPgMA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV
+BAMMCENPTVAtOTAyMCAXDTEyMDkwNDEyMDM1OFoYDzIxMTIwODExMTIwMzU4WjAT
+MREwDwYDVQQDDAhDT01QLTkwMjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
+nhfhuGEO3gsQXkYjbhMFzY3b74bAcOvT3vwYd3V+V38XYC2Ds7ugyKIp3EisrREN
+8bRzxLTJjEwNhBjdS3GfFt/8uxB7hoKul4lEtdYmM4NCIlLbmoXwoJOVYzL7QWNg
+4uMEm9Bf46zhgY3ZNgCLELn8YgUDSr/dfdSDnN7wpoUCAwEAAaNQME4wHQYDVR0O
+BBYEFHgf9WN8LY9BZvtAcWrGtk6rCTq3MB8GA1UdIwQYMBaAFHgf9WN8LY9BZvtA
+cWrGtk6rCTq3MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAIFHRgb3D
+7va0+kUmw6xidJf9t4X5bkhOt/FBKpJK3tXctIN6DYPlPcemktMmrnYtYimq387I
+NYK/ZbWhfgv7VZqJ2OUvGaDQIm9oAuRfcu7QCbEzN10RibLLRKdDDgIhb34iLxVg
+jlD7tZ2DbRKHu5FadsKWNZpqC9H0BRLjBwY=
+-----END CERTIFICATE-----
+""" + self.signature_certificate_list
 
 
 
@@ -142,23 +179,45 @@ def update_system ():
   _call(['zypper','--gpg-auto-import-keys','dup','-l'], stdout = None)
 
 
+def download_info_from_networkcache(path,slapos_conf):
+  """
+  Download a tar of the repository from cache, and untar it.
+  """
+  shacache = NetworkCache(slapos_conf)
+
+  def strategy(entry_list):
+    """
+    Get the latest entry.
+    """
+    timestamp = 0
+    best_entry = None
+    for entry in entry_list:
+      if entry['timestamp'] > timestamp:
+        best_entry = entry
+    return best_entry
+  
+  return helper_download_network_cached_to_file(
+    path=path,
+    directory_key='slapos-upgrade',
+    required_key_list=['timestamp'],
+    strategy=strategy,
+    # Then we give a lot of not interesting things
+    dir_url=shacache.download_binary_dir_url,
+    cache_url=shacache.download_binary_cache_url,
+    signature_certificate_list=shacache.signature_certificate_list,
+  )
+
 
 def get_info_from_master(config):
   """
   Get status information and return its path
   """
-  update_server_url = config.server_url
-  request = urllib2.Request(update_server_url)
-  url = urllib2.urlopen(request)  
-  page = url.read()
   info, path = tempfile.mkstemp()
-  update_info = open(path,'w')
-  update_info.write(page)
-  update_info.close()
-  return path
-
-
-
+  if not download_info_from_networkcache(
+    path, config.slapos_configuration) == False:
+    return path
+  else :
+    raise ValueError("No result from shacache")
 
 def repositories_process(repositories):
   """
@@ -234,7 +293,6 @@ def update_machine(config):
     if config.last_reboot < config.reboot :
       current_state.set('system','reboot',config.today.isoformat())
       save_current_state(current_state,config)
-      print "reboot"
       os.system('reboot')
       
       

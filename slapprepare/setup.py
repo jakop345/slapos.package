@@ -16,8 +16,9 @@ setup(name=name,
       license='GPLv3',
       packages=['slapprepare'],
       include_package_data=True,
+      install_requires=['slapos.libnetworkcache',],      
       zip_safe=False, # proxy depends on Flask, which has issues with
-                      # accessing templates
+      # accessing templates
       entry_points={
         'console_scripts': [
       'slapprepare = slapprepare:slapprepare',
