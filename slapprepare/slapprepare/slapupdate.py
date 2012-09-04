@@ -306,7 +306,3 @@ def main():
   #config.displayUserConfig()
   update_machine(config)
   sys.exit()
-
-
-if __name__ == "__main__":
-  main()
