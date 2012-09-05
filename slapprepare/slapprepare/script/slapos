@@ -91,6 +91,11 @@ SLAP_INSTALL_LOG=/opt/slapos/slapos-install.log
 
 while :; do
   if [ -f /opt/slapos/bin/slapformat ] && [ -f /opt/slapos/bin/bang ]; then
+      zypper search -i slapos.node | grep slapos.node > /dev/null
+      if [ $? != 0 ]; then
+	    echo -n "Installing SlapOS"
+	    zypper --gpg-auto-import-keys install -fy slapos.node
+      fi
     # slapos tools available, nothing to do
     break
   fi
@@ -105,7 +110,7 @@ mkdir -v -p -m 0755 $repo
 
 
 # Fix path in case of old config:
-SLAPOS_GOOD_CONFIGURATION=/etc/opt/slapos
+SLAPOS_GOOD_CONFIGURATION=/etc/opt/slapos/
 if [ $SLAPOS_GOOD_CONFIGURATION != $SLAPOS_CONFIGURATION ]; then
     sed -i "s|$SLAPOS_GOOD_CONFIGURATION|$SLAPOS_CONFIGURATION|g" /etc/cron.d/slapos-node
     sed -i "s|$SLAPOS_GOOD_CONFIGURATION|$SLAPOS_CONFIGURATION|g" /usr/sbin/slapos-start
