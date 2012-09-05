@@ -172,6 +172,8 @@ def configureNtp():
   new_ntp.write(server+'\n')
   new_ntp.close()
   callWithIgnore(['chkconfig', '--add', 'ntp'])
+  callWithIgnore(['systemctl', 'enable', 'ntp.service'])
+  callWithIgnore(['systemctl', 'restart', 'ntp.service']) 
 
 def getMountedPartitionList():
   partition_list = []
