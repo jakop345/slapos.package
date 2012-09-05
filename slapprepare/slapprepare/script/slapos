@@ -119,6 +119,8 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin
 MAILTO=root
 
+0 0 * * * root /usr/local/bin/slapupdate -v >> /opt/slapos/slapupdate.log 2>&1
+
 """> /etc/cron.d/slapos
 
 if [ -f ${SLAPOS_CONFIGURATION}/SlapContainer-needed ]; then

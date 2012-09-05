@@ -171,12 +171,12 @@ def repositories_add (url,alias):
 
 def update_software ():
   """ Upgrade softwares """
-  _call(['zypper','--gpg-auto-import-keys','up','-l']
+  _call(['zypper','--gpg-auto-import-keys','up','-ly']
         , stdout=None)
 
 def update_system ():
   """ Dist-Upgrade of system """
-  _call(['zypper','--gpg-auto-import-keys','dup','-l'], stdout = None)
+  _call(['zypper','--gpg-auto-import-keys','dup','-ly'], stdout = None)
 
 
 def download_info_from_networkcache(path,slapos_conf):
@@ -215,6 +215,7 @@ def get_info_from_master(config):
   info, path = tempfile.mkstemp()
   if not download_info_from_networkcache(
     path, config.slapos_configuration) == False:
+    print open(path,'r').read()
     return path
   else :
     raise ValueError("No result from shacache")
@@ -273,7 +274,6 @@ def update_machine(config):
     else :
       logger.info("We will now upgrade your packages")
       update_software()
-      os.system('reboot')
   else:
     if config.last_upgrade < config.upgrade :
       # Purge repositories list and add new ones
