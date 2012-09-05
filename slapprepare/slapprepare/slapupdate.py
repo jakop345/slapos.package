@@ -37,15 +37,13 @@ import os
 import subprocess as sub
 import sys
 import tempfile
-import urllib2
-
 
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.WARNING)
 # create formatter
-formatter = logging.Formatter("%(levelname)s - %(name)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
 # add formatter to ch
 ch.setFormatter(formatter)
 
@@ -60,9 +58,6 @@ class Parser(OptionParser):
     """
     OptionParser.__init__(self, usage=usage, version=version,
                       option_list=[
-        Option("--server-url",
-               default='https://perso.telecom-paristech.fr/~leninivi/update-info',
-               help="status file url"),        
         Option("--slapos-configuration",
                default='/etc/opt/slapos/slapos.cfg',
                help="Path to slapos configuration file"),        
