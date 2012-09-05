@@ -33,6 +33,8 @@ from subprocess import call as subprocessCall
 import sys
 import urllib2
 
+SLAPOS_MARK='# Added by SlapOS\n'
+
 
 
 __import__('pkg_resources').declare_namespace(__name__)
@@ -138,12 +140,12 @@ def get_ssh(temp_dir):
       try:
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
         gotten= True
-      except ValueError, err:
+      except ValueError:
       # add http:// if it is missing (needed by urllib2)
         ssh_web = """http://"""+ssh_web   
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
         gotten= True
-    except urllib2.URLError,err: 
+    except urllib2.URLError: 
       print "  URL ERROR"
       gotten = False
       count -= 1
@@ -300,6 +302,21 @@ log /var/log/openvpn.log""" % dict(
     print "SlapOS Image configuration: DONE"
     return 0
 
+def configureNtp():
+  """Configures NTP daemon"""
+  server = "server pool.ntp.org"
+  old_ntp = open('/etc/ntp.conf', 'r').readlines()
+  new_ntp = open('/etc/ntp.conf', 'w')
+  for line in old_ntp:
+    if line.startswith('server'):
+      continue
+    new_ntp.write(line)
+  new_ntp.write(SLAPOS_MARK)
+  new_ntp.write(server+'\n')
+  new_ntp.close()
+  _call(['chkconfig', '--add', 'ntp'])
+  _call(['systemctl', 'enable', 'ntp.service'])
+
 
 class Config:
   def setConfig(self,mount_dir_path,slapos_configuration,
@@ -401,6 +418,8 @@ def slapprepare():
                     computer_id=computer_id)
     
  
+    configureNtp()
+
 
     # Prepare SlapOS Suse Server confuguration
     if config.need_ssh :

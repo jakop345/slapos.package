@@ -159,22 +159,6 @@ def prepareSlapOSPartition(mount_point):
   callWithCheck(['mount', '/tmp'])
   callWithCheck(['mount', '/srv'])
 
-def configureNtp():
-  """Configures NTP daemon"""
-  server = "server pool.ntp.org"
-  old_ntp = open('/etc/ntp.conf', 'r').readlines()
-  new_ntp = open('/etc/ntp.conf', 'w')
-  for line in old_ntp:
-    if line.startswith('server'):
-      continue
-    new_ntp.write(line)
-  new_ntp.write(SLAPOS_MARK)
-  new_ntp.write(server+'\n')
-  new_ntp.close()
-  callWithIgnore(['chkconfig', '--add', 'ntp'])
-  callWithIgnore(['systemctl', 'enable', 'ntp.service'])
-  callWithIgnore(['systemctl', 'restart', 'ntp.service']) 
-
 def getMountedPartitionList():
   partition_list = []
   for line in open('/etc/mtab', 'r').readlines():
@@ -299,7 +283,7 @@ def run():
   prepareSlapOSPartition(mount_point)
   print "Configuring fallback grub information"
   configureGrub(mount_point, slapos_label_file)
-  configureNtp()
+
 
 if __name__ == '__main__':
   try:
