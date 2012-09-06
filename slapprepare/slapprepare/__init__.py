@@ -314,7 +314,7 @@ def configureNtp():
   new_ntp.write(SLAPOS_MARK)
   new_ntp.write(server+'\n')
   new_ntp.close()
-  _call(['chkconfig', '--add', 'ntp'])
+  _call(['chkconfig', 'ntp', 'on'])
   _call(['systemctl', 'enable', 'ntp.service'])
 
 
