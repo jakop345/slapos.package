@@ -32,6 +32,7 @@ from shutil import move
 from subprocess import call as subprocessCall
 import sys
 import urllib2
+from slapupdate import main as slapupdate
 
 SLAPOS_MARK='# Added by SlapOS\n'
 
@@ -316,6 +317,7 @@ def configureNtp():
   new_ntp.close()
   _call(['chkconfig', '--add', 'ntp'])
   _call(['systemctl', 'enable', 'ntp.service'])
+  _call(['systemctl', 'restart', 'ntp.service'])
 
 
 class Config:
@@ -428,14 +430,18 @@ def slapprepare():
     if not config.one_disk:
       _call(['/etc/init.d/slapos_firstboot'])
 
-    try:
-      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
-             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
-    except ValueError :
-      print "SlapOS repository was already there"
-      pass
-
+    # Enable but do not run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
+    _call(['systemctl','stop','slapos-boot-dedicated.service'])
+
+    # Install/update slapos
+    _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
+           ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
+    _call('zypper','--gpg-auto-import-keys','install','-fy','slapos.node')
+
+    # Update computer
+    slapupdate()      
+
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
     return_code = 0

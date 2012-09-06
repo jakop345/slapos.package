@@ -28,7 +28,6 @@
 
 systemctl stop slapos-node.service
 systemctl disable slapos-node.service
-systemctl restart ntp.service
 
 # clean the system
 for service in rpcbind network-remotefs postfix ; do
