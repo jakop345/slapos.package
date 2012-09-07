@@ -26,15 +26,48 @@
 #
 ##############################################################################
 
+from optparse import OptionParser, Option
 import os
 import pkg_resources
 from shutil import move
 from subprocess import call as subprocessCall
 import sys
 import urllib2
-from slapupdate import main as slapupdate
 
 SLAPOS_MARK='# Added by SlapOS\n'
+
+
+class Parser(OptionParser):
+  """
+  Parse all arguments.
+  """
+  def __init__(self, usage=None, version=None):
+    """
+    Initialize all options possibles.
+    """
+    OptionParser.__init__(self, usage=usage, version=version,
+                      option_list=[
+        Option("-u","--update",
+               default=False,
+               action="store_true",
+               help="Will only run an update for scripts."),
+        Option("-v","--verbose",
+               default=False,
+               action="store_true",
+               help="Verbose output."),
+        Option("-n", "--dry-run",
+               help="Simulate the execution steps",
+               default=False,
+               action="store_true"),
+        ])
+
+
+  def check_args(self):
+    """
+    Check arguments
+    """
+    (options, args) = self.parse_args()
+    return options
 
 
 
@@ -163,6 +196,20 @@ def get_ssh(temp_dir):
   return 0
 
 
+def remove_former_scripts(slapos_configuration):
+  """
+  Will remove former scripts
+  """
+  # Remove old-fashioned slapos service
+  try:
+    _call(['systemctl','disable','slapos.service'])
+  except:
+    pass
+  _call(['rm','-f',os.path.join(slapos_configuration,'slapos')])
+  _call(['rm','-f','/etc/systemd/system/slapos.service'])
+  
+
+
 # Specific function to configure SlapOS Image
 def slapserver(config):
   dry_run = config.dry_run
@@ -204,39 +251,6 @@ def slapserver(config):
         pkg_resources.resource_stream(__name__,
                                       'template/ifcfg-br0.in').read())
 
-    # Creating boot scripts
-    path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
-    print "Creating %r" % path
-    if not dry_run:
-      open(path, 'w').write(pkg_resources.resource_stream(__name__,
-                                                          'script/%s' % 'slapos').read()% dict(
-          slapos_configuration=config.slapos_configuration) )
-      os.chmod(path, 0755)
-    path = os.path.join(mount_dir_path, 'etc', 'systemd', 'system','slapos-boot-dedicated.service')
-    print "Creating %r" % path
-    if not dry_run:
-      open(path, 'w').write(pkg_resources.resource_stream(__name__,
-                                                          'script/%s' % 'slapos.service').read() % dict(
-          slapos_configuration=config.slapos_configuration))
-      os.chmod(path, 0755)
-
-    # Preparing retry slapformat script
-    path = os.path.join(config.slapos_configuration,'run_slapformat')    
-    print "Creating %r" % path
-    if not dry_run:
-      open(path, 'w').write(pkg_resources.resource_stream(__name__,
-                                                          'script/%s' % 'run_slapformat').read() % dict(
-          slapos_configuration=config.slapos_configuration))
-      os.chmod(path, 0755)
-    path = os.path.join(mount_dir_path,'etc','openvpn','client.conf')    
-    print "Creating %r" % path
-    if not dry_run:
-      open(path, 'a').write("""script-security 3 system
-up-restart
-up '/bin/bash %(slapos_configuration)s/run_slapformat & echo foo'
-log /var/log/openvpn.log""" % dict(
-          slapos_configuration=config.slapos_configuration))
-      os.chmod(path, 0755)
   
     # Writing ssh key
     if config.need_ssh :
@@ -270,7 +284,7 @@ log /var/log/openvpn.log""" % dict(
       if not dry_run:
         open(os.path.join(config.slapos_configuration,'openvpn-needed'),'w')
 
-        # Put file to  force VPN if user asked
+    # Put file to  force VPN if user asked
     if config.force_slapcontainer :
       if not dry_run:
         open(os.path.join(config.slapos_configuration,'SlapContainer-needed'),'w')
@@ -303,6 +317,71 @@ log /var/log/openvpn.log""" % dict(
     print "SlapOS Image configuration: DONE"
     return 0
 
+
+
+def prepare_scripts (config):
+  """ 
+  Will prepare script for slapos dedicated computer
+  """
+  dry_run = config.dry_run
+
+  # Get slapos.cfg path
+  if hasattr(config,'slapos_configuration'):
+    slapos_configuration = config.slapos_configuration
+  else:
+    # Check for config file in /etc/slapos/
+    if os.path.exists('/etc/slapos/slapos.cfg'):
+      slapos_configuration='/etc/slapos/'
+    else:
+      slapos_configuration='/etc/opt/slapos/'
+
+  remove_former_scripts(slapos_configuration)
+
+  # Creating boot script
+  path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
+  print "Creating %r" % path
+  if not dry_run:
+    open(path, 'w').write(
+      pkg_resources.resource_stream(__name__,
+                                    'script/%s' % 'slapos').read()
+      % dict(slapos_configuration=slapos_configuration) )
+    os.chmod(path, 0755)
+
+  path = os.path.join('/', 'etc', 
+                      'systemd', 'system',
+                      'slapos-boot-dedicated.service')
+  print "Creating %r" % path
+  if not dry_run:
+    open(path, 'w').write(
+      pkg_resources.resource_stream(__name__,
+                                    'script/%s' % 'slapos.service').read() 
+      % dict(slapos_configuration=slapos_configuration))
+    os.chmod(path, 0755)
+
+  # Preparing retry slapformat script
+  path = os.path.join(slapos_configuration,'run_slapformat')    
+  print "Creating %r" % path
+  if not dry_run:
+    open(path, 'w').write(
+      pkg_resources.resource_stream(__name__,
+                                    'script/%s' % 'run_slapformat').read() 
+      % dict(slapos_configuration=slapos_configuration))
+    os.chmod(path, 0755)
+    
+  path = os.path.join('/','etc','openvpn','client.conf')    
+  print "Creating %r" % path
+  if not dry_run:
+    open(path, 'a').write(
+      """script-security 3 system
+up-restart
+up '/bin/bash %(slapos_configuration)s/run_slapformat & echo foo'
+log /var/log/openvpn.log""" 
+      % dict(slapos_configuration=slapos_configuration))
+    os.chmod(path, 0755)
+
+
+
+
 def configureNtp():
   """Configures NTP daemon"""
   server = "server pool.ntp.org"
@@ -315,24 +394,32 @@ def configureNtp():
   new_ntp.write(SLAPOS_MARK)
   new_ntp.write(server+'\n')
   new_ntp.close()
+  _call(['chkconfig', '--add', 'ntp'])
   _call(['chkconfig', 'ntp', 'on'])
   _call(['systemctl', 'enable', 'ntp.service'])
 
 
 
 class Config:
-  def setConfig(self,mount_dir_path,slapos_configuration,
-                hostname_path, host_path,
-                dry_run,
-                key_path, master_url, 
-                temp_dir,computer_id):
+  def setConfig(self, option_dict):
     """
     Set options given by parameters.
+    """
+    # Set options parameters
+    for option, value in option_dict.__dict__.items():
+      setattr(self, option, value)
+
+
+  def slaposConfig(self,mount_dir_path,slapos_configuration,
+                   hostname_path, host_path,
+                   key_path, master_url, 
+                   temp_dir,computer_id):
+    """
+    Set configuration for slapos
     """
     self.slapos_configuration = slapos_configuration
     self.hostname_path = hostname_path
     self.host_path = host_path
-    self.dry_run = dry_run
     self.key_path = key_path
     self.master_url = master_url
     self.mount_dir_path = mount_dir_path
@@ -360,6 +447,7 @@ class Config:
       self.ipv6_interface = ""
     self.need_ssh = get_yes_no("Do you want a remote ssh access?",True)
 
+
   def displayUserConfig(self):
     if self.certificates:
       print "Will register a computer on master"
@@ -371,22 +459,23 @@ class Config:
     print "Prepared to use lxc: %s" % self.force_slapcontainer
     if not self.virtual:
       print "Use a second disk: %s" % (not self.one_disk)
-      
-def slapprepare():
+
+
+
+def prepare_from_scratch(config):
   try:
     temp_directory=os.path.join('/tmp/slaptemp/')
     if not os.path.exists(temp_directory):
       print "Creating directory: %s" % temp_directory
       os.mkdir(temp_directory, 0711)
 
-    config= Config()
     while True :
       config.userConfig()
       print "\nThis your configuration: \n"
       config.displayUserConfig()
       if get_yes_no("\nDo you confirm?"):
         break
-
+        
     if config.certificates:      
       slapos_configuration='/etc/opt/slapos/'
     else:
@@ -404,43 +493,73 @@ def slapprepare():
              ,'--partition-number',config.partition_amount])      
       # Prepare for bridge
       enable_bridge(slapos_configuration)
-
-    computer_id = get_computer_name(os.path.join('/',slapos_configuration,'slapos.cfg'))
+    
+    computer_id = get_computer_name(
+      os.path.join('/',slapos_configuration,'slapos.cfg'))
     
     print "Your Computer is : %s" % computer_id
-
-    config.setConfig(mount_dir_path = '/',
-                    slapos_configuration=slapos_configuration,
-                    hostname_path='/etc/HOSTNAME',
-                    host_path='/etc/hosts',
-                    dry_run=False,
-                    key_path=os.path.join(temp_directory,'authorized_keys'),
-                    master_url="""https://slap.vifib.com""",
-                    temp_dir=temp_directory,
-                    computer_id=computer_id)
     
- 
-    configureNtp()
-
-
+    config.slaposConfig(mount_dir_path = '/',
+                        slapos_configuration=slapos_configuration,
+                        hostname_path='/etc/HOSTNAME',
+                        host_path='/etc/hosts',
+                        key_path=os.path.join(temp_directory,'authorized_keys'),
+                        master_url="""https://slap.vifib.com""",
+                        temp_dir=temp_directory,
+                        computer_id=computer_id)
+    
     # Prepare SlapOS Suse Server confuguration
     if config.need_ssh :
       get_ssh(temp_directory)
+
     slapserver(config)
+
     if not config.one_disk:
       _call(['/etc/init.d/slapos_firstboot'])
+
+
+    return_code = 0
+  except ExecError, err:
+    print >>sys.stderr, err.msg
+    return_code = 16
+  except SystemExit, err:
+    # Catch exception raise by optparse
+    return_code = err
+  if os.path.exists(temp_directory):
+    print "Deleting directory: %s" % temp_directory
+    _call(['rm','-rf',temp_directory])
+  return return_code
+
+
+      
+def slapprepare():
+  """
+  Prepare SlapOS dedicated computer
+  """
+  usage = "usage: %s [options] " % sys.argv[0]
+  try:
+    config= Config()
+    config.setConfig(Parser(usage=usage).check_args())
+
+    if not config.update :
+      prepare_from_scratch(config)
+
+    prepare_scripts(config)
+
+    configureNtp()
 
     # Enable but do not run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','stop','slapos-boot-dedicated.service'])
 
     # Install/update slapos
-    _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
-           ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
-    _call('zypper','--gpg-auto-import-keys','install','-fy','slapos.node')
+    try :
+      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
+             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
+    except:
+      pass
+    _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
 
-    # Update computer
-    slapupdate()      
 
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
@@ -455,17 +574,4 @@ def slapprepare():
   except SystemExit, err:
     # Catch exception raise by optparse
     return_code = err
-  if os.path.exists(temp_directory):
-    print "Deleting directory: %s" % temp_directory
-    _call(['rm','-rf',temp_directory])
   sys.exit(return_code)
-
-
-if __name__ == "__main__":
-  config= Config()
-  while True :
-    config.userConfig()
-    print "\nThis your configuration: \n"
-    config.displayUserConfig()
-    if get_yes_no("\nDo you confirm?"):
-      break
