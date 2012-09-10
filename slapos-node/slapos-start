@@ -7,6 +7,11 @@ IPV6WAITTIME=5
 
 SLAPOS_CONFIGURATION=/etc/opt/slapos/
 
+if [ ! -f  $SLAPOS_CONFIGURATION/slapos.cfg ]; then
+    echo "No slapos.cfg found"
+    exit 0
+fi
+
 echo "Starting slap script" 
 
 # Check ipv4

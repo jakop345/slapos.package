@@ -114,24 +114,26 @@ def check_networkcache(config,logger,configuration_parser
   Check network cache download
   """
   section = "networkcache"
-  configuration_example_dict = dict(configuration_example_parser.items(section))
-  configuration_dict = dict(configuration_parser.items(section))
-  for key in configuration_example_dict:
-    try:
-      if not configuration_dict[key] ==  configuration_example_dict[key] :
-        logger.warn("%s parameter in %s section is out of date" % (key, section))
-    except KeyError:
-      logger.warn("No %s parameter in %s section" % (key,section))
-      pass
-  
-  if config.test_agent:
-    configuration_dict = dict(configuration_parser.items('slapformat'))
-    if int(configuration_dict['partition_amount']) < 60 :
-      logger.warn("Partition amount is to low for a test agent. Is %s but should be at least 60"
-                  % configuration_dict['partition_amount'] )
+  if configuration_parser.has_section(section) :
+    configuration_example_dict = dict(configuration_example_parser.items(section))
+    configuration_dict = dict(configuration_parser.items(section))
+    for key in configuration_example_dict:
+      try:
+        if not configuration_dict[key] ==  configuration_example_dict[key] :
+          logger.warn("%s parameter in %s section is out of date" % (key, section))
+      except KeyError:
+        logger.warn("No %s parameter in %s section" % (key,section))
+        pass
+    
+    if config.test_agent:
+      configuration_dict = dict(configuration_parser.items('slapformat'))
+      if int(configuration_dict['partition_amount']) < 60 :
+        logger.warn("Partition amount is to low for a test agent. Is %s but should be at least 60"
+                    % configuration_dict['partition_amount'] )
+    
+    if config.check_upload == True :
+      check_networkcache_upload(config,logger,configuration_dict)
 
-  if config.check_upload == True :
-    check_networkcache_upload(config,logger,configuration_dict)
 
 class Upload:
   """
@@ -223,8 +225,19 @@ def slapos_conf_check (config):
   configuration_example_parser = ConfigParser.RawConfigParser()
   configuration_example_parser.read(slapos_cfg_example)  
   os.remove(slapos_cfg_example)
+  
+  # Check sections
+  mandatory_sections = ["slapos","slapformat","networkcache"]
+  for section in mandatory_sections:
+    if not configuration_parser.has_section(section):
+      logger.critical("No %s section in slapos.cfg" % section)
+      mandatory_sections.remove(section)
+
+  if 'networkcache' in mandatory_sections:
+    mandatory_sections.remove('networkcache')
+
   # Check if parameters for slapos and slapformat exists
-  for section in ("slapos","slapformat"):
+  for section in mandatory_sections :
     configuration_dict = dict(configuration_parser.items(section))
     configuration_example_dict = dict(configuration_example_parser.items(section))
     for key in configuration_example_dict:
@@ -239,10 +252,10 @@ def slapos_conf_check (config):
                            % (files,key)) 
         else :
           logger.info ("%s parameter:%s does exists" % (key,files))
-          # check if computer id is the same in slapos.cfg and certificate
-          if key == "cert_file":
-            check_computer_id(logger,configuration_dict["computer_id"],
-                              configuration_dict["cert_file"])
+      # check if computer id is the same in slapos.cfg and certificate
+      if key == "cert_file":
+        check_computer_id(logger,configuration_dict["computer_id"],
+                          configuration_dict["cert_file"])
   # Check networkcache
   check_networkcache(config,logger,configuration_parser,
                      configuration_example_parser)
