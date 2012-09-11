@@ -30,7 +30,7 @@ tar -czf $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
 
 
 #################    Prepare obs   ###################################
-cd $CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
+cd $OBS_DIRECTORY
 
 # Remove former configuration
 osc rm -f $SLAPOS_ORGINAL_DIRECTORY*.tar.gz

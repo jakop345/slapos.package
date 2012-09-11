@@ -7,9 +7,7 @@ Build-Depends: debhelper (>= 4.1.16),
                po-debconf,
                wget,
                python,
-	       python-setuptools
 Homepage: http://www.slapos.org
-
 Package: slapos-node
 Architecture: any
 Depends: ${misc:Depends},
@@ -26,7 +24,6 @@ Depends: ${misc:Depends},
          patch,
 # openvpn for ipv6
          openvpn,
-
 Description: Client-side to deploy applications with SlapOS 
  SlapOS allows one to turn any application into SaaS (Service as a System),
  PaaS (Platform as a Service) or IaaS (Infrastructure as a Service) without
