@@ -7,7 +7,9 @@ Build-Depends: debhelper (>= 4.1.16),
                po-debconf,
                wget,
                python,
+	       python-setuptools
 Homepage: http://www.slapos.org
+
 Package: slapos-node
 Architecture: any
 Depends: ${misc:Depends},
@@ -16,8 +18,8 @@ Depends: ${misc:Depends},
 # slapformat
          bridge-utils,
          uml-utilities,
-# slapgrid-sr
-         libc6-dev | libc-dev,
+# slapgrid-sr needed by most recipes
+	 libc6-dev | libc-dev,
          gcc | c-compiler,
          g++ | c++-compiler,
          make,
