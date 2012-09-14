@@ -6,7 +6,7 @@ MAILTO=root
 */5 * * * * root /opt/slapos/bin/slapgrid-cp --verbose --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 
 # slapgrid-ur: hardcoded script to rerun slapgrid-ur if failed.
-* * * * * root i=20; false; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;
+0 0 * * * root i=20; false; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;
 
 0 0 * * * root /opt/slapos/bin/slapformat --verbose --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1
 

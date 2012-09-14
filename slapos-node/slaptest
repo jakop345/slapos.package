@@ -99,7 +99,7 @@ def get_slapos_conf_example():
   """
   register_server_url = "http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example"
   request = urllib2.Request(register_server_url)
-  url = urllib2.urlopen(request)  
+  url = urllib2.urlopen(request)
   page = url.read()
   info, path = tempfile.mkstemp()
   slapos_cfg_example = open(path,'w')
@@ -107,7 +107,7 @@ def get_slapos_conf_example():
   slapos_cfg_example.close()
   return path
 
-  
+
 def check_networkcache(config,logger,configuration_parser
                        ,configuration_example_parser):
   """
@@ -124,20 +124,20 @@ def check_networkcache(config,logger,configuration_parser
       except KeyError:
         logger.warn("No %s parameter in %s section" % (key,section))
         pass
-    
+
     if config.test_agent:
       configuration_dict = dict(configuration_parser.items('slapformat'))
       if int(configuration_dict['partition_amount']) < 60 :
         logger.warn("Partition amount is to low for a test agent. Is %s but should be at least 60"
                     % configuration_dict['partition_amount'] )
-    
+
     if config.check_upload == True :
       check_networkcache_upload(config,logger,configuration_dict)
 
 
 class Upload:
   """
-  Class used as a reference to check network cache upload 
+  Class used as a reference to check network cache upload
   """
   def __init__(self):
     self.data = {'download-binary-dir-url': 'http://www.shacache.org/shadir',
@@ -145,13 +145,13 @@ class Upload:
                  'upload-dir-url': 'https://www.shacache.org/shadir',
                  'shadir-cert-file': '/etc/slapos-cache/shacache.cert',
                  'download-cache-url': 'https://www.shacache.org/shacache',
-                 'upload-cache-url': 'https://www.shacache.org/shacache', 
-                 'shacache-cert-file': '/etc/slapos-cache/shacache.cert', 
-                 'upload-binary-cache-url': 'https://www.shacache.org/shacache', 
-                 'shacache-key-file': '/etc/slapos-cache/shacache.key', 
+                 'upload-cache-url': 'https://www.shacache.org/shacache',
+                 'shacache-cert-file': '/etc/slapos-cache/shacache.cert',
+                 'upload-binary-cache-url': 'https://www.shacache.org/shacache',
+                 'shacache-key-file': '/etc/slapos-cache/shacache.key',
                  'download-binary-cache-url': 'http://www.shacache.org/shacache',
-                 'upload-binary-dir-url':'https://www.shacache.org/shadir', 
-                 'signature_private_key_file': '/etc/slapos-cache/signature.key', 
+                 'upload-binary-dir-url':'https://www.shacache.org/shadir',
+                 'signature_private_key_file': '/etc/slapos-cache/signature.key',
                  'shadir-key-file': '/etc/slapos-cache/shacache.key'}
 
 
@@ -165,17 +165,17 @@ def check_networkcache_upload(config,logger,configuration_dict):
       if not key.find("file") == -1:
         file = configuration_dict[key]
         if not os.path.exists(file) :
-          logger.critical ("%s file for %s parameters does not exist " 
-                         % (file,key)) 
+          logger.critical ("%s file for %s parameters does not exist "
+                         % (file,key))
         else :
           logger.info ("%s parameter:%s does exists" % (key,file))
       else :
         if not configuration_dict[key] == upload_parameters.data[key]:
-          logger.warn("%s is %s sould be %s" 
+          logger.warn("%s is %s sould be %s"
                       %(key,configuration_dict[key]
                         ,upload_parameters.data[key]))
     except KeyError:
-      logger.critical("No %s parameter in networkcache section " 
+      logger.critical("No %s parameter in networkcache section "
                         % (key))
       pass
 
@@ -201,7 +201,7 @@ def check_computer_id(logger,computer_id,cert_file):
   if comp_cert == "":
     logger.error("Certificate file indicated is corrupted (no computer id)")
   elif comp_cert == computer_id :
-      logger.info("Certificate and slapos.cfg define same computer id: %s" 
+      logger.info("Certificate and slapos.cfg define same computer id: %s"
                    % computer_id)
   else :
     logger.critical("Computers id from cerificate (%s) is different from slapos.cfg (%s)"
@@ -223,9 +223,9 @@ def slapos_conf_check (config):
   # Get example configuration file
   slapos_cfg_example = get_slapos_conf_example()
   configuration_example_parser = ConfigParser.RawConfigParser()
-  configuration_example_parser.read(slapos_cfg_example)  
+  configuration_example_parser.read(slapos_cfg_example)
   os.remove(slapos_cfg_example)
-  
+
   # Check sections
   mandatory_sections = ["slapos","slapformat","networkcache"]
   for section in mandatory_sections:
@@ -242,14 +242,14 @@ def slapos_conf_check (config):
     configuration_example_dict = dict(configuration_example_parser.items(section))
     for key in configuration_example_dict:
       if not key in configuration_dict:
-        logger.critical("No %s parameter in %s section " 
+        logger.critical("No %s parameter in %s section "
                         % (key,section))
       # check if necessary files exist
       elif key in ("key_file","cert_file","certificate_repository_path"):
         files = configuration_dict[key]
         if not os.path.exists(files) :
-          logger.critical ("%s file for %s parameters does not exist " 
-                           % (files,key)) 
+          logger.critical ("%s file for %s parameters does not exist "
+                           % (files,key))
         else :
           logger.info ("%s parameter:%s does exists" % (key,files))
       # check if computer id is the same in slapos.cfg and certificate
@@ -274,37 +274,36 @@ class CronFile:
     # cron file from slapos documentation
     self.slapgrid_sr_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-sr --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1"""
     self.slapgrid_cp_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-cp --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1"""
-    self.slapgrid_ur_base = """0 0 * * * root /opt/slapos/bin/slapgrid-ur --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1"""
+    self.slapgrid_ur_base = """0 0 * * * root i=20; false; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;"""
     self.slapformat_base = """0 0 * * * root /opt/slapos/bin/slapformat --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1"""
 
   def parse(self,cron_line):
     """ Parse cron line and give value to attributes """
     line = cron_line.split()
-    command = line[6]
-    if "slapformat"  in command :
+    if "slapformat"  in cron_line :
       self.slapformat  = self.compare(self.slapformat,
                                       self.slapformat_base.split()  , line)
-    if "slapgrid-ur" in command :
+    if "slapgrid-ur" in cron_line :
       self.slapgrid_ur = self.compare(self.slapgrid_ur,
                                       self.slapgrid_ur_base.split() , line)
-    if "slapgrid-cp" in command : 
+    if "slapgrid-cp" in cron_line :
       self.slapgrid_cp = self.compare(self.slapgrid_cp,
                                       self.slapgrid_cp_base.split() , line)
-    if "slapgrid-sr" in command : 
+    if "slapgrid-sr" in cron_line :
       self.slapgrid_sr = self.compare(self.slapgrid_sr,
                                       self.slapgrid_sr_base.split() , line)
-  
+
   def compare(self,state,reference,cron_line):
     if not state == -1 :
       return 2
     for i in range(0,6):
       if not reference[i] == cron_line[i] :
         return 0
-    ref = len(reference[6:])
+    ref = len(set(reference[6:]))
     if not len(set(reference[6:]) & set(cron_line[6:])) == ref :
       return 0
     else: return 1
-                  
+
   def check(self,logger):
     elements = {"slapformat":self.slapformat,"slapgrid-ur":self.slapgrid_ur,
                 "slapgrid-sr":self.slapgrid_sr,"slapgrid-cp":self.slapgrid_cp}
@@ -317,7 +316,7 @@ class CronFile:
         logger.info("Line for %s command is good" % key)
       elif elements[key] == 2 :
         logger.error("You have a duplicated line for %s command" % key)
-        
+
 
 
 def cron_check (config):
@@ -345,7 +344,7 @@ def slapos_global_check (config):
   logger.addHandler(ch)
   # checking slapos.cfg
   if not os.path.exists(os.path.join(config.slapos_configuration,'slapos.cfg')) :
-    logger.critical("No slapos.cfg found in slapos configuration directory: %s" 
+    logger.critical("No slapos.cfg found in slapos configuration directory: %s"
                     % config.slapos_configuration )
   else :
     logger.info("SlapOS configuration file found")
