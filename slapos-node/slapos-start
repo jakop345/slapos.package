@@ -16,30 +16,30 @@ if [ $ONLY_SLAPFORMAT = false ]; then
 
     echo "Starting slap script" 
 
-# Check ipv4
+    # Check ipv4
     ping -c 2 $IPV4CHECK
     while [ $? != 0 ]; do
 	sleep $(($i * 5))
 	if [[ $i < 40 ]]; then
-	    let i++
+        let i++
 	fi
 	ping -c 2 $IPV4CHECK
     done
 
-# Launch openvpn
+    # Launch openvpn
     if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
 	/etc/init.d/openvpn start
 	sleep 10
     fi
 
-# Wait for ipv6 connection to be ready 
+    # Wait for ipv6 connection to be ready
     i=0
     ping6 -c 2 $IPV6CHECK
     while [ $? != 0 ];
     do
 	sleep $(($i * 10))
 	if [[ $i < 40 ]]; then
-	    let i++
+        let i++
 	fi
 	ping6 -c 2 $IPV6CHECK
     done
@@ -50,31 +50,31 @@ fi
 # Run slapformat
 i=1
 echo -n "Running slapformat..." 
-/opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log   $SLAPOS_CONFIGURATION/slapos.cfg 
+/opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
 while [ $? != 0 ]; do
     sleep $(($i*60))
     if [ $i < 20 ]; then
 	let i++
     fi
     echo "Retrying slapformat"
-    /opt/slapos/bin/slapformat  --now --console --verbose --verbose --log_file=/opt/slapos/slapformat.log  $SLAPOS_CONFIGURATION/slapos.cfg
+    /opt/slapos/bin/slapformat  --now --console --verbose --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
 done
 
 if [ $ONLY_SLAPFORMAT = false ]; then
-# Run bang
+    # Run bang
     i=1
     echo -n "Banging..."
     /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
     while [ $? != 0 ]; do
 	sleep $(($i*60))
 	if [ $i < 20 ]; then
-	    let i++
+        let i++
 	fi
 	echo "Retrying Bang"
 	/opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
     done
     echo "done."
 
-# Run slapgrid on all computer partitions
+    # Run slapgrid on all computer partitions
     /opt/slapos/bin/slapgrid-cp --verbose --develop --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 fi
