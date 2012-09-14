@@ -274,7 +274,7 @@ class CronFile:
     # cron file from slapos documentation
     self.slapgrid_sr_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-sr --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1"""
     self.slapgrid_cp_base = """*/5 * * * * root /opt/slapos/bin/slapgrid-cp --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1"""
-    self.slapgrid_ur_base = """0 0 * * * root i=20; false; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;"""
+    self.slapgrid_ur_base = """0 0 * * * root /opt/slapos/bin/slapgrid-ur --maximal_delay=86400 --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg; i=20; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;"""
     self.slapformat_base = """0 0 * * * root /opt/slapos/bin/slapformat --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1"""
 
   def parse(self,cron_line):
