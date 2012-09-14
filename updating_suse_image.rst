@@ -7,7 +7,7 @@ Procedure
 Run this whole command as root
 ++++++++++++++++++++++++++++++
 
-# wget http://perso.telecom-paristech.fr/~leninivi/slapprepare.tar.gz ;zypper remove -y slapos.node ; rm -f /etc/opt/slapos/slapos.node-0.88-28.1.x86_64.rpm ;tar -xzf slapprepare.tar.gz ; cd slapprepare; python setup.py install; cd .. ; rm -r slapprepare* ; slapprepare -u ;
+# wget http://perso.telecom-paristech.fr/~leninivi/slapprepare.tar.gz ;zypper remove -y slapos.node ; rm -f /etc/opt/slapos/slapos.node*.rpm ;tar -xzf slapprepare.tar.gz ; cd slapprepare; python setup.py install; cd .. ; rm -r slapprepare* ; slapprepare -u ;
 
 Check your config
 -----------------

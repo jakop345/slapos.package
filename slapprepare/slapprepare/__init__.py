@@ -359,6 +359,15 @@ def prepare_scripts (config):
       % dict(slapos_configuration=slapos_configuration))
     os.chmod(path, 0755)
 
+  # add clientipv4
+  path = os.path.join('/','etc','openvpn','clientipv4.conf')
+  print "Creating %r" % path
+  if not dry_run:
+    open(path, 'w').write(
+      pkg_resources.resource_stream(__name__,
+                                    'template/%s' % 'clientipv4.conf.in').read())
+    os.chmod(path, 0755)
+
   # Remove old-timers scripts
   remove_former_scripts(slapos_configuration)
 
