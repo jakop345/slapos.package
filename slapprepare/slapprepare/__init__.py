@@ -122,7 +122,7 @@ def get_yes_no (prompt,default=None):
       if answer == '' : return default
 
 # Return OpenSUSE version if it is SuSE
-def suse_version(): 
+def suse_version():
   if os.path.exists('/etc/SuSE-release') :
     with open('/etc/SuSE-release') as f :
       for line in f:
@@ -144,7 +144,7 @@ def get_computer_name(slapos_configuration):
   return -1
 
 
- 
+
 def enable_bridge(slapos_configuration):
   #Create temp file
   slapos_old_path = os.path.join(slapos_configuration,'slapos.cfg')
@@ -176,10 +176,10 @@ def get_ssh(temp_dir):
         gotten= True
       except ValueError:
       # add http:// if it is missing (needed by urllib2)
-        ssh_web = """http://"""+ssh_web   
+        ssh_web = """http://"""+ssh_web
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
         gotten= True
-    except urllib2.URLError: 
+    except urllib2.URLError:
       print "  URL ERROR"
       gotten = False
       count -= 1
@@ -207,7 +207,7 @@ def remove_former_scripts(slapos_configuration):
     pass
   _call(['rm','-f',os.path.join(slapos_configuration,'slapos')])
   _call(['rm','-f','/etc/systemd/system/slapos.service'])
-  
+
 
 
 # Specific function to configure SlapOS Image
@@ -222,7 +222,7 @@ def slapserver(config):
     if not dry_run:
       open(hostname_path, 'w').write("%s\n" % config.computer_id)
 
-    # Adding the hostname as a valid address 
+    # Adding the hostname as a valid address
     host_path = os.path.normpath('/'.join([mount_dir_path,
                                            config.host_path]))
     print "Creating %r" % host_path
@@ -251,7 +251,7 @@ def slapserver(config):
         pkg_resources.resource_stream(__name__,
                                       'template/ifcfg-br0.in').read())
 
-  
+
     # Writing ssh key
     if config.need_ssh :
       user_path = os.path.normpath('/'.join([mount_dir_path, 'root']))
@@ -269,11 +269,11 @@ def slapserver(config):
         print "Setting uid:gid of %r to %s:%s" % (ssh_key_directory, uid, gid)
         os.chown(ssh_key_directory, uid, gid)
         os.chmod(ssh_key_directory, 0700)
-      
+
       print "Creating file: %s" % ssh_key_path
       if not dry_run:
         open(ssh_key_path,'a').write(''.join(open(config.key_path,'r').read()))
-        
+
       if not dry_run:
         print "Setting uid:gid of %r to %s:%s" % (ssh_key_path, uid, gid)
         os.chown(ssh_key_path, uid, gid)
@@ -290,14 +290,14 @@ def slapserver(config):
         open(os.path.join(config.slapos_configuration,'SlapContainer-needed'),'w')
 
 
-    # Removing line in slapos script activating kvm in virtual 
+    # Removing line in slapos script activating kvm in virtual
     if config.virtual:
       if not dry_run:
         path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
         _call(['sed','-i',"$d",path],dry_run=dry_run)
         _call(['sed','-i',"$d",path],dry_run=dry_run)
-      
-    # Adding slapos_firstboot in case of MultiDisk usage    
+
+    # Adding slapos_firstboot in case of MultiDisk usage
     if not config.one_disk :
       for script in ['slapos_firstboot']:
         path = os.path.join(mount_dir_path, 'etc', 'init.d', script)
@@ -305,7 +305,7 @@ def slapserver(config):
         if not dry_run:
           open(path, 'w').write(pkg_resources.resource_stream(__name__,
                                                               'script/%s' % script).read())
-          os.chmod(path, 0755)	  
+          os.chmod(path, 0755)
     else:
       for script in ['slapos_firstboot']:
         path = os.path.join(mount_dir_path, 'etc', 'init.d', script)
@@ -320,7 +320,7 @@ def slapserver(config):
 
 
 def prepare_scripts (config):
-  """ 
+  """
   Will prepare script for slapos dedicated computer
   """
   dry_run = config.dry_run
@@ -335,8 +335,6 @@ def prepare_scripts (config):
     else:
       slapos_configuration='/etc/opt/slapos/'
 
-  remove_former_scripts(slapos_configuration)
-
   # Creating boot script
   path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
   print "Creating %r" % path
@@ -347,37 +345,19 @@ def prepare_scripts (config):
       % dict(slapos_configuration=slapos_configuration) )
     os.chmod(path, 0755)
 
-  path = os.path.join('/', 'etc', 
+  path = os.path.join('/', 'etc',
                       'systemd', 'system',
                       'slapos-boot-dedicated.service')
   print "Creating %r" % path
   if not dry_run:
     open(path, 'w').write(
       pkg_resources.resource_stream(__name__,
-                                    'script/%s' % 'slapos.service').read() 
+                                    'script/%s' % 'slapos.service').read()
       % dict(slapos_configuration=slapos_configuration))
     os.chmod(path, 0755)
 
-  # Preparing retry slapformat script
-  path = os.path.join(slapos_configuration,'run_slapformat')    
-  print "Creating %r" % path
-  if not dry_run:
-    open(path, 'w').write(
-      pkg_resources.resource_stream(__name__,
-                                    'script/%s' % 'run_slapformat').read() 
-      % dict(slapos_configuration=slapos_configuration))
-    os.chmod(path, 0755)
-    
-  path = os.path.join('/','etc','openvpn','client.conf')    
-  print "Creating %r" % path
-  if not dry_run:
-    open(path, 'a').write(
-      """script-security 3 system
-up-restart
-up '/bin/bash %(slapos_configuration)s/run_slapformat & echo foo'
-log /var/log/openvpn.log""" 
-      % dict(slapos_configuration=slapos_configuration))
-    os.chmod(path, 0755)
+  # Remove old-timers scripts
+  remove_former_scripts(slapos_configuration)
 
 
 
@@ -412,7 +392,7 @@ class Config:
 
   def slaposConfig(self,mount_dir_path,slapos_configuration,
                    hostname_path, host_path,
-                   key_path, master_url, 
+                   key_path, master_url,
                    temp_dir,computer_id):
     """
     Set configuration for slapos
@@ -439,11 +419,11 @@ class Config:
       self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
     else:
       self.one_disk=True
-    self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?",True) 
-    self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False) 
-    if self.force_vpn : 
+    self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?",True)
+    self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False)
+    if self.force_vpn :
       self.ipv6_interface = "tapVPN"
-    else : 
+    else :
       self.ipv6_interface = ""
     self.need_ssh = get_yes_no("Do you want a remote ssh access?",True)
 
@@ -475,8 +455,8 @@ def prepare_from_scratch(config):
       config.displayUserConfig()
       if get_yes_no("\nDo you confirm?"):
         break
-        
-    if config.certificates:      
+
+    if config.certificates:
       slapos_configuration='/etc/opt/slapos/'
     else:
       # Check for config file in /etc/slapos/
@@ -484,21 +464,21 @@ def prepare_from_scratch(config):
         slapos_configuration='/etc/slapos/'
       else:
         slapos_configuration='/etc/opt/slapos/'
-       
+
     # Prepare Slapos Configuration
-    if config.certificates:  
+    if config.certificates:
       _call(['slapos','node','register',config.computer_name
              ,'--interface-name','br0'
              ,'--ipv6-interface',config.ipv6_interface
-             ,'--partition-number',config.partition_amount])      
+             ,'--partition-number',config.partition_amount])
       # Prepare for bridge
       enable_bridge(slapos_configuration)
-    
+
     computer_id = get_computer_name(
       os.path.join('/',slapos_configuration,'slapos.cfg'))
-    
+
     print "Your Computer is : %s" % computer_id
-    
+
     config.slaposConfig(mount_dir_path = '/',
                         slapos_configuration=slapos_configuration,
                         hostname_path='/etc/HOSTNAME',
@@ -507,7 +487,7 @@ def prepare_from_scratch(config):
                         master_url="""https://slap.vifib.com""",
                         temp_dir=temp_directory,
                         computer_id=computer_id)
-    
+
     # Prepare SlapOS Suse Server confuguration
     if config.need_ssh :
       get_ssh(temp_directory)
@@ -531,7 +511,7 @@ def prepare_from_scratch(config):
   return return_code
 
 
-      
+
 def slapprepare():
   """
   Prepare SlapOS dedicated computer
