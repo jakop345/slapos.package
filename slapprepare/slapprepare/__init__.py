@@ -208,6 +208,9 @@ def remove_former_scripts(slapos_configuration):
   _call(['rm','-f',os.path.join(slapos_configuration,'slapos')])
   _call(['rm','-f','/etc/systemd/system/slapos.service'])
 
+  _call(['rm','-f','/etc/openvpn/client.conf'])
+  _call(['rm','-rf','/etc/openvpn/keys/'])
+  _call(['rm','-f',os.path.join(slapos_configuration,'run_slapformat')])
 
 
 # Specific function to configure SlapOS Image
