@@ -521,6 +521,17 @@ def slapprepare():
     config= Config()
     config.setConfig(Parser(usage=usage).check_args())
 
+    # Install/update slapos
+    try :
+      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
+             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
+    except:
+      pass
+    _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
+    _call(['systemctl','stop','slapos-node.service'])
+
+    print "SlapOS has been updated"
+
     if not config.update :
       prepare_from_scratch(config)
 
@@ -531,15 +542,6 @@ def slapprepare():
     # Enable but do not run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','stop','slapos-boot-dedicated.service'])
-
-    # Install/update slapos
-    try :
-      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
-             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
-    except:
-      pass
-    _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
-
 
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 

@@ -44,7 +44,9 @@ SLAPOS_CONFIGURATION='%(slapos_configuration)s'
 
 # Test ipv4/ipv6 connectivity and if not working use openvpn 
 # and wait for it to be ready
-/etc/init.d/openvpn stop
+if [ ! -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
+    /etc/init.d/openvpn stop
+fi
 
 ping -c 2 $IPV4CHECK
 while [ $? != 0 ]; do
