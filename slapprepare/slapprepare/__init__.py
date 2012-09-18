@@ -508,6 +508,8 @@ def prepare_from_scratch(config):
 
     if not config.one_disk:
       _call(['/etc/init.d/slapos_firstboot'])
+      _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
+      _call(['systemctl','stop','slapos-node.service'])
 
 
     return_code = 0
