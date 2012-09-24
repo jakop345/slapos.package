@@ -283,9 +283,10 @@ def slapserver(config):
         os.chmod(ssh_key_path, 0600)
 
     # Put file to  force VPN if user asked
-    if config.force_vpn :
+    if not config.force_vpn :
       if not dry_run:
-        open(os.path.join(config.slapos_configuration,'openvpn-needed'),'w')
+        _call(['rm','-f',
+               os.path.join(config.slapos_configuration,'openvpn-needed')])
 
     # Put file to  force VPN if user asked
     if config.force_slapcontainer :
@@ -431,7 +432,7 @@ class Config:
       self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
     else:
       self.one_disk=True
-    self.force_vpn = get_yes_no ("Do you want to force the use of vpn to provide ipv6?",True)
+    self.force_vpn = get_yes_no ("Do you want to use vpn to provide ipv6?",True)
     self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False)
     if self.force_vpn :
       self.ipv6_interface = "tapVPN"
@@ -553,10 +554,8 @@ def slapprepare():
 
     configureNtp()
 
-    # Enable but do not run slapos-boot-dedicated.service
+    # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
-    _call(['systemctl','stop','slapos-boot-dedicated.service'])
-
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
     return_code = 0
