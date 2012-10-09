@@ -20,7 +20,7 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     ping -c 2 $IPV4CHECK
     while [ $? != 0 ]; do
   sleep $(($i * 5))
-  if [[ $i < 40 ]]; then
+  if [[ $i -le 40 ]]; then
         let i++
   fi
   ping -c 2 $IPV4CHECK
@@ -38,7 +38,7 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     while [ $? != 0 ];
     do
   sleep $(($i * 10))
-  if [[ $i < 40 ]]; then
+  if [[ $i -le 40 ]]; then
         let i++
   fi
   ping6 -c 2 $IPV6CHECK
@@ -53,7 +53,7 @@ echo -n "Running slapformat..."
 /opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
 while [ $? != 0 ]; do
     sleep $(($i*60))
-    if [ $i < 20 ]; then
+    if [ $i -le 20 ]; then
   let i++
     fi
     echo "Retrying slapformat"
@@ -67,7 +67,7 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
     while [ $? != 0 ]; do
   sleep $(($i*60))
-  if [ $i < 20 ]; then
+  if [ $i -le 20 ]; then
         let i++
   fi
   echo "Retrying Bang"
