@@ -66,15 +66,18 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     echo -n "Banging..."
     /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
     while [ $? != 0 ]; do
-  sleep $(($i*60))
-  if [ $i -le 20 ]; then
-        let i++
-  fi
-  echo "Retrying Bang"
-  /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
+        sleep $(($i*60))
+        if [ $i -le 20 ]; then
+            let i++
+        fi
+        echo "Retrying Bang"
+        /opt/slapos/bin/bang -m "Rebooted" $SLAPOS_CONFIGURATION/slapos.cfg
     done
     echo "done."
 
-    # Run slapgrid on all computer partitions
-    /opt/slapos/bin/slapgrid-cp --verbose --develop --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
+    # Delete timestamp of all partitions so that it will force slapgrid to process them.
+    rm /srv/slapgrid/slappart*/.timestamp
+
+    # Run slapgrid now.
+    /opt/slapos/bin/slapgrid-cp --verbose --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 fi
