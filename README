@@ -43,7 +43,7 @@ preparing the package
 ---------------------
 
 First make sure all files are ready and you have all necessary packages installed.
-You need in particular the OBS directory::
+You need in particular an OBS directory (for example, the vifib test directory)::
 
   $ cd <directory_to_contain_prepare_script>
   $ osc checkout home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
