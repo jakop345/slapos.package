@@ -4,6 +4,17 @@ prepare slapos build for obs
 This environment is made to prepare a SlapOS tarball and packaging configurations
 to be used with openSUSE Build Service (OBS).
 
+Notes
+-----
+
+Build in OBS is a bit complex. The build of the packages itself is in offline mode,
+meaning that we don't have internet connection. Of course, doing "bin/buildout" to
+install slapos and make the package requires internet connection.
+
+Solution: run bin/buildout outside of the OBS system to fetch all the needed files,
+put them in a cache and upload it in the OBS system so that buildout is happy and works in
+offline mode.
+
 Requirements
 ------------
 - A computer
