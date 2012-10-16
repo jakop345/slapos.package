@@ -43,6 +43,13 @@ preparing the package
 ---------------------
 
 First make sure all files are ready and you have all necessary packages installed.
+You need in particular the OBS directory::
+
+  $ cd <directory_to_contain_prepare_script>
+  $ osc checkout home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
+  $ cd home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
+  $ osc up
+
 SlapOS is build using buildout and need an internet connection to fetch all elements.
 On obs package are build on virtual machines without internet access.
 prepare_slapos_build.sh will compile slapos on your computer and build a network-cache thanks to offline.sh script.
