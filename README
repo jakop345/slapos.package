@@ -70,3 +70,10 @@ It then fetch packaging configuration from templates directory. Everything is th
 
 So to build package just run:
 # bash prepare_slapos_build.sh
+
+About cron file
+---------------
+
+Main cron file is situated in slapos-node/template/slapos-node.cron.d
+Prepare script will copy this one in the debian directory.
+WARNING: if you update cron, do not forget to update slaptest which check cron file
