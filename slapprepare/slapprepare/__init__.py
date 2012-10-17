@@ -317,6 +317,10 @@ def slapserver(config):
           print "Removing %r" % path
           if not dry_run:
             os.remove(path)
+
+    # Disable login by password for root
+    _call(['passwd','-d','root'])
+
   finally:
     print "SlapOS Image configuration: DONE"
     return 0
@@ -553,6 +557,12 @@ def slapprepare():
     prepare_scripts(config)
 
     configureNtp()
+
+    if not config.update :
+      print """WARNING: WE WILL DEACTIVATE CONNECTION TO ROOT BY PASSWORD.
+If you want to enable it call '# passwd root' an set a new password
+We advise you to put your public ssh key in '/root/.ssh/authorized_key'"""
+
 
     # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])

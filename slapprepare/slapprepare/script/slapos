@@ -84,11 +84,6 @@ else
     sed -i "/${SLAPVPN}/ s/^\([^#]\)/#\1/g" $SLAPOS_CONFIGURATION/slapos.cfg
 fi
 
-
-
-# set random root password
-pwgen -sync 512 1 | passwd --stdin root
-
 SLAP_INSTALL_LOG=/opt/slapos/slapos-install.log
 
 while :; do
