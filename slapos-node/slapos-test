@@ -366,7 +366,7 @@ class Config:
     for option, value in option_dict.__dict__.items():
       setattr(self, option, value)
     # Define logger for register
-    self.logger = logging.getLogger('slaptest configuration')
+    self.logger = logging.getLogger('slapos-test configuration')
     self.logger.setLevel(logging.DEBUG)
     # add ch to logger
     self.logger.addHandler(ch)

@@ -87,7 +87,7 @@ Check your config
 Check your config file and your cron file
 +++++++++++++++++++++++++++++++++++++++++
 Run:
-# slaptest
+# slapos-test
 This script will check your config file for missing section or parameters
 
 You can use the slapos.cfg.example config file as reference for slapos.cfg.

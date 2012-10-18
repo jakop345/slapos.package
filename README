@@ -45,7 +45,7 @@ Directory Organisation
 - slapos-node/ : Template to build package
   	       - Makefile : Makefile to build slapos and add files for package
 	       - slapos-start : shell script that will be run on startup (called by slapos-node daemon)
-	       - slaptest : python script to check user configuration and cron file
+	       - slapos-test : python script to check user configuration and cron file
 	       - template/ : template files for package (cron.d, service)
 	       - slapos/ : to build slapos. Contain buildout.cfg.in
 
@@ -76,4 +76,4 @@ About cron file
 
 Main cron file is situated in slapos-node/template/slapos-node.cron.d
 Prepare script will copy this one in the debian directory.
-WARNING: if you update cron, do not forget to update slaptest which check cron file
+WARNING: if you update cron, do not forget to update slapos-test which check cron file
