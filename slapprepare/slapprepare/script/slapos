@@ -156,7 +156,7 @@ systemctl enable slapos-node.service
 systemctl start slapos-node.service
 
 # Increase default aio-max-nr for sql servers
-sysctl -w fs.aio-max-nr=262144 
+sysctl -w fs.aio-max-nr=1048576
 
 # Enable noop scheduler for disk which have SLAPOS labeled partition
 disk=`blkid -L SLAPOS | sed -r -e 's/(\/dev\/|[0-9]*$)//g'`
