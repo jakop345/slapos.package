@@ -79,7 +79,7 @@ How to update you old Suse Image (Suse 12.1 or sooner)
 ------------------------------------------------------
 Run this whole command as root:
 
-# wget http://www.nexedi.org/static/packages/source/slapprepare/slapprepare.tar.gz; zypper remove -y slapos.node; rm -f /etc/opt/slapos/slapos.node*.rpm; tar -xzf slapprepare.tar.gz; cd slapprepare; python setup.py install; cd .. ; rm -r slapprepare* ; slapprepare -u ;
+# wget zypper remove -y slapos.node; rm -f /etc/opt/slapos/slapos.node*.rpm; easy_install slapparepare && slapprepare -u ;
 
 
 Check your config
