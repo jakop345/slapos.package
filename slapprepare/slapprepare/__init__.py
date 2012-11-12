@@ -403,10 +403,14 @@ class Config:
       setattr(self, option, value)
 
 
-  def slaposConfig(self,mount_dir_path,slapos_configuration,
-                   hostname_path, host_path,
-                   key_path, master_url,
-                   temp_dir,computer_id):
+  def slaposConfig(self,
+                   mount_dir_path,
+                   slapos_configuration,
+                   hostname_path,
+                   host_path, key_path,
+                   master_url,
+                   temp_dir,
+                   computer_id):
     """
     Set configuration for slapos
     """
