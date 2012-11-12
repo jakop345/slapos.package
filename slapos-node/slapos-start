@@ -10,26 +10,26 @@ ${ONLY_SLAPFORMAT:=false}
 
 if [ $ONLY_SLAPFORMAT = false ]; then
     if [ ! -f  $SLAPOS_CONFIGURATION/slapos.cfg ]; then
-  echo "No slapos.cfg found"
-  exit 0
+        echo "No slapos.cfg found"
+        exit 0
     fi
 
-    echo "Starting slap script" 
+    echo "Starting slap script"
 
     # Check ipv4
     ping -c 2 $IPV4CHECK
     while [ $? != 0 ]; do
-  sleep $(($i * 5))
-  if [[ $i -le 40 ]]; then
-        let i++
-  fi
-  ping -c 2 $IPV4CHECK
+        sleep $(($i * 5))
+        if [[ $i -le 40 ]]; then
+            let i++
+        fi
+        ping -c 2 $IPV4CHECK
     done
 
     # Launch openvpn
     if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
-  /etc/init.d/openvpn start
-  sleep 10
+        /etc/init.d/openvpn start
+        sleep 10
     fi
 
     # Wait for ipv6 connection to be ready
@@ -37,11 +37,11 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     ping6 -c 2 $IPV6CHECK
     while [ $? != 0 ];
     do
-  sleep $(($i * 10))
-  if [[ $i -le 40 ]]; then
-        let i++
-  fi
-  ping6 -c 2 $IPV6CHECK
+        sleep $(($i * 10))
+        if [[ $i -le 40 ]]; then
+            let i++
+        fi
+        ping6 -c 2 $IPV6CHECK
     done
 else
     sleep 15
@@ -54,7 +54,7 @@ echo -n "Running slapformat..."
 while [ $? != 0 ]; do
     sleep $(($i*60))
     if [ $i -le 20 ]; then
-  let i++
+        let i++
     fi
     echo "Retrying slapformat"
     /opt/slapos/bin/slapformat  --now --console --verbose --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
