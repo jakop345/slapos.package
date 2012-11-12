@@ -1,6 +1,12 @@
 Changes
 =======
 
+1.0a2 (2012-11-12)
+------------------
+
+  * Don't crash when we don't want to create slapos.cfg file. [Cédric de Saint
+    Martin]
+
 1.0a1 (2012-10-30)
 ------------------
 
