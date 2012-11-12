@@ -15,10 +15,6 @@ install: all
 	# Open VPN configuration
 	mkdir -p $(DESTDIR)/etc/openvpn/
 	cp -r template/openvpn/* $(DESTDIR)/etc/openvpn/
-	# Activate openvpn 
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
-	touch $(DESTDIR)/etc/opt/slapos/openvpn-needed	
 clean:
 #	cd slapos; make clean
-
-# Début 23:39
