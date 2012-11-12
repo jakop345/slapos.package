@@ -30,6 +30,7 @@ from optparse import OptionParser, Option
 import os
 import pkg_resources
 from shutil import move
+import socket
 from subprocess import call as subprocessCall
 import sys
 import urllib2
@@ -135,13 +136,16 @@ def suse_version():
 
 # Parse certificate to get computer name and return it
 def get_computer_name(slapos_configuration):
-  conf_file=open(slapos_configuration,"r")
-  for line in conf_file:
-    if "computer_id" in line:
-      i=line.find("COMP-")
-      conf_file.close()
-      return line[i:]
-  return -1
+  try:
+    conf_file=open(slapos_configuration, "r")
+    for line in conf_file:
+      if "computer_id" in line:
+        i=line.find("COMP-")
+        conf_file.close()
+        return line[i:]
+  except IOError:
+    print "Warning: slapos.cfg doesn't exist. Using current hostname."
+  return socket.gethostname()
 
 
 
