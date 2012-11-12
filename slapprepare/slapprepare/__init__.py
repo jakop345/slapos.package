@@ -287,12 +287,6 @@ def slapserver(config):
         os.chmod(ssh_key_path, 0600)
 
     # Put file to  force VPN if user asked
-    if not config.force_vpn :
-      if not dry_run:
-        _call(['rm','-f',
-               os.path.join(config.slapos_configuration,'openvpn-needed')])
-
-    # Put file to  force VPN if user asked
     if config.force_slapcontainer :
       if not dry_run:
         open(os.path.join(config.slapos_configuration,'SlapContainer-needed'),'w')
@@ -321,6 +315,7 @@ def slapserver(config):
           print "Removing %r" % path
           if not dry_run:
             os.remove(path)
+
   finally:
     print "SlapOS Image configuration: DONE"
     return 0
@@ -561,6 +556,10 @@ def slapprepare():
     prepare_scripts(config)
 
     configureNtp()
+
+    # Remove use of openvpn if not explicitely defined
+    if not config.force_vpn and not config.dry_run:
+        os.remove(os.path.join(config.slapos_configuration, 'openvpn-needed'))
 
     # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
