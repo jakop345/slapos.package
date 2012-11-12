@@ -116,9 +116,9 @@ def get_yes_no (prompt,default=None):
     def_value = ''
   while True:
     answer=raw_input( prompt + " [y,n] %s: " % def_value )
-    if answer.upper() in [ 'Y','YES' ]: return True
+    if answer.upper() in [ 'Y', 'YES' ]: return True
     if answer.upper() in [ 'N', 'NO' ]: return False
-    if not default == None :
+    if not default == None:
       if answer == '' : return default
 
 # Return OpenSUSE version if it is SuSE
@@ -420,8 +420,8 @@ class Config:
     self.key_path = key_path
     self.master_url = master_url
     self.mount_dir_path = mount_dir_path
-    self.temp_dir=temp_dir
-    self.computer_id=computer_id
+    self.temp_dir = temp_dir
+    self.computer_id = computer_id
 
 
   def userConfig(self):
@@ -484,15 +484,15 @@ def prepare_from_scratch(config):
 
     # Prepare Slapos Configuration
     if config.certificates:
-      _call(['slapos','node','register',config.computer_name
-             ,'--interface-name','br0'
-             ,'--ipv6-interface',config.ipv6_interface
-             ,'--partition-number',config.partition_amount])
+      _call(['slapos', 'node', 'register', config.computer_name
+             ,'--interface-name', 'br0'
+             ,'--ipv6-interface', config.ipv6_interface
+             ,'--partition-number', config.partition_amount])
       # Prepare for bridge
       enable_bridge(slapos_configuration)
 
     computer_id = get_computer_name(
-      os.path.join('/',slapos_configuration,'slapos.cfg'))
+        os.path.join('/', slapos_configuration, 'slapos.cfg'))
 
     print "Your Computer is : %s" % computer_id
 
