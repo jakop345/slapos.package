@@ -168,11 +168,11 @@ sleep 1
 chmod 666 /dev/kvm
 
 # Set power saving
-modprobe acpi_cpufreq
+modprobe acpi_cpufreq > /dev/null  2>&1
 
 # Set hardware monitoring tools (for Shuttle xh61 machines)
-modprobe coretemp
-modprobe f71882fg
+modprobe coretemp > /dev/null  2>&1
+modprobe f71882fg > /dev/null  2>&1
 
 # Activate KSM (shared memory for KVM)
 echo 1 > /sys/kernel/mm/ksm/run
