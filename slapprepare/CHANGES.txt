@@ -1,6 +1,11 @@
 Changes
 =======
 
+1.0a3 (2012-11-13)
+
+  * Minor release: doesn't show scary error when modprobe of some monitoring
+    module can't be done. [Cédric de Saint Martin]
+
 1.0a2 (2012-11-12)
 ------------------
 
