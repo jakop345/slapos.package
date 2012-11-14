@@ -5,6 +5,7 @@ Changes
 
   * Minor release: doesn't show scary error when modprobe of some monitoring
     module can't be done. [Cédric de Saint Martin]
+  * Change references of VIFIB to slapos.org.
 
 1.0a2 (2012-11-12)
 ------------------

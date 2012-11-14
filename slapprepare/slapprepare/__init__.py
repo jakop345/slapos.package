@@ -424,7 +424,7 @@ class Config:
 
 
   def userConfig(self):
-    self.certificates = get_yes_no("Automatically register new computer to Vifib?",True)
+    self.certificates = get_yes_no("Automatically register new computer to slapos.org?",True)
     if self.certificates:
       self.computer_name = raw_input("Define a unique name for this computer: ")
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
