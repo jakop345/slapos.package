@@ -19,10 +19,7 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     # Check ipv4
     ping -c 2 $IPV4CHECK
     while [ $? != 0 ]; do
-        sleep $(($i * 5))
-        if [[ $i -le 40 ]]; then
-            let i++
-        fi
+        sleep 10
         ping -c 2 $IPV4CHECK
     done
 
@@ -33,14 +30,10 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     fi
 
     # Wait for ipv6 connection to be ready
-    i=0
     ping6 -c 2 $IPV6CHECK
     while [ $? != 0 ];
     do
-        sleep $(($i * 10))
-        if [[ $i -le 40 ]]; then
-            let i++
-        fi
+        sleep 10
         ping6 -c 2 $IPV6CHECK
     done
 else
