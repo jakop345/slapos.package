@@ -95,7 +95,7 @@ def upload_network_cached_from_file(path, networkcache_options):
     'timestamp':time.time(),
   }
   try:
-    helper_upload_network_cached_from_file(
+    if helper_upload_network_cached_from_file(
       path=path,
       directory_key='slapos-upgrade',
       metadata_dict=metadata_dict,
@@ -108,8 +108,8 @@ def upload_network_cached_from_file(path, networkcache_options):
       shacache_key_file=networkcache_options.get('shacache-key-file'),
       shadir_cert_file=networkcache_options.get('shadir-cert-file'),
       shadir_key_file=networkcache_options.get('shadir-key-file'),
-    )
-    print 'Uploaded git repository to cache.'
+    ):
+      print 'Uploaded update file to cache.'
   except Exception:
     print 'Unable to upload to cache:\n%s.' % traceback.format_exc()
 

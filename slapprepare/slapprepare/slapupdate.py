@@ -39,7 +39,7 @@ import sys
 import tempfile
 
 
-# create console handler and set level to debug
+# create console handler and set level to warning
 ch = logging.StreamHandler()
 ch.setLevel(logging.WARNING)
 # create formatter
@@ -60,10 +60,10 @@ class Parser(OptionParser):
                       option_list=[
         Option("--slapos-configuration",
                default='/etc/opt/slapos/slapos.cfg',
-               help="Path to slapos configuration file"),        
+               help="Path to slapos configuration file"),
         Option("--srv-file",
                default='/srv/slapupdate',
-               help="Server status file."),        
+               help="Server status file."),
         Option("-v","--verbose",
                default=False,
                action="store_true",
@@ -190,7 +190,7 @@ def download_info_from_networkcache(path,slapos_conf):
       if entry['timestamp'] > timestamp:
         best_entry = entry
     return best_entry
-  
+
   return helper_download_network_cached_to_file(
     path=path,
     directory_key='slapos-upgrade',
@@ -243,7 +243,7 @@ def update_machine(config):
   # add ch to logger
   logger.addHandler(ch)
 
-  # Get configuration 
+  # Get configuration
   current_state = ConfigParser.RawConfigParser()
   current_state.read(config.srv_file)
   next_state = ConfigParser.RawConfigParser()
@@ -289,10 +289,6 @@ def update_machine(config):
       current_state.set('system','reboot',config.today.isoformat())
       save_current_state(current_state,config)
       os.system('reboot')
-      
-      
-
-
 
 
 # Class containing all parameters needed for configuration
@@ -346,8 +342,6 @@ class Config:
     if not self.first_time :
       self.logger.debug( "Last reboot : %s" % self.last_reboot)
       self.logger.debug( "Last upgrade : %s" % self.last_upgrade)
-
-      
 
 
 def main():
