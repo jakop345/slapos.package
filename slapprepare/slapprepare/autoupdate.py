@@ -4,7 +4,7 @@ import sys
 
 
 def do_update():
-    print 'Updating slapreport'
+    print 'Updating slapprepare'
     subprocess.call(['easy_install', '-U', 'slapprepare'])
 
 
