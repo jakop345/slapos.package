@@ -24,7 +24,7 @@ setup(name=name,
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              'slapprepare = slapprepare:slapprepare',
+              'slapprepare = slapprepare.slapprepare:main',
               'slapupdate = slapprepare.slapupdate:main',
           ]
       },
