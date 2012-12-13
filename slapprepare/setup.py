@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import glob
 import os
 
-version = '1.0a4'
+version = '1.0a5'
 name = 'slapprepare'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -24,7 +24,8 @@ setup(name=name,
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              'slapprepare = slapprepare.slapprepare:main',
+              'slapprepare = slapprepare.autoupdate:main',
+              'slapprepare-raw = slapprepare.slapprepare:main',
               'slapupdate = slapprepare.slapupdate:main',
           ]
       },
