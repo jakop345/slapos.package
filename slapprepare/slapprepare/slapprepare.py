@@ -256,6 +256,16 @@ def slapserver(config):
                                       'template/ifcfg-br0.in').read())
 
 
+    # Creating default limits config
+    limits_conf_path = os.path.join(mount_dir_path,
+                                    'etc', 'security', 'limits.conf')
+    print "Overriding %s" % limits_conf_path
+    if not dry_run:
+      open(limits_conf_path, 'w').write(
+        pkg_resources.resource_stream(__name__,
+                                      'template/limits.conf.in').read())
+
+
     # Writing ssh key
     if config.need_ssh :
       user_path = os.path.normpath('/'.join([mount_dir_path, 'root']))
