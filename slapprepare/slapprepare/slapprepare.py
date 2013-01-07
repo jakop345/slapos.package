@@ -564,9 +564,15 @@ def slapprepare():
 
     configureNtp()
 
-    # Remove use of openvpn if not explicitely defined
-    if not config.force_vpn and not config.dry_run:
-        os.remove(os.path.join(config.slapos_configuration, 'openvpn-needed'))
+    if not config.dry_run:
+      openvpn_needed_file_path = os.path.join(config.slapos_configuration,
+                                              'openvpn-needed')
+      if config.force_vpn:
+        # Force use of openvpn
+        open(openvpn_needed_file_path, 'w')
+      else:
+        # Forbid use of openvpn if not explicitely defined
+        os.remove(openvpn_needed_file_path)
 
     # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
