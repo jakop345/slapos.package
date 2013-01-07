@@ -1,10 +1,11 @@
 Changes
 =======
 
-1.0a5 (unreleased)
+1.0a5 (2013-01-07)
 ------------------
 
  * autoupdate through easy_install before running slapprepare
+ * Force start of VPN if defined
 
 1.0a4 (2012-11-22)
 ------------------
