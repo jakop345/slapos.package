@@ -6,6 +6,8 @@ Changes
 
  * autoupdate through easy_install before running slapprepare
  * Force start of VPN if defined
+ * Add limits.conf file preventing fork bombs and ensuring root can spawn lot
+   of processes
 
 1.0a4 (2012-11-22)
 ------------------
