@@ -53,8 +53,9 @@ osc add slapos.spec
 # Add entry to changelog
 cd $TEMPLATES_DIRECTORY/debian
 dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
-# Add cronfile
+# Add cron and logrotate files
 cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $TEMPLATES_DIRECTORY/debian/cron.d
+cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $TEMPLATES_DIRECTORY/debian/slapos-node.logrotate
 cd $TEMPLATES_DIRECTORY
 tar -czf debian.tar.gz debian
 cd $OBS_DIRECTORY

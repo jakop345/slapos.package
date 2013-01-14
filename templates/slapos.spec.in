@@ -86,6 +86,8 @@ cd $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_numb
 make DESTDIR=$RPM_BUILD_ROOT install 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
 cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.cron.d $RPM_BUILD_ROOT/etc/cron.d/slapos-node
+mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
+cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/slapos.logrotate.conf
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
 cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.service %{buildroot}/etc/systemd/system/
 

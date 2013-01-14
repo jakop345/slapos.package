@@ -65,6 +65,7 @@ binary-arch: build install
 #	dh_installmime
 	dh_installinit
 	dh_installcron
+	dh_installlogrotate
 	dh_installman
 	dh_installinfo
 #	dh_undocumented
