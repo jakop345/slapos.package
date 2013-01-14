@@ -1,3 +1,12 @@
+slapos-node (0.XXX+0.XXX+0) unstable; urgency=low
+
+  * New version of SlapOS (0.XXX)
+  * Added logrotate file
+  * Switched cron file to new entry points
+
+ -- Cedric de Saint Martin <cedric.dsm@nexedi.com>  Thu, 16 Jan 2013 15:13:52 +0200
+
+
 slapos-node (0.27+0.97+0) unstable; urgency=low
 
   * Removed slapprepare from package
