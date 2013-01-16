@@ -269,7 +269,7 @@ def update_machine(config):
     else :
       logger.info("We will now upgrade your packages")
       update_software()
-      autoupdate.do_update
+      autoupdate.do_update()
   else:
     if config.last_upgrade < config.upgrade :
       # Purge repositories list and add new ones
@@ -283,7 +283,7 @@ def update_machine(config):
       else:
         logger.info("We will now upgrade your packages")
         update_software()
-        autoupdate.do_update
+        autoupdate.do_update()
     else :
       logger.info("Your system is up to date")
       
