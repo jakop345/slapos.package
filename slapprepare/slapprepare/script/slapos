@@ -119,14 +119,15 @@ if [ $SLAPOS_GOOD_CONFIGURATION != $SLAPOS_CONFIGURATION ]; then
 fi
 
 # Set up cron
+let HOUR=$RANDOM%23;
+let MINUTE=$RANDOM%60;
 
-# Remove default route for ipv6 in case of openvpn-needed
 echo """# BEWARE: This file will be automatically regenerated on each boot
 SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin
 MAILTO=root
 
-0 0 * * * root /usr/local/bin/slapupdate -v --slapos-configuration $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapupdate.log 2>&1
+$MINUTE $HOUR * * * root /usr/local/bin/slapupdate -v --slapos-configuration $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapupdate.log 2>&1
 
 """> /etc/cron.d/slapos
 
