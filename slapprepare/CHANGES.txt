@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.0a6 (2013-01-15)
+------------------
+
+ * Machine tweaks: raise max AIO NR and nofile, set semaphore limits. This
+   allows to run many instances of apache/mysql/zope on the same machine.
+ * Mount /var/log on disk in order not to touch USB key.
+
 1.0a5 (2013-01-07)
 ------------------
 
