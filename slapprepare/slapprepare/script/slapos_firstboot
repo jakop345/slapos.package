@@ -133,6 +133,7 @@ def prepareSlapOSPartition(mount_point):
   a("/mnt/%(label)s/opt /opt none bind 0 0\n" % d)
   a("/mnt/%(label)s/tmp /tmp none bind 0 0\n" % d)
   a("/mnt/%(label)s/srv /srv none bind 0 0\n" % d)
+  a("/mnt/%(label)s/log /var/log none bind 0 0\n" % d)
   open('/etc/fstab', 'w').write(''.join(new_fstab))
   partprobe()
   retry = 10
@@ -149,7 +150,7 @@ def prepareSlapOSPartition(mount_point):
         raise
     else:
       break
-  for d in ['opt', 'srv', 'tmp']:
+  for d in ['opt', 'srv', 'tmp', 'log']:
     p = '/mnt/'+LABEL+'/'+d
     if not os.path.exists(p):
       os.mkdir(p)
@@ -158,6 +159,7 @@ def prepareSlapOSPartition(mount_point):
   callWithCheck(['mount', '/opt'])
   callWithCheck(['mount', '/tmp'])
   callWithCheck(['mount', '/srv'])
+  callWithCheck(['mount', '/var/log'])
 
 def getMountedPartitionList():
   partition_list = []
