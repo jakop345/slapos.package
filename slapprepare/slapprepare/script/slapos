@@ -119,8 +119,8 @@ if [ $SLAPOS_GOOD_CONFIGURATION != $SLAPOS_CONFIGURATION ]; then
 fi
 
 # Set up cron
-let HOUR=$RANDOM%23;
-let MINUTE=$RANDOM%60;
+let HOUR=$RANDOM%%23;
+let MINUTE=$RANDOM%%60;
 
 echo """# BEWARE: This file will be automatically regenerated on each boot
 SHELL=/bin/sh
