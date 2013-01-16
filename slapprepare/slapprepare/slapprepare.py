@@ -533,6 +533,19 @@ def prepare_from_scratch(config):
   if os.path.exists(temp_directory):
     print "Deleting directory: %s" % temp_directory
     _call(['rm','-rf',temp_directory])
+
+
+  # Add/remove VPN file forcing/forbidding start of VPN.
+  if not config.dry_run:
+    openvpn_needed_file_path = os.path.join(slapos_configuration,
+                                            'openvpn-needed')
+    if config.force_vpn:
+      # Force use of openvpn
+      open(openvpn_needed_file_path, 'w')
+    else:
+      # Forbid use of openvpn if not explicitely defined
+      os.remove(openvpn_needed_file_path)
+
   return return_code
 
 
@@ -563,16 +576,6 @@ def slapprepare():
     prepare_scripts(config)
 
     configureNtp()
-
-    if not config.dry_run:
-      openvpn_needed_file_path = os.path.join(config.slapos_configuration,
-                                              'openvpn-needed')
-      if config.force_vpn:
-        # Force use of openvpn
-        open(openvpn_needed_file_path, 'w')
-      else:
-        # Forbid use of openvpn if not explicitely defined
-        os.remove(openvpn_needed_file_path)
 
     # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
