@@ -7,8 +7,7 @@ MAILTO=root
 * * * * * root /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/slapos-instance.log
 
 # Run "Destroy Partitions to be destroyed" once per hour
-SLAPOS_REPORT_COMMAND="/opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/slapos-report.log"
-0 * * * * root $SLAPOS_REPORT_COMMAND; i=20; while [ $? != 0 ]; do SLAPOS_REPORT_COMMAND; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;
+0 * * * * root /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/slapos-report.log
 
 # Run "Check/add IPs and so on" once per hour
 0 * * * * root /opt/slapos/bin/slapos node format >> /opt/slapos/slapos-format.log 2>&1
