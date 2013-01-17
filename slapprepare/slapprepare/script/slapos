@@ -125,7 +125,7 @@ let MINUTE=$RANDOM%%60;
 echo """# BEWARE: This file will be automatically regenerated on each boot
 SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin
-MAILTO=root
+MAILTO=""
 
 $MINUTE $HOUR * * * root /usr/local/bin/slapupdate -v --slapos-configuration $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapupdate.log 2>&1
 
