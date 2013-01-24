@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.0.a7 (unreleased)
+1.0a7 (2013-01-24)
 ------------------
 
  * Fixed a bug where the hostname would contain a newline.
