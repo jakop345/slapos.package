@@ -306,17 +306,21 @@ class CronFile:
     else: return 1
 
   def check(self,logger):
-    elements = {"slapformat":self.slapformat,"slapgrid-ur":self.slapgrid_ur,
-                "slapgrid-sr":self.slapgrid_sr,"slapgrid-cp":self.slapgrid_cp}
+    elements = {
+            'slapos node format': self.slapformat,
+            'slapos node report': self.slapgrid_ur,
+            'slapos node software': self.slapgrid_sr,
+            'slapos node instance': self.slapgrid_cp
+            }
     for key in elements :
       if elements[key] == 0 :
-        logger.error("Your line for %s command does not seem right" % key)
+        logger.error("Your line for '%s' command does not seem right" % key)
       elif elements[key] == -1 :
-        logger.error("No line found for %s command" % key)
+        logger.error("No line found for '%s' command" % key)
       elif elements[key] == 1 :
-        logger.info("Line for %s command is good" % key)
+        logger.info("Line for '%s' command is good" % key)
       elif elements[key] == 2 :
-        logger.error("You have a duplicated line for %s command" % key)
+        logger.error("You have a duplicated line for '%s' command" % key)
 
 
 
