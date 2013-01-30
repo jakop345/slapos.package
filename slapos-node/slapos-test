@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# vim: set et sts=2:
 ##############################################################################
 #
 # Copyright (c) 2012 Vifib SARL and Contributors.
@@ -88,7 +89,7 @@ class Parser(OptionParser):
     Check arguments
     """
     (options, args) = self.parse_args()
-    if options.test_agent :
+    if options.test_agent:
       options.check_upload = True
     return options
 
@@ -108,31 +109,31 @@ def get_slapos_conf_example():
   return path
 
 
-def check_networkcache(config,logger,configuration_parser
-                       ,configuration_example_parser):
+def check_networkcache(config, logger, configuration_parser,
+                       configuration_example_parser):
   """
   Check network cache download
   """
   section = "networkcache"
-  if configuration_parser.has_section(section) :
+  if configuration_parser.has_section(section):
     configuration_example_dict = dict(configuration_example_parser.items(section))
     configuration_dict = dict(configuration_parser.items(section))
     for key in configuration_example_dict:
       try:
-        if not configuration_dict[key] ==  configuration_example_dict[key] :
+        if not configuration_dict[key] ==  configuration_example_dict[key]:
           logger.warn("%s parameter in %s section is out of date" % (key, section))
       except KeyError:
-        logger.warn("No %s parameter in %s section" % (key,section))
+        logger.warn("No %s parameter in %s section" % (key, section))
         pass
 
     if config.test_agent:
       configuration_dict = dict(configuration_parser.items('slapformat'))
-      if int(configuration_dict['partition_amount']) < 60 :
+      if int(configuration_dict['partition_amount']) < 60:
         logger.warn("Partition amount is to low for a test agent. Is %s but should be at least 60"
                     % configuration_dict['partition_amount'] )
 
-    if config.check_upload == True :
-      check_networkcache_upload(config,logger,configuration_dict)
+    if config.check_upload == True:
+      check_networkcache_upload(config, logger, configuration_dict)
 
 
 class Upload:
@@ -155,7 +156,7 @@ class Upload:
                  'shadir-key-file': '/etc/slapos-cache/shacache.key'}
 
 
-def check_networkcache_upload(config,logger,configuration_dict):
+def check_networkcache_upload(config, logger, configuration_dict):
   """
   Check network cache upload
   """
@@ -164,16 +165,20 @@ def check_networkcache_upload(config,logger,configuration_dict):
     try:
       if not key.find("file") == -1:
         file = configuration_dict[key]
-        if not os.path.exists(file) :
+        if not os.path.exists(file):
           logger.critical ("%s file for %s parameters does not exist "
-                         % (file,key))
-        else :
-          logger.info ("%s parameter:%s does exists" % (key,file))
-      else :
+                         % (file, key))
+        else:
+          logger.info ("%s parameter:%s does exists" % (key, file))
+      else:
         if not configuration_dict[key] == upload_parameters.data[key]:
           logger.warn("%s is %s sould be %s"
-                      %(key,configuration_dict[key]
-                        ,upload_parameters.data[key]))
+                      % (
+                          key,
+                          configuration_dict[key],
+                          upload_parameters.data[key]
+                          )
+                      )
     except KeyError:
       logger.critical("No %s parameter in networkcache section "
                         % (key))
@@ -185,7 +190,7 @@ def get_computer_name(certificate):
   """
   certificate = open(certificate,"r")
   for line in certificate:
-    i=0
+    i = 0
     if "Subject" in line:
       k=line.find("COMP-")
       i=line.find("/email")
@@ -200,10 +205,10 @@ def check_computer_id(logger,computer_id,cert_file):
   comp_cert = get_computer_name(cert_file)
   if comp_cert == "":
     logger.error("Certificate file indicated is corrupted (no computer id)")
-  elif comp_cert == computer_id :
+  elif comp_cert == computer_id:
       logger.info("Certificate and slapos.cfg define same computer id: %s"
                    % computer_id)
-  else :
+  else:
     logger.critical("Computers id from cerificate (%s) is different from slapos.cfg (%s)"
                     % (comp_cert,computer_id))
 
@@ -237,7 +242,7 @@ def slapos_conf_check (config):
     mandatory_sections.remove('networkcache')
 
   # Check if parameters for slapos and slapformat exists
-  for section in mandatory_sections :
+  for section in mandatory_sections:
     configuration_dict = dict(configuration_parser.items(section))
     configuration_example_dict = dict(configuration_example_parser.items(section))
     for key in configuration_example_dict:
@@ -247,10 +252,10 @@ def slapos_conf_check (config):
       # check if necessary files exist
       elif key in ("key_file","cert_file","certificate_repository_path"):
         files = configuration_dict[key]
-        if not os.path.exists(files) :
+        if not os.path.exists(files):
           logger.critical ("%s file for %s parameters does not exist "
                            % (files,key))
-        else :
+        else:
           logger.info ("%s parameter:%s does exists" % (key,files))
       # check if computer id is the same in slapos.cfg and certificate
       if key == "cert_file":
@@ -281,45 +286,45 @@ class CronFile:
   def parse(self,cron_line):
     """ Parse cron line and give value to attributes """
     line = cron_line.split()
-    if "slapos node format"  in cron_line :
+    if "slapos node format"  in cron_line:
       self.slapformat  = self.compare(self.slapformat,
                                       self.slapformat_base.split()  , line)
-    if "slapos node report" in cron_line :
+    if "slapos node report" in cron_line:
       self.slapgrid_ur = self.compare(self.slapgrid_ur,
                                       self.slapgrid_ur_base.split() , line)
-    if "slapos node instance" in cron_line :
+    if "slapos node instance" in cron_line:
       self.slapgrid_cp = self.compare(self.slapgrid_cp,
                                       self.slapgrid_cp_base.split() , line)
-    if "slapos node software" in cron_line :
+    if "slapos node software" in cron_line:
       self.slapgrid_sr = self.compare(self.slapgrid_sr,
                                       self.slapgrid_sr_base.split() , line)
 
-  def compare(self,state,reference,cron_line):
-    if not state == -1 :
+  def compare(self, state, reference, cron_line):
+    if not state == -1:
       return 2
-    for i in range(0,6):
-      if not reference[i] == cron_line[i] :
+    for i in range(0, 6):
+      if not reference[i] == cron_line[i]:
         return 0
     ref = len(set(reference[6:]))
-    if not len(set(reference[6:]) & set(cron_line[6:])) == ref :
+    if not len(set(reference[6:]) & set(cron_line[6:])) == ref:
       return 0
     else: return 1
 
-  def check(self,logger):
+  def check(self, logger):
     elements = {
             'slapos node format': self.slapformat,
             'slapos node report': self.slapgrid_ur,
             'slapos node software': self.slapgrid_sr,
             'slapos node instance': self.slapgrid_cp
             }
-    for key in elements :
-      if elements[key] == 0 :
+    for key in elements:
+      if elements[key] == 0:
         logger.error("Your line for '%s' command does not seem right" % key)
-      elif elements[key] == -1 :
+      elif elements[key] == -1:
         logger.error("No line found for '%s' command" % key)
-      elif elements[key] == 1 :
+      elif elements[key] == 1:
         logger.info("Line for '%s' command is good" % key)
-      elif elements[key] == 2 :
+      elif elements[key] == 2:
         logger.error("You have a duplicated line for '%s' command" % key)
 
 
@@ -334,7 +339,7 @@ def cron_check (config):
   logger.addHandler(ch)
   cron = open(config.slapos_cron,"r")
   cron_file = CronFile()
-  for line in cron :
+  for line in cron:
     if "/opt/slapos" in line and not line[0]=="#":
       cron_file.parse(line)
   cron_file.check(logger)
@@ -348,14 +353,14 @@ def slapos_global_check (config):
   logger.setLevel(logging.INFO)
   logger.addHandler(ch)
   # checking slapos.cfg
-  if not os.path.exists(os.path.join(config.slapos_configuration,'slapos.cfg')) :
+  if not os.path.exists(os.path.join(config.slapos_configuration,'slapos.cfg')):
     logger.critical("No slapos.cfg found in slapos configuration directory: %s"
                     % config.slapos_configuration )
-  else :
+  else:
     logger.info("SlapOS configuration file found")
     slapos_conf_check(config)
   # checking cron file
-  if not os.path.exists(config.slapos_cron) :
+  if not os.path.exists(config.slapos_cron):
     logger.warn("No %s found for cron" % config.slapos_cron)
   else:
     logger.info("Cron file found at %s" %config.slapos_cron)
@@ -376,7 +381,7 @@ class Config:
     # add ch to logger
     self.logger.addHandler(ch)
 
-    if self.verbose :
+    if self.verbose:
       ch.setLevel(logging.DEBUG)
 
 
