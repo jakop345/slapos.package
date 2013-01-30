@@ -272,24 +272,25 @@ class CronFile:
     self.slapgrid_ur = -1
     self.slapgrid_sr = -1
     # cron file from slapos documentation
-    self.slapgrid_sr_base = """* * * * * root /opt/slapos/bin/slapgrid-sr --verbose --logfile=/opt/slapos/slapgrid-sr.log --pidfile=/opt/slapos/slapgrid-sr.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-sr.log 2>&1"""
-    self.slapgrid_cp_base = """* * * * * root /opt/slapos/bin/slapgrid-cp --verbose --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1"""
-    self.slapgrid_ur_base = """0 * * * * root /opt/slapos/bin/slapgrid-ur --maximal_delay=3600 --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg; i=20; while [ $? != 0 ]; do /opt/slapos/bin/slapgrid-ur --verbose --logfile=/opt/slapos/slapgrid-ur.log --pidfile=/opt/slapos/slapgrid-ur.pid /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapgrid-ur.log 2>&1; sleep $(($i*60)); if [ $i < 20 ]; then let i++; fi; done;"""
-    self.slapformat_base = """0 * * * * root /opt/slapos/bin/slapformat --verbose --log_file=/opt/slapos/slapformat.log -c /etc/opt/slapos/slapos.cfg >> /opt/slapos/slapformat.log 2>&1"""
+    self.slapgrid_sr_base = "* * * * * root /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/slapos-node-software.log > /dev/null 2>&1"
+    self.slapgrid_cp_base = "* * * * * root /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/slapos-node-instance.log > /dev/null 2>&1"
+    self.slapgrid_ur_base = "0 * * * * root /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/slapos-node-report.log > /dev/null 2>&1"
+    self.slapformat_base = "0 * * * * root /opt/slapos/bin/slapos node format >> /opt/slapos/slapos-node-format.log 2>&1"
+
 
   def parse(self,cron_line):
     """ Parse cron line and give value to attributes """
     line = cron_line.split()
-    if "slapformat"  in cron_line :
+    if "slapos node format"  in cron_line :
       self.slapformat  = self.compare(self.slapformat,
                                       self.slapformat_base.split()  , line)
-    if "slapgrid-ur" in cron_line :
+    if "slapos node report" in cron_line :
       self.slapgrid_ur = self.compare(self.slapgrid_ur,
                                       self.slapgrid_ur_base.split() , line)
-    if "slapgrid-cp" in cron_line :
+    if "slapos node instance" in cron_line :
       self.slapgrid_cp = self.compare(self.slapgrid_cp,
                                       self.slapgrid_cp_base.split() , line)
-    if "slapgrid-sr" in cron_line :
+    if "slapos node software" in cron_line :
       self.slapgrid_sr = self.compare(self.slapgrid_sr,
                                       self.slapgrid_sr_base.split() , line)
 
