@@ -5,6 +5,7 @@ set -e
 
 
 mkdir -p /etc/opt/slapos/ssl/partition_pki
+mkdir -p /opt/slapos/log
 
 
 
