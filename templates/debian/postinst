@@ -4,7 +4,7 @@
 set -e
 
 
-mkdir -p /opt/slapos/pki
+mkdir -p /etc/opt/slapos/ssl/partition_pki
 
 
 
