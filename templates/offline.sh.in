@@ -28,8 +28,8 @@ sed  "s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s|\%PATCHES_DIRECTORY\%|$PATCHES_DI
 # Build first time to get download-cache and extends-cache ready
 cd $BUILD_DIRECTORY
 wget $BOOTSTRAP_URL -O bootstrap.py
-python -S bootstrap.py #&& \
-    ./bin/buildout
+(python -S bootstrap.py && \
+    ./bin/buildout) || (echo "Failed to run buildout, exiting." && exit 1)
 
 cd $BUILD_ROOT_DIRECTORY/..
 

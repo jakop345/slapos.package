@@ -24,7 +24,7 @@ sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAP
 # Prepare Download Cache for SlapOS
 cd $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
 #rm -rf build/
-bash offline.sh
+bash offline.sh || (echo "Impossible to build SlapOS, exiting." && exit 1)
 
 # Prepare tarball
 cd $CURRENT_DIRECTORY
