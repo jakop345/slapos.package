@@ -90,8 +90,8 @@ while :; do
   if [ -f /opt/slapos/bin/slapformat ] && [ -f /opt/slapos/bin/bang ]; then
       zypper search -i slapos.node | grep slapos.node > /dev/null
       if [ $? != 0 ]; then
-	    echo -n "Installing SlapOS"
-	    zypper --gpg-auto-import-keys install -fy slapos.node
+        echo -n "Installing SlapOS"
+        zypper --gpg-auto-import-keys install -fy slapos.node
       fi
     # slapos tools available, nothing to do
     break
