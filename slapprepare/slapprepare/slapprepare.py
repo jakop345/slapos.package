@@ -324,6 +324,9 @@ def slapserver(config):
           if not dry_run:
             os.remove(path)
 
+    # Disable login by password for root
+    _call(['passwd','-d','root'])
+
   finally:
     print "SlapOS Image configuration: DONE"
     return 0

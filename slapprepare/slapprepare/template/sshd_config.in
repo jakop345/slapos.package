@@ -1,4 +1,4 @@
-PermitRootLogin yes
+PermitRootLogin without-password
 AllowUsers root
 AddressFamily any
 
