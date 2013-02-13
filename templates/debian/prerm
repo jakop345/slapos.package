@@ -9,7 +9,9 @@ case "$1" in
     # XXX-Cedric: there are smarter ways to do that
     upgrade|failed-upgrade)
         rm -rf /opt/slapos/eggs
-        ;;
+        rm -rf /opt/slapos/develop-eggs
+        rm -rf /opt/slapos/parts
+    ;;
 esac
 
 #DEBHELPER#
