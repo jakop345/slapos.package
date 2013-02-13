@@ -8,8 +8,13 @@ case "$1" in
         ucf --purge /etc/opt/slapos/slapos.cfg
 
         rm -rf /var/opt/slapos/ /srv/slapgrid/ /opt/slapgrid/ \
-		/etc/opt/slapos/ /opt/slapos/
-	;;
+            /etc/opt/slapos/ /opt/slapos/
+     ;;
+
+     remove)
+         rm -rf /opt/slapos/
+      ;;
+
 esac
 
 #DEBHELPER#
