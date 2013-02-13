@@ -6,7 +6,7 @@ RECIPE_VERSION=%RECIPE_VERSION%
 TARGET_DIRECTORY=/opt/slapos
 BUILD_ROOT_DIRECTORY="$(pwd)/build"
 BUILD_DIRECTORY=$BUILD_ROOT_DIRECTORY$TARGET_DIRECTORY
-BOOTSTRAP_URL='http://svn.zope.org/*checkout*/zc.buildout/trunk/bootstrap/bootstrap.py?rev=127518'
+BOOTSTRAP_URL='https://raw.github.com/buildout/buildout/1/bootstrap/bootstrap.py'
 
 #./configure --prefix=/opt/slapos/parts/<NAME>
 
