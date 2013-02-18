@@ -277,10 +277,10 @@ class CronFile:
     self.slapgrid_ur = -1
     self.slapgrid_sr = -1
     # cron file from slapos documentation
-    self.slapgrid_sr_base = "* * * * * root /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/slapos-node-software.log > /dev/null 2>&1"
-    self.slapgrid_cp_base = "* * * * * root /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/slapos-node-instance.log > /dev/null 2>&1"
-    self.slapgrid_ur_base = "0 * * * * root /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/slapos-node-report.log > /dev/null 2>&1"
-    self.slapformat_base = "0 * * * * root /opt/slapos/bin/slapos node format >> /opt/slapos/slapos-node-format.log 2>&1"
+    self.slapgrid_sr_base = "* * * * * root /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1"
+    self.slapgrid_cp_base = "* * * * * root /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1"
+    self.slapgrid_ur_base = "0 * * * * root /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1"
+    self.slapformat_base = "0 * * * * root /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1"
 
 
   def parse(self,cron_line):
