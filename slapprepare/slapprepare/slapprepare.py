@@ -581,6 +581,9 @@ def slapprepare():
 
     configureNtp()
 
+    # Restart sysctl in case of new mount points in /var/log
+    _call(['systemctl', 'restart', 'syslog.service'])
+
     # Enable and run slapos-boot-dedicated.service
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','start','slapos-boot-dedicated.service'])
