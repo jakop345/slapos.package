@@ -27,13 +27,14 @@
 ##############################################################################
 
 from optparse import OptionParser, Option
-import os
+import ConfigParser, os
 import pkg_resources
 from shutil import move
 import socket
 from subprocess import call as subprocessCall
 import sys
 import urllib2
+from pwd import getpwnam
 
 SLAPOS_MARK='# Added by SlapOS\n'
 
@@ -504,7 +505,7 @@ def prepare_from_scratch(config):
     computer_id = get_computer_name(
         os.path.join('/', slapos_configuration, 'slapos.cfg'))
 
-    print "Your Computer is : %s" % computer_id
+    print "$Your Computer is : %s" % computer_id
 
     config.slaposConfig(mount_dir_path = '/',
                         slapos_configuration=slapos_configuration,
@@ -552,6 +553,53 @@ def prepare_from_scratch(config):
 
   return return_code
 
+def chownSlaposDirectory():
+  config = ConfigParser.RawConfigParser()
+  # search slapos.cfg
+  slapos_path_configuration_old = "/etc/slapos/slapos.cfg"
+  slapos_path_configuration = "/etc/opt/slapos/slapos.cfg"
+  # check path slapos.cfg
+  if os.path.isfile(slapos_path_configuration_old) == True:
+    path_slapos = "/etc/slapos/"
+
+  if os.path.isfile(slapos_path_configuration) == True:                                              
+    path_slapos = "/etc/opt/slapos/"
+
+  # deplacement the real folder 
+  os.chdir(path_slapos)
+  # read slapos.cfg
+  config.read('slapos.cfg')
+  slapos_slapgrid_instance = config.get('slapos', 'instance_root')
+  slapos_slapgrid_software = config.get('slapos', 'software_root')
+  slapformat_partition = config.get('slapformat', 'partition_amount')
+  slapformat_partition_base_name = config.get('slapformat', 'partition_base_name')
+  slapformat_user_base_name = config.get('slapformat', 'user_base_name')
+
+  path = slapos_slapgrid_instance
+
+  print "Changing owners of software directory and partitions directories…"
+  for i in range(int(slapformat_partition)):
+    uid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[2]
+    gid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[3]
+    item = '%s%s' % (slapformat_partition_base_name, i)
+    itempath = os.path.join(path, item)
+    os.chown(itempath, uid, gid)
+
+
+  for i in range(int(slapformat_partition)):
+   path = "%s/%s%s" % ( slapos_slapgrid_instance, slapformat_partition_base_name, i)
+   for root, dirs, files in os.walk(path):
+    for items in dirs, files:
+     for item in items:
+       if not os.path.islink(item):
+         os.chown(os.path.join(root, item), getpwnam('%s%s' % (slapformat_user_base_name, i) )[2], getpwnam('%s%s' % (slapformat_user_base_name, i) )[3])
+
+
+  path = slapos_slapgrid_software
+  for root, dirs, files in os.walk(path):
+   for items in dirs, files:
+    for item in items:
+      os.chown(os.path.join(root, item), getpwnam('slapsoft')[2], getpwnam('slapsoft')[3])
 
 
 def slapprepare():
@@ -581,6 +629,8 @@ def slapprepare():
 
     configureNtp()
 
+    chownSlaposDirectory()
+
     # Restart sysctl in case of new mount points in /var/log
     _call(['systemctl', 'restart', 'syslog.service'])
 
@@ -588,6 +638,7 @@ def slapprepare():
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
+ 
     return_code = 0
   except UsageError, err:
     print >>sys.stderr, err.msg
