@@ -574,20 +574,23 @@ def chownSlaposDirectory():
   slapformat_partition_base_name = config.get('slapformat', 'partition_base_name')
   slapformat_user_base_name = config.get('slapformat', 'user_base_name')
 
-  print "Changing owners of software directory and partitions directories..."
-  # chown of partitions (/srv/slapgrid/slappart*)
+  path = slapos_slapgrid_instance
+  print "Changing owners of software directory and partitions directories…"
   for i in range(int(slapformat_partition)):
     uid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[2]
     gid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[3]
     item = '%s%s' % (slapformat_partition_base_name, i)
-    itempath = os.path.join(slapos_slapgrid_instance, item)
+    itempath = os.path.join(path, item)
     os.chown(itempath, uid, gid)
-    slapos_slapgrid_instance = "%s/%s%s" % ( slapos_slapgrid_instance, slapformat_partition_base_name, i)
-    for root, dirs, files in os.walk(slapos_slapgrid_instance):
-      for items in dirs, files:
-        for item in items:
-          if not os.path.islink(item):
-            os.chown(os.path.join(root, item), getpwnam('%s%s' % (slapformat_user_base_name, i) )[2], getpwnam('%s%s' % (slapformat_user_base_name, i) )[3])
+
+  for i in range(int(slapformat_partition)):
+   path = "%s/%s%s" % ( slapos_slapgrid_instance, slapformat_partition_base_name, i)
+   for root, dirs, files in os.walk(path):
+    for items in dirs, files:
+     for item in items:
+       if not os.path.islink(item):
+         os.chown(os.path.join(root, item), getpwnam('%s%s' % (slapformat_user_base_name, i) )[2], getpwnam('%s%s' % (slapformat_user_base_name, i) )[3])
+
 
   # chown of software root (/opt/slapgrid)
   for root, dirs, files in os.walk(slapos_slapgrid_software):
