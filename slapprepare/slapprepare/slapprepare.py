@@ -626,7 +626,10 @@ def slapprepare():
 
     configureNtp()
 
-    chownSlaposDirectory()
+    try:
+      chownSlaposDirectory()
+    except:
+      print "Warning: Impossible to change owner of slapos directories."
 
     # Restart sysctl in case of new mount points in /var/log
     _call(['systemctl', 'restart', 'syslog.service'])
