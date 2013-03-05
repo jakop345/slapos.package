@@ -1,6 +1,12 @@
 Changes
 =======
 
+1.0a8 (2013-03-05)
+------------------
+
+ * Chown all files in software root and instance root when doing slapprepare.
+   It allows easy USB key replacement.
+
 1.0a7 (2013-01-24)
 ------------------
 
