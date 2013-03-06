@@ -156,6 +156,9 @@ sysctl -w fs.aio-max-nr=16777216
 # Increase semaphore limits
 sysctl -w kernel.sem="1250 256000 100 1024"
 
+# Force reboot after kernel panic
+sysctl -w kernel.panic=120
+
 # Enable noop scheduler for disk which have SLAPOS labeled partition
 disk=`blkid -L SLAPOS | sed -r -e 's/(\/dev\/|[0-9]*$)//g'`
 echo noop > /sys/block/$disk/queue/scheduler
