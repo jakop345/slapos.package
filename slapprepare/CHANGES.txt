@@ -6,6 +6,7 @@ Changes
 
  * Chown all files in software root and instance root when doing slapprepare.
    It allows easy USB key replacement.
+ * Completely disable root password. Won't create random password.
 
 1.0a7 (2013-01-24)
 ------------------
