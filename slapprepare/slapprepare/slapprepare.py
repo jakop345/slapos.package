@@ -152,14 +152,9 @@ def suse_version():
 # Parse certificate to get computer name and return it
 def get_computer_name(slapos_configuration):
   try:
-    conf_file=open(slapos_configuration, "r")
-    for line in conf_file:
-      line = line.rstrip('\n')
-      if "computer_id" in line:
-        i = line.find("COMP-")
-        conf_file.close()
-        return line[i:]
-  except IOError:
+    return getSlaposConfiguration(slapos_configuration).get('slapos',
+                                                            'computer_id')
+  except:
     print "Warning: slapos.cfg doesn't exist. Using current hostname."
   return socket.gethostname()
 
