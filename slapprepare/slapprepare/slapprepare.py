@@ -120,6 +120,22 @@ def get_yes_no (prompt,default=None):
     if not default == None:
       if answer == '' : return default
 
+def getSlaposConfiguration(slapos_configuration_file_path=None):
+  config = ConfigParser.RawConfigParser()
+  # Search slapos.cfg
+  if not slapos_configuration_file_path:
+    slapos_configuration_file_path = "/etc/opt/slapos/slapos.cfg"
+  slapos_configuration_file_path_old = "/etc/slapos/slapos.cfg"
+
+  if not os.path.isfile(slapos_configuration_file_path):
+    if os.path.isfile(slapos_configuration_file_path_old):
+      slapos_configuration_file_path = slapos_configuration_file_path_old
+    else:
+      # No configuration found : returning
+      return {}
+  # Reading slapos paths from configuration file
+  return config.read(slapos_configuration_file_path)
+
 # Return OpenSUSE version if it is SuSE
 def suse_version():
   if os.path.exists('/etc/SuSE-release') :
@@ -554,20 +570,8 @@ def prepare_from_scratch(config):
   return return_code
 
 def chownSlaposDirectory():
-  config = ConfigParser.RawConfigParser()
-  # Search slapos.cfg
-  slapos_configuration_file_path = "/etc/opt/slapos/slapos.cfg"
-  slapos_configuration_file_path_old = "/etc/slapos/slapos.cfg"
-  
-  if not os.path.isfile(slapos_configuration_file_path):
-    if os.path.isfile(slapos_configuration_file_path_old):
-      slapos_configuration_file_path = slapos_configuration_file_path_old
-    else:
-      # No configuration found : returning
-      return
+  config = getSlaposConfiguration()
 
-  # Reading slapos paths from configuration file
-  config.read(slapos_configuration_file_path)
   slapos_slapgrid_instance = config.get('slapos', 'instance_root')
   slapos_slapgrid_software = config.get('slapos', 'software_root')
   slapformat_partition = config.get('slapformat', 'partition_amount')
