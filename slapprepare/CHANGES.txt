@@ -1,10 +1,20 @@
 Changes
 =======
 
+1.0.1 (2013-03-15)
+------------------
+
+Fixes:
+
+ * Will autoreboot after two minutes in case of a kernel panic.
+
 1.0.0 (2013-03-07)
 ------------------
 
- * Initial stable release!
+Initial stable release!
+
+New features:
+
  * Chown all files in software root and instance root when doing slapprepare.
    It allows easier USB key replacement.
  * Completely disable root password. Won't create random password.
