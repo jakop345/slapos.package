@@ -29,7 +29,7 @@
 from optparse import OptionParser, Option
 import ConfigParser, os
 import pkg_resources
-from shutil import move
+import re
 import socket
 from subprocess import call as subprocessCall
 import sys
@@ -159,22 +159,16 @@ def get_computer_name(slapos_configuration):
   return socket.gethostname()
 
 
-
 def enable_bridge(slapos_configuration):
-  #Create temp file
-  slapos_old_path = os.path.join(slapos_configuration,'slapos.cfg')
-  slapos_new_path = os.path.join(slapos_configuration,'slapos.cfg.tmp')
-  slapos_new = open(slapos_new_path,'w')
-  slapos_old = open(slapos_old_path)
-  for line in slapos_old:
-    slapos_new.write(line.replace("create_tap = false", "#create_tap = false"))
-  #close temp file
-  slapos_new.close()
-  slapos_old.close()
-  #Remove original file
-  os.remove(slapos_old_path)
-  #Move new file
-  move(slapos_new_path, slapos_old_path)
+  # we don't use ConfigParser here, as it would remove comments
+  slapos_cfg_path = os.path.join(slapos_configuration, 'slapos.cfg')
+  lines = []
+  for line in open(slapos_cfg_path):
+    if re.match('^create_tap *=', line):
+      line = 'create_tap = true\n'
+    lines.append(line)
+  with open(slapos_cfg_path, 'w') as fout:
+    fout.writelines(lines)
 
 
 # Function to get ssh key
