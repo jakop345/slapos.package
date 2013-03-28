@@ -27,43 +27,42 @@
 ##############################################################################
 
 from optparse import OptionParser, Option
-import ConfigParser, os
+import ConfigParser
+import os
 import pkg_resources
 import socket
-from subprocess import call as subprocessCall
+import subprocess
 import sys
 import urllib2
 from pwd import getpwnam
 
 import iniparse
 
-SLAPOS_MARK='# Added by SlapOS\n'
+SLAPOS_MARK = '# Added by SlapOS\n'
 
 
 class Parser(OptionParser):
-  """
-  Parse all arguments.
-  """
+
   def __init__(self, usage=None, version=None):
     """
-    Initialize all options possibles.
+    Initialize all possible options.
     """
     OptionParser.__init__(self, usage=usage, version=version,
-                      option_list=[
-        Option("-u","--update",
-               default=False,
-               action="store_true",
-               help="Will only run an update for scripts."),
-        Option("-v","--verbose",
-               default=False,
-               action="store_true",
-               help="Verbose output."),
-        Option("-n", "--dry-run",
-               help="Simulate the execution steps",
-               default=False,
-               action="store_true"),
-        ])
-
+            option_list=[
+                Option("-u", "--update",
+                    default=False,
+                    action="store_true",
+                    help="Will only run an update for scripts."),
+                Option("-v", "--verbose",
+                    default=False,
+                    action="store_true",
+                    help="Verbose output."),
+                Option("-n", "--dry-run",
+                    help="Simulate the execution steps",
+                    default=False,
+                    action="store_true"),
+                ]
+            )
 
   def check_args(self):
     """
@@ -100,27 +99,29 @@ def _call(cmd_args, stdout=None, stderr=None, dry_run=False):
   """
   print "Calling: %s" % ' '.join(cmd_args)
   try:
-    if subprocessCall(cmd_args, stdout=stdout, stderr=stderr) != 0:
+    if subprocess.call(cmd_args, stdout=stdout, stderr=stderr) != 0:
       raise ValueError('Issues during running %r' % cmd_args)
   except OSError as e:
     raise ExecError('Process respond:"%s" when calling "%s"' % \
                       (str(e), ' '.join(cmd_args)))
 
 
-# Utility fonction to get yes/no answers
-def get_yes_no (prompt,default=None):
-  if default :
+# Utility function to get yes/no answers
+def get_yes_no(prompt, default=None):
+  if default:
     def_value = '/ Default yes'
-  elif default == False :
+  elif default == False:
     def_value = '/ Default no'
   else:
     def_value = ''
   while True:
-    answer=raw_input( prompt + " [y,n] %s: " % def_value )
-    if answer.upper() in [ 'Y', 'YES' ]: return True
-    if answer.upper() in [ 'N', 'NO' ]: return False
-    if not default == None:
-      if answer == '' : return default
+    answer = raw_input(prompt + " [y,n] %s: " % def_value)
+    if answer.upper() in ['Y', 'YES']:
+      return True
+    if answer.upper() in ['N', 'NO']:
+      return False
+    if not answer and default is not None:
+        return default
 
 
 def getSlaposConfiguration(slapos_configuration_file_path=None):
@@ -143,14 +144,13 @@ def getSlaposConfiguration(slapos_configuration_file_path=None):
 
 # Return OpenSUSE version if it is SuSE
 def suse_version():
-  if os.path.exists('/etc/SuSE-release') :
-    with open('/etc/SuSE-release') as f :
-      for line in f:
-        if "VERSION" in line:
-          dist = line.split()
-          return float(dist[2])
-  else:
+  if not os.path.exists('/etc/SuSE-release'):
     return 0
+  with open('/etc/SuSE-release') as f:
+    for line in f:
+      if "VERSION" in line:
+        dist = line.split()
+        return float(dist[2])
 
 
 # Parse certificate to get computer name and return it
@@ -180,30 +180,30 @@ def get_ssh(temp_dir):
   # Downloading ssh_key
   count = 10
   gotten = True
-  while count > 0 :
+  while count > 0:
     try:
       print "Enter the url of your public ssh key"
-      ssh_web=raw_input('-->  ')
+      ssh_web = raw_input('-->  ')
       try:
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
-        gotten= True
+        gotten = True
       except ValueError:
       # add http:// if it is missing (needed by urllib2)
         ssh_web = """http://"""+ssh_web
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
-        gotten= True
+        gotten = True
     except urllib2.URLError:
       print "  URL ERROR"
       gotten = False
       count -= 1
     if gotten:
-      ssh_pub_key= ssh_key_all.read()
+      ssh_pub_key = ssh_key_all.read()
       print ssh_pub_key
-      if get_yes_no ('Is this your ssh public key?'):
+      if get_yes_no('Is this your ssh public key?'):
         break
       else:
-        count -=1
-  ssh_file=open(os.path.join(temp_dir,"authorized_keys"),"w")
+        count -= 1
+  ssh_file = open(os.path.join(temp_dir, "authorized_keys"), "w")
   ssh_file.write(''.join(ssh_pub_key))
   ssh_file.close()
   return 0
@@ -215,15 +215,15 @@ def remove_former_scripts(slapos_configuration):
   """
   # Remove old-fashioned slapos service
   try:
-    _call(['systemctl','disable','slapos.service'])
+    _call(['systemctl', 'disable', 'slapos.service'])
   except:
     pass
-  _call(['rm','-f',os.path.join(slapos_configuration,'slapos')])
-  _call(['rm','-f','/etc/systemd/system/slapos.service'])
+  _call(['rm', '-f', os.path.join(slapos_configuration, 'slapos')])
+  _call(['rm', '-f', '/etc/systemd/system/slapos.service'])
 
-  _call(['rm','-f','/etc/openvpn/client.conf'])
-  _call(['rm','-rf','/etc/openvpn/keys/'])
-  _call(['rm','-f',os.path.join(slapos_configuration,'run_slapformat')])
+  _call(['rm', '-f', '/etc/openvpn/client.conf'])
+  _call(['rm', '-rf', '/etc/openvpn/keys/'])
+  _call(['rm', '-f', os.path.join(slapos_configuration, 'run_slapformat')])
 
 
 # Specific function to configure SlapOS Image
@@ -278,7 +278,7 @@ def slapserver(config):
                                       'template/limits.conf.in').read())
 
     # Writing ssh key
-    if config.need_ssh :
+    if config.need_ssh:
       user_path = os.path.normpath('/'.join([mount_dir_path, 'root']))
       ssh_key_directory = os.path.normpath('/'.join([user_path, '.ssh']))
       ssh_key_path = os.path.normpath('/'.join([ssh_key_directory,
@@ -297,7 +297,7 @@ def slapserver(config):
 
       print "Creating file: %s" % ssh_key_path
       if not dry_run:
-        open(ssh_key_path,'a').write(''.join(open(config.key_path,'r').read()))
+        open(ssh_key_path, 'a').write(''.join(open(config.key_path, 'r').read()))
 
       if not dry_run:
         print "Setting uid:gid of %r to %s:%s" % (ssh_key_path, uid, gid)
@@ -305,20 +305,20 @@ def slapserver(config):
         os.chmod(ssh_key_path, 0600)
 
     # Put file to  force VPN if user asked
-    if config.force_slapcontainer :
+    if config.force_slapcontainer:
       if not dry_run:
-        open(os.path.join(config.slapos_configuration,'SlapContainer-needed'),'w')
+        open(os.path.join(config.slapos_configuration, 'SlapContainer-needed'), 'w')
 
 
     # Removing line in slapos script activating kvm in virtual
     if config.virtual:
       if not dry_run:
-        path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
-        _call(['sed','-i',"$d",path],dry_run=dry_run)
-        _call(['sed','-i',"$d",path],dry_run=dry_run)
+        path = os.path.join('/', 'usr', 'sbin', 'slapos-boot-dedicated')
+        _call(['sed', '-i', "$d", path], dry_run=dry_run)
+        _call(['sed', '-i', "$d", path], dry_run=dry_run)
 
     # Adding slapos_firstboot in case of MultiDisk usage
-    if not config.one_disk :
+    if not config.one_disk:
       for script in ['slapos_firstboot']:
         path = os.path.join(mount_dir_path, 'etc', 'init.d', script)
         print "Creating %r" % path
@@ -335,7 +335,7 @@ def slapserver(config):
             os.remove(path)
 
     # Disable login by password for root
-    _call(['passwd','-d','root'])
+    _call(['passwd', '-d', 'root'])
 
   finally:
     print "SlapOS Image configuration: DONE"
@@ -343,14 +343,14 @@ def slapserver(config):
 
 
 
-def prepare_scripts (config):
+def prepare_scripts(config):
   """
   Will prepare script for slapos dedicated computer
   """
   dry_run = config.dry_run
 
   # Get slapos.cfg path
-  if hasattr(config,'slapos_configuration'):
+  if hasattr(config, 'slapos_configuration'):
     slapos_configuration = config.slapos_configuration
   else:
     # Check for config file in /etc/slapos/
@@ -360,7 +360,7 @@ def prepare_scripts (config):
       slapos_configuration='/etc/opt/slapos/'
 
   # Creating boot script
-  path = os.path.join('/','usr','sbin', 'slapos-boot-dedicated')
+  path = os.path.join('/', 'usr', 'sbin', 'slapos-boot-dedicated')
   print "Creating %r" % path
   if not dry_run:
     open(path, 'w').write(
@@ -381,7 +381,7 @@ def prepare_scripts (config):
     os.chmod(path, 0755)
 
   # add clientipv4
-  path = os.path.join('/','etc','openvpn','clientipv4.conf')
+  path = os.path.join('/', 'etc', 'openvpn', 'clientipv4.conf')
   print "Creating %r" % path
   if not dry_run:
     open(path, 'w').write(
@@ -443,28 +443,28 @@ class Config:
 
 
   def userConfig(self):
-    self.certificates = get_yes_no("Automatically register new computer to slapos.org?",True)
+    self.certificates = get_yes_no("Automatically register new computer to slapos.org?", True)
     if self.certificates:
       self.computer_name = raw_input("Define a unique name for this computer: ")
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
       if self.partition_amount == '':
         self.partition_amount = '20'
 
-    self.virtual = get_yes_no("Is this a virtual Machine?",False)
+    self.virtual = get_yes_no("Is this a virtual Machine?", False)
     if not self.virtual:
-      self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
+      self.one_disk = not get_yes_no("Do you want to use SlapOS with a second disk?", True)
     else:
       self.one_disk=True
 
-    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?",False)
+    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?", False)
 
-    self.force_vpn = get_yes_no ("Do you want to use vpn to provide ipv6?",True)
-    self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False)
-    if self.force_vpn :
+    self.force_vpn = get_yes_no("Do you want to use vpn to provide ipv6?", True)
+    self.force_slapcontainer = get_yes_no("Do you want to force the use lxc on this computer?", False)
+    if self.force_vpn:
       self.ipv6_interface = "tapVPN"
     else:
       self.ipv6_interface = ""
-    self.need_ssh = get_yes_no("Do you want a remote ssh access?",True)
+    self.need_ssh = get_yes_no("Do you want a remote ssh access?", True)
 
 
   def displayUserConfig(self):
@@ -487,7 +487,7 @@ def prepare_from_scratch(config):
       print "Creating directory: %s" % temp_directory
       os.mkdir(temp_directory, 0711)
 
-    while True :
+    while True:
       config.userConfig()
       print "\nThis is your configuration: \n"
       config.displayUserConfig()
@@ -495,13 +495,13 @@ def prepare_from_scratch(config):
         break
 
     if config.certificates:
-      slapos_configuration='/etc/opt/slapos/'
+      slapos_configuration = '/etc/opt/slapos/'
     else:
       # Check for config file in /etc/slapos/
       if os.path.exists('/etc/slapos/slapos.cfg'):
-        slapos_configuration='/etc/slapos/'
+        slapos_configuration = '/etc/slapos/'
       else:
-        slapos_configuration='/etc/opt/slapos/'
+        slapos_configuration = '/etc/opt/slapos/'
 
     # Prepare Slapos Configuration
     if config.certificates:
@@ -524,21 +524,21 @@ def prepare_from_scratch(config):
                         slapos_configuration=slapos_configuration,
                         hostname_path='/etc/HOSTNAME',
                         host_path='/etc/hosts',
-                        key_path=os.path.join(temp_directory,'authorized_keys'),
+                        key_path=os.path.join(temp_directory, 'authorized_keys'),
                         master_url="""https://slap.vifib.com""",
                         temp_dir=temp_directory,
                         computer_id=computer_id)
 
     # Prepare SlapOS Suse Server confuguration
-    if config.need_ssh :
+    if config.need_ssh:
       get_ssh(temp_directory)
 
     slapserver(config)
 
     if not config.one_disk:
       _call(['/etc/init.d/slapos_firstboot'])
-      _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
-      _call(['systemctl','stop','slapos-node.service'])
+      _call(['zypper', '--gpg-auto-import-keys', 'install', '-fy', 'slapos.node'])
+      _call(['systemctl', 'stop', 'slapos-node.service'])
 
 
     return_code = 0
@@ -550,7 +550,7 @@ def prepare_from_scratch(config):
     return_code = err
   if os.path.exists(temp_directory):
     print "Deleting directory: %s" % temp_directory
-    _call(['rm','-rf',temp_directory])
+    _call(['rm', '-rf', temp_directory])
 
 
   # Add/remove VPN file forcing/forbidding start of VPN.
@@ -606,21 +606,21 @@ def slapprepare():
   """
   usage = "usage: %s [options] " % sys.argv[0]
   try:
-    config= Config()
+    config = Config()
     config.setConfig(Parser(usage=usage).check_args())
 
     # Install/update slapos
-    try :
-      _call(['zypper','addrepo', '-fc' ,'-n','"SlapOS Official repo"'
+    try:
+      _call(['zypper', 'addrepo', '-fc', '-n', '"SlapOS Official repo"'
              ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
     except:
       pass
-    _call(['zypper','--gpg-auto-import-keys','install','-fy','slapos.node'])
-    _call(['systemctl','stop','slapos-node.service'])
+    _call(['zypper', '--gpg-auto-import-keys', 'install', '-fy', 'slapos.node'])
+    _call(['systemctl', 'stop', 'slapos-node.service'])
 
     print "SlapOS has been updated"
 
-    if not config.update :
+    if not config.update:
       prepare_from_scratch(config)
 
     prepare_scripts(config)
@@ -636,8 +636,8 @@ def slapprepare():
     _call(['systemctl', 'restart', 'syslog.service'])
 
     # Enable and run slapos-boot-dedicated.service
-    _call(['systemctl','enable','slapos-boot-dedicated.service'])
-    _call(['systemctl','start','slapos-boot-dedicated.service'])
+    _call(['systemctl', 'enable', 'slapos-boot-dedicated.service'])
+    _call(['systemctl', 'start', 'slapos-boot-dedicated.service'])
 
     return_code = 0
   except UsageError, err:
