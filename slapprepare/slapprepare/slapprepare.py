@@ -105,13 +105,14 @@ def _call(cmd_args, stdout=None, stderr=None, dry_run=False):
     raise ExecError('Process respond:"%s" when calling "%s"' % \
                       (str(e), ' '.join(cmd_args)))
 
+
 # Utility fonction to get yes/no answers
 def get_yes_no (prompt,default=None):
   if default :
     def_value = '/ Default yes'
   elif default == False :
     def_value = '/ Default no'
-  else :
+  else:
     def_value = ''
   while True:
     answer=raw_input( prompt + " [y,n] %s: " % def_value )
@@ -119,6 +120,7 @@ def get_yes_no (prompt,default=None):
     if answer.upper() in [ 'N', 'NO' ]: return False
     if not default == None:
       if answer == '' : return default
+
 
 def getSlaposConfiguration(slapos_configuration_file_path=None):
   config = ConfigParser.RawConfigParser()
@@ -137,6 +139,7 @@ def getSlaposConfiguration(slapos_configuration_file_path=None):
   config.read(slapos_configuration_file_path)
   return config
 
+
 # Return OpenSUSE version if it is SuSE
 def suse_version():
   if os.path.exists('/etc/SuSE-release') :
@@ -145,7 +148,7 @@ def suse_version():
         if "VERSION" in line:
           dist = line.split()
           return float(dist[2])
-  else :
+  else:
     return 0
 
 
@@ -273,7 +276,6 @@ def slapserver(config):
         pkg_resources.resource_stream(__name__,
                                       'template/limits.conf.in').read())
 
-
     # Writing ssh key
     if config.need_ssh :
       user_path = os.path.normpath('/'.join([mount_dir_path, 'root']))
@@ -390,8 +392,6 @@ def prepare_scripts (config):
   remove_former_scripts(slapos_configuration)
 
 
-
-
 def configureNtp():
   """Configures NTP daemon"""
   server = "server pool.ntp.org"
@@ -457,7 +457,7 @@ class Config:
     self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False)
     if self.force_vpn :
       self.ipv6_interface = "tapVPN"
-    else :
+    else:
       self.ipv6_interface = ""
     self.need_ssh = get_yes_no("Do you want a remote ssh access?",True)
 
@@ -475,17 +475,16 @@ class Config:
       print "Use a second disk: %s" % (not self.one_disk)
 
 
-
 def prepare_from_scratch(config):
   try:
-    temp_directory=os.path.join('/tmp/slaptemp/')
+    temp_directory = os.path.join('/tmp/slaptemp/')
     if not os.path.exists(temp_directory):
       print "Creating directory: %s" % temp_directory
       os.mkdir(temp_directory, 0711)
 
     while True :
       config.userConfig()
-      print "\nThis your configuration: \n"
+      print "\nThis is your configuration: \n"
       config.displayUserConfig()
       if get_yes_no("\nDo you confirm?"):
         break
@@ -559,6 +558,7 @@ def prepare_from_scratch(config):
 
   return return_code
 
+
 def chownSlaposDirectory():
   config = getSlaposConfiguration()
 
@@ -584,7 +584,6 @@ def chownSlaposDirectory():
      for item in items:
        if not os.path.islink(item):
          os.chown(os.path.join(root, item), getpwnam('%s%s' % (slapformat_user_base_name, i) )[2], getpwnam('%s%s' % (slapformat_user_base_name, i) )[3])
-
 
   # chown of software root (/opt/slapgrid)
   for root, dirs, files in os.walk(slapos_slapgrid_software):
@@ -632,7 +631,6 @@ def slapprepare():
     _call(['systemctl','enable','slapos-boot-dedicated.service'])
     _call(['systemctl','start','slapos-boot-dedicated.service'])
 
- 
     return_code = 0
   except UsageError, err:
     print >>sys.stderr, err.msg
