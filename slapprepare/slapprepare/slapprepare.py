@@ -29,12 +29,13 @@
 from optparse import OptionParser, Option
 import ConfigParser, os
 import pkg_resources
-import re
 import socket
 from subprocess import call as subprocessCall
 import sys
 import urllib2
 from pwd import getpwnam
+
+import iniparse
 
 SLAPOS_MARK='# Added by SlapOS\n'
 
@@ -162,16 +163,16 @@ def get_computer_name(slapos_configuration):
   return socket.gethostname()
 
 
-def enable_bridge(slapos_configuration):
-  # we don't use ConfigParser here, as it would remove comments
+def setup_bridge(slapos_configuration, create_tap):
   slapos_cfg_path = os.path.join(slapos_configuration, 'slapos.cfg')
-  lines = []
-  for line in open(slapos_cfg_path):
-    if re.match('^create_tap *=', line):
-      line = 'create_tap = true\n'
-    lines.append(line)
+
+  # using iniparse instead of ConfigParser, will retain the comments
+  slapos_cfg = iniparse.RawConfigParser()
+  slapos_cfg.read(slapos_cfg_path)
+
+  slapos_cfg.set('slapformat', 'create_tap', 'true' if create_tap else 'false')
   with open(slapos_cfg_path, 'w') as fout:
-    fout.writelines(lines)
+    slapos_cfg.write(fout)
 
 
 # Function to get ssh key
@@ -448,11 +449,15 @@ class Config:
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
       if self.partition_amount == '':
         self.partition_amount = '20'
+
     self.virtual = get_yes_no("Is this a virtual Machine?",False)
     if not self.virtual:
       self.one_disk = not get_yes_no ("Do you want to use SlapOS with a second disk?",True)
     else:
       self.one_disk=True
+
+    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?",False)
+
     self.force_vpn = get_yes_no ("Do you want to use vpn to provide ipv6?",True)
     self.force_slapcontainer = get_yes_no ("Do you want to force the use lxc on this computer?",False)
     if self.force_vpn :
@@ -504,8 +509,11 @@ def prepare_from_scratch(config):
              ,'--interface-name', 'br0'
              ,'--ipv6-interface', config.ipv6_interface
              ,'--partition-number', config.partition_amount])
-      # Prepare for bridge
-      enable_bridge(slapos_configuration)
+
+    if config.need_bridge:
+      setup_bridge(slapos_configuration, True)
+    else:
+      setup_bridge(slapos_configuration, False)
 
     computer_id = get_computer_name(
         os.path.join('/', slapos_configuration, 'slapos.cfg'))

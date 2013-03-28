@@ -20,7 +20,10 @@ setup(name=name,
       author='VIFIB',
       packages=['slapprepare'],
       include_package_data=True,
-      install_requires=['slapos.libnetworkcache',],
+      install_requires=[
+          'slapos.libnetworkcache',
+          'iniparse',
+      ],
       zip_safe=False,
       entry_points={
           'console_scripts': [
