@@ -456,7 +456,7 @@ class Config:
     else:
       self.one_disk=True
 
-    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?", False)
+    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?", True)
 
     self.force_vpn = get_yes_no("Do you want to use vpn to provide ipv6?", True)
     self.force_slapcontainer = get_yes_no("Do you want to force the use lxc on this computer?", False)
