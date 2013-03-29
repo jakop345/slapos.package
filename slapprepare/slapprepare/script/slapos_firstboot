@@ -40,13 +40,13 @@ import tempfile
 import time
 
 # some constants
-LABEL="SLAPOS"
-MINIMUM_FREE_SPACE_GB=60
-MINIMUM_FREE_SPACE=MINIMUM_FREE_SPACE_GB * 1024 * 1024 * 1024
-SLAPOS_MARK='# Added by SlapOS\n'
+LABEL = "SLAPOS"
+MINIMUM_FREE_SPACE_GB = 60
+MINIMUM_FREE_SPACE = MINIMUM_FREE_SPACE_GB * 1024 * 1024 * 1024
+SLAPOS_MARK = '# Added by SlapOS\n'
 
 def callWithCheck(args):
-  """Calls args in subprocesses, rasies ValueError if command failed"""
+  """Calls args in subprocesses, raises ValueError if command failed"""
   if subprocess.call(args) != 0:
     raise ValueError
 
@@ -126,7 +126,7 @@ def prepareSlapOSPartition(mount_point):
   """Prepare SlapOS partitioning"""
   new_fstab = open('/etc/fstab', 'r').readlines()
   a = new_fstab.append
-  d = dict(label=LABEL)
+  d = {'label': LABEL}
   a(SLAPOS_MARK)
   a('LABEL=%(label)s /mnt/%(label)s ext4 defaults,noatime 0 0\n'%
       d)
@@ -175,7 +175,7 @@ def getWidestFreeSpaceList(disk_dict):
     for l in v:
       size = int(l.split(':')[3].rstrip('B'))
       free_space_disk_dict.setdefault(size, [])
-      free_space_disk_dict[size].append(dict(disk=disk, info=l))
+      free_space_disk_dict[size].append({'disk': disk, 'info': l})
   if free_space_disk_dict:
     m = max(free_space_disk_dict)
     if m > MINIMUM_FREE_SPACE:
