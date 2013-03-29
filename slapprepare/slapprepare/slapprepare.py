@@ -454,9 +454,9 @@ class Config:
     if not self.virtual:
       self.one_disk = not get_yes_no("Do you want to use SlapOS with a second disk?", True)
     else:
-      self.one_disk=True
+      self.one_disk = True
 
-    self.need_bridge = get_yes_no("Do you to setup the network to allow virtual machines inside this node?", True)
+    self.need_bridge = get_yes_no("Do you want the setup to allow virtual machines inside this node?", True)
 
     self.force_vpn = get_yes_no("Do you want to use vpn to provide ipv6?", True)
     self.force_slapcontainer = get_yes_no("Do you want to force the use lxc on this computer?", False)
@@ -473,6 +473,7 @@ class Config:
       print "Number of partition: %s" % (self.partition_amount)
       print "Computer name: %s" % self.computer_name
     print "Virtual Machine: %s" % self.virtual
+    print "Network bridge for hosted VMs: %s" % self.need_bridge
     print "Ipv6 over VPN: %s" % self.force_vpn
     print "Remote ssh access: %s" % self.need_ssh
     print "Prepared to use lxc: %s" % self.force_slapcontainer
