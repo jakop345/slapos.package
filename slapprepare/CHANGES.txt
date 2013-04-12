@@ -1,12 +1,13 @@
 Changes
 =======
 
-1.0.1 (2013-03-15)
+1.1.0 (2013-04-12)
 ------------------
 
-Fixes:
+New features:
 
  * Will autoreboot after two minutes in case of a kernel panic.
+ * Ask if machine will host VMs.
 
 1.0.0 (2013-03-07)
 ------------------
