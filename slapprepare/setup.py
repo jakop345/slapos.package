@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import glob
 import os
 
-version = '1.0.1-dev'
+version = '1.1.0'
 name = 'slapprepare'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -20,10 +20,7 @@ setup(name=name,
       author='VIFIB',
       packages=['slapprepare'],
       include_package_data=True,
-      install_requires=[
-          'slapos.libnetworkcache',
-          'iniparse',
-      ],
+      install_requires=['slapos.libnetworkcache',],
       zip_safe=False,
       entry_points={
           'console_scripts': [
