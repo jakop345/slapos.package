@@ -511,10 +511,13 @@ def prepare_from_scratch(config):
              ,'--ipv6-interface', config.ipv6_interface
              ,'--partition-number', config.partition_amount])
 
-    if config.need_bridge:
-      setup_bridge(slapos_configuration, True)
+    if getSlaposConfiguration():
+      if config.need_bridge:
+        setup_bridge(slapos_configuration, True)
+      else:
+        setup_bridge(slapos_configuration, False)
     else:
-      setup_bridge(slapos_configuration, False)
+      print 'Warning: impossible to set up bridge because slapos configuration doesn\'t exist.'
 
     computer_id = get_computer_name(
         os.path.join('/', slapos_configuration, 'slapos.cfg'))
