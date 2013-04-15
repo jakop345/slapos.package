@@ -472,10 +472,10 @@ class Config:
     self.virtual = get_yes_no("Is this a virtual Machine?", False)
     if not self.virtual:
       self.one_disk = not get_yes_no("Do you want to use SlapOS with a second disk?", True)
+      self.need_bridge = get_yes_no("Do you want the setup to allow virtual machines inside this node?", True)
     else:
       self.one_disk = True
-
-    self.need_bridge = get_yes_no("Do you want the setup to allow virtual machines inside this node?", True)
+      self.need_bridge = False
 
     self.force_vpn = get_yes_no("Do you want to use vpn to provide ipv6?", True)
     self.force_slapcontainer = get_yes_no("Do you want to force the use lxc on this computer?", False)
