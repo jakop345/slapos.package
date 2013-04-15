@@ -443,12 +443,22 @@ class Config:
 
 
   def userConfig(self):
+    # XXX-Testme: test each possible scenario
+    already_configured = getSlaposConfiguration()
     self.certificates = get_yes_no("Automatically register new computer to slapos.org?", True)
     if self.certificates:
+      if already_configured:
+        if not get_yes_no("A SlapOS Node configuration has been found. Do you want to overwrite it?", False):
+          print "Okay, let's start from scratch."
+          return False
       self.computer_name = raw_input("Define a unique name for this computer: ")
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
       if self.partition_amount == '':
         self.partition_amount = '20'
+    elif not already_configured:
+      print "No existing Node configuration has been found. please either automatically register or manually setup Node configuration."
+      print "Starting from scratch..."
+      return False
 
     self.virtual = get_yes_no("Is this a virtual Machine?", False)
     if not self.virtual:
@@ -465,6 +475,8 @@ class Config:
     else:
       self.ipv6_interface = ""
     self.need_ssh = get_yes_no("Do you want a remote ssh access?", True)
+
+    return True
 
 
   def displayUserConfig(self):
@@ -489,11 +501,11 @@ def prepare_from_scratch(config):
       os.mkdir(temp_directory, 0711)
 
     while True:
-      config.userConfig()
-      print "\nThis is your configuration: \n"
-      config.displayUserConfig()
-      if get_yes_no("\nDo you confirm?"):
-        break
+      if config.userConfig():
+        print "\nThis is your configuration: \n"
+        config.displayUserConfig()
+        if get_yes_no("\nDo you confirm?"):
+          break
 
     if config.certificates:
       slapos_configuration = '/etc/opt/slapos/'
