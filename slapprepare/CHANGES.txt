@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.1.2 (2013-04-15)
+------------------
+
+Fix:
+
+ * Don't raise if impossible to find slapos configuration while trying to setup bridge (bug introduced in 1.0).
+
 1.1.1 (2013-04-15)
 ------------------
 
