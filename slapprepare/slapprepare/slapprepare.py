@@ -444,13 +444,22 @@ class Config:
 
   def userConfig(self):
     # XXX-Testme: test each possible scenario
+    # XXX don't use self.xx but return a dict so that it is stateless
+    #     and easy to test
+    # XXX rename "get_yes_no" so that we don't have insane cases like
+    #     "if not get_yes_no('...')"
     already_configured = getSlaposConfiguration()
-    self.certificates = get_yes_no("Automatically register new computer to slapos.org?", True)
+    self.certificates = get_yes_no("Automatically register new computer to a SlapOS Master?", True)
     if self.certificates:
       if already_configured:
         if not get_yes_no("A SlapOS Node configuration has been found. Do you want to overwrite it?", False):
           print "Okay, let's start from scratch."
           return False
+      self.master_url = raw_input("""SlapOS Master URL? Empty answer will make it use slapos.org Master:""")
+      if self.master_url:
+        self.master_url_web = raw_input("""SlapOS Master "web" URL?:""")
+      else:
+        self.master_url_web = ''
       self.computer_name = raw_input("Define a unique name for this computer: ")
       self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
       if self.partition_amount == '':
@@ -480,8 +489,12 @@ class Config:
 
 
   def displayUserConfig(self):
+    # XXX print everything from configuration, not arbitrary members
     if self.certificates:
       print "Will register a computer on master"
+      if self.master_url:
+        print "URL of master: %s" % self.master_url
+        print "URL \"web\" of master: %s" % self.master_url_web
       print "Number of partition: %s" % (self.partition_amount)
       print "Computer name: %s" % self.computer_name
     print "Virtual Machine: %s" % self.virtual
@@ -518,10 +531,18 @@ def prepare_from_scratch(config):
 
     # Prepare Slapos Configuration
     if config.certificates:
-      _call(['slapos', 'node', 'register', config.computer_name
-             ,'--interface-name', 'br0'
-             ,'--ipv6-interface', config.ipv6_interface
-             ,'--partition-number', config.partition_amount])
+      slapos_register_parameter_list = [
+          'slapos', 'node', 'register', config.computer_name,
+          '--interface-name', 'br0',
+          '--ipv6-interface', config.ipv6_interface,
+          '--partition-number', config.partition_amount
+      ]
+      if config.master_url:
+        slapos_register_parameter_list.extend([
+            '--master-url', config.master_url,
+            '--master-url-web', config.master_url_web,
+        ])
+      _call(slapos_register_parameter_list)
 
     if getSlaposConfiguration():
       if config.need_bridge:
