@@ -652,7 +652,7 @@ def slapprepare():
              ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
     except:
       pass
-    _call(['zypper', '--gpg-auto-import-keys', 'install', '-fy', 'slapos.node'])
+    _call(['zypper', '--gpg-auto-import-keys', 'install', '-y', 'slapos.node'])
     _call(['systemctl', 'stop', 'slapos-node.service'])
 
     print "SlapOS has been updated"
