@@ -456,13 +456,13 @@ class Config:
         if not get_yes_no("A SlapOS Node configuration has been found. Do you want to overwrite it?", False):
           print "Okay, let's start from scratch."
           return False
-      self.master_url = raw_input("""SlapOS Master URL? Empty answer will make it use slapos.org Master:""")
+      self.master_url = raw_input("""SlapOS Master URL? Empty answer will make it use slapos.org Master: """)
       if self.master_url:
-        self.master_url_web = raw_input("""SlapOS Master "web" URL?:""")
+        self.master_url_web = raw_input("""SlapOS Master "web" URL?: """)
       else:
         self.master_url_web = ''
       self.computer_name = raw_input("Define a unique name for this computer: ")
-      self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20 :""")
+      self.partition_amount = raw_input("""Number of SlapOS partitions for this computer? Default is 20: """)
       if self.partition_amount == '':
         self.partition_amount = '20'
     elif not already_configured:
