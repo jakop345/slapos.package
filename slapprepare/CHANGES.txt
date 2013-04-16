@@ -1,6 +1,20 @@
 Changes
 =======
 
+1.2.0 (2013-04-16)
+------------------
+
+Note: it is no longer possible to run slapprepare without either registering Node or having an existing Node configuration.
+
+New features:
+
+ * Add support for any SlapOS Master, not only slapos.org
+
+Fixes:
+
+ * Don't force install slapos if already installed.
+ * Only ask bridge question if it is not a VM.
+
 1.1.2 (2013-04-15)
 ------------------
 
