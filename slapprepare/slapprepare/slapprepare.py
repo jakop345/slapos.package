@@ -33,6 +33,7 @@ import pkg_resources
 import socket
 import subprocess
 import sys
+import time
 import urllib2
 from pwd import getpwnam
 
@@ -531,6 +532,11 @@ def prepare_from_scratch(config):
 
     # Prepare Slapos Configuration
     if config.certificates:
+      if config.force_vpn:
+        print "Starting IPv6 tunnel..."
+        _call(['systemctl', 'start', 'openvpn.service'])
+        # XXX better way to check
+        time.sleep(10)
       slapos_register_parameter_list = [
           'slapos', 'node', 'register', config.computer_name,
           '--interface-name', 'br0',
