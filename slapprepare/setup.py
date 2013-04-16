@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import glob
 import os
 
-version = '1.1.2'
+version = '1.2.0'
 name = 'slapprepare'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
