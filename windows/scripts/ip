@@ -520,7 +520,7 @@ elif [[ $object == "route" ]] ; then
     while [[ "$1" != "" ]] ; do
         case $1 in
             dev)
-                interface=dev=\"$(format_interface_name \"$2\")\"
+                interface=\"$(format_interface_name $2)\"
                 shift
                 ;;
             proto)
