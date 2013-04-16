@@ -28,17 +28,17 @@
 # Simulate the linux command "ip" in the Windows. Most of functions
 # are mapped to windows command "netsh". Refer to ip man in the linux
 # to know how to use this command.
-# 
-# Synopsis (not all of options are implemented here), 
-# 
-# ip [ OPTIONS ] OBJECT { COMMAND | help } 
-# 
+#
+# Synopsis (not all of options are implemented here),
+#
+# ip [ OPTIONS ] OBJECT { COMMAND | help }
+#
 # OBJECT := { link | addr | addrlabel | route | rule | neigh | tunnel
 # | maddr | mroute | monitor }
-# 
+#
 # OPTIONS := { -V[ersion] | -s[tatistics] | -r[esolve] | -f[amily] {
 # inet | inet6 | ipx | dnet | link } | -o[neline] }
-# 
+#
 # ip link set DEVICE { up | down | arp { on | off } |
 #  promisc { on | off } |
 #  allmulticast { on | off } |
@@ -50,208 +50,208 @@
 #  mtu MTU |
 #  netns PID |
 #  alias NAME |
-#  vf NUM [ mac LLADDR ] [ vlan VLANID [ qos VLAN-QOS ] ] [ rate TXRATE ] } 
-# 
-# ip link show [ DEVICE ] 
-# 
-# ip addr { add | del } IFADDR dev STRING 
-# 
+#  vf NUM [ mac LLADDR ] [ vlan VLANID [ qos VLAN-QOS ] ] [ rate TXRATE ] }
+#
+# ip link show [ DEVICE ]
+#
+# ip addr { add | del } IFADDR dev STRING
+#
 # ip addr { show | flush } [ dev STRING ] [ scope SCOPE-ID ] [ to
 # PREFIX ] [ FLAG-LIST ] [ label PATTERN ]
-# 
+#
 # IFADDR := PREFIX | ADDR peer PREFIX [ broadcast ADDR ] [ anycast
 # ADDR ] [ label STRING ] [ scope SCOPE-ID ]
-# 
-# SCOPE-ID := [ host | link | global | NUMBER ] 
-# 
-# FLAG-LIST := [ FLAG-LIST ] FLAG 
-# 
-# FLAG := [ permanent | dynamic | secondary | primary | tentative | deprecated ] 
-# 
-# ip addrlabel { add | del } prefix PREFIX [ dev DEV ] [ label NUMBER ] 
-# 
-# ip addrlabel { list | flush } 
-# 
-# ip route { list | flush } SELECTOR 
-# 
-# ip route get ADDRESS [ from ADDRESS iif STRING ] [ oif STRING ] [ tos TOS ] 
-# 
-# ip route { add | del | change | append | replace | monitor } ROUTE 
-# 
+#
+# SCOPE-ID := [ host | link | global | NUMBER ]
+#
+# FLAG-LIST := [ FLAG-LIST ] FLAG
+#
+# FLAG := [ permanent | dynamic | secondary | primary | tentative | deprecated ]
+#
+# ip addrlabel { add | del } prefix PREFIX [ dev DEV ] [ label NUMBER ]
+#
+# ip addrlabel { list | flush }
+#
+# ip route { list | flush } SELECTOR
+#
+# ip route get ADDRESS [ from ADDRESS iif STRING ] [ oif STRING ] [ tos TOS ]
+#
+# ip route { add | del | change | append | replace | monitor } ROUTE
+#
 # SELECTOR := [ root PREFIX ] [ match PREFIX ] [ exact PREFIX ] [
 # table TABLE_ID ] [ proto RTPROTO ] [ type TYPE ] [ scope SCOPE ]
-# 
-# ROUTE := NODE_SPEC [ INFO_SPEC ] 
-# 
+#
+# ROUTE := NODE_SPEC [ INFO_SPEC ]
+#
 # NODE_SPEC := [ TYPE ] PREFIX [ tos TOS ] [ table TABLE_ID ] [ proto
 # RTPROTO ] [ scope SCOPE ] [ metric METRIC ]
-# 
-# INFO_SPEC := NH OPTIONS FLAGS [ nexthop NH ] ... 
-# 
+#
+# INFO_SPEC := NH OPTIONS FLAGS [ nexthop NH ] ...
+#
 # NH := [ via ADDRESS ] [ dev STRING ] [ weight NUMBER ] NHFLAGS
-# 
+#
 # OPTIONS := FLAGS [ mtu NUMBER ] [ advmss NUMBER ] [ rtt TIME ] [
 # rttvar TIME ] [ window NUMBER ] [ cwnd NUMBER ] [ initcwnd NUMBER ]
 # [ ssthresh REALM ] [ realms REALM ] [ rto_min TIME ]
-# 
+#
 # TYPE := [ unicast | local | broadcast | multicast | throw |
 # unreachable | prohibit | blackhole | nat ]
-# 
-# TABLE_ID := [ local| main | default | all | NUMBER ] 
-# 
-# SCOPE := [ host | link | global | NUMBER ] 
-# 
-# FLAGS := [ equalize ] 
-# 
+#
+# TABLE_ID := [ local| main | default | all | NUMBER ]
+#
+# SCOPE := [ host | link | global | NUMBER ]
+#
+# FLAGS := [ equalize ]
+#
 # NHFLAGS := [ onlink | pervasive ]
-# 
-# RTPROTO := [ kernel | boot | static | NUMBER ] 
-# 
-# ip rule [ list | add | del | flush ] SELECTOR ACTION 
-# 
+#
+# RTPROTO := [ kernel | boot | static | NUMBER ]
+#
+# ip rule [ list | add | del | flush ] SELECTOR ACTION
+#
 # SELECTOR := [ from PREFIX ] [ to PREFIX ] [ tos TOS ] [ fwmark
 # FWMARK[/MASK] ] [ dev STRING ] [ pref NUMBER ]
-# 
+#
 # ACTION := [ table TABLE_ID ] [ nat ADDRESS ] [ prohibit | reject |
 # unreachable ] [ realms [SRCREALM/]DSTREALM ]
-# 
-# TABLE_ID := [ local | main | default | NUMBER ] 
-# 
+#
+# TABLE_ID := [ local | main | default | NUMBER ]
+#
 # ip neigh { add | del | change | replace } { ADDR [ lladdr LLADDR ] [
 # nud { permanent | noarp | stale | reachable } ] | proxy ADDR } [ dev
 # DEV ]
-# 
-# ip neigh { show | flush } [ to PREFIX ] [ dev DEV ] [ nud STATE ] 
-# 
+#
+# ip neigh { show | flush } [ to PREFIX ] [ dev DEV ] [ nud STATE ]
+#
 # ip tunnel { add | change | del | show | prl } [ NAME ]
 #  [ mode MODE ] [ remote ADDR ] [ local ADDR ]
 #  [ [i|o]seq ] [ [i|o]key KEY ] [ [i|o]csum ] ]
 #  [ encaplimit ELIM ] [ ttl TTL ]
 #  [ tos TOS ] [ flowlabel FLOWLABEL ]
 #  [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]
-#  [ [no]pmtudisc ] [ dev PHYS_DEV ] [ dscp inherit ] 
-# 
-# MODE := { ipip | gre | sit | isatap | ip6ip6 | ipip6 | any } 
-# 
-# ADDR := { IP_ADDRESS | any } 
-# 
-# TOS := { NUMBER | inherit } 
-# 
-# ELIM := { none | 0..255 } 
-# 
-# TTL := { 1..255 | inherit } 
-# 
-# KEY := { DOTTED_QUAD | NUMBER } 
-# 
-# TIME := NUMBER[s|ms|us|ns|j] 
-# 
-# ip maddr [ add | del ] MULTIADDR dev STRING 
-# 
-# ip maddr show [ dev STRING ] 
-# 
-# ip mroute show [ PREFIX ] [ from PREFIX ] [ iif DEVICE ] 
-# 
-# ip monitor [ all | LISTofOBJECTS ] 
-# 
-# ip xfrm XFRM_OBJECT { COMMAND } 
-# 
-# XFRM_OBJECT := { state | policy | monitor } 
-# 
+#  [ [no]pmtudisc ] [ dev PHYS_DEV ] [ dscp inherit ]
+#
+# MODE := { ipip | gre | sit | isatap | ip6ip6 | ipip6 | any }
+#
+# ADDR := { IP_ADDRESS | any }
+#
+# TOS := { NUMBER | inherit }
+#
+# ELIM := { none | 0..255 }
+#
+# TTL := { 1..255 | inherit }
+#
+# KEY := { DOTTED_QUAD | NUMBER }
+#
+# TIME := NUMBER[s|ms|us|ns|j]
+#
+# ip maddr [ add | del ] MULTIADDR dev STRING
+#
+# ip maddr show [ dev STRING ]
+#
+# ip mroute show [ PREFIX ] [ from PREFIX ] [ iif DEVICE ]
+#
+# ip monitor [ all | LISTofOBJECTS ]
+#
+# ip xfrm XFRM_OBJECT { COMMAND }
+#
+# XFRM_OBJECT := { state | policy | monitor }
+#
 # ip xfrm state { add | update } ID [ XFRM_OPT ] [ mode MODE ]
 #  [ reqid REQID ] [ seq SEQ ] [ replay-window SIZE ]
 #  [ flag FLAG-LIST ] [ encap ENCAP ] [ sel SELECTOR ]
-#  [ LIMIT-LIST ] 
-# 
+#  [ LIMIT-LIST ]
+#
 # ip xfrm state allocspi ID [ mode MODE ] [ reqid REQID ] [ seq SEQ ]
 # [ min SPI max SPI ]
-# 
-# ip xfrm state { delete | get } ID 
-# 
+#
+# ip xfrm state { delete | get } ID
+#
 # ip xfrm state { deleteall | list } [ ID ] [ mode MODE ]
-#  [ reqid REQID ] [ flag FLAG_LIST ] 
-# 
-# ip xfrm state flush [ proto XFRM_PROTO ] 
-# 
-# ip xfrm state count 
-# 
-# ID := [ src ADDR ] [ dst ADDR ] [ proto XFRM_PROTO ] [ spi SPI ] 
-# 
-# XFRM_PROTO := [ esp | ah | comp | route2 | hao ] 
-# 
-# MODE := [ transport | tunnel | ro | beet ] (default=transport) 
-# 
-# FLAG-LIST := [ FLAG-LIST ] FLAG 
-# 
-# FLAG := [ noecn | decap-dscp | wildrecv ] 
-# 
-# ENCAP := ENCAP-TYPE SPORT DPORT OADDR 
-# 
-# ENCAP-TYPE := espinudp | espinudp-nonike 
-# 
-# ALGO-LIST := [ ALGO-LIST ] | [ ALGO ] 
-# 
-# ALGO := ALGO_TYPE ALGO_NAME ALGO_KEY 
-# 
-# ALGO_TYPE := [ enc | auth | comp ] 
-# 
-# SELECTOR := src ADDR[/PLEN] dst ADDR[/PLEN] [ UPSPEC ] [ dev DEV ] 
-# 
+#  [ reqid REQID ] [ flag FLAG_LIST ]
+#
+# ip xfrm state flush [ proto XFRM_PROTO ]
+#
+# ip xfrm state count
+#
+# ID := [ src ADDR ] [ dst ADDR ] [ proto XFRM_PROTO ] [ spi SPI ]
+#
+# XFRM_PROTO := [ esp | ah | comp | route2 | hao ]
+#
+# MODE := [ transport | tunnel | ro | beet ] (default=transport)
+#
+# FLAG-LIST := [ FLAG-LIST ] FLAG
+#
+# FLAG := [ noecn | decap-dscp | wildrecv ]
+#
+# ENCAP := ENCAP-TYPE SPORT DPORT OADDR
+#
+# ENCAP-TYPE := espinudp | espinudp-nonike
+#
+# ALGO-LIST := [ ALGO-LIST ] | [ ALGO ]
+#
+# ALGO := ALGO_TYPE ALGO_NAME ALGO_KEY
+#
+# ALGO_TYPE := [ enc | auth | comp ]
+#
+# SELECTOR := src ADDR[/PLEN] dst ADDR[/PLEN] [ UPSPEC ] [ dev DEV ]
+#
 # UPSPEC := proto PROTO [[ sport PORT ] [ dport PORT ] |
-#  [ type NUMBER ] [ code NUMBER ]] 
-# 
-# LIMIT-LIST := [ LIMIT-LIST ] | [ limit LIMIT ] 
-# 
+#  [ type NUMBER ] [ code NUMBER ]]
+#
+# LIMIT-LIST := [ LIMIT-LIST ] | [ limit LIMIT ]
+#
 # LIMIT := [ [time-soft|time-hard|time-use-soft|time-use-hard] SECONDS
 #  ] | [ [byte-soft|byte-hard] SIZE ] | [ [packet-soft|packet-hard]
 #  COUNT ]
-# 
+#
 # ip xfrm policy { add | update } dir DIR SELECTOR [ index INDEX ]
 #  [ ptype PTYPE ] [ action ACTION ] [ priority PRIORITY ]
-#  [ LIMIT-LIST ] [ TMPL-LIST ] 
-# 
+#  [ LIMIT-LIST ] [ TMPL-LIST ]
+#
 # ip xfrm policy { delete | get } dir DIR [ SELECTOR | index INDEX ]
-#  [ ptype PTYPE ] 
-# 
+#  [ ptype PTYPE ]
+#
 # ip xfrm policy { deleteall | list } [ dir DIR ] [ SELECTOR ]
-#  [ index INDEX ] [ action ACTION ] [ priority PRIORITY ] 
-# 
-# ip xfrm policy flush [ ptype PTYPE ] 
-# 
-# ip xfrm count 
-# 
-# PTYPE := [ main | sub ] (default=main) 
-# 
-# DIR := [ in | out | fwd ] 
-# 
-# SELECTOR := src ADDR[/PLEN] dst ADDR[/PLEN] [ UPSPEC ] [ dev DEV ] 
-# 
+#  [ index INDEX ] [ action ACTION ] [ priority PRIORITY ]
+#
+# ip xfrm policy flush [ ptype PTYPE ]
+#
+# ip xfrm count
+#
+# PTYPE := [ main | sub ] (default=main)
+#
+# DIR := [ in | out | fwd ]
+#
+# SELECTOR := src ADDR[/PLEN] dst ADDR[/PLEN] [ UPSPEC ] [ dev DEV ]
+#
 # UPSPEC := proto PROTO [ [ sport PORT ] [ dport PORT ] |
-#  [ type NUMBER ] [ code NUMBER ] ] 
-# 
-# ACTION := [ allow | block ] (default=allow) 
-# 
-# LIMIT-LIST := [ LIMIT-LIST ] | [ limit LIMIT ] 
-# 
+#  [ type NUMBER ] [ code NUMBER ] ]
+#
+# ACTION := [ allow | block ] (default=allow)
+#
+# LIMIT-LIST := [ LIMIT-LIST ] | [ limit LIMIT ]
+#
 # LIMIT := [ [time-soft|time-hard|time-use-soft|time-use-hard] SECONDS
 #  ] | [ [byte-soft|byte-hard] SIZE ] | [packet-soft|packet-hard]
 #  NUMBER ]
-# 
-# TMPL-LIST := [ TMPL-LIST ] | [ tmpl TMPL ] 
-# 
-# TMPL := ID [ mode MODE ] [ reqid REQID ] [ level LEVEL ] 
-# 
-# ID := [ src ADDR ] [ dst ADDR ] [ proto XFRM_PROTO ] [ spi SPI ] 
-# 
-# XFRM_PROTO := [ esp | ah | comp | route2 | hao ] 
-# 
-# MODE := [ transport | tunnel | beet ] (default=transport) 
-# 
-# LEVEL := [ required | use ] (default=required) 
-# 
+#
+# TMPL-LIST := [ TMPL-LIST ] | [ tmpl TMPL ]
+#
+# TMPL := ID [ mode MODE ] [ reqid REQID ] [ level LEVEL ]
+#
+# ID := [ src ADDR ] [ dst ADDR ] [ proto XFRM_PROTO ] [ spi SPI ]
+#
+# XFRM_PROTO := [ esp | ah | comp | route2 | hao ]
+#
+# MODE := [ transport | tunnel | beet ] (default=transport)
+#
+# LEVEL := [ required | use ] (default=required)
+#
 # ip xfrm monitor [ all | LISTofOBJECTS ]
 
 # transfer ipv4 prefix to netmask string
-function prefix_to_netmask() 
+function prefix_to_netmask()
 {
     local -i prefix=$1
     local -i n=4
@@ -286,23 +286,181 @@ function prefix_to_netmask()
             prefix=$((prefix - 8))
         fi
         n=$((n - 1))
-        dot='.'        
+        dot='.'
     done
     echo $result
 }
 
+#
+# Parameter:
+#     ifname: interface name or guid name
+#
+# If ifname is guid name, return the corresponding connection name,
+# otherwise return the original ifname.
+#
 function format_interface_name()
 {
     if [[ "$1" == "" ]]; then
         return 1
     fi
 
-    local guid=$1
+    local guid="$1"    
     if ! [[ "${guid:0:1}" == "{" ]] ; then
         echo $1
     else
         ipv6 if | grep -B1 "${guid}" | \
           sed -e "2d" -e "s/^Interface[0-9: ]\+\(Ethernet: \)\?//g"
+    fi
+}
+
+#
+# Parameter:
+#     ifname: connection name
+#
+# Add a TAP-WINDOWS driver of Openvpn, then rename the connection name
+# as ifname.
+#
+function install_tap_driver()
+{
+    local FILENAME="/etc/openvpn/driver/OemWin2k.inf"
+    local DEVFILE=$(cygpath -w $FILENAME)
+    local DEVCON=$(which devcon.exe)
+    local HWID=tap0901
+    local CHECKSCRIPT=$(cygpath -m /etc/openvpn/check_driver_signing_dialog.vbs)
+    local CSCRIPT=$(which cscript)
+    local GETSCRIPT=$(cygpath -m /etc/openvpn/get_last_connection.vbs)
+
+    if [[ ! -f $FILENAME ]] ; then
+        echo "Error: no TAP-WINDOWS driver inf file found"
+        return 1
+    fi
+
+    if [[ ! -x $DEVCON ]] ; then
+        echo "Error: no devcon.exe found"
+        return 1
+    fi
+
+    if [[ ! -x $CSCRIPT ]] ; then
+        echo "Error: no cscript.exe found"
+        return 1
+    fi
+
+    if ! [[ -f $CHECKSCRIPT ]] ; then
+        cat <<EOF > $CHECKSCRIPT
+  Set oShell = CreateObject("WScript.Shell")
+  Do
+    If oShell.AppActivate("Hardware Installation") Then
+       WScript.Sleep 1000
+       oShell.SendKeys "%C"
+       WScript.Sleep 2000
+    End If
+    WScript.Sleep 1000
+  Loop While True
+EOF
+    fi
+
+    # install driver
+    $CSCRIPT $CHECKSCRIPT > /dev/null &
+    local sid=$!
+    $DEVCON install $DEVFILE $HWID
+    kill $sid
+
+    # rename the connection name
+    if [[ ! "$1" == "" ]] ; then
+
+        if [[ ! -f $GETSCRIPT ]] ; then
+            cat <<EOF > $GETSCRIPT
+  strComputer = "."
+  strPrefix = "Local Area Connection"
+  Set objWMIService = GetObject("winmgmts:\\\\" & strComputer & "\root\CIMV2")
+  Set colItems = objWMIService.ExecQuery( _
+      "SELECT NetConnectionID FROM Win32_NetworkAdapter WHERE " & _
+             "NetConnectionID Like '" & strPrefix & "%'", _
+      "WQL", 48)
+  strLastConnectionName = ""
+  i = -1
+  k = Len(strPrefix)
+  For Each objItem In colItems
+    s = Right(objItem.NetConnectionID, Len(objItem.NetConnectionID) - k)
+    If s = "" Then
+      j = 0
+    Else
+      j = Int(s)
+    End If
+    If j > i Then
+      strLastConnectionName = objItem.NetConnectionID
+      i = j
+    End If
+  Next
+  WScript.StdOut.Write(strLastConnectionName)
+  WScript.Quit(0)
+EOF
+        fi
+        local OLDNAME=$($CSCRIPT //Nologo $GETSCRIPT)
+        if (( $? == 0 )) ; then
+            netsh interface set interface name="$OLDNAME" newname="$1"
+        fi
+    fi
+}
+
+#
+# Parameter:
+#     ifname: connection name
+#
+# Remove a TAP-WINDOWS driver of Openvpn which connection name equals
+# ifname.
+#
+function uninstall_tap_driver()
+{
+    local DEVCON=$(which devcon.exe)
+    local CSCRIPT=$(which cscript.exe)
+    local GETSCRIPT=$(cygpath -m /etc/openvpn/get_pnpid_connection.vbs)
+    
+    if [[ "$1" == "" ]] ; then
+        echo "Error: missing connection name"
+        return 1
+    fi
+
+    local IFNAME=$1
+
+    if [[ ! -x $DEVCON ]] ; then
+        echo "Error: no devcon.exe found"
+        return 1
+    fi
+
+    if [[ ! -x $CSCRIPT ]] ; then
+        echo "Error: no cscript.exe found"
+        return 1
+    fi
+
+    if [[ ! -f $GETSCRIPT ]] ; then
+            cat <<EOF > $GETSCRIPT
+  If WScript.Arguments.Count < 1 Then
+    WScript.Echo "Error: missing paramter connection name"
+    WScript.Quit(1)
+  End If
+
+  strComputer = "."
+  strDriverName = "TAP-Windows Adapter V9"
+  strConnectionName = WScript.Arguments(0)
+  Set objWMIService = GetObject("winmgmts:\\\\" & strComputer & "\root\CIMV2")
+  Set colItems = objWMIService.ExecQuery(_
+      "SELECT PNPDeviceID FROM Win32_NetworkAdapter WHERE Name='" _
+      & strDriverName & "' AND NetConnectionID='" & strConnectionName & "'", _
+      "WQL", 48)
+  strDeviceID = ""
+  For Each objItem In colItems
+     strDeviceID = objItem.PNPDeviceID
+  Next
+  WScript.StdOut.Write(strDeviceId)
+  WScript.Quit(0)
+EOF
+    fi
+
+    local PNPDEVICEID=$($CSCRIPT //Nologo "$GETSCRIPT" "$IFNAME")
+    if (( $? == 0 )) ; then
+        $DEVCON remove =Net "@$PNPDEVICEID"
+        return $?
     fi
 }
 
@@ -338,12 +496,8 @@ while [[ "$1" != "" ]] && [[ "$object" == "" ]] ; do
         -s | -stats | -statistics)
             let opt_statistics+=1
             ;;
-        tuntap)
-            echo $orig_cmd
-            exit 0
-            ;;
         link | addr | addrlabel | route | rule | neigh | tunnel | \
-        maddr | mroute | monitor)
+        maddr | mroute | monitor | tuntap)
             object=$1
             ;;
         *) echo Warning: unsupport options "$1"
@@ -402,16 +556,16 @@ elif [[ $object == "addr" ]] ; then
     while [[ "$1" != "" ]] ; do
         case $1 in
             dev)
-                dev=\"$(format_interface_name $2)\"
+                dev=$(format_interface_name "$2")
                 shift
-                ;;            
+                ;;
             *) echo Warning: unsupport parameter "$1"
         esac
 
         shift
     done
 
-    ipcmd="$ipcmd $dev $address"
+    ipcmd="$ipcmd \"$dev\" $address"
 
 elif [[ $object == "addrlabel" ]] ; then
 
@@ -424,11 +578,11 @@ elif [[ $object == "addrlabel" ]] ; then
           exit 1
       fi
       prefix="prefix=$2"; shift; shift
-      
+
       if [[ "$1" == "dev" ]] ; then
           shift; shift
       fi
-      
+
       precedence="precedence=100"
 
       if [[ "$1" == 'label' ]] ; then
@@ -479,7 +633,7 @@ elif [[ $object == "route" ]] ; then
         exit 1
     fi
 
-    # Route type 
+    # Route type
     case "$1" in
         unicast)
             shift
@@ -499,7 +653,7 @@ elif [[ $object == "route" ]] ; then
         prohibit)
             shift
             ;;
- 
+
         # Windows XP/Vista/7 does not support reject or blackhole
         # arguments via route, thus an unused IP address must be used
         # as the target gateway.
@@ -520,7 +674,7 @@ elif [[ $object == "route" ]] ; then
     while [[ "$1" != "" ]] ; do
         case $1 in
             dev)
-                interface=\"$(format_interface_name $2)\"
+                interface=$(format_interface_name "$2")
                 shift
                 ;;
             proto)
@@ -545,7 +699,7 @@ elif [[ $object == "route" ]] ; then
         if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
             echo $orig_cmd
             echo "Error: unreachable ipv4 route entry is unimplemented"
-            exit 1                
+            exit 1
         else
             if [[ "$command" == "del" ]] ; then
                 interface=1
@@ -560,13 +714,42 @@ elif [[ $object == "route" ]] ; then
                 echo $orig_cmd
                 echo "Error: unsupported command \"$command\" "\
                      "for unreachable route entry"
-                exit 1                
+                exit 1
             fi
         fi
     fi
 
-    ipcmd="$ipcmd $prefix $interface $nexthop"
+    ipcmd="$ipcmd $prefix \"$interface\" $nexthop"
 
+elif [[ $object == "tuntap" ]] ; then
+
+    while [[ "$1" != "" ]] ; do
+        case $1 in
+            dev)
+                dev=$(format_interface_name "$2")
+                shift
+                ;;
+            mode)
+                mode=$2
+                shift
+                ;;
+            *) echo Warning: unsupport parameter "$1"
+        esac
+
+        shift
+    done
+
+    if [[ "$command" == "add" ]] ; then
+        install_tap_driver "$dev"
+        exit $?
+    elif [[ "$command" == "del" ]] ; then
+        uninstall_tap_driver "$dev"
+        exit $?
+    else
+        echo $orig_cmd
+        echo "Error: unsupported command \"$command\" for tuntap"
+        exit 1
+    fi
 # elif [[ $object == "rule" ]] ; then
 #     echo "Error: unsupported ip object \"$object\" in the Cygwin"
 #     exit 1
@@ -593,4 +776,3 @@ fi
 
 echo "Mapped to: $ipcmd"
 $ipcmd
-
