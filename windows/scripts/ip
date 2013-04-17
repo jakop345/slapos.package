@@ -330,6 +330,15 @@ function install_tap_driver()
     local CSCRIPT=$(which cscript)
     local GETSCRIPT=$(cygpath -m /etc/openvpn/get_last_connection.vbs)
 
+    # check if ifname has been installed
+    if [[ ! "$1" == "" ]] ; then
+        netsh interface show interface | grep -q "\\b$1\\b"
+        if (( $? == 0 )) ; then
+            echo "Nothing need to do, \"$1\" has been installed."
+            return 0
+        fi
+    fi
+
     if [[ ! -f $FILENAME ]] ; then
         echo "Error: no TAP-WINDOWS driver inf file found"
         return 1
@@ -396,6 +405,7 @@ EOF
   WScript.Quit(0)
 EOF
         fi
+        # nodosfilewarning
         local OLDNAME=$($CSCRIPT //Nologo $GETSCRIPT)
         if (( $? == 0 )) ; then
             netsh interface set interface name="$OLDNAME" newname="$1"
