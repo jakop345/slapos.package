@@ -545,9 +545,8 @@ elif [[ $object == "addr" ]] ; then
         shift
     elif [[ $command == "list" ]] ; then
         command="show"
-        if [[ "$opt_family" == "ipv6" ]] ; then
-            address="normal"
-        fi
+        dev=$(format_interface_name "$1")
+        shift
     else
         echo "Error: unsupported command \"$command\""
         exit 1
