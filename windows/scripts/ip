@@ -633,24 +633,6 @@ elif [[ $object == "addrlabel" ]] ; then
 
 elif [[ $object == "route" ]] ; then
 
-    if [[ $command == "list" ]] ; then
-        command="show"
-    elif [[ $command == "change" ]] ; then
-        command="set"
-    fi
-
-    if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
-        # rtmroute need that the Routing and Remote Access Service is running
-        ipcmd="netsh routing ip $command rtmroute"
-        # ipcmd="netsh routing ip $command persistentroute"
-    elif [[ "$opt_family" == "ipv6" ]] ; then
-        ipcmd="netsh interface ipv6 $command route"
-    else
-        echo $orig_cmd
-        echo "Error: unsupported family \"$opt_family\""
-        exit 1
-    fi
-
     # Route type
     case "$1" in
         unicast)
@@ -737,7 +719,31 @@ elif [[ $object == "route" ]] ; then
         fi
     fi
 
-    ipcmd="$ipcmd $prefix \"$interface\" $nexthop"
+    if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
+        # rtmroute need that the Routing and Remote Access Service is running
+        ipcmd="netsh routing ip $command rtmroute"
+        # ipcmd="netsh routing ip $command persistentroute"
+        if [[ $command == "list" ]] ; then
+            route print
+            exit $?
+        elif [[ $command == "del" ]] ; then
+            command="delete"
+        fi        
+        address=$(dirname $prefix)
+        mask=$(prefix_to_netmask $(basename $prefix))
+        ipcmd="route $command $address MASK $mask $nexthop"
+    elif [[ "$opt_family" == "ipv6" ]] ; then
+        if [[ $command == "list" ]] ; then
+            command="show"
+        elif [[ $command == "change" ]] ; then
+            command="set"
+        fi
+        ipcmd="netsh interface ipv6 $command route $prefix \"$interface\" $nexthop"
+    else
+        echo $orig_cmd
+        echo "Error: unsupported family \"$opt_family\""
+        exit 1
+    fi    
 
 elif [[ $object == "tuntap" ]] ; then
 
