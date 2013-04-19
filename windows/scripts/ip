@@ -543,6 +543,13 @@ elif [[ $object == "addr" ]] ; then
     if [[ $command == "add" ]] || [[ $command == "del" ]] ; then
         mask=$(prefix_to_netmask $(basename $1))
         address=$(dirname $1)
+        if [[ "$opt_family" == "" ]] ; then
+            if [[ "$address" == *:* ]] ; then
+                opt_family="ipv6"
+            else
+                opt_family="ipv4"
+            fi
+        fi
         shift
     elif [[ $command == "list" ]] ; then
         command="show"
