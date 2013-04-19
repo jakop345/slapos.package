@@ -304,7 +304,7 @@ function format_interface_name()
         return 1
     fi
 
-    local guid="$1"    
+    local guid="$1"
     if ! [[ "${guid:0:1}" == "{" ]] ; then
         echo $1
     else
@@ -425,7 +425,7 @@ function uninstall_tap_driver()
     local DEVCON=$(which devcon.exe)
     local CSCRIPT=$(which cscript.exe)
     local GETSCRIPT=$(cygpath -m /etc/openvpn/get_pnpid_connection.vbs)
-    
+
     if [[ "$1" == "" ]] ; then
         echo "Error: missing connection name"
         return 1
@@ -541,6 +541,7 @@ if [[ $object == "link" ]] ; then
 elif [[ $object == "addr" ]] ; then
 
     if [[ $command == "add" ]] || [[ $command == "del" ]] ; then
+        mask=$(prefix_to_netmask $(basename $1))
         address=$(dirname $1)
         shift
     elif [[ $command == "list" ]] ; then
@@ -554,6 +555,7 @@ elif [[ $object == "addr" ]] ; then
 
     if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
         ipcmd="netsh interface ip $command address"
+        address="$address $mask"
     elif [[ "$opt_family" == "ipv6" ]] ; then
         ipcmd="netsh interface ipv6 $command address"
     else
