@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.2.2 (2013-04-24)
+------------------
+
+Fixes:
+
+ * Correctly chown() SlapOS directories: don't try to chown links.
+
 1.2.1 (2013-04-16)
 ------------------
 
