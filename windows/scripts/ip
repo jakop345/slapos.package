@@ -324,10 +324,8 @@ function install_tap_driver()
 {
     local FILENAME="/etc/openvpn/driver/OemWin2k.inf"
     local DEVFILE=$(cygpath -w $FILENAME)
-    local DEVCON=$(which devcon.exe)
     local HWID=tap0901
     local CHECKSCRIPT=$(cygpath -m /etc/openvpn/check_driver_signing_dialog.vbs)
-    local CSCRIPT=$(which cscript)
     local GETSCRIPT=$(cygpath -m /etc/openvpn/get_last_connection.vbs)
 
     # check if ifname has been installed
@@ -344,11 +342,13 @@ function install_tap_driver()
         return 1
     fi
 
+    local DEVCON=$(which devcon.exe)
     if [[ ! -x $DEVCON ]] ; then
         echo "Error: no devcon.exe found"
         return 1
     fi
 
+    local CSCRIPT=$(which cscript.exe)
     if [[ ! -x $CSCRIPT ]] ; then
         echo "Error: no cscript.exe found"
         return 1
@@ -425,7 +425,7 @@ function uninstall_tap_driver()
     local DEVCON=$(which devcon.exe)
     local CSCRIPT=$(which cscript.exe)
     local GETSCRIPT=$(cygpath -m /etc/openvpn/get_pnpid_connection.vbs)
-
+    
     if [[ "$1" == "" ]] ; then
         echo "Error: missing connection name"
         return 1
@@ -721,7 +721,7 @@ elif [[ $object == "route" ]] ; then
 
     if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
         # rtmroute need that the Routing and Remote Access Service is running
-        ipcmd="netsh routing ip $command rtmroute"
+        # ipcmd="netsh routing ip $command rtmroute" 
         # ipcmd="netsh routing ip $command persistentroute"
         if [[ $command == "list" ]] ; then
             route print
@@ -733,12 +733,14 @@ elif [[ $object == "route" ]] ; then
         mask=$(prefix_to_netmask $(basename $prefix))
         ipcmd="route $command $address MASK $mask $nexthop"
     elif [[ "$opt_family" == "ipv6" ]] ; then
-        if [[ $command == "list" ]] ; then
+        if [[ $command == "add" ]] ; then
+            publish="publish=yes"
+        elif [[ $command == "list" ]] ; then
             command="show"
         elif [[ $command == "change" ]] ; then
             command="set"
         fi
-        ipcmd="netsh interface ipv6 $command route $prefix \"$interface\" $nexthop"
+        ipcmd="netsh interface ipv6 $command route $prefix \"$interface\" $nexthop $publish"
     else
         echo $orig_cmd
         echo "Error: unsupported family \"$opt_family\""
