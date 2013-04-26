@@ -507,7 +507,7 @@ while [[ "$1" != "" ]] && [[ "$object" == "" ]] ; do
             let opt_statistics+=1
             ;;
         link | addr | addrlabel | route | rule | neigh | tunnel | \
-        maddr | mroute | monitor | tuntap)
+        maddr | mroute | monitor | tuntap | vpntap)
             object=$1
             ;;
         *) echo Warning: unsupport options "$1"
@@ -748,6 +748,10 @@ elif [[ $object == "route" ]] ; then
     fi    
 
 elif [[ $object == "tuntap" ]] ; then
+    echo $orig_cmd
+    exit 0
+
+elif [[ $object == "vpntap" ]] ; then
 
     while [[ "$1" != "" ]] ; do
         case $1 in
@@ -769,8 +773,13 @@ elif [[ $object == "tuntap" ]] ; then
         install_tap_driver "$dev"
         exit $?
     elif [[ "$command" == "del" ]] ; then
-        uninstall_tap_driver "$dev"
-        exit $?
+        if [[ "$mode" == "" ]] ; then
+            echo $orig_cmd
+            exit 0
+        else
+            uninstall_tap_driver "$dev"
+            exit $?
+        fi
     else
         echo $orig_cmd
         echo "Error: unsupported command \"$command\" for tuntap"
