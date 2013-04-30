@@ -67,6 +67,7 @@ net user "${USER_NAME}" "${USER_NAME}" /${ACTION}
 if (( $? == 0 )) ; then
     if [[ $ACTION == "ADD" ]] ; then
         mkpasswd | grep "^${USER_NAME}:" >> /etc/passwd
+        [[ ! "$USER_HOME" == "" ]] && [[ ! -f $USER_HOME ]] && mkdir -p $USER_HOME && chown $USER_NAME $USER_HOME
     elif [[ $ACTION == "DELETE" ]] ; then
         sed -i -e "s/^${USER_NAME}:.*//g" /etc/passwd
     fi
