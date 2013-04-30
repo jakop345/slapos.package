@@ -11,10 +11,14 @@
 
 #include <windows.h>
 
+#if defined(__CYGWIN__)
+#define PyErr_SetFromWindowsErr(n) \
+  PyErr_Format(PyExc_RuntimeError, "Windoows Error: %d\n", n)
+#endif
 
 BOOL SetPrivilege(HANDLE hToken, LPCTSTR Privilege, BOOL bEnablePrivilege);
-int SetSeDebug();
-int UnsetSeDebug();
+int SetSeDebug(void);
+int UnsetSeDebug(void);
 HANDLE token_from_handle(HANDLE hProcess);
 int HasSystemPrivilege(HANDLE hProcess);
 

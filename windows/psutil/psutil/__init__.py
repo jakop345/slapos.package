@@ -14,7 +14,7 @@ Python.
 
 from __future__ import division
 
-__version__ = "0.6.1"
+__version__ = "0.6.01"
 version_info = tuple([int(num) for num in __version__.split('.')])
 
 __all__ = [
@@ -73,6 +73,15 @@ if sys.platform.startswith("linux"):
     cached_phymem = _psplatform.cached_phymem
 
 elif sys.platform.startswith("win32"):
+    import psutil._psmswindows as _psplatform
+    from psutil._psmswindows import (ABOVE_NORMAL_PRIORITY_CLASS,
+                                     BELOW_NORMAL_PRIORITY_CLASS,
+                                     HIGH_PRIORITY_CLASS,
+                                     IDLE_PRIORITY_CLASS,
+                                     NORMAL_PRIORITY_CLASS,
+                                     REALTIME_PRIORITY_CLASS)
+
+elif sys.platform.startswith("cygwin"):
     import psutil._psmswindows as _psplatform
     from psutil._psmswindows import (ABOVE_NORMAL_PRIORITY_CLASS,
                                      BELOW_NORMAL_PRIORITY_CLASS,

@@ -12,6 +12,8 @@
 #include <windows.h>
 #include <Python.h>
 
+#include "security.h"
+
 /*
  * Convert a process handle to a process token handle.
  */

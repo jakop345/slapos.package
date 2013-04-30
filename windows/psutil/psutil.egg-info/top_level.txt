@@ -1,3 +1,2 @@
 psutil
-_psutil_linux
-_psutil_posix
+_psutil_mswindows

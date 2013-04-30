@@ -17,14 +17,22 @@
 #include <time.h>
 #include <lm.h>
 #include <WinIoCtl.h>
+
+#if defined(__CYGWIN__)
+#include "tchar.h"
+#else
 #include <tchar.h>
+#endif
+
 #include <tlhelp32.h>
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <wtsapi32.h>
 
 // Link with Iphlpapi.lib
+#if !defined(__CYGWIN__)
 #pragma comment(lib, "IPHLPAPI.lib")
+#endif
 
 #include "_psutil_mswindows.h"
 #include "_psutil_common.h"
@@ -552,7 +560,11 @@ static PyObject*
 get_process_exe(PyObject* self, PyObject* args) {
     long pid;
     HANDLE hProcess;
+#if defined(_UNICODE)
     wchar_t exe[MAX_PATH];
+#else
+    char exe[MAX_PATH];
+#endif
     DWORD nSize = MAX_PATH;
 
     if (! PyArg_ParseTuple(args, "l", &pid)) {
@@ -1379,7 +1391,7 @@ static char *state_to_string(ULONG state)
 }
 
 /* mingw support */
-#ifndef _IPRTRMIB_H
+#if !defined(_IPRTRMIB_H) && !defined(__CYGWIN__)
 typedef struct _MIB_TCP6ROW_OWNER_PID
 {
     UCHAR           ucLocalAddr[16];
@@ -1429,6 +1441,7 @@ typedef struct _MIB_UDPTABLE_OWNER_PID
 #endif
 /* end of mingw support */
 
+#if ! defined(__CYGWIN__)
 typedef struct _MIB_UDP6ROW_OWNER_PID {
     UCHAR           ucLocalAddr[16];
     DWORD           dwLocalScopeId;
@@ -1441,7 +1454,7 @@ typedef struct _MIB_UDP6TABLE_OWNER_PID
     DWORD                   dwNumEntries;
     MIB_UDP6ROW_OWNER_PID   table[ANY_SIZE];
 } MIB_UDP6TABLE_OWNER_PID, *PMIB_UDP6TABLE_OWNER_PID;
-
+#endif
 
 #define ConnDecrefPyObjs() Py_DECREF(_AF_INET); \
                            Py_DECREF(_AF_INET6);\

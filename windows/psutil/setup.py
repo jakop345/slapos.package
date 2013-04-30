@@ -67,6 +67,31 @@ if sys.platform.startswith("win32"):
                             #extra_compile_args=["/Z7"],
                             #extra_link_args=["/DEBUG"]
                             )]
+elif sys.platform.startswith("cygwin"):
+
+    def get_winver():
+        return '0x0503'
+        maj, min = sys.getwindowsversion()[0:2]
+        return '0x0%s' % ((maj * 100) + min)
+
+    extensions = [Extension('_psutil_mswindows',
+                            sources=['psutil/_psutil_mswindows.c',
+                                     'psutil/_psutil_common.c',
+                                     'psutil/arch/mswindows/process_info.c',
+                                     'psutil/arch/mswindows/process_handles.c',
+                                     'psutil/arch/mswindows/security.c'],
+                            define_macros=[('_WIN32_WINNT', get_winver()),
+                                           ('_AVAIL_WINVER_', get_winver()),
+                                           # ('_UNICODE', 1),
+                                           ('USE_SYS_TYPES_FD_SET', 1),
+                                           ('__USE_W32_SOCKETS', 1)],
+                            libraries=["psapi", "kernel32", "advapi32",
+                                       "shell32", "netapi32", "iphlpapi",
+                                       "wtsapi32"],
+                            #extra_compile_args=["/Z7"],
+                            #extra_link_args=["/DEBUG"]
+                            )]
+                                                        
 # OS X
 elif sys.platform.startswith("darwin"):
     extensions = [Extension('_psutil_osx',

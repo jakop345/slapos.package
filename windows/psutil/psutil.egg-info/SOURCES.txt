@@ -4,6 +4,7 @@ INSTALL
 LICENSE
 MANIFEST.in
 README
+setup.cfg
 setup.py
 examples/disk_usage.py
 examples/free.py
@@ -37,6 +38,7 @@ psutil/_psutil_osx.h
 psutil/_psutil_posix.c
 psutil/_psutil_posix.h
 psutil/error.py
+psutil/tchar.h
 psutil.egg-info/PKG-INFO
 psutil.egg-info/SOURCES.txt
 psutil.egg-info/dependency_links.txt
