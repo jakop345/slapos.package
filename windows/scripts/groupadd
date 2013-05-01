@@ -30,12 +30,16 @@
 #   
 ACTION=ADD
 GROUP_NAME=$1
-net localgroup "${GROUP_NAME}" /${ACTION}
-if (( $? == 0 )) ; then
-    if [[ $ACTION == "ADD" ]] ; then
-        grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
-        mkgroup | grep "^${GROUP_NAME}:" >> /etc/group
-    elif [[ $ACTION == "DELETE" ]] ; then
-        grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
-    fi
+if [[ "$GROUP_NAME" == "" ]] ; then
+    echo Error: no group name specified.
+    exit 1
+fi
+
+if [[ $ACTION == "ADD" ]] ; then
+    NET LOCALGROUP "${GROUP_NAME}" /ADD
+    grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
+    mkgroup | grep "^${GROUP_NAME}:" >> /etc/group
+elif [[ $ACTION == "DELETE" ]] ; then
+    NET LOCALGROUP "${GROUP_NAME}" /DELETE
+    grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
 fi

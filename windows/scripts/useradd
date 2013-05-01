@@ -45,8 +45,11 @@ while getopts "Dd:g:G:p:s:r" opt ; do
         d)
             USER_HOME=$OPTARG
             ;;
-        g|G)
-            USER_GROUP=$OPTARG
+        g)
+            USER_INIT_GROUP=grp_$OPTARG
+            ;;
+        G)
+            USER_OTHER_GROUP=grp_$OPTARG
             ;;
         p)
             USER_PASSWORD=$OPTARG
@@ -77,10 +80,10 @@ if (( $? == 0 )) ; then
         NET USER "${USER_NAME}" "${USER_PASSWORD}" /ADD
         grep -q "^${USER_NAME}" /etc/passwd && sed -i -e "/^${USER_NAME}/d" /etc/passwd
         mkpasswd | grep "^${USER_NAME}:" >> /etc/passwd
+        [[ $USER_HOME == "/home/$USER_NAME" ]] || sed -i -e "s%:/home/${USER_NAME}:%:${USER_HOME}:%g" /etc/passwd
         [[ ! "$USER_HOME" == "" ]] && [[ ! -f $USER_HOME ]] && mkdir -p $USER_HOME && chown $USER_NAME $USER_HOME
-        if [[ ! "$USER_GROUP" == "" ]]; then
-            NET LOCALGROUP $USER_GROUP $USER_NAME /ADD
-        fi
+        [[ "$USER_INIT_GROUP" == "" ]] || NET LOCALGROUP $USER_INIT_GROUP $USER_NAME /ADD
+        [[ "$USER_OTHER_GROUP" == "" ]] || NET LOCALGROUP $USER_OTHER_GROUP $USER_NAME /ADD
     elif [[ $ACTION == "DELETE" ]] ; then
         NET USER "${USER_NAME}" /DELETE
         grep -q "^${USER_NAME}" /etc/passwd && sed -i -e "/^${USER_NAME}/d" /etc/passwd
