@@ -33,8 +33,9 @@ GROUP_NAME=$1
 net localgroup "${GROUP_NAME}" /${ACTION}
 if (( $? == 0 )) ; then
     if [[ $ACTION == "ADD" ]] ; then
+        grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
         mkgroup | grep "^${GROUP_NAME}:" >> /etc/group
     elif [[ $ACTION == "DELETE" ]] ; then
-        sed -i -e "s/^${GROUP_NAME}:.*//g" /etc/group
+        grep -q "^${GROUP_NAME}" /etc/group && sed -i -e "/^${GROUP_NAME}/d" /etc/group
     fi
 fi
