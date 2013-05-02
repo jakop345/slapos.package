@@ -49,7 +49,6 @@ process_signal_p2p (struct context *c)
 }
 
 
-
 /**************************************************************************/
 /**
  * Main event loop for OpenVPN in client mode, where only one VPN tunnel
@@ -138,7 +137,7 @@ openvpn_main (int argc, char *argv[])
   return 1;
 #endif
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   SetConsoleOutputCP (CP_UTF8);
 #endif
 
@@ -291,7 +290,8 @@ openvpn_main (int argc, char *argv[])
   return 0;			            /* NOTREACHED */
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined (CYGWIN)
+
 int
 wmain (int argc, wchar_t *wargv[]) {
   char **argv;

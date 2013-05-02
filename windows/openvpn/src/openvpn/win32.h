@@ -28,12 +28,20 @@
 
 #include "mtu.h"
 
+#if !defined(CYGWIN)
 /* location of executables */
 #define SYS_PATH_ENV_VAR_NAME "SystemRoot"  /* environmental variable name that normally contains the system path */
 #define NETSH_PATH_SUFFIX     "\\system32\\netsh.exe"
 #define WIN_ROUTE_PATH_SUFFIX "\\system32\\route.exe"
 #define WIN_IPCONFIG_PATH_SUFFIX "\\system32\\ipconfig.exe"
 #define WIN_NET_PATH_SUFFIX "\\system32\\net.exe"
+#else
+#define SYS_PATH_ENV_VAR_NAME "SYSTEMROOT"
+#define NETSH_PATH_SUFFIX     "/System32/netsh.exe"
+#define WIN_ROUTE_PATH_SUFFIX "/System32/route.exe"
+#define WIN_IPCONFIG_PATH_SUFFIX "/System32/ipconfig.exe"
+#define WIN_NET_PATH_SUFFIX "net.exe"
+#endif
 
 /*
  * Win32-specific OpenVPN code, targetted at the mingw

@@ -38,11 +38,13 @@
 #endif
 
 #ifdef WIN32
-#include <windows.h>
 #include <winsock2.h>
+#include <windows.h>
+#ifndef CYGWIN
 #define sleep(x) Sleep((x)*1000)
 #define random rand
 #define srandom srand
+#endif
 #endif
 
 #if defined(__APPLE__)
@@ -448,7 +450,7 @@
 /*
  * Directory separation char
  */
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
 #define OS_SPECIFIC_DIRSEP '\\'
 #else
 #define OS_SPECIFIC_DIRSEP '/'
@@ -615,7 +617,7 @@ socket_defined (const socket_descriptor_t sd)
  * Do we have CryptoAPI capability?
  */
 #if defined(WIN32) && defined(ENABLE_CRYPTO) && defined(ENABLE_SSL) && defined(ENABLE_CRYPTO_OPENSSL)
-#define ENABLE_CRYPTOAPI
+/* #define ENABLE_CRYPTOAPI */
 #endif
 
 /*

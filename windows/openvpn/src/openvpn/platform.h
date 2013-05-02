@@ -130,7 +130,7 @@ int platform_putenv (char *string);
 FILE *platform_fopen (const char *path, const char *mode);
 int platform_open (const char *path, int flags, int mode);
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
 typedef struct _stat platform_stat_t;
 #else
 typedef struct stat platform_stat_t;

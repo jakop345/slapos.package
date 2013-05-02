@@ -3650,7 +3650,11 @@ get_adapter_index_method_1 (const char *guid)
   DWORD index;
   ULONG aindex;
   wchar_t wbuf[256];
+#if defined(CYGWIN)
+  swprintf (wbuf, SIZE (wbuf), L"\\DEVICE\\TCPIP_%S", guid);
+#else
   _snwprintf (wbuf, SIZE (wbuf), L"\\DEVICE\\TCPIP_%S", guid);
+#endif
   wbuf [SIZE(wbuf) - 1] = 0;
   if (GetAdapterIndex (wbuf, &aindex) != NO_ERROR)
     index = TUN_ADAPTER_INDEX_INVALID;
@@ -4480,10 +4484,10 @@ fork_dhcp_action (struct tuntap *tt)
       buf_printf (&cmd, "openvpn --verb %d --tap-sleep %d", verb, pre_sleep);
       if (tt->options.dhcp_pre_release)
 	buf_printf (&cmd, " --dhcp-pre-release");
+
       if (tt->options.dhcp_renew)
 	buf_printf (&cmd, " --dhcp-renew");
       buf_printf (&cmd, " --dhcp-internal %u", (unsigned int)tt->adapter_index);
-
       fork_to_self (BSTR (&cmd));
       gc_free (&gc);
     }

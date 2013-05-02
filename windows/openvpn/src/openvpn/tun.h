@@ -27,7 +27,13 @@
 
 #ifdef WIN32
 #include <winioctl.h>
+
+#ifdef CYGWIN
+#include "tap-windows.h"
+#else
 #include <tap-windows.h>
+#endif
+
 #endif
 
 #include "buffer.h"

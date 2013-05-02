@@ -209,7 +209,7 @@ init_net_event_win32 (struct rw_handle *event, long network_events, socket_descr
       if (event->read == NULL)
 	msg (M_ERR, "Error: init_net_event_win32: CreateEvent (read) failed");
     }
-  
+
   /* setup network events to change read event state */
   if (WSAEventSelect (sd, event->read, network_events) != 0)
     msg (M_FATAL | M_ERRNO, "Error: init_net_event_win32: WSAEventSelect call failed");
@@ -218,7 +218,7 @@ init_net_event_win32 (struct rw_handle *event, long network_events, socket_descr
 long
 reset_net_event_win32 (struct rw_handle *event, socket_descriptor_t sd)
 {
-  WSANETWORKEVENTS wne;  
+  WSANETWORKEVENTS wne;
   if (WSAEnumNetworkEvents (sd, event->read, &wne) != 0)
     {
       msg (M_FATAL | M_ERRNO, "Error: reset_net_event_win32: WSAEnumNetworkEvents call failed");
@@ -359,7 +359,7 @@ win32_signal_open (struct win32_signal *ws,
 		& ~(ENABLE_WINDOW_INPUT
 		    | ENABLE_PROCESSED_INPUT
 		    | ENABLE_LINE_INPUT
-		    | ENABLE_ECHO_INPUT 
+		    | ENABLE_ECHO_INPUT
 		    | ENABLE_MOUSE_INPUT);
 
 	      if (new_console_mode != ws->console_mode_save)
@@ -685,7 +685,7 @@ netcmd_semaphore_lock (void)
 {
   const int timeout_seconds = 600;
   if (!semaphore_lock (&netcmd_semaphore, timeout_seconds * 1000))
-    msg (M_FATAL, "Cannot lock net command semaphore"); 
+    msg (M_FATAL, "Cannot lock net command semaphore");
 }
 
 void
@@ -764,7 +764,6 @@ static char *
 env_block (const struct env_set *es)
 {
   char * force_path = "PATH=C:\\Windows\\System32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem";
-
   if (es)
     {
       struct env_item *e;
@@ -772,7 +771,7 @@ env_block (const struct env_set *es)
       char *p;
       size_t nchars = 1;
       bool path_seen = false;
-      
+
       for (e = es->list; e != NULL; e = e->next)
 	nchars += strlen (e->string) + 1;
 
@@ -849,6 +848,116 @@ wide_cmd_line (const struct argv *a, struct gc_arena *gc)
   return wide_string (BSTR (&buf), gc);
 }
 
+#if defined(CYGWIN)
+
+/*
+ * Run execve() inside a fork().  Designed to replicate the semantics of system() but
+ * in a safer way that doesn't require the invocation of a shell or the risks
+ * assocated with formatting and parsing a command line.
+ */
+const char **
+make_env_array_p (const struct env_set *es,
+                  const bool check_allowed,
+                  struct gc_arena *gc)
+{
+  char **ret = NULL;
+  struct env_item *e = NULL;
+  int i = 0, n = 0;
+  bool path_seen = false;
+
+  /* figure length of es */
+  if (es)
+    {
+      for (e = es->list; e != NULL; e = e->next)
+	++n;
+    }
+
+  /* alloc return array */
+  ALLOC_ARRAY_CLEAR_GC (ret, char *, n+2, gc);
+
+  /* fill return array */
+  if (es)
+    {
+      i = 0;
+      for (e = es->list; e != NULL; e = e->next)
+	{
+	  if (!check_allowed || env_allowed (e->string))
+	    {
+	      ASSERT (i < n);
+	      ret[i++] = e->string;
+              if ( strncmp(e->string, "PATH=", 5 ) == 0 )
+                path_seen = true;
+	    }
+	}
+    }
+
+  /* PATH */
+  char * p = NULL ;
+  if ( !path_seen )
+    {
+      char * s = getenv("PATH");
+      n = strlen(s);
+      ALLOC_ARRAY_CLEAR_GC (p, char, n+6, gc);
+      memcpy(p, "PATH=", 5);
+      memcpy(p + 5, s, n);
+      *(p + n + 5) = 0;
+    }
+  ret[i++] = p;
+  ret[i] = NULL;
+  return (const char **)ret;
+}
+
+int
+openvpn_execve (const struct argv *a, const struct env_set *es, const unsigned int flags)
+{
+  struct gc_arena gc = gc_new ();
+  int ret = -1;
+  static bool warn_shown = false;
+
+  if (a && a->argv[0])
+    {
+#if defined(ENABLE_FEATURE_EXECVE)
+      if (openvpn_execve_allowed (flags))
+	{
+          const char *cmd = a->argv[0];
+          char *const *argv = a->argv;
+          char *const *envp = (char *const *)make_env_array_p (es, true, &gc);
+          pid_t pid;
+          pid = fork ();
+          if (pid == (pid_t)0) /* child side */
+            {
+              /* Miss PATH */
+              execve (cmd, argv, envp);
+              exit (127);
+            }
+          else if (pid < (pid_t)0) /* fork failed */
+            msg (M_ERR, "openvpn_execve: unable to fork");
+          else /* parent side */
+            {
+              if (waitpid (pid, &ret, 0) != pid)
+                ret = -1;
+            }
+        }
+      else if (!warn_shown && (script_security < SSEC_SCRIPTS))
+	{
+	  msg (M_WARN, SCRIPT_SECURITY_WARNING);
+          warn_shown = true;
+	}
+#else
+      msg (M_WARN, "openvpn_execve: execve function not available");
+#endif
+    }
+  else
+    {
+      msg (M_FATAL, "openvpn_execve: called with empty argv");
+    }
+
+  gc_free (&gc);
+  return ret;
+}
+
+#else
+
 /*
  * Attempt to simulate fork/execve on Windows
  */
@@ -909,6 +1018,7 @@ openvpn_execve (const struct argv *a, const struct env_set *es, const unsigned i
     }
   return ret;
 }
+#endif  /* CYGWIN */
 
 WCHAR *
 wide_string (const char* utf8, struct gc_arena *gc)
@@ -986,6 +1096,12 @@ set_win_sys_path_via_env (struct env_set *es)
     msg (M_ERR, "Cannot find environmental variable %s", SYS_PATH_ENV_VAR_NAME);
   if (status > sizeof (buf) - 1)
     msg (M_FATAL, "String overflow attempting to read environmental variable %s", SYS_PATH_ENV_VAR_NAME);
+#if defined(CYGWIN)
+  while(status) {
+    if (buf[status] == '\\') buf[status] = '/';
+    status --;
+  }
+#endif
   set_win_sys_path (buf, es);
 }
 
@@ -1008,4 +1124,5 @@ win_get_tempdir()
   }
   return tmpdir;
 }
+
 #endif

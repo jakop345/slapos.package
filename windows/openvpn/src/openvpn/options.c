@@ -739,7 +739,7 @@ static const char usage_message[] =
 #ifdef ENABLE_PKCS11
   "\n"
   "PKCS#11 standalone options:\n"
-  "--show-pkcs11-ids provider [cert_private] : Show PKCS#11 available ids.\n" 
+  "--show-pkcs11-ids provider [cert_private] : Show PKCS#11 available ids.\n"
   "                                            --verb option can be added *BEFORE* this.\n"
 #endif				/* ENABLE_PKCS11 */
   "\n"
@@ -859,7 +859,7 @@ init_options (struct options *o, const bool init_gc)
 /* tmp is only used in P2MP server context */
 #if P2MP_SERVER
   /* Set default --tmp-dir */
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   /* On Windows, find temp dir via enviroment variables */
   o->tmp_dir = win_get_tempdir();
 #else
@@ -1404,7 +1404,7 @@ show_settings (const struct options *o)
   msg (D_SHOW_PARMS, "Current Parameter Settings:");
 
   SHOW_STR (config);
-  
+
   SHOW_INT (mode);
 
 #ifdef ENABLE_FEATURE_TUN_PERSIST
@@ -1526,7 +1526,7 @@ show_settings (const struct options *o)
   SHOW_BOOL (allow_pull_fqdn);
   if (o->routes)
     print_route_options (o->routes, D_SHOW_PARMS);
-  
+
 #ifdef ENABLE_CLIENT_NAT
   if (o->client_nat)
     print_client_nat_list(o->client_nat, D_SHOW_PARMS);
@@ -1859,7 +1859,7 @@ options_postprocess_verify_ce (const struct options *options, const struct conne
 
   if (options->lladdr && dev != DEV_TYPE_TAP)
     msg (M_USAGE, "--lladdr can only be used in --dev tap mode");
- 
+
   /*
    * Sanity check on TCP mode options
    */
@@ -1898,7 +1898,7 @@ options_postprocess_verify_ce (const struct options *options, const struct conne
       && string_defined_equal (ce->local, ce->remote)
       && ce->local_port == ce->remote_port)
     msg (M_USAGE, "--remote and --local addresses are the same");
-  
+
   if (string_defined_equal (ce->remote, options->ifconfig_local)
       || string_defined_equal (ce->remote, options->ifconfig_remote_netmask))
     msg (M_USAGE, "--local and --remote addresses must be distinct from --ifconfig addresses");
@@ -1969,7 +1969,7 @@ options_postprocess_verify_ce (const struct options *options, const struct conne
     msg (M_USAGE, "--explicit-exit-notify can only be used with --proto udp");
 #endif
 
-  if (!ce->remote && (ce->proto == PROTO_TCPv4_CLIENT 
+  if (!ce->remote && (ce->proto == PROTO_TCPv4_CLIENT
 		      || ce->proto == PROTO_TCPv6_CLIENT))
     msg (M_USAGE, "--remote MUST be used in TCP Client mode");
 
@@ -2008,7 +2008,7 @@ options_postprocess_verify_ce (const struct options *options, const struct conne
 	msg (M_USAGE, "--mode server currently only supports "
 	     "--proto udp or --proto tcp-server or proto tcp6-server");
 #if PORT_SHARE
-      if ((options->port_share_host || options->port_share_port) && 
+      if ((options->port_share_host || options->port_share_port) &&
 	  (ce->proto != PROTO_TCPv4_SERVER && ce->proto != PROTO_TCPv6_SERVER))
 	msg (M_USAGE, "--port-share only works in TCP server mode "
 	     "(--proto tcp-server or tcp6-server)");
@@ -2390,7 +2390,7 @@ options_postprocess_mutate_ce (struct options *o, struct connection_entry *ce)
 	o->ce.mssfix = ce->fragment;
 #else
       msg (M_USAGE, "--mssfix must specify a parameter");
-#endif      
+#endif
     }
 
   /*
@@ -2452,7 +2452,7 @@ options_postprocess_mutate_invariant (struct options *options)
        */
       options->tuntap_options.tap_sleep = 10;
       if (options->route_delay_defined && options->route_delay)
-	options->tuntap_options.tap_sleep = options->route_delay;	
+	options->tuntap_options.tap_sleep = options->route_delay;
       options->route_delay_defined = false;
 #endif
     }
@@ -2529,7 +2529,7 @@ options_postprocess_mutate (struct options *o)
 #endif
     }
   else
-    options_postprocess_mutate_ce (o, &o->ce);  
+    options_postprocess_mutate_ce (o, &o->ce);
 
 #if P2MP
   /*
@@ -3085,7 +3085,7 @@ options_warning_extract_parm1 (const char *option_string,
   struct buffer b = string_alloc_buf (option_string, &gc);
   char *p = gc_malloc (OPTION_PARM_SIZE, false, &gc);
   const char *ret;
-  
+
   buf_parse (&b, ' ', p, OPTION_PARM_SIZE);
   ret = string_alloc (p, gc_ret);
   gc_free (&gc);
@@ -3122,7 +3122,7 @@ options_warning_safe_scan2 (const int msglevel,
 	  if (strlen (p2))
 	    {
 	      const char *p2_prefix = options_warning_extract_parm1 (p2, &gc);
-	    
+
 	      if (!strcmp (p1, p2))
 		goto done;
 	      if (!strcmp (p1_prefix, p2_prefix))
@@ -3133,17 +3133,17 @@ options_warning_safe_scan2 (const int msglevel,
 			 b1_name,
 			 safe_print (p1, &gc),
 			 b2_name,
-			 safe_print (p2, &gc)); 
+			 safe_print (p2, &gc));
 		  goto done;
 		}
 	    }
 	}
-      
+
       msg (msglevel, "WARNING: '%s' is present in %s config but missing in %s config, %s='%s'",
 	   safe_print (p1_prefix, &gc),
 	   b1_name,
 	   b2_name,
-	   b1_name,	   
+	   b1_name,
 	   safe_print (p1, &gc));
 
     done:
@@ -3402,7 +3402,7 @@ usage (void)
   fflush(fp);
 
 #endif /* ENABLE_SMALL */
-  
+
   openvpn_exit (OPENVPN_EXIT_STATUS_USAGE); /* exit point */
 }
 
@@ -4789,7 +4789,7 @@ add_option (struct options *options,
 	  if (streq (p[j], "TCP_NODELAY"))
 	    options->sockflags |= SF_TCP_NODELAY;
 	  else
-	    msg (msglevel, "unknown socket flag: %s", p[j]);	    
+	    msg (msglevel, "unknown socket flag: %s", p[j]);
 	}
     }
   else if (streq (p[0], "txqueuelen") && p[1])
@@ -4931,9 +4931,9 @@ add_option (struct options *options,
 	    msg (msglevel, "Bad http-proxy port number: %s", p[2]);
 	    goto err;
 	  }
-	
+
 	ho = init_http_proxy_options_once (&options->ce.http_proxy_options, &options->gc);
-	
+
 	ho->server = p[1];
 	ho->port = port;
       }
@@ -5763,7 +5763,7 @@ add_option (struct options *options,
       else
 	{
 	  if ( ! options->ifconfig_ipv6_local ||
-	       ! get_ipv6_addr( options->ifconfig_ipv6_local, &remote, 
+	       ! get_ipv6_addr( options->ifconfig_ipv6_local, &remote,
 				NULL, NULL, msglevel ) )
 	    {
 	      msg( msglevel, "second argument to --ifconfig-ipv6-push missing and no global --ifconfig-ipv6 address set");
@@ -5930,7 +5930,7 @@ add_option (struct options *options,
 	    }
 	}
       to->ip_win32_type = index;
-      to->ip_win32_defined = true; 
+      to->ip_win32_defined = true;
     }
   else if (streq (p[0], "dhcp-option") && p[1])
     {
@@ -6331,7 +6331,7 @@ add_option (struct options *options,
 	}
       else
 	options->engine = "auto";
-    }  
+    }
 #endif /* ENABLE_CRYPTO_POLARSSL */
 #ifdef HAVE_EVP_CIPHER_CTX_SET_KEY_LENGTH
   else if (streq (p[0], "keysize") && p[1])
@@ -6454,7 +6454,7 @@ add_option (struct options *options,
 	  options->key_pass_file = p[1];
 	}
       else
-	options->key_pass_file = "stdin";	
+	options->key_pass_file = "stdin";
     }
   else if (streq (p[0], "auth-nocache"))
     {
@@ -6664,7 +6664,7 @@ add_option (struct options *options,
   else if (streq (p[0], "pkcs11-providers") && p[1])
     {
       int j;
-      
+
       VERIFY_PERMISSION (OPT_P_GENERAL);
 
       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)
@@ -6682,7 +6682,7 @@ add_option (struct options *options,
   else if (streq (p[0], "pkcs11-private-mode") && p[1])
     {
       int j;
-      
+
       VERIFY_PERMISSION (OPT_P_GENERAL);
 
       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)

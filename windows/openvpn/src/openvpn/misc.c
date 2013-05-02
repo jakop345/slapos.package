@@ -147,7 +147,7 @@ write_pid (const struct pid_state *state)
 {
   if (state->filename && state->fp)
     {
-      unsigned int pid = platform_getpid (); 
+      unsigned int pid = platform_getpid ();
       fprintf(state->fp, "%u\n", pid);
       if (fclose (state->fp))
 	msg (M_ERR, "Close error on pid file %s", state->filename);
@@ -562,7 +562,7 @@ env_set_del_nolock (struct env_set *es, const char *str)
 static void
 env_set_add_nolock (struct env_set *es, const char *str)
 {
-  remove_env_item (str, es->gc == NULL, &es->list);  
+  remove_env_item (str, es->gc == NULL, &es->list);
   add_env_item ((char *)str, true, &es->list, es->gc);
 }
 
@@ -1036,7 +1036,11 @@ absolute_pathname (const char *pathname)
     {
       const int c = pathname[0];
 #ifdef WIN32
+#if defined(CYGWIN)
+      return c == '/' || (isalpha(c) && pathname[1] == ':' && pathname[2] == '/');
+#else
       return c == '\\' || (isalpha(c) && pathname[1] == ':' && pathname[2] == '\\');
+#endif
 #else
       return c == '/';
 #endif
@@ -1100,14 +1104,14 @@ get_user_pass_cr (struct user_pass *up,
 	  struct buffer user_prompt = alloc_buf_gc (128, &gc);
 
 	  buf_printf (&user_prompt, "NEED-OK|%s|%s:", prefix, up->username);
-	  
+
 	  if (!get_console_input (BSTR (&user_prompt), true, up->password, USER_PASS_LEN))
 	    msg (M_FATAL, "ERROR: could not read %s ok-confirmation from stdin", prefix);
-	  
+
 	  if (!strlen (up->password))
 	    strcpy (up->password, "ok");
 	}
-	  
+
       /*
        * Get username/password from standard input?
        */
@@ -1183,7 +1187,7 @@ get_user_pass_cr (struct user_pass *up,
 	   * Get username/password from a file.
 	   */
 	  FILE *fp;
-      
+
 #ifndef ENABLE_PASSWORD_SAVE
 	  /*
 	   * Unless ENABLE_PASSWORD_SAVE is defined, don't allow sensitive passwords
@@ -1214,12 +1218,12 @@ get_user_pass_cr (struct user_pass *up,
 		     prefix,
 		     auth_file);
 	    }
-      
+
 	  fclose (fp);
-      
+
 	  chomp (up->username);
 	  chomp (up->password);
-      
+
 	  if (!(flags & GET_USER_PASS_PASSWORD_ONLY) && strlen (up->username) == 0)
 	    msg (M_FATAL, "ERROR: username from %s authfile '%s' is empty", prefix, auth_file);
 	}
@@ -1277,7 +1281,7 @@ get_auth_challenge (const char *auth_challenge, struct gc_arena *gc)
 	  else if (c == 'R')
 	    ac->flags |= CR_RESPONSE;
 	}
-      
+
       /* parse state ID */
       if (!buf_parse(&b, ':', work, len))
 	return NULL;
@@ -1491,7 +1495,7 @@ make_inline_array (const char *str, struct gc_arena *gc)
       ASSERT (i < len);
       ret[i] = string_alloc (skip_leading_whitespace (line), gc);
       ++i;
-    }  
+    }
   ASSERT (i <= len);
   ret[i] = NULL;
   return (const char **)ret;
@@ -1826,7 +1830,7 @@ argv_printf_arglist (struct argv *a, const char *format, const unsigned int flag
     argv_reset (a);
   argv_extend (a, 1); /* ensure trailing NULL */
 
-  while ((term = argv_term (&f)) != NULL) 
+  while ((term = argv_term (&f)) != NULL)
     {
       if (term[0] == '%')
 	{
@@ -1950,7 +1954,7 @@ argv_test (void)
   msg (M_INFO, "ARGV-S: %s", argv_system_str(&a));
   /*openvpn_execve_check (&a, NULL, 0, "command failed");*/
 
-  argv_printf (&a, "%sc %s %s", "c:\\\\src\\\\test files\\\\batargs.bat", "foo", "bar");  
+  argv_printf (&a, "%sc %s %s", "c:\\\\src\\\\test files\\\\batargs.bat", "foo", "bar");
   argv_msg_prefix (M_INFO, &a, "ARGV");
   msg (M_INFO, "ARGV-S: %s", argv_system_str(&a));
   /*openvpn_execve_check (&a, NULL, 0, "command failed");*/
@@ -2001,7 +2005,7 @@ argv_test (void)
 	const char *f = line;
 	int i = 0;
 
-	while ((term = argv_term (&f)) != NULL) 
+	while ((term = argv_term (&f)) != NULL)
 	  {
 	    printf ("[%d] '%s'\n", i, term);
 	    ++i;

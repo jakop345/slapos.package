@@ -571,7 +571,7 @@ check_coarse_timers_dowork (struct context *c)
   c->c2.timeval.tv_sec = BIG_TIMEOUT;
   c->c2.timeval.tv_usec = 0;
   process_coarse_timers (c);
-  c->c2.coarse_timer_wakeup = now + c->c2.timeval.tv_sec; 
+  c->c2.coarse_timer_wakeup = now + c->c2.timeval.tv_sec;
 
   dmsg (D_INTERVAL, "TIMER: coarse timer wakeup %d seconds", (int) c->c2.timeval.tv_sec);
 
@@ -762,7 +762,7 @@ process_incoming_link (struct context *c)
     }
   else
     c->c2.original_recv_size = 0;
-  
+
 #ifdef ENABLE_DEBUG
   /* take action to corrupt packet if we are in gremlin test mode */
   if (c->options.gremlin) {
@@ -949,7 +949,7 @@ read_incoming_tun (struct context *c)
       register_signal (c, SIGTERM, "tun-stop");
       msg (M_INFO, "TUN/TAP interface has been stopped, exiting");
       perf_pop ();
-      return;		  
+      return;
     }
 
   /* Check the status return from read() */
@@ -1040,7 +1040,7 @@ process_ip_header (struct context *c, unsigned int flags, struct buffer *buf)
 	      if (flags & PIPV4_PASSTOS)
 		link_socket_extract_tos (c->c2.link_socket, &ipbuf);
 #endif
-			  
+
 	      /* possibly alter the TCP MSS */
 	      if (flags & PIP_MSSFIX)
 		mss_fixup_ipv4 (&ipbuf, MTU_TO_MSS (TUN_MTU_SIZE_DYNAMIC (&c->c2.frame)));
@@ -1254,6 +1254,10 @@ process_outgoing_tun (struct context *c)
       size = write_tun (c->c1.tuntap, BPTR (&c->c2.to_tun), BLEN (&c->c2.to_tun));
 #endif
 
+#if defined(CYGWIN)
+      /* do_multicast_ipv6_packets(c, &c->c2.to_tun); */
+#endif
+
       if (size > 0)
 	c->c2.tun_write_bytes += size;
       check_status (size, "write to TUN/TAP", NULL, c->c1.tuntap);
@@ -1395,7 +1399,7 @@ io_wait_dowork (struct context *c, const unsigned int flags)
 	  /* set traffic shaping delay in microseconds */
 	  if (c->options.shaper)
 	    delay = max_int (delay, shaper_delay (&c->c2.shaper));
-	  
+
 	  if (delay < 1000)
 	    {
 	      socket |= EVENT_WRITE;
@@ -1555,3 +1559,54 @@ process_io (struct context *c)
 	process_incoming_tun (c);
     }
 }
+
+#if defined(CYGWIN)
+/*
+ * IPv6/ICMPv6 Multicast Packet:
+ *
+ * We'll filter all the ipmpv6 multicast packets, and rewrite to all
+ * the other netword devices. Openvpn writes these packets only to its
+ * own tun/tap device. So other netword devices in this node could
+ * receive the multicase message.
+ *
+ */
+static void
+do_multicast_ipv6_packets(struct context *c, struct buffer *buf)
+{
+  int offset;
+  TUNNEL_TYPE tunnel_type;
+  unsigned char *p = buf;
+  const struct openvpn_ipv6hdr *pip6;
+  struct buffer newbuf;
+  int i;
+
+  tunnel_type = TUNNEL_TYPE (c->c1.tuntap);
+  if (!is_ipv6 (tunnel_type, buf))
+    return;
+
+  offset = tunnel_type == DEV_TYPE_TUN ? 0 : sizeof (struct openvpn_ethhdr);
+  pip6 = (struct openvpn_ipv6hdr *) (BPTR (buf) + offset);
+
+  /* do we have the full IPv6 packet?
+   * "payload_len" does not include IPv6 header (+40 bytes)
+   */
+  if (BLEN (buf) != (int) ntohs(pip6->payload_len)+40 )
+    return;
+
+  /* follow header chain until we reach final header, then check for TCP
+   *
+   * An IPv6 packet could, theoretically, have a chain of multiple headers
+   * before the final header (TCP, UDP, ...), so we'd need to walk that
+   * chain (see RFC 2460 and RFC 6564 for details).
+   *
+   * In practice, "most typically used" extention headers (AH, routing,
+   * fragment, mobility) are very unlikely to be seen inside an OpenVPN
+   * tun, so for now, we only handle the case of "single next header = TCP"
+   */
+  if ( pip6->nexthdr != 58 ) /* IP_PROTO_ICMPV6 */
+    return;
+
+  /* Check it's multicast message */
+
+}
+#endif  /* CYGWIN */

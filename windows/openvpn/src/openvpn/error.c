@@ -470,7 +470,7 @@ get_orig_stderr (void)
 void
 redirect_stdout_stderr (const char *file, bool append)
 {
-#if defined(WIN32)
+#if defined(WIN32) && !defined(CYGWIN)
   if (!std_redir)
     {
       struct gc_arena gc = gc_new ();

@@ -34,7 +34,7 @@
 #include "buffer.h"
 #include "misc.h"
 
-#ifdef WIN32
+#if defined (WIN32) && !defined (CYGWIN) 
 
 #include "win32.h"
 
@@ -201,7 +201,7 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
     return get_console_input_systemd (prompt, echo, input, capacity);
 #endif
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(CYGWIN)
   return get_console_input_win32 (prompt, echo, input, capacity);
 #elif defined(HAVE_GETPASS)
   if (echo)

@@ -158,7 +158,7 @@ platform_nice (int niceval)
 unsigned int
 platform_getpid ()
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   return (unsigned int) GetCurrentProcessId ();
 #else
 #ifdef HAVE_GETPID
@@ -190,7 +190,7 @@ int
 platform_chdir (const char* dir)
 {
 #ifdef HAVE_CHDIR
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   int res;
   struct gc_arena gc = gc_new ();
   res = _wchdir (wide_string (dir, &gc));
@@ -210,7 +210,7 @@ platform_chdir (const char* dir)
 bool
 platform_system_ok (int stat)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   return stat == 0;
 #else
   return stat != -1 && WIFEXITED (stat) && WEXITSTATUS (stat) == 0;
@@ -220,7 +220,7 @@ platform_system_ok (int stat)
 int
 platform_access (const char *path, int mode)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   int ret = _waccess (wide_string (path, &gc), mode & ~X_OK);
   gc_free (&gc);
@@ -263,7 +263,7 @@ platform_sleep_until_signal (void)
 bool
 platform_unlink (const char *filename)
 {
-#if defined(WIN32)
+#if defined(WIN32) & !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   BOOL ret = DeleteFileW (wide_string (filename, &gc));
   gc_free (&gc);
@@ -278,7 +278,7 @@ platform_unlink (const char *filename)
 int platform_putenv(char *string)
 {
   int status;
-#if defined(WIN32)
+#if defined(WIN32) && !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   char *s = string_alloc(string, &gc);
   char *value = strchr(s, '=');
@@ -306,7 +306,7 @@ int platform_putenv(char *string)
 FILE *
 platform_fopen (const char *path, const char *mode)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   FILE *f = _wfopen (wide_string (path, &gc), wide_string (mode, &gc));
   gc_free (&gc);
@@ -319,7 +319,7 @@ platform_fopen (const char *path, const char *mode)
 int
 platform_open (const char *path, int flags, int mode)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   int fd = _wopen (wide_string (path, &gc), flags, mode);
   gc_free (&gc);
@@ -332,7 +332,7 @@ platform_open (const char *path, int flags, int mode)
 int
 platform_stat (const char *path, platform_stat_t *buf)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(CYGWIN)
   struct gc_arena gc = gc_new ();
   int res = _wstat (wide_string (path, &gc), buf);
   gc_free (&gc);

@@ -239,6 +239,8 @@ struct link_socket
   /* used to get/set TOS. */
 #if defined(TARGET_LINUX)
   uint8_t ptos;
+#elif defined(CYGWIN)
+  char ptos;
 #else /* all the BSDs, Solaris, MacOS use plain "int" -> see "man ip" there */
   int  ptos;
 #endif
