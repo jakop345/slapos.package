@@ -44,8 +44,8 @@ Source: "src\win32\groupadd"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "src\win32\brctl"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "src\win32\tunctl"; DestDir: "{app}\cygwin\usr\local\bin";
 
-Source: "opt\git\babeld-1.3.4\babeld.exe"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "opt\git\openvpn-2.3.0\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 
 Source: "src\docs\openvpn\devcon.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "src\docs\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";

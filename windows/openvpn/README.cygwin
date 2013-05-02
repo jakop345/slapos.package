@@ -5,7 +5,7 @@ $ cd openvpn
 $ ac_cv_type_socklen_t=yes \
   IFCONFIG="C:/WINDOWS/system32" \
   LDFLAGS="-liphlpapi -lws2_32" \
-  CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g"
+  CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" \
   OPENSSL_CRYPTO_CFLAGS=-I/opt/slapnode/include \
   OPENSSL_CRYPTO_LIBS="-L/opt/slapnode/lib -lcrypto" \
   OPENSSL_SSL_CFLAGS=-I/opt/slapnode/include \
