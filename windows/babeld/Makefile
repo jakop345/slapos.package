@@ -14,6 +14,20 @@ SRCS = babeld.c net.c kernel.c util.c interface.c source.c neighbour.c \
 OBJS = babeld.o net.o kernel.o util.o interface.o source.o neighbour.o \
        route.o xroute.o message.o resend.o configuration.o local.o
 
+ifneq "$(WINVER)" ""
+
+SRCS += cyginet.c
+OBJS += cyginet.o
+LDLIBS +=  -liphlpapi -lws2_32 -lwlanapi -lole32 -lsetupapi
+
+ifeq "$(WINVER)" "XP"
+CFLAGS += -D_WIN32_WINNT=0x0503
+else
+CLFAGS += -D_WIN32_WINNT=0x0600
+endif
+
+endif
+
 babeld: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o babeld $(OBJS) $(LDLIBS)
 
@@ -48,4 +62,9 @@ uninstall:
 clean:
 	-rm -f babeld babeld.html *.o *~ core TAGS gmon.out
 
-kernel.o: kernel_netlink.c kernel_socket.c
+kernel.o: kernel_netlink.c kernel_socket.c kernel_cygwin.c
+
+# Usage: ./test.exe
+# Verify most of the functions in the cyginet.c
+test.exe: cyginet.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -DTEST_CYGINET -o $@ $< $(LDLIBS)

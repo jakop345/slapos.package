@@ -96,6 +96,8 @@ static void init_signals(void);
 static void dump_tables(FILE *out);
 static int reopen_logfile(void);
 
+int cyginet_set_interface_forwards(const char * ifname, int value);
+
 int
 main(int argc, char **argv)
 {
@@ -371,13 +373,17 @@ main(int argc, char **argv)
 
     FOR_ALL_INTERFACES(ifp) {
         /* ifp->ifindex is not necessarily valid at this point */
+#if defined (_WIN32_WINNT)
+        int ifindex = if_nametoindex(cyginet_guidname(ifp->name));
+#else
         int ifindex = if_nametoindex(ifp->name);
+#endif
         if(ifindex > 0) {
             unsigned char eui[8];
             rc = if_eui64(ifp->name, ifindex, eui);
             if(rc < 0)
                 continue;
-            memcpy(myid, eui, 8);
+            memcpy(myid, eui, 8);            
             goto have_id;
         }
     }
@@ -390,7 +396,11 @@ main(int argc, char **argv)
         ifname = if_indextoname(i, buf);
         if(ifname == NULL)
             continue;
+#if defined (_WIN32_WINNT)
+        rc = if_eui64(cyginet_ifname(ifname), i, eui);
+#else
         rc = if_eui64(ifname, i, eui);
+#endif        
         if(rc < 0)
             continue;
         memcpy(myid, eui, 8);
@@ -478,6 +488,14 @@ main(int argc, char **argv)
     check_interfaces();
     if(receive_buffer == NULL)
         goto fail;
+
+#if defined (_WIN32_WINNT)
+    FOR_ALL_INTERFACES(ifp)
+      if (cyginet_set_interface_forwards(ifp->name, 1) == -1) {
+        fprintf(stderr, "Cannot enable IPv6 forwarding.\n");
+        goto fail;
+      }
+#endif
 
     rc = check_xroutes(0);
     if(rc < 0)
