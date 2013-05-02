@@ -8,7 +8,6 @@
     notifempty
     create 640 root root
     sharedscripts
-    endscript
 }
 
 /opt/slapos/log/slapos-node-format.log {
@@ -20,5 +19,4 @@
     notifempty
     create 640 root root
     sharedscripts
-    endscript
 }
