@@ -37,12 +37,12 @@ Source: "images\register.ico"; DestDir: "{app}\images";
 Source: "images\updater.ico"; DestDir: "{app}\images";
 Source: "images\manager.ico"; DestDir: "{app}\images";
 
-Source: "src\win32\ip"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "src\win32\useradd"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "src\win32\usermod"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "src\win32\groupadd"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "src\win32\brctl"; DestDir: "{app}\cygwin\usr\local\bin";
-Source: "src\win32\tunctl"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\usr\local\bin";
 
 Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\usr\local\bin";
@@ -50,14 +50,14 @@ Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; 
 Source: "src\docs\openvpn\devcon.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "src\docs\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
 
-Source: "src\win32\init-slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
-Source: "src\win32\init-cygwin.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
-Source: "src\win32\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
-Source: "src\win32\init-re6stnet.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
-Source: "src\win32\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\init-slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\init-cygwin.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\init-re6stnet.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 
 Source: "src\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html";
-Source: "src\win32\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
+Source: "src\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
 
 [Icons]
 Name: "{commondesktop}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\imapges\slapos.ico";
