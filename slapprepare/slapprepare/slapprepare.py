@@ -656,7 +656,7 @@ def slapprepare():
     # Install/update slapos
     try:
       _call(['zypper', 'addrepo', '-fc', '-n', '"SlapOS Official repo"'
-             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_12.1/', 'slapos'])
+             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_%s/' % suse_version(), 'slapos'])
     except:
       pass
     _call(['zypper', '--gpg-auto-import-keys', 'install', '-y', 'slapos.node'])
