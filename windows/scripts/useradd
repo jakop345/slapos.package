@@ -73,11 +73,14 @@ if [[ "$USER_NAME" == "" ]] ; then
     exit 1
 fi
 USER_HOME=${USER_HOME:=/home/$USER_NAME}
-USER_PASSWORD=${USER_PASSWORD:=$USER_NAME}
 
 if (( $? == 0 )) ; then
     if [[ $ACTION == "ADD" ]] ; then
-        NET USER "${USER_NAME}" "${USER_PASSWORD}" /ADD
+        if [[ "${USER_PASSWORD}" == "" ]] ; then
+            NET USER "${USER_NAME}" /ADD /PASSWORDREQ:No
+        else
+            NET USER "${USER_NAME}" "${USER_PASSWORD}" /ADD
+        fi
         grep -q "^${USER_NAME}" /etc/passwd && sed -i -e "/^${USER_NAME}/d" /etc/passwd
         mkpasswd | grep "^${USER_NAME}:" >> /etc/passwd
         [[ $USER_HOME == "/home/$USER_NAME" ]] || sed -i -e "s%:/home/${USER_NAME}:%:${USER_HOME}:%g" /etc/passwd
