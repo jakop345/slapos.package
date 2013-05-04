@@ -4,7 +4,7 @@ SETLOCAL
 SET CYGWINHOME=%~1
 SET CYGWINROOT="%~1\cygwin"
 SET DOWNLOADPATH="%CYGWINHOME%\cygwin-packages"
-SET SETUPFILE="%DOWNLOADPATH%\setup.exe"
+SET SETUPFILE="%CYGWINHOME%\setup.exe"
 SET OPTIONS=--no-shortcuts --no-startmenu --quiet-mode --no-verify
 
 IF NOT "%2" == "" GOTO REMOTE_INSTALL

@@ -32,6 +32,7 @@ Source: "opt\git\slapos.recipe.cmmi\dist\slapos.recipe.cmmi-0.1.tar.gz"; DestDir
 Source: "opt\git\qooxdoo\application\playground\build\*"; DestDir: "{app}\cygwin\etc\slapos\desktop";
 Source: "opt\git\qooxdoo\application\showcase\build\*"; DestDir: "{app}\cygwin\etc\slapos\node";
 
+Source: "setup.exe"; DestDir: "{app}";
 Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
 
 Source: "cygwin\Cygwin-Terminal.ico"; DestDir: "{app}\images"; DestName: "terminal.ico";
