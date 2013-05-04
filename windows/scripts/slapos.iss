@@ -37,6 +37,8 @@ Source: "images\register.ico"; DestDir: "{app}\images";
 Source: "images\updater.ico"; DestDir: "{app}\images";
 Source: "images\manager.ico"; DestDir: "{app}\images";
 
+Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
+
 Source: "opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\usr\local\bin";
