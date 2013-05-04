@@ -1,18 +1,34 @@
 #! /bin/bash
+#
+# It used to initialzie slapos node when the computer startup:
+#
+#    1. Start re6stnet, 
+#
+#    2. Check whether IPv6 connection is availabe
+#
+#    3. Run slapformat to synchornize information with master
+#
+#    4. Start slapproxy, it will used by slapos desktop and node manager
+#    
 
+# Get connection name by GUID name, for example
+#
+#     $ guid2name {C8D7F065-AD35-4777-A768-122451282533}
+#
 function guid2name()
 {
     if [[ "$1" == "" ]] ; then
         echo
     else
         netsh interface ipv6 show interface level=verbose | \
-        grep -B 1 "{C8D7F065-AD35-4777-A768-122451282533}" | \
+        grep -B 1 "$1" | \
         grep "^Connection" | \
         sed -e "s/^Connection Name\\s*:\\s*//g"
     fi
 }
 
-cfilename=/etc/opt/slapos/slapos.cfg
+# Default node configure filename
+cfilename=${1:/etc/opt/slapos/slapos.cfg}
 
 if [[ ! -f $cfilename ]] ; then
     echo "Error: no found configure file $cfilename, the computer "
@@ -20,31 +36,33 @@ if [[ ! -f $cfilename ]] ; then
     exit 1
 fi
 
-interface=$(grep "^interface_name\\s*=" $cfilename | sed -e "s/^interface_name\\s*=\\s*//g")
+interface=$(grep "^interface_name\\s*=" $cfilename | \
+          sed -e "s/^interface_name\\s*=\\s*//g")
 if (( $? == 0 )) ; then
     ifname=$(guid2name $interface)
 else
     echo "Error: no interface found in the configure file $cfilename"
     exit 1
 fi
-
 if [[ "$ifname" == "" ]]; then
     echo "Error: no ipv6 interface found in the configure file $cfilename"
     exit 1
 fi
+
+# Run re6stnet, waiting until it works
 cd /etc/re6stnet
 re6stnet @re6stnet.conf -I $ifname -i $ifname
 
-echo Waiting Re6stent network work ...
+echo "Waiting re6stent network work ..."
 while true ; do
   ping6 slap.vifib.com > /dev/null && break
 done
+echo "re6stnet network OK."
 
-if (( $? == 0 )) ; then
-    echo Re6stnet network OK.
-else
-    echo SlapOS Node initialize failed, no any IPv6 connection.
-    exit 1
-fi
+# Run slapformat
+/opt/slapos/bin/slapformat -c --now $cfilename || \
+( echo "Error: initialize SlapOS Node failed."; exit 1 )
+echo "run slapformat OK."
 
-/opt/slapos/bin/slapformat -c --now /etc/opt/slapos/slapos.cfg
+# Run slapproxy
+/opt/slapos/bin/slapproxy || echo "Warning: start slapproxy failed"
