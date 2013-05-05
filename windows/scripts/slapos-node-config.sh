@@ -153,11 +153,11 @@ mkdir -p /etc/opt/slapos/ssl/partition_pki
 nodecfgfile=/etc/opt/slapos/slapos.cfg
 
 if [[ ! -f $nodecfgfile ]] ; then
-    [[ -f /etc/slapos/slapos.cfg.sample ]] || \
+    [[ -f /etc/slapos/slapos.cfg.example ]] || \
         (cd /etc/slapos; wget -O slapos.cfg http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example) || \
         (echo "Download slapos.cfg.example failed."; exit 1)
     
-    cp /etc/slapos/slapos.cfg.sample $nodecfgfile
+    cp /etc/slapos/slapos.cfg.example $nodecfgfile
 fi
 
 interface_guid=$(connection2guid re6stnet-lo)
