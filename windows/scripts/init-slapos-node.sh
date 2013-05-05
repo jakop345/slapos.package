@@ -28,7 +28,7 @@ function guid2name()
 }
 
 # Default node configure filename
-cfilename=${1:/etc/opt/slapos/slapos.cfg}
+cfilename=${1-/etc/opt/slapos/slapos.cfg}
 
 if [[ ! -f $cfilename ]] ; then
     echo "Error: no found configure file $cfilename, the computer "
@@ -60,9 +60,9 @@ done
 echo "re6stnet network OK."
 
 # Run slapformat
-/opt/slapos/bin/slapformat -c --now $cfilename || \
-( echo "Error: initialize SlapOS Node failed."; exit 1 )
-echo "run slapformat OK."
+/opt/slapos/bin/slapos node format -cv --now || \
+( echo "Initialize SlapOS Node failed."; exit 1 )
+echo "Initialize SlapOS Node OK."
 
 # Run slapproxy
-/opt/slapos/bin/slapproxy || echo "Warning: start slapproxy failed"
+/opt/slapos/bin/slapproxy || echo "Start slapproxy failed."
