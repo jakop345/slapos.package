@@ -3,10 +3,10 @@
 [Setup]
 AppName=SlapOS
 AppVersion=0.158
-AppVerName=SlapOS Windows 0.158
+AppVerName=SlapOS Windows 0.158.2
 DefaultDirName=C:\slapos
 DefaultGroupName=SlapOS
-OutputBaseFilename=slapos-0.158-windows-x86-all-in-one
+OutputBaseFilename=slapos-0.158.2-windows-x86-all-in-one
 OutputDir=D:\slapos\publish\Output
 SourceDir=D:\slapos
 Uninstallable=yes
@@ -21,8 +21,8 @@ Name: "{app}\cygwin\etc\slapos\scripts"
 [Files]
 Source: "cygwin-packages\*"; DestDir: "{app}\cygwin-packages"; Flags: recursesubdirs;
 Source: "publish\buildout\slapos\*"; DestDir: "{app}\cygwin\opt\slapos"; Flags: recursesubdirs;
-Source: "opt\git\slapos.core\slapos.cfg.sample"; DestDir: "{app}\cygwin\etc\slapos";
-Source: "opt\git\slapos.core\slapos-client.cfg.sample"; DestDir: "{app}\cygwin\etc\slapos";
+Source: "opt\git\slapos.core\slapos.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
+Source: "opt\git\slapos.core\slapos-client.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
 
 Source: "opt\git\slapos\component\cygwin\slapos-core.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
 Source: "opt\git\slapos\component\cygwin\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";

@@ -3,11 +3,11 @@
 [Setup]
 AppName=SlapOS
 AppVersion=0.158
-AppVerName=SlapOS Windows 0.158
+AppVerName=SlapOS Windows 0.158.2
 DefaultDirName=C:\slapos
 DefaultGroupName=SlapOS
 OutputDir=D:\slapos\publish\Output
-OutputBaseFilename=slapos-0.158-windows-x86
+OutputBaseFilename=slapos-0.158.2-windows-x86
 SourceDir=D:\slapos
 Uninstallable=yes
 
