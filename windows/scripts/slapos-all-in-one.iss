@@ -79,7 +79,7 @@ Name: "{group}\Configure Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameter
 Name: "{group}\Command Console"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
 Name: "{group}\Update Center"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\updater.ico";
 Name: "{group}\User Guide"; Filename: "{app}\user-guide.html";
-Name: "{group}\Read Me"; Filename: "{app}\readme.txt";
+Name: "{group}\Read Me"; Filename: "{app}\Readme.txt";
 Name: "{group}\SlapOS.org"; Filename: "http://www.slapos.org/";
 Name: "{group}\Uninstall SlapOS"; Filename: "{uninstallexe}";
 

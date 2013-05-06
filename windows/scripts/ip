@@ -541,7 +541,7 @@ if [[ $object == "link" ]] ; then
 elif [[ $object == "addr" ]] ; then
 
     if [[ $command == "add" ]] || [[ $command == "del" ]] ; then
-        mask=$(prefix_to_netmask $(basename $1))
+        mask=$(basename $1)
         address=$(dirname $1)
         if [[ "$opt_family" == "" ]] ; then
             if [[ "$address" == *:* ]] ; then
@@ -562,6 +562,9 @@ elif [[ $object == "addr" ]] ; then
 
     if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
         ipcmd="netsh interface ip $command address"
+        if [[ ! "$mask" == *.* ]] ; then
+            mask=$(prefix_to_netmask $mask)
+        fi
         address="$address $mask"
     elif [[ "$opt_family" == "ipv6" ]] ; then
         ipcmd="netsh interface ipv6 $command address"
