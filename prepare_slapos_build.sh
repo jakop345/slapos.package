@@ -65,6 +65,12 @@ osc rm -f slapos*.dsc
 sed $VERSION_REGEX $TEMPLATES_DIRECTORY/slapos.dsc.in > $SLAPOS_DIRECTORY.dsc
 osc add $SLAPOS_DIRECTORY.dsc
 
+#prepare new PKGBUILD file
+osc rm -f PKGBUILD
+sed $VERSION_REGEX $TEMPLATES_DIRECTORY/PKGBUILD.in > PKGBUILD
+cp $TEMPLATES_DIRECTORY/slapos-node.install .
+osc add PKGBUILD slapos-node.install
+
 ## Upload new Package
 osc commit -m "New SlapOS Recipe $RECIPE_VERSION"
 
