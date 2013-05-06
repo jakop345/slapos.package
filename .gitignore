@@ -3,3 +3,4 @@ slapprepare/build
 slapprepare/dist
 slapprepare/slapprepare.egg-info
 .*.swp
+*~
