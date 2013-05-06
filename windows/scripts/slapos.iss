@@ -25,8 +25,9 @@ Name: "{app}\cygwin\etc\slapos\images"
 Source: "opt\git\re6stnet\dist\re6stnet-0.1.tar.gz"; DestDir: "{app}\cygwin"; DestName: "re6stnet-0.1.tar.gz"; Flags: deleteafterinstall;
 Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin"; DestName: "miniupnpc.tar.gz"; Flags: deleteafterinstall;
 
-Source: "opt\git\slapos\component\cygwin\slapos-core.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
-Source: "opt\git\slapos\component\cygwin\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "src\patch\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "src\patch\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "src\patch\slapos-core-env.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
 
 Source: "opt\git\qooxdoo\application\playground\build\*"; DestDir: "{app}\cygwin\etc\slapos\desktop"; Flags: recursesubdirs;
 Source: "opt\git\qooxdoo\application\showcase\build\*"; DestDir: "{app}\cygwin\etc\slapos\node"; Flags: recursesubdirs;

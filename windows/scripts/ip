@@ -550,6 +550,10 @@ elif [[ $object == "addr" ]] ; then
                 opt_family="ipv4"
             fi
         fi
+
+        [[ "$opt_family" == "ipv4" ]] && [[ ! "$mask" == *.* ]] && \
+            mask=$(prefix_to_netmask $mask)
+
         shift
     elif [[ $command == "list" ]] ; then
         command="show"
@@ -562,9 +566,6 @@ elif [[ $object == "addr" ]] ; then
 
     if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
         ipcmd="netsh interface ip $command address"
-        if [[ ! "$mask" == *.* ]] ; then
-            mask=$(prefix_to_netmask $mask)
-        fi
         address="$address $mask"
     elif [[ "$opt_family" == "ipv6" ]] ; then
         ipcmd="netsh interface ipv6 $command address"

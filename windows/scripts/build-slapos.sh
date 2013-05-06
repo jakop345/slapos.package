@@ -31,9 +31,10 @@ fi
 bin/buildout -v -N || (echo "Buildout SlapOS failed."; exit 1)
 
 # apply patches
-if [[ -f /etc/slapos/patches/slapos-core.patch ]] ; then
-    echo "Apply patch: /etc/slapos/patches/slapos-core.patch"
-    (cd `ls -d $slapos_home/eggs/slapos.core-*-py2.7.egg`/slapos ; \
-     patch -p1 < /etc/slapos/patches/slapos-core.patch )
-    (cd  /etc/slapos/patches ; mv slapos-core.patch slapos-core.patch.done)
+patch_file=/etc/slapos/patches/slapos-core-format.patch
+if [[ -f $patch_file ]] ; then
+    echo "Apply patch: $patch_file"
+    (cd `ls -d $slapos_home/eggs/slapos.core-*-py2.7.egg` ; \
+     patch -p1 < $patch_file)
+    (cd  /etc/slapos/patches ; mv $patch_file{,.done})
 fi

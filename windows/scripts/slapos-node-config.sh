@@ -77,8 +77,8 @@ function connection2guid()
         sed -e "s/^GUID\s*:\s*//"
 }
 
-node_certificate_file=/etc/opt/slapos/ssl/certificate
-node_key_file=/etc/opt/slapos/ssl/key
+node_certificate_file=/etc/opt/slapos/ssl/computer.crt
+node_key_file=/etc/opt/slapos/ssl/computer.key
 node_config_file=/etc/opt/slapos/slapos.cfg
 node_template_file=/etc/slapos/slapos.cfg.example
 run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
