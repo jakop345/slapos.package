@@ -58,11 +58,12 @@ function reset_connection()
                 sed -e "s/^\(\w\+\s\+\)\{4\}//") ; do
         netsh interface ipv6 del address $ifname $addr
     done
-    for addr in $(netsh interface ip show address $ifname | \
-                grep "IP Address:" | \
-                sed -e "s/IP Address://") ; do
-        netsh interface del address $ifname $addr
-    done
+    netsh interface ip set address $ifname source=dhcp
+    # for addr in $(netsh interface ip show address $ifname | \
+    #             grep "IP Address:" | \
+    #             sed -e "s/IP Address://") ; do
+    #     netsh interface del address $ifname $addr
+    # done
 }
 
 #
@@ -152,7 +153,7 @@ elif [[ ! -f $node_key_file ]] ; then
 fi
 
 # Hope it will not confilct with original network in the local machine
-ipv4_local_network=10.201.67.0/8
+ipv4_local_network=10.201.67.0/24
 
 # Add ipv4 address
 ip -4 addr add $ipv4_local_network dev $slapos_ifname
