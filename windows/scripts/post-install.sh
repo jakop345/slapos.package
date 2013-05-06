@@ -65,5 +65,10 @@ fi
 # Configure syslog-ng
 /usr/bin/syslog-ng-config --yes
 
+# Copy rebaseall.bat to /
+if [[ -f /etc/postinstall/autorebase.bat.done ]] ; then
+    cp /etc/postinstall/autorebase.bat.done /autorebase.bat
+fi
+
 exit 0
 

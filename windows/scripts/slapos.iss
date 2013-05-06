@@ -64,13 +64,13 @@ Source: "src\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "us
 Source: "src\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
 
 [Icons]
-Name: "{commondesktop}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\imapges\slapos.ico";
-Name: "{group}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\imapges\slapos.ico";
-Name: "{group}\Node Manager"; Filename: "{app}\cygwin\etc\slapos\node\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\node"; IconFilename: "{app}\imapges\manager.ico";
-Name: "{group}\Configure Client"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\imapges\configure.ico";
-Name: "{group}\Configure Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-node-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\imapges\node.ico";
-Name: "{group}\Command Console"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\imapges\terminal.ico";
-Name: "{group}\Update Center"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\imapges\updater.ico";
+Name: "{commondesktop}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
+Name: "{group}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
+Name: "{group}\Node Manager"; Filename: "{app}\cygwin\etc\slapos\node\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\node"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
+Name: "{group}\Configure Client"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
+Name: "{group}\Configure Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-node-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\node.ico";
+Name: "{group}\Command Console"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
+Name: "{group}\Update Center"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\updater.ico";
 Name: "{group}\User Guide"; Filename: "{app}\user-guide.html";
 Name: "{group}\Read Me"; Filename: "{app}\readme.txt";
 Name: "{group}\SlapOS.org"; Filename: "http://www.slapos.org/";
@@ -80,7 +80,7 @@ Name: "{group}\Uninstall SlapOS"; Filename: "{uninstallexe}";
 Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"" network"; StatusMsg: "Installing Cygwin..."; Flags: runhidden;
 Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/post-install.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Configure Cygwin..."; Flags: skipifdoesntexist runhidden;
 Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Builout process"; StatusMsg: "Building SlapOS..."; Flags: skipifdoesntexist;
-Filename: "cmd.exe"; Parameters: "/c {app}\cygwin\etc\postinstall\autorebase.bat.done"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist runhidden;
+Filename: "{app}\cygwin\autorebase.bat"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist runhidden;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\cygwin" ;
