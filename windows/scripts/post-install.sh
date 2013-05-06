@@ -70,5 +70,11 @@ if [[ -f /etc/postinstall/autorebase.bat.done ]] ; then
     cp /etc/postinstall/autorebase.bat.done /autorebase.bat
 fi
 
+# Change format of readme.txt
+readme_filepath=$(cygpath -m /)/..
+if [[ -f $readme_filepath/Readme.txt ]] ; then
+    unix2dos $readme_filepath/Readme.txt
+fi
+
 exit 0
 
