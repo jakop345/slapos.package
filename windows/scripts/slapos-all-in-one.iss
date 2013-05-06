@@ -30,8 +30,8 @@ Source: "opt\git\slapos\component\cygwin\slapos-cookbook-inotifyx.patch"; DestDi
 Source: "opt\git\re6stnet\dist\re6stnet-0.1.tar.gz"; DestDir: "{app}\cygwin"; DestName: "re6stnet-0.1.tar.gz"; Flags: deleteafterinstall;
 Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin"; DestName: "miniupnpc.tar.gz"; Flags: deleteafterinstall;
 
-Source: "opt\git\qooxdoo\application\playground\build\*"; DestDir: "{app}\cygwin\etc\slapos\desktop";
-Source: "opt\git\qooxdoo\application\showcase\build\*"; DestDir: "{app}\cygwin\etc\slapos\node";
+Source: "opt\git\qooxdoo\application\playground\build\*"; DestDir: "{app}\cygwin\etc\slapos\desktop"; Flags: recursesubdirs;
+Source: "opt\git\qooxdoo\application\showcase\build\*"; DestDir: "{app}\cygwin\etc\slapos\node"; Flags: recursesubdirs;
 
 Source: "setup.exe"; DestDir: "{app}";
 Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
@@ -81,9 +81,9 @@ Name: "{group}\SlapOS.org"; Filename: "http://www.slapos.org/";
 Name: "{group}\Uninstall SlapOS"; Filename: "{uninstallexe}";
 
 [Run]
-Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"" network"; StatusMsg: "Installing Cygwin...";
-Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/post-install.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Configure Cygwin...";
-Filename: "cmd.exe"; Parameters: "/c {app}\cygwin\etc\postinstall\autorebase.bat.done"; WorkingDir: "{app}\cygwin";  Flags: runhidden;
+Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"" network"; StatusMsg: "Installing Cygwin..."; Flags: runhidden;
+Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/post-install.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Configure Cygwin..."; Flags: skipifdoesntexist runhidden;
+Filename: "cmd.exe"; Parameters: "/c {app}\cygwin\etc\postinstall\autorebase.bat.done"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist runhidden;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\cygwin" ;

@@ -16,7 +16,7 @@ cd $slapos_home
 if [[ ! -f buildout.cfg ]] ; then
     echo "Create $slapos_home/buildout.cfg"
     echo "[buildout]
-extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/slapos/buildout.cfg
+extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
 " > buildout.cfg 
