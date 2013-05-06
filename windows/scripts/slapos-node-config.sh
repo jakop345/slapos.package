@@ -183,7 +183,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
 netsh interface ipv6 show interface > /dev/null || netsh interface ipv6 install
 
 # miniupnpc is required by re6stnet
-if [[ ! -f /opt/miniupnpc ]] ; then
+if [[ ! -d /opt/miniupnpc ]] ; then
     if [[ -f /miniupnpc.tar.gz ]] ; then
         echo "Installing miniupnpc ..."
         cd /opt
@@ -198,7 +198,7 @@ if [[ ! -f /opt/miniupnpc ]] ; then
 fi
 
 # pyOpenSSL is required by re6stnet
-if [[ ! -f /opt/pyOpenSSL ]] ; then
+if [[ ! -d /opt/pyOpenSSL ]] ; then
     if [[ -f /pyOpenSSL.tar.gz ]] ; then
         echo "Installing pyOpenSSL ..."
         cd /opt
@@ -210,7 +210,7 @@ if [[ ! -f /opt/pyOpenSSL ]] ; then
 fi
 
 # Install re6stnet
-if [[ ! -f /opt/re6stnet ]] ; then
+if [[ ! -d /opt/re6stnet ]] ; then
     echo "Installing re6stnet ..."
     cd /opt
     if [[ -f /re6stnet.tar.gz ]] ; then
