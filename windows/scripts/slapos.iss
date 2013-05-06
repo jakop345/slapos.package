@@ -19,6 +19,7 @@ Name: "{app}\cygwin\usr\local\bin"
 Name: "{app}\cygwin\etc\slapos\driver"
 Name: "{app}\cygwin\etc\slapos\scripts"
 Name: "{app}\cygwin\etc\slapos\patches"
+Name: "{app}\cygwin\etc\slapos\images"
 
 [Files]
 Source: "opt\git\slapos\component\cygwin\slapos-core.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
@@ -30,11 +31,12 @@ Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin"; DestName:
 Source: "opt\git\qooxdoo\application\playground\build\*"; DestDir: "{app}\cygwin\etc\slapos\desktop"; Flags: recursesubdirs;
 Source: "opt\git\qooxdoo\application\showcase\build\*"; DestDir: "{app}\cygwin\etc\slapos\node"; Flags: recursesubdirs;
 
-Source: "cygwin\Cygwin-Terminal.ico"; DestDir: "{app}\images"; DestName: "terminal.ico";
-Source: "images\configure.ico"; DestDir: "{app}\images";
-Source: "images\node.ico"; DestDir: "{app}\images";
-Source: "images\updater.ico"; DestDir: "{app}\images";
-Source: "images\manager.ico"; DestDir: "{app}\images";
+Source: "images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\Cygwin-Terminal.ico"; DestDir: "{app}\cygwin\etc\slapos\images"; DestName: "terminal.ico";
+Source: "images\configure.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "images\node.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "images\updater.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "images\manager.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 
 Source: "setup.exe"; DestDir: "{app}";
 Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
