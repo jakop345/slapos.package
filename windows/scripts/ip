@@ -322,11 +322,11 @@ function format_interface_name()
 #
 function install_tap_driver()
 {
-    local FILENAME="/etc/openvpn/driver/OemWin2k.inf"
+    local FILENAME="/etc/slapos/driver/OemWin2k.inf"
     local DEVFILE=$(cygpath -w $FILENAME)
     local HWID=tap0901
-    local CHECKSCRIPT=$(cygpath -m /etc/openvpn/check_driver_signing_dialog.vbs)
-    local GETSCRIPT=$(cygpath -m /etc/openvpn/get_last_connection.vbs)
+    local CHECKSCRIPT=$(cygpath -m /etc/slapos/scripts/check_driver_signing_dialog.vbs)
+    local GETSCRIPT=$(cygpath -m /etc/slapos/scripts/get_last_connection.vbs)
 
     # check if ifname has been installed
     if [[ ! "$1" == "" ]] ; then
@@ -424,7 +424,7 @@ function uninstall_tap_driver()
 {
     local DEVCON=$(which devcon.exe)
     local CSCRIPT=$(which cscript.exe)
-    local GETSCRIPT=$(cygpath -m /etc/openvpn/get_pnpid_connection.vbs)
+    local GETSCRIPT=$(cygpath -m /etc/slapos/scripts/get_pnpid_connection.vbs)
     
     if [[ "$1" == "" ]] ; then
         echo "Error: missing connection name"
