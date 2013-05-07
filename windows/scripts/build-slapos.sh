@@ -19,16 +19,18 @@ if [[ ! -f buildout.cfg ]] ; then
 extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
-" > buildout.cfg 
+" > buildout.cfg
 fi
 
 if [[ ! -f bootstrap.py ]] ; then
     echo "Download $slapos_home/bootstrap.py"
     python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py
     python -S bootstrap.py
+    (($?)) && echo "SlapOS bootstrap failed." && exit 1
 fi
 
-bin/buildout -v -N || (echo "Buildout SlapOS failed."; exit 1)
+bin/buildout -v -N
+(($?)) && echo "Buildout SlapOS failed." && exit 1
 
 # apply patches
 patch_file=/etc/slapos/patches/slapos-core-format.patch
