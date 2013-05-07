@@ -148,6 +148,7 @@ elif [[ ! -f $node_certificate_file ]] ; then
     [[ ! -f "$certificate_file" ]] && \
         show_error_exit "Certificate file $certificate_file doesn't exists."
     echo "Copy certificate from $certificate_file to $node_certificate_file"
+    certificate_file=$(cygpath -u $certificate_file)
     cp $certificate_file $node_certificate_file
 fi
 
@@ -159,6 +160,7 @@ elif [[ ! -f $node_key_file ]] ; then
     [[ ! -f "$key_file" ]] && \
         show_error_exit "Key file $key_file doesn't exists."
     echo "Copy key from $key_file to $node_key_file"
+    key_file=$(cygpath -u $key_file)
     cp $key_file $node_key_file
 fi
 
