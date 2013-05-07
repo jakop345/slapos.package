@@ -189,7 +189,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         $node_config_file
 
 # Config slapproxy
-if [[ $(grep -q "^\[slapproxy\]" $node_config_file) ]] ; then
+if ! $(grep -q "^\[slapproxy\]" $node_config_file) ; then
     echo "
 [slapproxy]
 host = 127.0.0.1
@@ -272,5 +272,5 @@ regtool -q set "$run_key\\$slapos_run_entry" \
     show_error_exit "Add startup item failed."
 
 echo SlapOS Node configure successfully.
-read -n -t 10 -p "Press any key to exit..."
+read -n 1 -t 10 -p "Press any key to exit..."
 exit 0
