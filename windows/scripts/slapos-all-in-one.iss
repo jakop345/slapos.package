@@ -77,7 +77,7 @@ Name: "{group}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; 
 Name: "{group}\Node Manager"; Filename: "{app}\cygwin\etc\slapos\node\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\node"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
 Name: "{group}\Configure Client"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
 Name: "{group}\Configure Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-node-config.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\node.ico";
-Name: "{group}\Command Console"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
+Name: "{group}\Command Console"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i -c ""/opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"""; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
 Name: "{group}\Update Center"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\etc\slapos\scripts"; IconFilename: "{app}\cygwin\etc\slapos\images\updater.ico";
 Name: "{group}\User Guide"; Filename: "{app}\user-guide.html";
 Name: "{group}\Read Me"; Filename: "{app}\Readme.txt";

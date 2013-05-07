@@ -4,8 +4,19 @@
 #
 # Usage:
 #
-#    ./slapos-client-config
+#    ./slapos-client-config certificate_file key_file
 #
+
+#
+# Show error message and waiting for user to press any key quit
+#
+function show_error_exit()
+{
+    msg=${1-Configure node failed.}
+    echo $msg
+    read -n 1 -t 15 -p "Press any key to exit..."
+    exit 1
+}
 
 slapos_client_home=~/.slapos
 client_configure_file=$slapos_client_home/slapos.cfg
@@ -32,7 +43,7 @@ if [[ -f "$1" ]] ; then
 elif [[ ! -f $client_certificate_file ]] ; then
     read -p "Where is certificate file: " certificate_file
     [[ ! -f "$certificate_file" ]] && \
-        echo "Certificate file $certificate_file doesn't exists." && exit 1
+        show_error_exit "Certificate file $certificate_file doesn't exists."
     echo "Copy certificate from $certificate_file to $client_certificate_file"
     cp $certificate_file $client_certificate_file
 fi
@@ -43,7 +54,7 @@ if [[ -f "$2" ]] ; then
 elif [[ ! -f $client_key_file ]] ; then
     read -p "Where is key file: " key_file
     [[ ! -f "$key_file" ]] && \
-        echo "Key file $key_file doesn't exists." && exit 1
+        show_error_exit "Key file $key_file doesn't exists."
     echo "Copy key from $key_file to $client_key_file"
     cp $key_file $client_key_file
 fi
@@ -51,10 +62,14 @@ fi
 if [[ ! -f $client_configure_file ]] ; then
     [[ -f $template_configure_file ]] || \
         (cd /etc/slapos; wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example) || \
-        (echo "Download slapos-client.cfg.example failed."; exit 1)
+        show_error_exit "Download slapos-client.cfg.example failed."
     cp $template_configure_file $client_configure_file
 fi
 
 sed -i -e "s%^cert_file.*$%cert_file = $client_certificate_file%" \
        -e "s%^key_file.*$%key_file = $client_key_file%" \
        $client_configure_file
+
+echo SlapOS Client configure successfully.
+read -n -t 10 -p "Press any key to exit..."
+exit 0

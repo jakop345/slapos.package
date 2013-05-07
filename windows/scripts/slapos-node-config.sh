@@ -77,6 +77,17 @@ function connection2guid()
         sed -e "s/^GUID\s*:\s*//"
 }
 
+#
+# Show error message and waiting for user to press any key quit
+#
+function show_error_exit()
+{
+    msg=${1-Configure node failed.}
+    echo $msg
+    read -n 1 -t 15 -p "Press any key to exit..."
+    exit 1
+}
+
 node_certificate_file=/etc/opt/slapos/ssl/computer.crt
 node_key_file=/etc/opt/slapos/ssl/computer.key
 node_config_file=/etc/opt/slapos/slapos.cfg
@@ -98,8 +109,7 @@ if [[ ! " $original_connections " == *[\ ]$slapos_ifname[\ ]* ]] ; then
     devcon install $WINDIR\\inf\\netloop.inf *MSLOOP
     connection_name=$(get_new_connection $original_connections)
     [[ "X$connection_name" == "X" ]] && \
-        echo "Add msloop network adapter failed." && \
-        exit 1
+        show_error_exit "Add msloop network adapter failed."
     echo
     netsh interface set interface name="$connection_name" newname="$slapos_ifname"
 fi
@@ -128,7 +138,7 @@ else
     read -p "computer id: " computer_id
 fi
 [[ "$computer_id" == COMP-+([0-9]) ]] || \
-    (echo "Invalid computer id specified."; exit 1)
+    show_error_exit "Invalid computer id specified."
 
 if [[ -f "$2" ]] ; then
     echo "Copy certificate from $2 to $node_certificate_file"
@@ -136,7 +146,7 @@ if [[ -f "$2" ]] ; then
 elif [[ ! -f $node_certificate_file ]] ; then
     read -p "Where is certificate file: " certificate_file
     [[ ! -f "$certificate_file" ]] && \
-        echo "Certificate file $certificate_file doesn't exists." && exit 1
+        show_error_exit "Certificate file $certificate_file doesn't exists."
     echo "Copy certificate from $certificate_file to $node_certificate_file"
     cp $certificate_file $node_certificate_file
 fi
@@ -147,7 +157,7 @@ if [[ -f "$3" ]] ; then
 elif [[ ! -f $node_key_file ]] ; then
     read -p "Where is key file: " key_file
     [[ ! -f "$key_file" ]] && \
-        echo "Key file $key_file doesn't exists." && exit 1
+        show_error_exit "Key file $key_file doesn't exists."
     echo "Copy key from $key_file to $node_key_file"
     cp $key_file $node_key_file
 fi
@@ -164,7 +174,7 @@ ip -4 addr add $ipv4_local_network dev $slapos_ifname
 if [[ ! -f $node_config_file ]] ; then
     [[ -f $node_template_file ]] || \
         (cd /etc/slapos; wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example) || \
-        (echo "Download slapos.cfg.example failed."; exit 1)
+        show_error_exit "Download slapos.cfg.example failed."
     cp $node_template_file $node_config_file
 fi
 
@@ -175,6 +185,16 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = $ipv4_local_network%" \
         -e "s%^computer_id.*$%computer_id = $computer_id%" \
         $node_config_file
+
+# Config slapproxy
+if [[ $(grep -q "^\[slapproxy\]" $node_config_file) ]] ; then
+    echo "
+[slapproxy]
+host = 127.0.0.1
+port = 28080
+database_uri = /var/lib/slapproxy.db
+" >> $node_config_file
+fi
 
 #
 # Re6stnet
@@ -230,7 +250,8 @@ cd /etc/re6stnet
 if [[ ! -f re6stnet.conf ]] ; then
     re6st-conf --registry http://re6stnet.nexedi.com/
 fi
-[[ ! -f re6stnet.conf ]] && echo "Register to nexedi re6stnet failed" && exit 1
+[[ ! -f re6stnet.conf ]] && show_error_exit "Register to nexedi re6stnet failed"
+grep -q "^table " re6stnet.conf || echo "table 0" >> re6stnet.conf
 
 #
 # Add run item when windows startup
@@ -246,6 +267,8 @@ echo "Add ${init_script}.sh as Windows startup item."
 
 regtool -q set "$run_key\\$slapos_run_entry" \
   "\"$(cygpath -w /usr/bin/bash)\" --login -i ${init_script}.sh" || \
-echo "Add startup item failed."
+    show_error_exit "Add startup item failed."
 
+echo SlapOS Node configure successfully.
+read -n -t 10 -p "Press any key to exit..."
 exit 0
