@@ -48,6 +48,7 @@ Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin
 Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\usr\local\bin";
 
 Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\usr\local\bin";

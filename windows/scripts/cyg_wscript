@@ -1,0 +1,4 @@
+#! /bin/bash
+script=$(cygpath -w $1)
+shift
+cscript.exe $script $*
