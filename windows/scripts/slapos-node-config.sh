@@ -259,16 +259,31 @@ grep -q "^table " re6stnet.conf || echo "table 0" >> re6stnet.conf
 # Add run item when windows startup
 #
 init_script=/etc/slapos/scripts/init-slapos-node
+password_file=/etc/passwd
+password_orig=/etc/slapos-format-passwd.orig
+cygroot=$(cygpath -w -a /)
 echo "Add ${init_script}.sh as Windows startup item."
-# if [[ ! -f ${init_script}.bat ]] ; then
-#             cat <<EOF > ${init_script}.bat
-# "$(cygpath -w /usr/bin/bash)" --login -i ${init_script}.sh
-# EXIT 0
-# EOF
-# fi
+[[ -f ${init_script}.bat ]] && cat <<EOF > ${init_script}.bat
+@ECHO OFF
+SETLOCAL
 
+${cygroot:0:2}
+CD "$(cygpath -w /usr/bin)"
+.\cp $password_file $password_orig
+.\sed -i -e "s/^Administrator:unused:500:513/Administrator:unused:0:513/" $password_file
+START /B bash --login -i "${init_script}.sh"
+.\sleep 3
+.\cp $password_orig $password_file
+
+ENDLOCAL
+EXIT 0
+EOF
+
+# regtool -q set "$run_key\\$slapos_run_entry" \
+#   "\"$(cygpath -w /usr/bin/bash)\" --login -i ${init_script}.sh" || \
+#     show_error_exit "Add startup item failed."
 regtool -q set "$run_key\\$slapos_run_entry" \
-  "\"$(cygpath -w /usr/bin/bash)\" --login -i ${init_script}.sh" || \
+    "\"$(cygpath -w ${init_script}.bat)\"" || \
     show_error_exit "Add startup item failed."
 
 echo SlapOS Node configure successfully.
