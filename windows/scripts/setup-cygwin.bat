@@ -17,8 +17,8 @@ ECHO Packages: %PACKAGES%
 GOTO END
 
 :REMOTE_INSTALL
-SET PACKAGES=-P autobuild -P autoconf -P automake -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget 
-SET SITEOPTIONS=-s http://www.netgull.com/cygwin -s http://cygwin.petsads.us
+SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget 
+SET SITEOPTIONS=-s http://www.netgull.com/cygwin
 REM ECHO %2 | FINDSTR \. > /NULL
 REM IF %ERRORLEVEL% == 0 SET SITEOPTIONS=--site %2 --only-site
 IF /I %2 NEQ network SET SITEOPTIONS=-s %2 --only-site
