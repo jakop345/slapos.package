@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.2.3 (2013-04-24)
+------------------
+
+Fixes:
+
+ * Remove the "is it a VM" question, misleading and blocking. This allows to have a second disk (or... a VM) inside of your VM.
+
 1.2.2 (2013-04-24)
 ------------------
 
