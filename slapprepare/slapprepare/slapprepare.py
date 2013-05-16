@@ -310,14 +310,6 @@ def slapserver(config):
       if not dry_run:
         open(os.path.join(config.slapos_configuration, 'SlapContainer-needed'), 'w')
 
-
-    # Removing line in slapos script activating kvm in virtual
-    if config.virtual:
-      if not dry_run:
-        path = os.path.join('/', 'usr', 'sbin', 'slapos-boot-dedicated')
-        _call(['sed', '-i', "$d", path], dry_run=dry_run)
-        _call(['sed', '-i', "$d", path], dry_run=dry_run)
-
     # Adding slapos_firstboot in case of MultiDisk usage
     if not config.one_disk:
       for script in ['slapos_firstboot']:
@@ -470,13 +462,8 @@ class Config:
       print "Starting from scratch..."
       return False
 
-    self.virtual = get_yes_no("Is this a virtual Machine?", False)
-    if not self.virtual:
-      self.one_disk = not get_yes_no("Do you want to use SlapOS with a second disk?", True)
-      self.need_bridge = get_yes_no("Do you want the setup to allow virtual machines inside this node?", True)
-    else:
-      self.one_disk = True
-      self.need_bridge = False
+    self.one_disk = not get_yes_no("Do you want to use SlapOS with a second disk?", True)
+    self.need_bridge = get_yes_no("Do you want the setup to allow virtual machines inside this node?", True)
 
     self.force_vpn = get_yes_no("Do you want to use vpn to provide ipv6?", True)
     self.force_slapcontainer = get_yes_no("Do you want to force the use lxc on this computer?", False)
@@ -498,13 +485,11 @@ class Config:
         print "URL \"web\" of master: %s" % self.master_url_web
       print "Number of partition: %s" % (self.partition_amount)
       print "Computer name: %s" % self.computer_name
-    print "Virtual Machine: %s" % self.virtual
     print "Network bridge for hosted VMs: %s" % self.need_bridge
     print "Ipv6 over VPN: %s" % self.force_vpn
     print "Remote ssh access: %s" % self.need_ssh
     print "Prepared to use lxc: %s" % self.force_slapcontainer
-    if not self.virtual:
-      print "Use a second disk: %s" % (not self.one_disk)
+    print "Use a second disk: %s" % (not self.one_disk)
 
 
 def prepare_from_scratch(config):
