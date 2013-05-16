@@ -484,7 +484,7 @@ class Config:
       self.ipv6_interface = "tapVPN"
     else:
       self.ipv6_interface = ""
-    self.need_ssh = get_yes_no("Do you want a remote ssh access?", True)
+    self.need_ssh = get_yes_no("Do you want to (re)configure remote SSH access?", True)
 
     return True
 
