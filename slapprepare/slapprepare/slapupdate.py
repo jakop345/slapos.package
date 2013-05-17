@@ -173,6 +173,9 @@ def update_system ():
   """ Dist-Upgrade of system """
   _call(['zypper','--gpg-auto-import-keys','dup','-ly'], stdout = None)
 
+def update_slapprepare_scripts ():
+  """ Run slapprepare -u (script that upgrade boot scripts and so on) """
+  _call(['slapprepare','-u'], stdout = None)
 
 def download_info_from_networkcache(path,slapos_conf):
   """
@@ -264,6 +267,7 @@ def update_machine(config):
     # Check if dist-upgrade is needed
     if suse_version() < config.opensuse_version:
       logger.info("We will now upgrade your system")
+      update_slapprepare_scripts()
       update_system()
       os.system('reboot')
     else :
