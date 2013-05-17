@@ -1,1 +1,11 @@
 Net Resource Usage Report For Windows
+
+Build extentions
+================
+
+$ python setup.py build
+
+Test basic functions
+====================
+
+$ python tests.py

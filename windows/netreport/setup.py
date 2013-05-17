@@ -30,9 +30,8 @@ if sys.platform.startswith("cygwin"):
                             sources=['src/netuse.c'],
                             define_macros=[('_WIN32_WINNT', '0x0503'),
                                            ('USE_SYS_TYPES_FD_SET', 1)],
-                            libraries=["psapi", "kernel32", "advapi32",
-                                       "shell32", "netapi32", "iphlpapi",
-                                       "wtsapi32"],
+                            libraries=["kernel32", "advapi32", "shell32",
+                                       "netapi32", "mpr"],
                             #extra_compile_args=["/Z7"],
                             #extra_link_args=["/DEBUG"]
                             )]
