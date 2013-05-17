@@ -134,6 +134,7 @@ netuse_user_info(PyObject *self, PyObject *args)
 static PyObject *
 netuse_map_drive(PyObject *self, PyObject *args)
 {
+  PyErr_SetString(PyExc_RuntimeError, "Not Implemented");
   return NULL;
 }
 
@@ -144,8 +145,8 @@ netuse_usage_report(PyObject *self, PyObject *args)
   PyObject *retvalue = NULL;
   DWORD bitmasks;
   char chdrive = '@';
-  char  drivepath[4] = { 'A', ':', '\\', 0 };
-  char  drivename[3] = { 'A', ':', 0 };
+  char  drivepath[] = { 'A', ':', '\\', 0 };
+  char  drivename[] = { 'A', ':', 0 };
   ULARGE_INTEGER lFreeBytesAvailable;
   ULARGE_INTEGER lTotalNumberOfBytes;
   ULARGE_INTEGER lTotalNumberOfFreeBytes;
@@ -198,7 +199,7 @@ netuse_usage_report(PyObject *self, PyObject *args)
                                  &cchBuff
                                  );
     if (dwResult == NO_ERROR) {
-      if (servername) {
+      if (serverlen) {
         if ((cchBuff < serverlen + 3) ||
             (strncmp(servername, szRemoteName+2, serverlen) != 0) ||
             (szRemoteName[serverlen + 2] != '\\')
@@ -282,9 +283,11 @@ static PyMethodDef NetUseMethods[] = {
     netuse_usage_report,
     METH_VARARGS,
     (
-     "usagereport()\n\n"
-     "Return a tuple to report all the mapped drive information:\n"
-     "(user, domain, drive, usage, total).\n"
+     "usagereport(servername='')\n\n"
+     "Return a tuple to report all the net drive information:\n"
+     "(drive, remote, available, free, total).\n"
+     "If servername is not empty, then only net drives in the specified server\n"
+     "are returned.\n"
      )
   },
   {NULL, NULL, 0, NULL}
