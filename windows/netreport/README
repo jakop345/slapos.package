@@ -8,4 +8,44 @@ $ python setup.py build
 Test basic functions
 ====================
 
+Maybe no test modules installed in the cygwin python. We need copy all
+the test library files to python library path.
+
+$ cd src
 $ python tests.py
+
+Here are example of src/Makefile:
+
+PYTHON = /opt/slapos/bin/python
+
+.PHONY : test 
+
+build: netuse.c
+	(cd ..; $(PYTHON) setup.py build)
+
+test: build
+	$(PYTHON) tests.py
+
+
+Then run test:
+
+$ cd src
+$ make test
+
+Use Cases
+=========
+
+Slave Node
+----------
+
+Master Node
+-----------
+
+Exchange Data Format
+====================
+
+Issues
+======
+
+1. Some records may be lost if the computer is shutdown in unnormal way.
+

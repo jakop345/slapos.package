@@ -5,15 +5,20 @@ import os
 import tempfile
 import shutil
 
-import netuse
+sys.path.insert(0, os.getcwd())
+
+import test.test_support
+netuse = test.test_support.import_module('netuse')
+threading = test.test_support.import_module('threading')
 import unittest
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        pass
+        self._threads = test.test_support.threading_setup()
 
     def tearDown(self):
-        pass
+        test.test_support.threading_cleanup(*self._threads)
+        test.test_support.reap_children()
 
 class NetUsageTests(BaseTestCase):
 
