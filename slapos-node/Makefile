@@ -17,5 +17,7 @@ install: all
 	mkdir -p $(DESTDIR)/etc/openvpn/
 	cp -r template/openvpn/* $(DESTDIR)/etc/openvpn/
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
+	# By default, we want to activate openvpn usage
+	touch $(DESTDIR)/etc/opt/openvpn-needed
 clean:
 #	cd slapos; make clean
