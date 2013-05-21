@@ -264,7 +264,7 @@ static PyMethodDef NetUseMethods[] = {
     netuse_user_info,
     METH_VARARGS,
     (
-     "userinfo()\n\n"
+     "userInfo()\n\n"
      "Get the logon user information, return a tuple:\n"
      "(user, domain, server).\n"
      )
@@ -274,12 +274,12 @@ static PyMethodDef NetUseMethods[] = {
     netuse_map_drive,
     METH_VARARGS,
     (
-     "mapdrive()\n\n"
+     "mapDrive()\n\n"
      "Create mapped drive from server shared folder\n"
      )
   },
   {
-    "usagereport",
+    "usageReport",
     netuse_usage_report,
     METH_VARARGS,
     (

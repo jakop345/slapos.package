@@ -23,17 +23,22 @@ class BaseTestCase(unittest.TestCase):
 class NetUsageTests(BaseTestCase):
 
     def test_user_info(self):
-        u = netuse.userinfo()
+        u = netuse.userInfo()
         self.assertEquals(len(u), 3)
         self.assertEquals(u, [])
 
     def test_usage_report(self):
-        r = netuse.usagereport()
+        r = netuse.usageReport()
         self.assertEquals(len(r), 0)
         self.assertEquals(r, [])
 
     def test_usage_report_server(self):
-        r = netuse.usagereport('myserver')
+        r = netuse.usageReport('myserver')
+        self.assertEquals(len(r), 0)
+        self.assertEquals(r, [])
+
+    def test_usage_report_server_is_none(self):
+        r = netuse.usageReport(None)
         self.assertEquals(len(r), 0)
         self.assertEquals(r, [])
 

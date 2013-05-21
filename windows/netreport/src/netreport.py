@@ -40,7 +40,7 @@
 #
 # main process
 #
-#   read data from json file
+#   read data from data file (pickle)
 #
 #   check start state, there are 3 cases
 #
@@ -90,7 +90,16 @@
 #
 #     Save unsending queue, report id and state to pickle file.
 #
-
+#
+#   Interface of computer:
+#
+#     reportNetDriveUsage will post a list of record:
+#
+#       (computer_id, sequence_no, timestamp, duration,
+#        domain, user, usage, remark)
+#
+#     getReportSequenceNo?computer_id=XXXX
+#     
 import argparse
 from datetime import datetime
 import logger
@@ -128,7 +137,7 @@ def parseArgumentTuple():
                         default="net_drive_usage_report.data")
     parser.add_argument("--server-name",
                         help="Interval in seconds to send report to master.",
-                        default=None)
+                        default="")
     option = parser.parse_args()
 
     # Build option_dict
@@ -150,8 +159,10 @@ class NetDriveUsageReporter(object):
       self.slap = slapos.slap.slap()
       self.slap_computer = None
       self.report_sequence_no = 0
-      self._queue = Queue.queue(self.queue_size)
+      self._queue = None
       self._state_file = self.data_file + ".state"
+      self._domain_name = None
+      self._domain_account = None
 
     def initializeConnection(self):
         connection_dict = {}
@@ -161,22 +172,32 @@ class NetDriveUsageReporter(object):
                                        **connection_dict)
         self.slap_computer = self.slap.registerComputer(self.computer_id)
 
+    def _getUserInfo(self):
+        user_info = netuser.userInfo()
+        self._domain_name = user_info[1]
+        self._domain_account = user_info[0]
+
     def run(self):
+        self._getUserInfo()
         self.initializeConnection()
         self._loadReportState()
         self._sendReportInQueue()
         self.report_state = REPORT_STATE_RUNNING
         pickle.dump(self.report_state, self._state_file)
         current_timestamp = datetime.now()
-        while True:
-            last_timestamp = datetime.now()
-            d = last_timestamp - current_timestamp
-            if d.seconds < self.report_interval:
-                sleep(self.report_interval)
-                continue
-            current_timestamp = last_timestamp
-            r = self.getUsageReport()
-            self.sendUsageReport(r)
+        try:
+            while True:
+                last_timestamp = datetime.now()
+                d = last_timestamp - current_timestamp
+                if d.seconds < self.report_interval:
+                    sleep(self.report_interval)
+                    continue
+                r = self.getUsageReport(d.seconds, current_timestamp)
+                current_timestamp = last_timestamp
+                if not self.sendUsageReport(r):
+                    break
+        except KeyboardInterrupt:
+            pass
         self._saveReportState()
         self.report_state = REPORT_STATE_STOP
         pickle.dump(self.report_state, self._state_file)
@@ -199,34 +220,35 @@ class NetDriveUsageReporter(object):
             pass # get sequence no from master sever
 
         self.report_sequence_no = s["sequence-no"]
-        for r in s["queue"]:
-            self._queue.put(r)
+        self._queue = s["queue"]
 
     def _saveReportState(self):
-        q = []
-        try:
-            while not self._queue.empty():
-                q.append(self._queue.get_nowait())
-        except Queue.Empty:
-            pass
         s = {
             "computer-id" : self.computer_id,
             "sequence-no" : self.report_sequence_no,
-            "queue" : q,
+            "queue" : self._queue,
             }
         pickle.dump(s, self.data_file)
 
-    def getUsageReport(self):
+    def getUsageReport(self, duration, timestamp=None):
+        if timestamp is None:
+            timestamp = datetime.now()
+        r = [self.computer_id, self.report_sequence_no, timestamp, duration,
+             self._domain_name, self._domain_account, ]
         self.report_sequence_no += 1
-        return netuse.usagereport()
+        remark = []
+        total = 0
+        for x in netuse.usageReport(self.server_name):
+            total += x[2]
+            remark.append(" ".join(map(str, x[0:3])))
+        r.append(total)
+        r.append("\n".join(remark))
+        return r
 
-    def sendUsageReport(self, report):
-        if self._sendReportInQueue():
-            if not self._postData(report):
-                self._queue.put(report)
-        else:
-            self._queue.put(report)
-
+    def sendUsageReport(self, r):
+        self._queue[0:0] = [r]
+        return self._sendReportInQueue()
+            
     def _postData(self, r):
         """Send a marshalled dictionary of the net drive usage record
         serialized via_getDict.
@@ -236,10 +258,11 @@ class NetDriveUsageReporter(object):
     def _sendReportInQueue(self):
         try:
             while True:
-                r = self._queue.get_nowait()
+                r = self._queue[-1]
                 if not self._postData(r):
                     return False
-        except  Queue.Empty:
+                self._queue.pop()
+        except IndexError:
             pass
         return True
 
