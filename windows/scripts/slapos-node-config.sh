@@ -242,7 +242,7 @@ if [[ ! -d /opt/re6stnet ]] ; then
         mv $(ls -d re6stnet-*) re6stnet
     else
         echo "Clone re6stnet from http://git.erp5.org/repos/re6stnet.git"
-        git clone -b cygwin -n http://git.erp5.org/repos/re6stnet.git
+		git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
     fi
     cd re6stnet
     python setup.py install || echo "Install re6stnet failed."

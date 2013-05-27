@@ -21,6 +21,9 @@ extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
 " > buildout.cfg
+else
+    echo "Edit $slapos_home/buildout.cfg"
+	sed -i -e "s%^extends = .*$%extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg%g" buildout.cfg
 fi
 
 if [[ ! -f bootstrap.py ]] ; then
