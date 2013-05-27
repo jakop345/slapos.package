@@ -24,9 +24,9 @@ Source: "cygwin-packages\*"; DestDir: "{app}\cygwin-packages"; Flags: recursesub
 Source: "publish\buildout\slapos\*"; DestDir: "{app}\cygwin\opt\slapos"; Flags: recursesubdirs;
 Source: "opt\git\slapos.core\slapos.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
 Source: "opt\git\slapos.core\slapos-client.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
-Source: "opt\downloads\pyOpenSSL-0.13.tar.gz"; DestDir: "{app}\cygwin"; DestName: "pyOpenSSL.tar.gz"; Flags: deleteafterinstall;
-Source: "opt\git\re6stnet\dist\re6stnet-0.1.tar.gz"; DestDir: "{app}\cygwin"; DestName: "re6stnet-0.1.tar.gz"; Flags: deleteafterinstall;
-Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin"; DestName: "miniupnpc.tar.gz"; Flags: deleteafterinstall;
+Source: "opt\downloads\pyOpenSSL-0.13.tar.gz"; DestDir: "{app}\cygwin"; DestName: "pyOpenSSL.tar.gz";
+Source: "opt\git\re6stnet\dist\re6stnet-0.1.tar.gz"; DestDir: "{app}\cygwin"; DestName: "re6stnet-0.1.tar.gz";
+Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin"; DestName: "miniupnpc.tar.gz";
 
 Source: "src\patch\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
 Source: "src\patch\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
