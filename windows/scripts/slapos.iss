@@ -3,11 +3,11 @@
 [Setup]
 AppName=SlapOS
 AppVersion=0.158
-AppVerName=SlapOS Windows 0.158.2
+AppVerName=SlapOS Windows 0.158.3
 DefaultDirName=C:\slapos
 DefaultGroupName=SlapOS
 OutputDir=D:\slapos\publish\Output
-OutputBaseFilename=slapos-0.158.2-windows-x86
+OutputBaseFilename=slapos-0.158.3-windows-x86
 SourceDir=D:\slapos
 Uninstallable=yes
 
@@ -61,6 +61,7 @@ Source: "opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app
 Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-node-config.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-client-config.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\pre-uninstall.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 
 Source: "src\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html";
 Source: "src\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
@@ -83,6 +84,9 @@ Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"" network"; StatusMsg: 
 Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/post-install.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Configure Cygwin..."; Flags: skipifdoesntexist runhidden;
 Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/build-slapos.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Builout process"; StatusMsg: "Building SlapOS..."; Flags: skipifdoesntexist;
 Filename: "{app}\cygwin\autorebase.bat"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist runhidden;
+
+[UninstallRun]
+Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/pre-uninstall.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Remove Service of Cygwin"; Flags: skipifdoesntexist runhidden;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\cygwin" ;
