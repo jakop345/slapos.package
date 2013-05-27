@@ -86,7 +86,7 @@ Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scrip
 Filename: "{app}\cygwin\autorebase.bat"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist runhidden;
 
 [UninstallRun]
-Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/pre-uninstall.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Remove Service of Cygwin"; Flags: skipifdoesntexist runhidden;
+Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/pre-uninstall.sh"; WorkingDir: "{app}\cygwin\bin"; Flags: skipifdoesntexist runhidden;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\cygwin" ;
