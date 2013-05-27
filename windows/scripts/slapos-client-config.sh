@@ -6,6 +6,7 @@
 #
 #    ./slapos-client-config certificate_file key_file
 #
+export PATH=/usr/local/bin:/usr/bin:$PATH
 
 #
 # Show error message and waiting for user to press any key quit

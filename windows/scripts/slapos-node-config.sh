@@ -18,6 +18,7 @@
 #
 #    ./slapos-node-config
 #
+export PATH=/usr/local/bin:/usr/bin:$PATH
 
 #
 # Return connection name by line, and replace space with '%'

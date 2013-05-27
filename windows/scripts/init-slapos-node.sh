@@ -10,6 +10,7 @@
 #
 #    4. 
 #    
+export PATH=/usr/local/bin:/usr/bin:$PATH
 
 ifname=re6stnet-lo
 

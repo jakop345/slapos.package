@@ -1,4 +1,5 @@
 #! /bin/bash
+export PATH=/usr/local/bin:/usr/bin:$PATH
 
 slapos_home=/opt/slapos
 slapos_cache=/opt/download-cache
