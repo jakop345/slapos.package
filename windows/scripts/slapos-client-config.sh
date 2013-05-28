@@ -74,5 +74,5 @@ sed -i -e "s%^cert_file.*$%cert_file = $client_certificate_file%" \
        $client_configure_file
 
 echo SlapOS Client configure successfully.
-read -n 1 -t 10 -p "Press any key to exit..."
+read -n 1 -p "Press any key to exit..."
 exit 0

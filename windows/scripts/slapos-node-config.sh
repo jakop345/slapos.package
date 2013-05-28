@@ -264,7 +264,7 @@ password_file=/etc/passwd
 password_orig=/etc/slapos-format-passwd.orig
 cygroot=$(cygpath -w -a /)
 echo "Add ${init_script}.sh as Windows startup item."
-[[ -f ${init_script}.bat ]] && cat <<EOF > ${init_script}.bat
+[[ ! -f ${init_script}.bat ]] && cat <<EOF > ${init_script}.bat
 @ECHO OFF
 SETLOCAL
 
@@ -288,5 +288,5 @@ regtool -q set "$run_key\\$slapos_run_entry" \
     show_error_exit "Add startup item failed."
 
 echo SlapOS Node configure successfully.
-read -n 1 -t 10 -p "Press any key to exit..."
+read -n 1 -p "Press any key to exit..."
 exit 0

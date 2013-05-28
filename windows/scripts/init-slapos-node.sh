@@ -27,7 +27,7 @@ echo "Start re6stent (pid:$!)in the background OK."
 
 # Run slapformat
 echo "Initializing SlapOS Node ..."
-/bin/bash --login -i /opt/slapos/bin/slapos node format -c --now
+/opt/slapos/bin/slapos node format -c --now
 if (( $? )) ; then
     echo "Initialize SlapOS Node failed."
 else

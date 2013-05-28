@@ -25,11 +25,11 @@ else
     cp /etc/passwd /etc/passwd.orig
 fi
 
-sed -i -e "s/Administrator:unused:500:/Administrator:unused:0:/g" /etc/passwd
+# sed -i -e "s/Administrator:unused:500:/Administrator:unused:0:/g" /etc/passwd
 grep -q "^root:" /etc/passwd
 if (( $? != 0 )) ; then
     myaccount=$(grep "^Administrator:" /etc/passwd | \
-              sed -e "s/Administrator:/root:/g")
+              sed -e "s/Administrator:unused:500:/root:unused:0:/g")
     if [[ "${myaccount:0:4}" == root ]] ; then
         echo $myaccount >> /etc/passwd
     else
