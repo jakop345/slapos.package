@@ -16,18 +16,18 @@ ifname=re6stnet-lo
 
 # Run re6stnet
 echo "Start re6stnet ..."
-(cd /etc/re6stnet; re6stnet @re6stnet.conf -I $ifname -i $ifname &)
-echo "Start re6stent (pid:$!)in the background OK."
+(cd /etc/re6stnet; re6stnet @re6stnet.conf --ovpnlog -I $ifname -i $ifname &)
+echo "Start re6stent in the background OK."
 
-# echo "Waiting re6stent network work ..."
-# while true ; do
-#   ping6 slap.vifib.com > /dev/null && break
-# done
-# echo "re6stnet network OK."
+echo "Waiting re6stent network work ..."
+while true ; do
+   ping6 slap.vifib.com && break
+done
+echo "re6stnet network OK."
 
 # Run slapformat
 echo "Initializing SlapOS Node ..."
-/opt/slapos/bin/slapos node format -c --now
+/opt/slapos/bin/slapos node format -cv --now
 if (( $? )) ; then
     echo "Initialize SlapOS Node failed."
 else
