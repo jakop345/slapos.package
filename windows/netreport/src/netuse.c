@@ -138,6 +138,41 @@ netuse_map_drive(PyObject *self, PyObject *args)
   return NULL;
 }
 
+static int
+check_duplicate_shared_folder(PyObject *retvalue, const char *folder)
+{
+  if (!PyList_Check(retvalue))
+    return -1;
+
+  Py_ssize_t size = PyList_Size(retvalue);
+  int len = strlen(folder);
+  int len2;
+  PyObject *item;
+  char * s;
+  
+  while (size) {
+    size --;
+    item = PySequence_GetItem(retvalue, size);
+    if (!PySequence_Check(item))
+      return -1;
+    s = PyString_AsString(PySequence_GetItem(item, 1));
+    if (s == NULL)
+      return -1;
+    len2 = strlen(s);
+    
+    if (strncmp(folder, s, len > len2 ? len : len2) == 0) {
+      if (len2 > len) {
+        if (PySequence_DelItem(retvalue, size) == -1)
+          return -1;
+        size --;
+      }
+      else
+        return 1;
+    }
+  }
+  return 0;
+}
+
 static PyObject *
 netuse_usage_report(PyObject *self, PyObject *args)
 {
@@ -226,7 +261,17 @@ netuse_usage_report(PyObject *self, PyObject *args)
       Py_XDECREF(retvalue);
       return NULL;
     }
-    
+
+    switch (check_duplicate_shared_folder(retvalue, szRemoteName)) {
+    case -1:
+      Py_XDECREF(retvalue);
+      return NULL;
+    case 1:
+      continue;
+    default:
+      break;
+    }
+
     if (GetDiskFreeSpaceEx(drivepath,
                            &lFreeBytesAvailable,
                            &lTotalNumberOfBytes,
@@ -254,7 +299,6 @@ netuse_usage_report(PyObject *self, PyObject *args)
      return NULL;
     }
   }
-
   return retvalue;
 }
 
