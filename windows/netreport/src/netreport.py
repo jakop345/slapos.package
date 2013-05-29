@@ -27,11 +27,11 @@
 #
 ##############################################################################
 import argparse
-import datetime
+from datetime import datetime, date
 import logger
+from lxml import etree
 import netuse
 import os.path
-import pickle
 import slapos.slap.slap
 import sys
 from time import sleep
@@ -75,7 +75,6 @@ class NetDriveUsageReporter(object):
     def __init__(self, option_dict):
       for option, value in option_dict.items():
         setattr(self, option, value)
-      self.slap = slapos.slap.slap()
       self.slap_computer = None
       self._domain_name = None
       self._domain_account = None
@@ -87,58 +86,53 @@ class NetDriveUsageReporter(object):
         connection_dict = {}
         connection_dict['key_file'] = self.key_file
         connection_dict['cert_file'] = self.cert_file
-        self.slap.initializeConnection(self.master_url,
-                                       **connection_dict)
-        self.slap_computer = self.slap.registerComputer(self.computer_id)
+        slap = slapos.slap.slap()
+        slap.initializeConnection(self.master_url,
+                                  **connection_dict)
+        self.slap_computer = slap.registerComputer(self.computer_id)
 
     def initializeConfigData(self):
         user_info = netuser.userInfo()
         self._domain_account = "%s\\%s" % user_info[0:2]
 
         q = self._db.execute
-        s = "SELECT _rowid, report_date FROM config WHERE domain_account=? and computer_id=?"
-        r =
+        s = "SELECT _rowid, report_date FROM config " \
+            "WHERE domain_account=? and computer_id=?"
         for r in q(s, (self._domain_account, self.computer_id)):
             self._config_id, self._report_date = r
         else:
-            q("INSERT OR REPLACE INTO config(domain_account, computer_id, report_date)"
+            q("INSERT OR REPLACE INTO config"
+              "(domain_account, computer_id, report_date)"
               " VALUES (?,?,?)",
-              (self._domain_account, self.computer_id, datetime.now()))
+              (self._domain_account, self.computer_id, date.today().isoformat()))
         for r in q(s, (self._domain_account, self.computer_id)):
             self._config_id, self._report_date = r
 
     def run(self):
         self.initializeConfigData()
         self.initializeConnection()
-        current_timestamp = datetime.now()
+        last_timestamp = datetime.now()
         try:
             while True:
-                last_timestamp = datetime.now()
-                d = last_timestamp - current_timestamp
+                current_timestamp = datetime.now()
+                d = current_timestamp - last_timestamp
                 if d.seconds < self.report_interval:
                     sleep(self.report_interval)
                     continue
-                r = self.getUsageReport(d.seconds, current_timestamp)
-                current_timestamp = last_timestamp
-                self.insertRecord(r[0], r[1], r[2], r[3])
+                self.insertUsageReport(last_timestamp.isoformat(), d.seconds)
                 self.sendReport()
+                last_timestamp = current_timestamp
         except KeyboardInterrupt:
             pass
 
-    def getUsageReport(self, duration, timestamp=None):
-        if timestamp is None:
-            timestamp = datetime.now()
-        r = [self.computer_id, self.report_sequence_no, timestamp, duration,
-             self._domain_name, self._domain_account, ]
-        self.report_sequence_no += 1
-        remark = []
-        total = 0
-        for x in netuse.usageReport(self.server_name):
-            total += x[2]
-            remark.append(" ".join(map(str, x[0:3])))
-        r.append(total)
-        r.append("\n".join(remark))
-        return r
+    def insertUsageReport(self, start, duration):
+        q = self._db.execute
+        for r in netuse.usageReport(self.server_name):
+            q( "INSERT INTO net_drive_usage "
+               "(config_id, drive_letter, remote_folder, "
+               " start, duration, usage_bytes )"
+               " VALUES (?, ?, ?, ?, ?, ?)",
+               (self._config_id, r[0], r[1], start, duration, r[3] - r[2]))
 
     def sendReport(self):
         # If report_date is not today, then
@@ -146,10 +140,9 @@ class NetDriveUsageReporter(object):
         #    Send xml data to master node
         #    Change report_date to today
         #    (Optional) Move all the reported data to histroy table
-        today = datetime.now()
+        today = date.today().isoformat()
         if self._report_date < today:
-            xml_data = self.generateDailyReport()
-            self._postData(xml_data)
+            self._postData(self.generateDailyReport())
             self._db.execute("UPDATE config SET report_date=? where _rowid=?",
                              (today, self._config_id))
 
@@ -168,45 +161,51 @@ class NetDriveUsageReporter(object):
             report_date TEXT NOT NULL,
             remark TEXT)""")
         q("""CREATE TABLE IF NOT EXISTS net_drive_usage (
-            id INTEGER PRIMARY KEY,
             config_id INTEGER REFERENCES config ( _rowid ),
             drive_letter TEXT NOT NULL,
             remote_folder TEXT NOT NULL,
-            start_timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+            start TEXT DEFAULT CURRENT_TIMESTAMP,
             duration FLOAT NOT NULL,
             usage_bytes INTEGER,
             remark TEXT)""")
         q("""CREATE TABLE IF NOT EXISTS net_drive_usage_history (
-            id INTEGER PRIMARY KEY,
             config_id INTEGER REFERENCES config ( _rowid ),
             drive_letter TEXT NOT NULL,
             remote_folder TEXT NOT NULL,
-            start_timestamp TEXT NOT NULL,
+            start TEXT NOT NULL,
             duration FLOAT NOT NULL,
-            bytes INTEGER
+            usage_bytes INTEGER,
             remark TEXT)""")
-
-    def insertRecord(self, drive_letter, remote_foler, duration, usage_bytes):
-        self._db.execute("INSERT INTO net_drive_usage "
-                         "(config_id, drive_letter, remote_folder, duration, usage_bytes )"
-                         " VALUES (?, ?, ?, ?, ?)",
-                         (self._config_id, drive_letter, remote_folder, duration, usage_bytes))
 
     def generateDailyReport(self, report_date=None, remove=False):
         if report_date is None:
             report_date = self._report_date
         q = self._db.execute
-        xml_data = ""
-        for r in q("SELECT * FROM net_drive_usage WHERE start_timestamp=?", report_date):
-            pass
+        root = etree.Element("report")
+        computer = etree.Element("computer")
+        computer.text = self.computer_id        
+        account = etree.Element("account")
+        account.text = self._domain_account
+        report_date = etree.Element("date")
+        report_date.text = self._report_date
+        usage = etree.Element("usage")
+        details = etree.Element("details")
+        root.append(computer, account, report_date, usage, details)
+        total = 0
+        for r in q("SELECT duration, usage_bytes FROM net_drive_usage "
+                   "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
+                   (self._config_id, report_date)):
+            total += r[0] * r[1]
+        usage.text = str(total)
         if remove:
             q("INSERT INTO net_drive_usage_history "
-              "SELECT * FROM net_drive_usage WHERE start_timestamp=?",
-              report_date)
-            q("DELETE FROM net_drive_usage WHERE start_timestamp=?",
-              report_date)
-        return xml_data
-
+              "SELECT * FROM net_drive_usage "
+              "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
+              (self._config_id, report_date))
+            q("DELETE FROM net_drive_usage "
+              "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
+              (self._config_id, report_date))
+        return etree.tostring(root, xml_declaration=True)
 
 def main():
     reporter = NetDriveUsageReporter(parseArgumentTuple())
