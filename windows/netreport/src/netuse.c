@@ -317,7 +317,7 @@ netuse_usage_report(PyObject *self, PyObject *args)
 
 static PyMethodDef NetUseMethods[] = {
   {
-    "userinfo",
+    "userInfo",
     netuse_user_info,
     METH_VARARGS,
     (
@@ -327,7 +327,7 @@ static PyMethodDef NetUseMethods[] = {
      )
   },
   {
-    "mapdrive",
+    "mapDrive",
     netuse_map_drive,
     METH_VARARGS,
     (
