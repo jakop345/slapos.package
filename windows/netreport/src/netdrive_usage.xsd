@@ -9,18 +9,18 @@
   </xs:element>
   <xs:element name="item">
     <xs:complexType>
-      <xs:all>
+      <xs:sequence>
         <xs:element name="computer" type="xs:string"/>
         <xs:element name="account" type="xs:string"/>
         <xs:element name="date" type="xs:date"/>
         <xs:element name="usage" type="xs:decimal"/>
-        <xs:element ref="details" minOccurs="0" maxOccurs="1"/>
-      </xs:all>
+        <xs:element ref="details"/>
+      </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="details">
     <xs:complexType>
-      <xs:element ref="line" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="line" minOccurs="0" maxOccurs="unbounded"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="line">
