@@ -110,6 +110,7 @@ class NetDriveUsageReporter(object):
 
     def run(self):
         self.initializeConfigData()
+        self.sendAllReport()
         self.initializeConnection()
         last_timestamp = datetime.now()
         try:
@@ -134,6 +135,17 @@ class NetDriveUsageReporter(object):
                " VALUES (?, ?, ?, ?, ?, ?)",
                (self._config_id, r[0], r[1], start, duration, r[3] - r[2]))
 
+    def sendAllReport(self):
+        """Called at startup of this application, send all report
+          in the config table."""
+        q = self._db.execute
+        for r in q("SELECT _rowid, domain_account, computer_id, report_date "
+                   "FROM config "
+                   "WHERE report_date < date('now')"):
+            self._postData(self.generateDailyReport(*r))
+        q("UPDATE config SET report_date = date('now') "
+          "WHERE report_date < date('now')")
+
     def sendReport(self):
         # If report_date is not today, then
         #    Generate xml data from local table by report_date
@@ -142,7 +154,10 @@ class NetDriveUsageReporter(object):
         #    (Optional) Move all the reported data to histroy table
         today = date.today().isoformat()
         if self._report_date < today:
-            self._postData(self.generateDailyReport())
+            self._postData(self.generateDailyReport(self._config_id,
+                                                    self.computer_id,
+                                                    self._domain_account,
+                                                    self._report_date))
             self._db.execute("UPDATE config SET report_date=? where _rowid=?",
                              (today, self._config_id))
 
@@ -150,7 +165,8 @@ class NetDriveUsageReporter(object):
         """Send a marshalled dictionary of the net drive usage record
         serialized via_getDict.
         """
-        self.slap_computer.reportNetDriveUsage(xml_data)
+        if xml_data is not None:
+            self.slap_computer.reportNetDriveUsage(xml_data)
 
     def initializeDatabase(self, db_path):
         self._db = sqlite3.connect(db_path, isolation_level=None)
@@ -177,35 +193,35 @@ class NetDriveUsageReporter(object):
             usage_bytes INTEGER,
             remark TEXT)""")
 
-    def generateDailyReport(self, report_date=None, remove=False):
-        if report_date is None:
-            report_date = self._report_date
+    def generateDailyReport(self, config_id, computer_id, domain_account,
+                                  report_date, remove=True):
         q = self._db.execute
         root = etree.Element("report")
         computer = etree.Element("computer")
-        computer.text = self.computer_id        
+        computer.text = computer_id
         account = etree.Element("account")
-        account.text = self._domain_account
+        account.text = domain_account
         report_date = etree.Element("date")
-        report_date.text = self._report_date
+        report_date.text = report_date
         usage = etree.Element("usage")
         details = etree.Element("details")
         root.append(computer, account, report_date, usage, details)
         total = 0
         for r in q("SELECT duration, usage_bytes FROM net_drive_usage "
                    "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-                   (self._config_id, report_date)):
+                   (_config_id, report_date)):
             total += r[0] * r[1]
         usage.text = str(total)
         if remove:
             q("INSERT INTO net_drive_usage_history "
               "SELECT * FROM net_drive_usage "
               "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-              (self._config_id, report_date))
+              (_config_id, report_date))
             q("DELETE FROM net_drive_usage "
               "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-              (self._config_id, report_date))
-        return etree.tostring(root, xml_declaration=True)
+              (_config_id, report_date))
+        if total:
+            return etree.tostring(root, xml_declaration=True)
 
 def main():
     reporter = NetDriveUsageReporter(parseArgumentTuple())
