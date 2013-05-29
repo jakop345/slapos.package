@@ -18,7 +18,6 @@ def get_description():
 
 VERSION = "0.1.1"
 
-
 if sys.platform.startswith("cygwin"):
 
     def get_winver():
@@ -42,10 +41,10 @@ else:
 
 def main():
     setup_args = dict(
-        name='netreport',
+        name='netdrive.report',
         version=VERSION,
         download_url='http://',
-        description='A tool used to report the usage of net resource in the Windows',
+        description='A tool used to report the usage of net drive in the Windows',
         long_description=get_description(),
         keywords=['netdrive',],
         scripts=['src/netreport.py'],
@@ -54,8 +53,17 @@ def main():
         maintainer='Jondy Zhao',
         maintainer_email='jondy.zhao@nexedi.com',
         url='http://',
-        platforms='Platform Independent',
-        license='License :: OSI Approved :: BSD License',
+        license='GPLv3',
+        zip_safe=False,
+        install_requires=[
+            'lxml', 
+            'slapos.core', 
+            ],
+        entry_points = {
+            'console_scripts': [
+                'netdrive-reporter = netreport:main',
+                ],
+            }
         )
     if extensions is not None:
         setup_args["ext_modules"] = extensions

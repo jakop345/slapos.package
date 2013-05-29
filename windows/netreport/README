@@ -32,6 +32,11 @@ Then run test:
 $ cd src
 $ make test
 
+Before test netreport.py, 
+
+$ easy_install lxml
+$ ln -s /opt/git/slapos.core
+
 Use Cases
 =========
 
