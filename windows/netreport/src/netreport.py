@@ -28,11 +28,11 @@
 ##############################################################################
 import argparse
 from datetime import datetime, date
-import logger
 from lxml import etree
 import netuse
 import os.path
 import slapos.slap.slap
+import sqlite3
 import sys
 from time import sleep
 
@@ -75,28 +75,28 @@ class NetDriveUsageReporter(object):
     def __init__(self, option_dict):
       for option, value in option_dict.items():
         setattr(self, option, value)
-      self.slap_computer = None
+      self._slap_computer = None
       self._domain_name = None
       self._domain_account = None
       self._config_id = None
       self._report_date = None
-      self._db = initializeDatabase(self.data_file)
+      self.initializeDatabase(self.data_file)
 
-    def initializeConnection(self):
+    def initializeConnection(self):        
         connection_dict = {}
         connection_dict['key_file'] = self.key_file
         connection_dict['cert_file'] = self.cert_file
         slap = slapos.slap.slap()
         slap.initializeConnection(self.master_url,
                                   **connection_dict)
-        self.slap_computer = slap.registerComputer(self.computer_id)
+        self._slap_computer = slap.registerComputer(self.computer_id)
 
     def initializeConfigData(self):
-        user_info = netuser.userInfo()
-        self._domain_account = "%s\\%s" % user_info[0:2]
+        user_info = netuse.userInfo()
+        self._domain_account = "%s\\%s" % user_info[1:3]
 
         q = self._db.execute
-        s = "SELECT _rowid, report_date FROM config " \
+        s = "SELECT _rowid_, report_date FROM config " \
             "WHERE domain_account=? and computer_id=?"
         for r in q(s, (self._domain_account, self.computer_id)):
             self._config_id, self._report_date = r
@@ -125,6 +125,8 @@ class NetDriveUsageReporter(object):
                 last_timestamp = current_timestamp
         except KeyboardInterrupt:
             pass
+        finally:
+            self._db.close()
 
     def insertUsageReport(self, start, duration):
         q = self._db.execute
@@ -139,7 +141,7 @@ class NetDriveUsageReporter(object):
         """Called at startup of this application, send all report
           in the config table."""
         q = self._db.execute
-        for r in q("SELECT _rowid, domain_account, computer_id, report_date "
+        for r in q("SELECT _rowid_, domain_account, computer_id, report_date "
                    "FROM config "
                    "WHERE report_date < date('now')"):
             self._postData(self.generateDailyReport(*r))
@@ -158,7 +160,7 @@ class NetDriveUsageReporter(object):
                                                     self.computer_id,
                                                     self._domain_account,
                                                     self._report_date))
-            self._db.execute("UPDATE config SET report_date=? where _rowid=?",
+            self._db.execute("UPDATE config SET report_date=? where _rowid_=?",
                              (today, self._config_id))
 
     def _postData(self, xml_data):
@@ -166,7 +168,7 @@ class NetDriveUsageReporter(object):
         serialized via_getDict.
         """
         if xml_data is not None:
-            self.slap_computer.reportNetDriveUsage(xml_data)
+            self._slap_computer.reportNetDriveUsage(xml_data)
 
     def initializeDatabase(self, db_path):
         self._db = sqlite3.connect(db_path, isolation_level=None)
@@ -177,7 +179,7 @@ class NetDriveUsageReporter(object):
             report_date TEXT NOT NULL,
             remark TEXT)""")
         q("""CREATE TABLE IF NOT EXISTS net_drive_usage (
-            config_id INTEGER REFERENCES config ( _rowid ),
+            config_id INTEGER REFERENCES config ( _rowid_ ),
             drive_letter TEXT NOT NULL,
             remote_folder TEXT NOT NULL,
             start TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -185,7 +187,7 @@ class NetDriveUsageReporter(object):
             usage_bytes INTEGER,
             remark TEXT)""")
         q("""CREATE TABLE IF NOT EXISTS net_drive_usage_history (
-            config_id INTEGER REFERENCES config ( _rowid ),
+            config_id INTEGER REFERENCES config ( _rowid_ ),
             drive_letter TEXT NOT NULL,
             remote_folder TEXT NOT NULL,
             start TEXT NOT NULL,
@@ -197,31 +199,41 @@ class NetDriveUsageReporter(object):
                                   report_date, remove=True):
         q = self._db.execute
         root = etree.Element("report")
-        computer = etree.Element("computer")
-        computer.text = computer_id
-        account = etree.Element("account")
-        account.text = domain_account
-        report_date = etree.Element("date")
-        report_date.text = report_date
-        usage = etree.Element("usage")
-        details = etree.Element("details")
-        root.append(computer, account, report_date, usage, details)
+        element = etree.Element("computer")
+        element.text = computer_id
+        root.append(element)
+
+        element = etree.Element("account")
+        element.text = domain_account
+        root.append(element)
+
+        element = etree.Element("date")
+        element.text = report_date
+        root.append(element)
+        
+        element = etree.Element("usage")
+        root.append(element)
+        usage = element
+
+        element = etree.Element("details")
+        root.append(element)
+
         total = 0
         for r in q("SELECT duration, usage_bytes FROM net_drive_usage "
                    "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-                   (_config_id, report_date)):
+                   (config_id, report_date)):
             total += r[0] * r[1]
         usage.text = str(total)
         if remove:
             q("INSERT INTO net_drive_usage_history "
               "SELECT * FROM net_drive_usage "
               "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-              (_config_id, report_date))
+              (config_id, report_date))
             q("DELETE FROM net_drive_usage "
               "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
-              (_config_id, report_date))
+              (config_id, report_date))
         if total:
-            return etree.tostring(root, xml_declaration=True)
+            return etree.tostring(root, encoding='utf-8', xml_declaration=True)
 
 def main():
     reporter = NetDriveUsageReporter(parseArgumentTuple())
