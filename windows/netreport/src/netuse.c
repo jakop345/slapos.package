@@ -124,7 +124,7 @@ netuse_user_info(PyObject *self, PyObject *args)
    //
    if (pBuf != NULL) {
      NetApiBufferFree(pBuf);
-     return Py_BuildValue("sss", logonuser, logondomain, logonserver);
+     return Py_BuildValue("sss", logonserver, logondomain, logonuser);
    }
 
    PyErr_SetString(PyExc_RuntimeError, "No logon user information");
@@ -323,7 +323,7 @@ static PyMethodDef NetUseMethods[] = {
     (
      "userInfo()\n\n"
      "Get the logon user information, return a tuple:\n"
-     "(user, domain, server).\n"
+     "(server, domain, user).\n"
      )
   },
   {
