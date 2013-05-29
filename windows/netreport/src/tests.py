@@ -22,6 +22,10 @@ class NetUseTests(unittest.TestCase):
         self.assertEquals(len(r), 3)
         self.assertEquals(r, ('JONDY', 'JONDY', 'Administrator'))
 
+    def test_map_drive(self):
+        r = real_netuse.mapDrive(r'\\server\path')
+        self.assertEquals(r, 'X:')
+
     def test_usage_report(self):
         r = real_netuse.usageReport()
         self.assertEquals(len(r), 0)
