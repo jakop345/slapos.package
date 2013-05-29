@@ -137,7 +137,21 @@ netuse_map_drive(PyObject *self, PyObject *args)
   PyErr_SetString(PyExc_RuntimeError, "Not Implemented");
   return NULL;
 }
-
+/* 
+ * Travel all the mapped drive to check whether there is duplicated
+ * shared folder:
+ *
+ *   Return 1 if current share folder is same or sub-folder of the
+ *   mapped folder;
+ *   
+ *   Return -1 if unknown exception occurs;
+ *
+ *   Remove mapped item from list if the mapped folder is sub-folder
+ *   of current share folder.
+ *
+ * Return 0 if it's new share folder.
+ * 
+ */
 static int
 check_duplicate_shared_folder(PyObject *retvalue, const char *folder)
 {
@@ -150,7 +164,7 @@ check_duplicate_shared_folder(PyObject *retvalue, const char *folder)
   PyObject *item;
   char * s;
   
-  while (size) {
+  while (size > 0) {
     size --;
     item = PySequence_GetItem(retvalue, size);
     if (!PySequence_Check(item))
@@ -275,13 +289,12 @@ netuse_usage_report(PyObject *self, PyObject *args)
     if (GetDiskFreeSpaceEx(drivepath,
                            &lFreeBytesAvailable,
                            &lTotalNumberOfBytes,
-                           &lTotalNumberOfFreeBytes
+                           NULL
                            )) {
       PyObject *pobj = Py_BuildValue("ssLLL",
                                      drivename,
                                      szRemoteName,
                                      lFreeBytesAvailable,
-                                     lTotalNumberOfFreeBytes,
                                      lTotalNumberOfBytes
                                      );
       if (PyList_Append(retvalue, pobj) == -1) {
@@ -329,7 +342,7 @@ static PyMethodDef NetUseMethods[] = {
     (
      "usagereport(servername='')\n\n"
      "Return a tuple to report all the net drive information:\n"
-     "(drive, remote, available, free, total).\n"
+     "[ (drive, remote, available, total), ... ]\n"
      "If servername is not empty, then only net drives in the specified server\n"
      "are returned.\n"
      )
