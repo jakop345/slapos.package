@@ -42,6 +42,16 @@ class NetUsageTests(BaseTestCase):
         self.assertEquals(len(r), 0)
         self.assertEquals(r, [])
 
+    def test_usage_report_one_share_folder_to_many_drive(self):
+        r = netuse.usageReport(None)
+        self.assertEquals(len(r), 0)
+        self.assertEquals(r, [])
+
+    def test_usage_report_share_subfolder(self):
+        r = netuse.usageReport(None)
+        self.assertEquals(len(r), 0)
+        self.assertEquals(r, [])
+
 if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
