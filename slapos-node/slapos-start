@@ -17,24 +17,28 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     echo "Starting slap script"
 
     # Check ipv4
-    ping -c 2 $IPV4CHECK
+    echo "Checking IPv4 connectivity..."
+    ping -c 2 -o $IPV4CHECK >/dev/null 2>&1
     while [ $? != 0 ]; do
-        sleep 10
-        ping -c 2 $IPV4CHECK
+        echo "IPv4 is not ready yet."
+        sleep 2
+        ping -c 2 -o $IPV4CHECK >/dev/null 2>&1
     done
 
     # Launch openvpn
     if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
+        echo "Starting openvpn..."
         /etc/init.d/openvpn start
-        sleep 10
     fi
 
     # Wait for ipv6 connection to be ready
-    ping6 -c 2 $IPV6CHECK
+    echo "Checking IPv6 connectivity. This may take a few seconds..."
+    ping6 -c 2 -o $IPV6CHECK >/dev/null 2>&1
     while [ $? != 0 ];
     do
-        sleep 10
-        ping6 -c 2 $IPV6CHECK
+        echo "IPv6 is not ready yet."
+        sleep 2
+        ping6 -c 2 -o $IPV6CHECK >/dev/null 2>&1
     done
 else
     sleep 15
