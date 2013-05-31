@@ -401,6 +401,8 @@ def configureNtp():
   _call(['chkconfig', '--add', 'ntp'])
   _call(['chkconfig', 'ntp', 'on'])
   _call(['systemctl', 'enable', 'ntp.service'])
+  _call(['systemctl', 'restart', 'ntp.service'])
+
 
 
 
