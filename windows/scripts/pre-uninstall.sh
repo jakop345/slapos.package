@@ -15,6 +15,13 @@ if [[ ! "$(whoami)" == "Administrator" ]] ; then
 fi
 
 #
+# Remove slapos-init script when windows startup
+#
+run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+slapos_run_entry=SlapOS-Node
+regtool -q unset "$run_key\\$slapos_run_entry"
+
+#
 # Remove virtual netcard installed by re6stnet 
 #
 for ifname in $(netsh interface show interface | gawk '{ print $3 }') ; do
