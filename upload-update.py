@@ -30,10 +30,12 @@
 
 import ConfigParser
 import datetime
-from slapos.networkcachehelper import helper_upload_network_cached_from_file
 from optparse import OptionParser, Option
+import traceback
 import sys
 import time
+
+from slapos.networkcachehelper import helper_upload_network_cached_from_file
 
 
 class Parser(OptionParser):
