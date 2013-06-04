@@ -50,7 +50,7 @@ class Parser(OptionParser):
                       option_list=[
         Option("--upgrade-file",
                default='/etc/slapos-cache/slapos-upgrade',
-               help="File use as reference to upgrade."),
+               help="File used as reference to upgrade."),
         Option("-u", "--upgrade",
                default=False,
                action="store_true",
