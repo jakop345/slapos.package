@@ -30,12 +30,12 @@ from optparse import OptionParser, Option
 import ConfigParser
 import os
 import pkg_resources
+import pwd
 import socket
 import subprocess
 import sys
 import time
 import urllib2
-from pwd import getpwnam
 
 import iniparse
 
@@ -73,7 +73,6 @@ class Parser(OptionParser):
     return options
 
 
-
 class SlapError(Exception):
   """
   Slap error
@@ -81,12 +80,13 @@ class SlapError(Exception):
   def __init__(self, message):
     self.msg = message
 
+
 class UsageError(SlapError):
   pass
 
+
 class ExecError(SlapError):
   pass
-
 
 
 def _call(cmd_args, stdout=None, stderr=None, dry_run=False):
@@ -103,15 +103,15 @@ def _call(cmd_args, stdout=None, stderr=None, dry_run=False):
     if subprocess.call(cmd_args, stdout=stdout, stderr=stderr) != 0:
       raise ValueError('Issues during running %r' % cmd_args)
   except OSError as e:
-    raise ExecError('Process respond:"%s" when calling "%s"' % \
-                      (str(e), ' '.join(cmd_args)))
+    raise ExecError('Process responded: "%s" when calling "%s"' %
+                      (e, ' '.join(cmd_args)))
 
 
 # Utility function to get yes/no answers
 def get_yes_no(prompt, default=None):
   if default:
     def_value = '/ Default yes'
-  elif default == False:
+  elif default is False:
     def_value = '/ Default no'
   else:
     def_value = ''
@@ -190,7 +190,7 @@ def get_ssh(temp_dir):
         gotten = True
       except ValueError:
       # add http:// if it is missing (needed by urllib2)
-        ssh_web = """http://"""+ssh_web
+        ssh_web = """http://""" + ssh_web
         ssh_key_all = urllib2.urlopen(''.join(ssh_web))
         gotten = True
     except urllib2.URLError:
@@ -268,7 +268,6 @@ def slapserver(config):
         pkg_resources.resource_stream(__name__,
                                       'template/ifcfg-br0.in').read())
 
-
     # Creating default limits config
     limits_conf_path = os.path.join(mount_dir_path,
                                     'etc', 'security', 'limits.conf')
@@ -335,7 +334,6 @@ def slapserver(config):
     return 0
 
 
-
 def prepare_scripts(config):
   """
   Will prepare script for slapos dedicated computer
@@ -348,9 +346,9 @@ def prepare_scripts(config):
   else:
     # Check for config file in /etc/slapos/
     if os.path.exists('/etc/slapos/slapos.cfg'):
-      slapos_configuration='/etc/slapos/'
+      slapos_configuration = '/etc/slapos/'
     else:
-      slapos_configuration='/etc/opt/slapos/'
+      slapos_configuration = '/etc/opt/slapos/'
 
   # Creating boot script
   path = os.path.join('/', 'usr', 'sbin', 'slapos-boot-dedicated')
@@ -359,7 +357,7 @@ def prepare_scripts(config):
     open(path, 'w').write(
       pkg_resources.resource_stream(__name__,
                                     'script/%s' % 'slapos').read()
-      % dict(slapos_configuration=slapos_configuration) )
+                                    % {'slapos_configuration': slapos_configuration})
     os.chmod(path, 0755)
 
   path = os.path.join('/', 'etc',
@@ -396,14 +394,12 @@ def configureNtp():
       continue
     new_ntp.write(line)
   new_ntp.write(SLAPOS_MARK)
-  new_ntp.write(server+'\n')
+  new_ntp.write(server + '\n')
   new_ntp.close()
   _call(['chkconfig', '--add', 'ntp'])
   _call(['chkconfig', 'ntp', 'on'])
   _call(['systemctl', 'enable', 'ntp.service'])
   _call(['systemctl', 'restart', 'ntp.service'])
-
-
 
 
 class Config:
@@ -414,7 +410,6 @@ class Config:
     # Set options parameters
     for option, value in option_dict.__dict__.items():
       setattr(self, option, value)
-
 
   def slaposConfig(self,
                    mount_dir_path,
@@ -435,7 +430,6 @@ class Config:
     self.mount_dir_path = mount_dir_path
     self.temp_dir = temp_dir
     self.computer_id = computer_id
-
 
   def userConfig(self):
     # XXX-Testme: test each possible scenario
@@ -476,7 +470,6 @@ class Config:
     self.need_ssh = get_yes_no("Do you want to (re)configure remote SSH access?", True)
 
     return True
-
 
   def displayUserConfig(self):
     # XXX print everything from configuration, not arbitrary members
@@ -550,7 +543,7 @@ def prepare_from_scratch(config):
 
     print "Your Computer is : %s" % computer_id
 
-    config.slaposConfig(mount_dir_path = '/',
+    config.slaposConfig(mount_dir_path='/',
                         slapos_configuration=slapos_configuration,
                         hostname_path='/etc/HOSTNAME',
                         host_path='/etc/hosts',
@@ -570,18 +563,16 @@ def prepare_from_scratch(config):
       _call(['zypper', '--gpg-auto-import-keys', 'install', '-fy', 'slapos.node'])
       _call(['systemctl', 'stop', 'slapos-node.service'])
 
-
     return_code = 0
-  except ExecError, err:
+  except ExecError as err:
     print >>sys.stderr, err.msg
     return_code = 16
-  except SystemExit, err:
+  except SystemExit as err:
     # Catch exception raise by optparse
     return_code = err
   if os.path.exists(temp_directory):
     print "Deleting directory: %s" % temp_directory
     _call(['rm', '-rf', temp_directory])
-
 
   # Add/remove VPN file forcing/forbidding start of VPN.
   if not config.dry_run:
@@ -609,26 +600,30 @@ def chownSlaposDirectory():
   path = slapos_slapgrid_instance
   print "Changing owners of software directory and partitions directories…"
   for i in range(int(slapformat_partition)):
-    uid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[2]
-    gid = getpwnam('%s%s' % (slapformat_user_base_name, i) )[3]
+    uid = pwd.getpwnam('%s%s' % (slapformat_user_base_name, i))[2]
+    gid = pwd.getpwnam('%s%s' % (slapformat_user_base_name, i))[3]
     item = '%s%s' % (slapformat_partition_base_name, i)
     if not os.path.islink(os.path.join(path, item)):
       os.chown(os.path.join(path, item), uid, gid)
 
   for i in range(int(slapformat_partition)):
-   path = "%s/%s%s" % ( slapos_slapgrid_instance, slapformat_partition_base_name, i)
+   path = "%s/%s%s" % (slapos_slapgrid_instance, slapformat_partition_base_name, i)
    for root, dirs, files in os.walk(path):
     for items in dirs, files:
      for item in items:
        if not os.path.islink(os.path.join(root, item)):
-         os.chown(os.path.join(root, item), getpwnam('%s%s' % (slapformat_user_base_name, i) )[2], getpwnam('%s%s' % (slapformat_user_base_name, i) )[3])
+         os.chown(os.path.join(root, item),
+                  pwd.getpwnam('%s%s' % (slapformat_user_base_name, i))[2],
+                  pwd.getpwnam('%s%s' % (slapformat_user_base_name, i))[3])
 
   # chown of software root (/opt/slapgrid)
   for root, dirs, files in os.walk(slapos_slapgrid_software):
     for items in dirs, files:
       for item in items:
         if not os.path.islink(os.path.join(root, item)):
-          os.chown(os.path.join(root, item), getpwnam('slapsoft')[2], getpwnam('slapsoft')[3])
+          os.chown(os.path.join(root, item),
+                   pwd.getpwnam('slapsoft')[2],
+                   pwd.getpwnam('slapsoft')[3])
 
 
 def slapprepare():
@@ -642,8 +637,8 @@ def slapprepare():
 
     # Install/update slapos
     try:
-      _call(['zypper', 'addrepo', '-fc', '-n', '"SlapOS Official repo"'
-             ,'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_%s/' % suse_version(), 'slapos'])
+      _call(['zypper', 'addrepo', '-fc', '-n', '"SlapOS Official repo"',
+             'http://download.opensuse.org/repositories/home:/VIFIBnexedi/openSUSE_%s/' % suse_version(), 'slapos'])
     except:
       pass
     _call(['zypper', '--gpg-auto-import-keys', 'install', '-y', 'slapos.node'])
@@ -671,14 +666,14 @@ def slapprepare():
     _call(['systemctl', 'start', 'slapos-boot-dedicated.service'])
 
     return_code = 0
-  except UsageError, err:
+  except UsageError as err:
     print >>sys.stderr, err.msg
     print >>sys.stderr, "For help use --help"
     return_code = 16
-  except ExecError, err:
+  except ExecError as err:
     print >>sys.stderr, err.msg
     return_code = 16
-  except SystemExit, err:
+  except SystemExit as err:
     # Catch exception raise by optparse
     return_code = err
   sys.exit(return_code)
@@ -686,4 +681,3 @@ def slapprepare():
 
 def main():
     slapprepare()
-

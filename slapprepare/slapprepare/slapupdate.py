@@ -31,13 +31,15 @@
 import ConfigParser
 import datetime
 import logging
-from slapos.networkcachehelper import helper_download_network_cached_to_file
 from optparse import OptionParser, Option
 import os
 import subprocess as sub
 import sys
 import tempfile
 import autoupdate
+
+from slapos.networkcachehelper import helper_download_network_cached_to_file
+
 
 # create console handler and set level to warning
 ch = logging.StreamHandler()
@@ -64,7 +66,7 @@ class Parser(OptionParser):
         Option("--srv-file",
                default='/srv/slapupdate',
                help="Server status file."),
-        Option("-v","--verbose",
+        Option("-v", "--verbose",
                default=False,
                action="store_true",
                help="Verbose output."),
@@ -73,7 +75,6 @@ class Parser(OptionParser):
                default=False,
                action="store_true"),
         ])
-
 
   def check_args(self):
     """
@@ -84,20 +85,20 @@ class Parser(OptionParser):
 
 
 class NetworkCache ():
-  def __init__(self,slapos_conf):
+  def __init__(self, slapos_conf):
     if os.path.exists(slapos_conf):
       network_cache_info = ConfigParser.RawConfigParser()
       network_cache_info.read(slapos_conf)
-      self.download_binary_cache_url = network_cache_info.get('networkcache','download-binary-cache-url')
-      self.download_cache_url        = network_cache_info.get('networkcache','download-cache-url')
-      self.download_binary_dir_url   = network_cache_info.get('networkcache','download-binary-dir-url')
-      self.signature_certificate_list = network_cache_info.get('networkcache','signature-certificate-list')
+      self.download_binary_cache_url  = network_cache_info.get('networkcache', 'download-binary-cache-url')
+      self.download_cache_url         = network_cache_info.get('networkcache', 'download-cache-url')
+      self.download_binary_dir_url    = network_cache_info.get('networkcache', 'download-binary-dir-url')
+      self.signature_certificate_list = network_cache_info.get('networkcache', 'signature-certificate-list')
     else:
       self.download_binary_cache_url = "http://www.shacache.org/shacache"
       self.download_cache_url = "https://www.shacache.org/shacache"
       self.download_binary_dir_url = "http://www.shacache.org/shadir"
-      self.signature_certificate_list =""
-    
+      self.signature_certificate_list = ""
+
     self.signature_certificate_list = """
 -----BEGIN CERTIFICATE-----
 MIIB9jCCAV+gAwIBAgIJANd3qMXJcWPgMA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV
@@ -115,8 +116,6 @@ jlD7tZ2DbRKHu5FadsKWNZpqC9H0BRLjBwY=
 """ + self.signature_certificate_list
 
 
-
-
 def _call(cmd_args, stdout=sub.PIPE, stderr=sub.PIPE, dry_run=False):
   """
   Wrapper for subprocess.call() which'll secure the usage of external program's.
@@ -128,56 +127,57 @@ def _call(cmd_args, stdout=sub.PIPE, stderr=sub.PIPE, dry_run=False):
   """
   print ("Calling: %s" % ' '.join(cmd_args))
 
-  if not dry_run :
-    p = sub.Popen(cmd_args,stdout=stdout,stderr=stderr)
-    output,err = p.communicate()
-    return output,err
+  if not dry_run:
+    p = sub.Popen(cmd_args, stdout=stdout, stderr=stderr)
+    output, err = p.communicate()
+    return output, err
 
 
-def suse_version(): 
+def suse_version():
   """
   Return OpenSUSE version if it is SuSE
   """
-  if os.path.exists('/etc/SuSE-release') :
-    with open('/etc/SuSE-release') as f :
+  if os.path.exists('/etc/SuSE-release'):
+    with open('/etc/SuSE-release') as f:
       for line in f:
         if "VERSION" in line:
           dist = line.split()
           return float(dist[2])
-  else :
+  else:
     return 0
 
 
-def repositories_purge ():
+def repositories_purge():
   """
   Remove all repositories
   """
-  listing,err = _call(['zypper','lr'])
-  while listing.count('\n') > 2 :
-    output,err = _call(['zypper','rr','1'],stdout=None)
-    listing,err = _call(['zypper','lr'])
+  listing, err = _call(['zypper', 'lr'])
+  while listing.count('\n') > 2:
+    output, err = _call(['zypper', 'rr', '1'], stdout=None)
+    listing, err = _call(['zypper', 'lr'])
 
 
-def repositories_add (url,alias):
+def repositories_add(url, alias):
   """ Add a repository """
-  output,err = _call(['zypper','ar','-fc',url,alias],stdout=None)
+  output, err = _call(['zypper', 'ar', '-fc', url, alias], stdout=None)
 
 
-
-def update_software ():
+def update_software():
   """ Upgrade softwares """
-  _call(['zypper','--gpg-auto-import-keys','up','-ly']
-        , stdout=None)
+  _call(['zypper', '--gpg-auto-import-keys', 'up', '-ly'], stdout=None)
 
-def update_system ():
+
+def update_system():
   """ Dist-Upgrade of system """
-  _call(['zypper','--gpg-auto-import-keys','dup','-ly'], stdout = None)
+  _call(['zypper', '--gpg-auto-import-keys', 'dup', '-ly'], stdout=None)
 
-def update_slapprepare_scripts ():
+
+def update_slapprepare_scripts():
   """ Run slapprepare -u (script that upgrade boot scripts and so on) """
-  _call(['slapprepare','-u'], stdout = None)
+  _call(['slapprepare', '-u'], stdout=None)
 
-def download_info_from_networkcache(path,slapos_conf):
+
+def download_info_from_networkcache(path, slapos_conf):
   """
   Download a tar of the repository from cache, and untar it.
   """
@@ -213,27 +213,29 @@ def get_info_from_master(config):
   info, path = tempfile.mkstemp()
   if not download_info_from_networkcache(
     path, config.slapos_configuration) == False:
-    print open(path,'r').read()
+    print open(path).read()
     return path
-  else :
+  else:
     raise ValueError("No result from shacache")
+
 
 def repositories_process(repositories):
   """
   Remove and then add needed repositories
   """
   repositories_purge()
-  for key in repositories :
-    repositories_add(repositories[key],key)
+  for key in repositories:
+    repositories_add(repositories[key], key)
 
 
-def save_current_state(current_state,config):
+def save_current_state(current_state, config):
   """
   Will save ConfigParser to config file
   """
-  file = open(config.srv_file,"w")
+  file = open(config.srv_file, "w")
   current_state.write(file)
   file.close()
+
 
 def update_machine(config):
   """
@@ -253,15 +255,15 @@ def update_machine(config):
   next_state_file = get_info_from_master(config)
   next_state.read(next_state_file)
   os.remove(next_state_file)
-  config.getSystemInfo(current_state,next_state)
+  config.getSystemInfo(current_state, next_state)
   config.displayConfig()
 
   # Check if run for first time
   if config.first_time:
     current_state.add_section('system')
-    current_state.set('system','reboot',config.today.isoformat())
-    current_state.set('system','upgrade',config.today.isoformat())
-    save_current_state(current_state,config)
+    current_state.set('system', 'reboot', config.today.isoformat())
+    current_state.set('system', 'upgrade', config.today.isoformat())
+    save_current_state(current_state, config)
     # Purge repositories list and add new ones
     repositories_process(dict(next_state.items('repositories')))
     # Check if dist-upgrade is needed
@@ -270,17 +272,17 @@ def update_machine(config):
       update_slapprepare_scripts()
       update_system()
       os.system('reboot')
-    else :
+    else:
       logger.info("We will now upgrade your packages")
       update_software()
       autoupdate.do_update()
   else:
-    if config.last_upgrade < config.upgrade :
+    if config.last_upgrade < config.upgrade:
       # Purge repositories list and add new ones
       repositories_process(dict(next_state.items('repositories')))
 
-      current_state.set('system','upgrade',config.today.isoformat())
-      save_current_state(current_state,config)
+      current_state.set('system', 'upgrade', config.today.isoformat())
+      save_current_state(current_state, config)
       if suse_version() < config.opensuse_version:
         logger.info("We will now upgrade your system")
         update_system()
@@ -288,12 +290,12 @@ def update_machine(config):
         logger.info("We will now upgrade your packages")
         update_software()
         autoupdate.do_update()
-    else :
+    else:
       logger.info("Your system is up to date")
-      
-    if config.last_reboot < config.reboot :
-      current_state.set('system','reboot',config.today.isoformat())
-      save_current_state(current_state,config)
+
+    if config.last_reboot < config.reboot:
+      current_state.set('system', 'reboot', config.today.isoformat())
+      save_current_state(current_state, config)
       os.system('reboot')
 
 
@@ -315,39 +317,39 @@ class Config:
     # add ch to logger
     self.logger.addHandler(ch)
 
-    if self.verbose :
+    if self.verbose:
       ch.setLevel(logging.DEBUG)
 
-  def getSystemInfo(self,current_state,next_state):
+  def getSystemInfo(self, current_state, next_state):
     """
     Extract information from config file and server file
     """
-    self.reboot = datetime.datetime.strptime(next_state.get('system','reboot'),
+    self.reboot = datetime.datetime.strptime(next_state.get('system', 'reboot'),
                                              "%Y-%m-%d").date()
-    self.upgrade = datetime.datetime.strptime(next_state.get('system','upgrade'),
+    self.upgrade = datetime.datetime.strptime(next_state.get('system', 'upgrade'),
                                               "%Y-%m-%d").date()
-    self.opensuse_version = next_state.getfloat('system','opensuse_version')
+    self.opensuse_version = next_state.getfloat('system', 'opensuse_version')
     if not current_state.has_section('system'):
       self.first_time = True
     else:
       self.first_time = False
       self.last_reboot = datetime.datetime.strptime(
-        current_state.get('system','reboot'),
+        current_state.get('system', 'reboot'),
         "%Y-%m-%d").date()
       self.last_upgrade = datetime.datetime.strptime(
-        current_state.get('system','upgrade'),
+        current_state.get('system', 'upgrade'),
         "%Y-%m-%d").date()
 
   def displayConfig(self):
     """
     Display Config
     """
-    self.logger.debug( "reboot %s" % self.reboot)
-    self.logger.debug( "upgrade %s" % self.upgrade)
-    self.logger.debug( "suse version %s" % self.opensuse_version)
-    if not self.first_time :
-      self.logger.debug( "Last reboot : %s" % self.last_reboot)
-      self.logger.debug( "Last upgrade : %s" % self.last_upgrade)
+    self.logger.debug("reboot %s" % self.reboot)
+    self.logger.debug("upgrade %s" % self.upgrade)
+    self.logger.debug("suse version %s" % self.opensuse_version)
+    if not self.first_time:
+      self.logger.debug("Last reboot : %s" % self.last_reboot)
+      self.logger.debug("Last upgrade : %s" % self.last_upgrade)
 
 
 def main():
