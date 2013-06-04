@@ -51,11 +51,11 @@ class Parser(OptionParser):
         Option("--upgrade-file",
                default='/etc/slapos-cache/slapos-upgrade',
                help="File use as reference to upgrade."),
-        Option("-u","--upgrade",
+        Option("-u", "--upgrade",
                default=False,
                action="store_true",
                help="If selected will update tomorrow."),
-        Option("-r","--reboot",
+        Option("-r", "--reboot",
                default=False,
                action="store_true",
                help="If selected will reboot tomorrow."),
@@ -65,7 +65,6 @@ class Parser(OptionParser):
                action="store_true"),
         ])
 
-
   def check_args(self):
     """
     Check arguments
@@ -74,14 +73,14 @@ class Parser(OptionParser):
     return options
 
 
-
 # Utility fonction to get yes/no answers
-def get_yes_no (prompt):
+def get_yes_no(prompt):
   while True:
-    answer=raw_input( prompt + " [y,n]: " )
-    if answer.upper() in [ 'Y','YES' ]: return True
-    if answer.upper() in [ 'N', 'NO' ]: return False
-
+    answer = raw_input(prompt + " [y,n]: ")
+    if answer.upper() in ['Y', 'YES']:
+        return True
+    if answer.upper() in ['N', 'NO']:
+        return False
 
 
 def upload_network_cached_from_file(path, networkcache_options):
@@ -94,7 +93,7 @@ def upload_network_cached_from_file(path, networkcache_options):
   metadata_dict = {
     # XXX: we set date from client side. It can be potentially dangerous
     # as it can be badly configured.
-    'timestamp':time.time(),
+    'timestamp': time.time(),
   }
   try:
     if helper_upload_network_cached_from_file(
@@ -115,13 +114,15 @@ def upload_network_cached_from_file(path, networkcache_options):
   except Exception:
     print 'Unable to upload to cache:\n%s.' % traceback.format_exc()
 
-def save_current_state(current_state,config):
+
+def save_current_state(current_state, config):
   """
   Will save ConfigParser to config file
   """
-  file = open(config.upgrade_file,"w")
+  file = open(config.upgrade_file, "w")
   current_state.write(file)
   file.close()
+
 
 # Class containing all parameters needed for configuration
 class Config:
@@ -137,16 +138,16 @@ class Config:
     self.tomorrow = self.today + datetime.timedelta(days=1)
 
 
-def new_upgrade (config):
+def new_upgrade(config):
   upgrade_info = ConfigParser.RawConfigParser()
   upgrade_info.read(config.upgrade_file)
-  if config.reboot :
-    upgrade_info.set('system','reboot',config.tomorrow)
-  if config.upgrade :
-    upgrade_info.set('system','upgrade',config.tomorrow)
-  save_current_state(upgrade_info,config)  
+  if config.reboot:
+    upgrade_info.set('system', 'reboot', config.tomorrow)
+  if config.upgrade:
+    upgrade_info.set('system', 'upgrade', config.tomorrow)
+  save_current_state(upgrade_info, config)
   print " You will update this :"
-  print open(config.upgrade_file,'r').read()
+  print open(config.upgrade_file).read()
   if not get_yes_no("Do you want to continue? "):
     sys.exit(0)
 
@@ -154,8 +155,7 @@ def new_upgrade (config):
   networkcache_info.read('/etc/slapos-cache/slapos.cfg')
   networkcache_info_dict = dict(networkcache_info.items('networkcache'))
   if not config.dry_run:
-    upload_network_cached_from_file(config.upgrade_file,networkcache_info_dict)
-
+    upload_network_cached_from_file(config.upgrade_file, networkcache_info_dict)
 
 
 def main():
@@ -168,6 +168,5 @@ def main():
   sys.exit()
 
 
-
 if __name__ == '__main__':
-  main ()
+  main()
