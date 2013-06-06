@@ -8,40 +8,79 @@ VERSION_REGEX="s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s
 CURRENT_DIRECTORY="$(pwd)"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 DEB_DIRECTORY=$TEMPLATES_DIRECTORY/deb
+RPM_DIRECTORY=$TEMPLATES_DIRECTORY/rpm
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 
 RE6STNET_SCRIPT=$TEMPLATES_DIRECTORY/re6stnet.sh
 
-function prepare_download_cache{
+function prepare_template_files
+{
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/Makefile.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/Makefile
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/offline.sh
+}
+
+function prepare_download_cache
+{
     cd $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
     rm -rf build/
     bash offline.sh || (echo "Impossible to build SlapOS, exiting." && exit 1)
-}
-
-function prepare_tarball{
+    # Go back to starting point
     cd $CURRENT_DIRECTORY
-    tar -czf $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
 }
 
-function spec_generation{
-    $CURRENT_DIRECTORY/prepare_spec.sh $VERSION_REGEX $TEMPLATES_DIRECTORY $RE6STNET_SCRIPT
+function prepare_tarball
+{
+    tar -czf $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY.tar.gz $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY
 }
 
-function prepare_deb_packaging{
+function spec_generation
+{
+    SLAPOS_SPEC=slapos.spec
+
+    # Replace version/release/etc… informations in base spec file
+    sed $VERSION_REGEX $RPM_DIRECTORY/slapos.spec.base.in > $SLAPOS_SPEC
+
+    # Post scriplet generation
+    echo "%post" >> $SLAPOS_SPEC
+    cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/post >> $SLAPOS_SPEC
+
+    # Preun scriplet generation
+    echo "%preun" >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/preun >> $SLAPOS_SPEC
+
+    # Postun scriplet generation
+    echo "%postun" >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/postun >> $SLAPOS_SPEC
+}
+
+function prepare_deb_packaging
+{
     # Add entry to changelog
     dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE --changelog $DEB_DIRECTORY/debian/changelog --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
+
     # Add cron and logrotate files
     cp -R $DEB_DIRECTORY/debian $OBS_DIRECTORY/
     cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $OBS_DIRECTORY/debian/cron.d
     cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $OBS_DIRECTORY/debian/slapos-node.logrotate
-    cat $RE6STNET_SCRIPT >> $OBS_DIRECTORY/debian/post
+    
+    # Create postinst
+    cat $RE6STNET_SCRIPT >> $OBS_DIRECTORY/debian/postinst.base
+    cat $OBS_DIRECTORY/debian/postinst.exit >> $OBS_DIRECTORY/debian/postinst.base
+    mv $OBS_DIRECTORY/debian/postinst.base $OBS_DIRECTORY/debian/postinst
+    rm $OBS_DIRECTORY/debian/postinst.exit
+
+    # Create tarball
     tar -czf $OBS_DIRECTORY/debian.tar.gz $OBS_DIRECTORY/debian
+    
+    # Generate .dsc
     sed $VERSION_REGEX $DEB_DIRECTORY/slapos.dsc.in > $SLAPOS_DIRECTORY.dsc
 }
 
-function obs_upload{
+function obs_upload
+{
     # Prepare obs
     cd $OBS_DIRECTORY
     # Update directory
@@ -61,10 +100,14 @@ function obs_upload{
     osc add slapos.spec
 
     # Add .dsc
+    cp $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY.dsc .
     osc add $SLAPOS_DIRECTORY.dsc
 
     # Upload new Package
     osc commit -m "New SlapOS Recipe $RECIPE_VERSION"
+
+    # Go back to starting point
+    cd $CURRENT_DIRECTORY
 }
 
 # Prepare directory for new version if needed
@@ -73,14 +116,13 @@ if [ ! -d "$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY" ]; then
 fi
 
 # Prepare Makefile and offline script
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/Makefile.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/Makefile
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/offline.sh
+#prepare_template_files
 
 # Prepare Download Cache for SlapOS
-prepare_download_cache
+#prepare_download_cache
 
 # Prepare tarball
-prepare_tarball
+#prepare_tarball
 
 # Generate spec file
 spec_generation
@@ -89,8 +131,8 @@ spec_generation
 prepare_deb_packaging
 
 # Upload to obs
-obs_upload
+#obs_upload
 
 # Save current version
-echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
-echo "$VERSION" > $CURRENT_DIRECTORY/slapos-version
+#echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
+#echo "$VERSION" > $CURRENT_DIRECTORY/slapos-version
