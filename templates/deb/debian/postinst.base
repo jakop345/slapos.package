@@ -78,4 +78,3 @@ mkdir -p /opt/slapos/log
 #
 #fi
 
-exit 0
