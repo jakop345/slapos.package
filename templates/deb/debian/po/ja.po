@@ -1,0 +1,103 @@
+# Copyright (C) 2011 Arnaud Fontaine <arnau@debian.org>
+# This file is distributed under the same license as the slapos.tool.format package.
+# Hideki Yamane <henrich@debian.org>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: slapos.tool.format 1.0~20110420+1.git67c5b39-2\n"
+"Report-Msgid-Bugs-To: slapos.node@packages.debian.org\n"
+"POT-Creation-Date: 2011-12-01 18:16+0900\n"
+"PO-Revision-Date: 2011-06-14 23:07+0900\n"
+"Last-Translator: Hideki Yamane <henrich@debian.org>\n"
+"Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: string
+#. Description
+#: ../templates:2001
+msgid "SlapOS master node URL:"
+msgstr "SlapOS のマスターノード URL:"
+
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid "Master node key and certificate mandatory"
+msgstr "マスターノード鍵と証明書が必須です"
+
+#. Type: note
+#. Description
+#: ../templates:3001
+#, fuzzy
+#| msgid ""
+#| "You used an HTTPS URL for the SlapOS master node, so the corresponding "
+#| "certificate must be placed in /etc/opt/slapos/ssl/slapos.crt, and the key "
+#| "in /etc/opt/slapos/ssl/slapos.key, readable only to root."
+msgid ""
+"You used an HTTPS URL for the SlapOS master node, so the Computer "
+"certificate must be placed in /etc/opt/slapos/ssl/computer.crt, and the key "
+"in /etc/opt/slapos/ssl/computer.key, readable only to root. Also, your "
+"account certificate and key must be placed respectively in /etc/opt/slapos/"
+"ssl/account.crt and /etc/opt/slapos/ssl/account.key."
+msgstr ""
+"HTTPS URL をマスターノードとして入力したので、対応する鍵と証明書を /etc/"
+"slapos/ssl/slapos.key と /etc/opt/slapos/ssl/slapos.crt に置いて、root のみが"
+"読み取れるようにしておく必要があります。"
+
+#. Type: string
+#. Description
+#: ../templates:4001
+msgid "SlapOS computer ID:"
+msgstr "SlapOS コンピュータ ID:"
+
+#. Type: string
+#. Description
+#: ../templates:4001
+msgid "Please specify a unique identifier for this SlapOS node."
+msgstr "この SlapOS ノード用の一意の識別子を指定してください。"
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid "Number of Computer Partitions on this computer:"
+msgstr "このコンピューター上のコンピューターパーティション数:"
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid ""
+"A Computer Partition (CP) is an instance of a Software Release (SR). You can "
+"now define how many instances will be available on this computer."
+msgstr ""
+"コンピューターパーティション (CP) は、ソフトウェアリリース (SR) のインスタン"
+"スです。このコンピューター上でいくつのインスタンスが利用可能かをここで定義で"
+"きます。"
+
+#. Type: string
+#. Description
+#: ../templates:5001
+msgid ""
+"Note that the Software Releases will be stored in /opt/slapgrid/, whereas "
+"the Computer Partition will be stored in /srv/slapgrid/."
+msgstr ""
+"ソフトウェアリリースは /opt/slapgrid/ に、そしてコンピューターパーティション"
+"は /srv/slapgrid/ に保存されます。"
+
+#. Type: string
+#. Description
+#: ../templates:6001
+msgid "Local IPv4 network to be used for Computer Partitions:"
+msgstr "コンピューターパーティションに使うローカル IPv4 ネットワーク:"
+
+#. Type: string
+#. Description
+#: ../templates:6001
+msgid ""
+"Every Computer Partition must have an address on the same IPv4 network. "
+"Please specify a network in CIDR notation (e.g.: 192.0.2.0/24)."
+msgstr ""
+"すべてのコンピューターパーティションは同じ IPv4 ネットワーク上のアドレスを持"
+"つ必要があります。ネットワークを CIDR 記法で指定してください (例: "
+"192.0.2.0/24)"

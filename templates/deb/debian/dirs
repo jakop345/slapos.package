@@ -1,0 +1,11 @@
+/opt/slapos
+/srv/slapgrid
+/opt/slapgrid
+/etc/opt/slapos
+/etc/opt/slapos/ssl
+/var/opt/slapos
+/var/opt/slapos/lib
+/var/opt/slapos/log
+/var/opt/slapos/run
+/usr/bin
+/usr/share/
