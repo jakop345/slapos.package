@@ -9,7 +9,7 @@ CURRENT_DIRECTORY="$(pwd)"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 DEB_DIRECTORY=$TEMPLATES_DIRECTORY/deb
 RPM_DIRECTORY=$TEMPLATES_DIRECTORY/rpm
-SLAPOS_ORGINAL_DIRECTORY=slapos-node
+SLAPOS_ORIGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 
@@ -63,8 +63,8 @@ function prepare_deb_packaging
 
     # Add cron and logrotate files
     cp -R $DEB_DIRECTORY/debian $OBS_DIRECTORY/
-    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $OBS_DIRECTORY/debian/cron.d
-    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $OBS_DIRECTORY/debian/slapos-node.logrotate
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORIGINAL_DIRECTORY/template/slapos-node.cron.d $OBS_DIRECTORY/debian/cron.d
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORIGINAL_DIRECTORY/template/slapos-node.logrotate $OBS_DIRECTORY/debian/slapos-node.logrotate
     
     # Create postinst
     cat $RE6STNET_SCRIPT >> $OBS_DIRECTORY/debian/postinst.base
@@ -87,7 +87,7 @@ function obs_upload
     osc up
 
     # Remove former configuration
-    osc rm -f $SLAPOS_ORGINAL_DIRECTORY*.tar.gz
+    osc rm -f $SLAPOS_ORIGINAL_DIRECTORY*.tar.gz
     osc rm -f slapos.spec
     osc rm -f slapos*.dsc
 
@@ -112,7 +112,7 @@ function obs_upload
 
 # Prepare directory for new version if needed
 if [ ! -d "$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY" ]; then
-    cp -r $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY
+    cp -r $CURRENT_DIRECTORY/$SLAPOS_ORIGINAL_DIRECTORY $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY
 fi
 
 # Prepare Makefile and offline script
