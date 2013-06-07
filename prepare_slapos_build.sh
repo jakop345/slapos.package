@@ -32,7 +32,7 @@ function prepare_download_cache
 
 function prepare_tarball
 {
-    tar -czf -C $CURRENT_DIRECTORY $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
+    tar -czf $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
 }
 
 function spec_generation
@@ -73,7 +73,9 @@ function prepare_deb_packaging
     rm $OBS_DIRECTORY/debian/postinst.exit
 
     # Create tarball
-    tar -czf -C $OBS_DIRECTORY debian.tar.gz debian
+    cd $OBS_DIRECTORY
+    tar -czf debian.tar.gz debian
+    cd $CURRENT_DIRECTORY
     rm -Rf $OBS_DIRECTORY/debian
     
     # Generate .dsc
