@@ -74,6 +74,7 @@ function prepare_deb_packaging
 
     # Create tarball
     tar -czf $OBS_DIRECTORY/debian.tar.gz $OBS_DIRECTORY/debian
+    rm -Rf $OBS_DIRECTORY/debian
     
     # Generate .dsc
     sed $VERSION_REGEX $DEB_DIRECTORY/slapos.dsc.in > $SLAPOS_DIRECTORY.dsc
@@ -116,13 +117,13 @@ if [ ! -d "$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY" ]; then
 fi
 
 # Prepare Makefile and offline script
-#prepare_template_files
+prepare_template_files
 
 # Prepare Download Cache for SlapOS
-#prepare_download_cache
+prepare_download_cache
 
 # Prepare tarball
-#prepare_tarball
+prepare_tarball
 
 # Generate spec file
 spec_generation
@@ -131,8 +132,8 @@ spec_generation
 prepare_deb_packaging
 
 # Upload to obs
-#obs_upload
+obs_upload
 
 # Save current version
-#echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
-#echo "$VERSION" > $CURRENT_DIRECTORY/slapos-version
+echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
+echo "$VERSION" > $CURRENT_DIRECTORY/slapos-version
