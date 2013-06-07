@@ -5,3 +5,8 @@ slapprepare/slapprepare.egg-info
 .*.swp
 *~
 \#*\#
+templates/debian*
+home:VIFIBnexedi*
+slapos-node_*
+slapos-recipe-version
+slapos-version
