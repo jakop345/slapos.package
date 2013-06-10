@@ -61,4 +61,3 @@ if [ -e $SLAPOS_CFG_PATH ]; then
 with the configuration of re6st and SlapOS Node by yourself."
     fi
 fi
-
