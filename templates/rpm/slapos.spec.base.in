@@ -93,4 +93,3 @@ mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 %files
 /
 %defattr(-,root,root)
-

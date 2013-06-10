@@ -3,4 +3,3 @@ if [ -f /bin/systemctl ]; then
     systemctl enable slapos-node.service
     systemctl start slapos-node.service
 fi
-

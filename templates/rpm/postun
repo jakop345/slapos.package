@@ -1,4 +1,3 @@
 if [ -f /bin/systemctl ]; then
     systemctl restart slapos-node.service
 fi
-
