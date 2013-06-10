@@ -1,6 +1,6 @@
 SLAPOS_CFG_PATH=/etc/opt/slapos/slapos.cfg
 
-function re6st_conf_generation
+function re6st_conf_generation()
 {
     # Generate re6st configuration
     read -p "Please enter the registry you wish to use for re6st[http://re6stnet.nexedi.com]: " REGISTRY
@@ -12,7 +12,7 @@ function re6st_conf_generation
 effect"
 }
 
-function remove_VPN_conf
+function remove_VPN_conf()
 {
     # Remove VPN configuration
     if [ -e /etc/openvpn/vifib.conf ]; then
@@ -27,7 +27,7 @@ function remove_VPN_conf
     fi
 }
 
-function modify_interfaces_in_SlapOS_conf
+function modify_interfaces_in_SlapOS_conf()
 {
     # Modify slapos.cfg to use lo
     cp $SLAPOS_CFG_PATH $SLAPOS_CFG_PATH.old
