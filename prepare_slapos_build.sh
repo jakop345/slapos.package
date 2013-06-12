@@ -42,22 +42,9 @@ function spec_generation
     # Replace version/release/etc… informations in base spec file
     sed $VERSION_REGEX $RPM_DIRECTORY/slapos.spec.base.in > $SLAPOS_SPEC
 
-    # Post scriplet generation
-    echo "%post" >> $SLAPOS_SPEC
+    # Scriplet insertion
     cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
-    cat $RPM_DIRECTORY/post.sh >> $SLAPOS_SPEC
-
-    # Preun scriplet generation
-    echo "
-%preun" >> $SLAPOS_SPEC
-    cat $RPM_DIRECTORY/preun.sh >> $SLAPOS_SPEC
-
-    # Postun scriplet generation
-    echo "
-%postun" >> $SLAPOS_SPEC
-    cat $RPM_DIRECTORY/postun.sh >> $SLAPOS_SPEC
-    echo "
-" >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/slapos.spec.end.in >> $SLAPOS_SPEC
 }
 
 function prepare_deb_packaging
