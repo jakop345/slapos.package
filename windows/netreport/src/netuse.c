@@ -338,7 +338,7 @@ netuse_usage_report(PyObject *self, PyObject *args)
                            &lTotalNumberOfBytes,
                            NULL
                            )) {
-      PyObject *pobj = Py_BuildValue("ssLLL",
+      PyObject *pobj = Py_BuildValue("ssLL",
                                      drivename,
                                      szRemoteName,
                                      lFreeBytesAvailable,
@@ -397,7 +397,6 @@ static PyMethodDef NetUseMethods[] = {
   },
   {NULL, NULL, 0, NULL}
 };
-
 
 PyMODINIT_FUNC initnetuse(void)
 {
