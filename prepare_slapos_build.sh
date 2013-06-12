@@ -43,8 +43,8 @@ function spec_generation
     sed $VERSION_REGEX $RPM_DIRECTORY/slapos.spec.base.in > $SLAPOS_SPEC
 
     # Scriplet insertion
-    cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
-    cat $RPM_DIRECTORY/slapos.spec.end.in >> $SLAPOS_SPEC
+#    cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
+#    cat $RPM_DIRECTORY/slapos.spec.end.in >> $SLAPOS_SPEC
 }
 
 function prepare_deb_packaging
