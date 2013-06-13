@@ -52,7 +52,10 @@ def parseArgumentTuple():
                         default="/etc/slapos/ssl/computer.key")
     parser.add_argument("--report-interval",
                         help="Interval in seconds to send report to master.",
-                        default=300)
+                        default=300.0)
+    parser.add_argument("--report-path",
+                        help="Where to save TioXML report.",
+                        default=300.0)
     parser.add_argument("--data-file",
                         help="File used to save report data.",
                         default="net_drive_usage_report.data")
@@ -80,6 +83,7 @@ class NetDriveUsageReporter(object):
       self._domain_account = None
       self._config_id = None
       self._report_date = None
+      self.report_interval = float(self.report_interval)
       self.initializeDatabase(self.data_file)
 
     def initializeConnection(self):        
@@ -163,12 +167,16 @@ class NetDriveUsageReporter(object):
             self._db.execute("UPDATE config SET report_date=? where _rowid_=?",
                              (today, self._config_id))
 
-    def _postData(self, xml_data):
+    def _postData(self, report):
         """Send a marshalled dictionary of the net drive usage record
         serialized via_getDict.
         """
-        if xml_data is not None:
-            self._slap_computer.reportNetDriveUsage(xml_data)
+        if report is not None:
+            name = "netdrive-report-%s.xml" % datetime.now().isoformat()
+            etree.ElementTree(report).write(
+                os.path.join(self.report_path, name),
+                xml_declaration=True
+                )
 
     def initializeDatabase(self, db_path):
         self._db = sqlite3.connect(db_path, isolation_level=None)
@@ -198,32 +206,45 @@ class NetDriveUsageReporter(object):
     def generateDailyReport(self, config_id, computer_id, domain_account,
                                   report_date, remove=True):
         q = self._db.execute
-        root = etree.Element("report")
-        element = etree.Element("computer")
-        element.text = computer_id
-        root.append(element)
-
-        element = etree.Element("account")
-        element.text = domain_account
-        root.append(element)
-
-        element = etree.Element("date")
-        element.text = report_date
-        root.append(element)
-        
-        element = etree.Element("usage")
-        root.append(element)
-        usage = element
-
-        element = etree.Element("details")
-        root.append(element)
-
-        total = 0
-        for r in q("SELECT duration, usage_bytes FROM net_drive_usage "
+        report = etree.Element("consumption")
+        for r in q("SELECT remote_folder, duration, usage_bytes  FROM net_drive_usage "
                    "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
                    (config_id, report_date)):
-            total += r[0] * r[1]
-        usage.text = str(total)
+            movement = etree.Element('movement')
+
+            element = etree.Element("resource")
+            element.text = r[0]
+            movement.append(element)
+
+            element = etree.Element("title")
+            element.text = 'NetDrive Usage %s' % report_date
+            movement.append(element)
+
+            element = etree.Element("reference")
+            element.text = domain_account
+            movement.append(element)
+
+            element = etree.Element("reference")
+            element.text = report_date
+            movement.append(element)
+
+            element = etree.Element("quantity")
+            element.text = str(r[1] * r[2])
+            movement.append(element)
+
+            element = etree.Element("price")
+            element.text = '0.0'
+            movement.append(element)
+
+            element = etree.Element("VAT")
+            movement.append(element)
+
+            element = etree.Element("category")
+            element.text = "NetDrive"
+            movement.append(element)
+
+            report.append(movement)
+
         if remove:
             q("INSERT INTO net_drive_usage_history "
               "SELECT * FROM net_drive_usage "
@@ -232,8 +253,7 @@ class NetDriveUsageReporter(object):
             q("DELETE FROM net_drive_usage "
               "WHERE config_id=? AND strftime('%Y-%m-%d', start)=?",
               (config_id, report_date))
-        if total:
-            return etree.tostring(root, encoding='utf-8', xml_declaration=True)
+        return report
 
 def main():
     reporter = NetDriveUsageReporter(parseArgumentTuple())

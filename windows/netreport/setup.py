@@ -3,10 +3,7 @@
 
 import sys
 import os
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 def get_description():
     README = os.path.abspath(os.path.join(os.path.dirname(__file__), 'README'))
@@ -16,7 +13,7 @@ def get_description():
     finally:
         f.close()
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 if sys.platform.startswith("cygwin"):
 
@@ -41,30 +38,31 @@ else:
 
 def main():
     setup_args = dict(
-        name='netdrive.report',
+        name='netdrive',
         version=VERSION,
-        download_url='http://',
         description='A tool used to report the usage of net drive in the Windows',
         long_description=get_description(),
         keywords=['netdrive',],
-        scripts=['src/netreport.py'],
+        py_modules=['src/netreport'],
         author='Nexedi',
         author_email='jondy.zhao@nexedi.com',
         maintainer='Jondy Zhao',
         maintainer_email='jondy.zhao@nexedi.com',
-        url='http://',
         license='GPLv3',
         zip_safe=False,
         install_requires=[
             'lxml', 
-            'slapos.core', 
+            'slapos.core',
+            'setuptools',
+            'zc.buildout', # plays with buildout
+            'zc.recipe.egg', # for scripts generation
             ],
-        entry_points = {
-            'console_scripts': [
-                'netdrive-reporter = netreport:main',
-                ],
-            }
-        )
+      entry_points={
+        'console_scripts': [
+          'netdrive-reporter = netreport:main',
+          ],
+        }
+    )
     if extensions is not None:
         setup_args["ext_modules"] = extensions
     setup(**setup_args)
