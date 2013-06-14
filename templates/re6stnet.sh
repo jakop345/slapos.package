@@ -40,25 +40,24 @@ modify_interfaces_in_SlapOS_conf()
 
 #XXX Vivien: fugly logic, feel free to modify it if you can do better
 #            or if install/upgrade procedure was simplified
-if [ -e $SLAPOS_CFG_PATH ]; then
-    # In case of an upgrade test for native ipv6 inside slapos.cfg
-    if grep -qe "ipv6_interface" $SLAPOS_CFG_PATH && ! grep -qe "#ipv6_interface" $SLAPOS_CFG_PATH; then
-        # If using vifib VPN        
-        remove_VPN_conf
+if [ ! -e /etc/re6stnet/re6stnet.conf ]; then
+    if [ -e $SLAPOS_CFG_PATH ]; then
+        # In case of an upgrade test for native ipv6 inside slapos.cfg
+        if grep -qe "ipv6_interface" $SLAPOS_CFG_PATH && ! grep -qe "#ipv6_interface" $SLAPOS_CFG_PATH; then
+            # If using vifib VPN        
+            remove_VPN_conf
        
-        modify_interfaces_in_SlapOS_conf
+            modify_interfaces_in_SlapOS_conf
        
-        re6st_conf_generation
-
-    elif [ ! -e /etc/re6stnet/re6stnet.conf ]; then
-        if grep -qe "interface_name = lo" $SLAPOS_CFG_PATH; then
-            # New node with new configuration case
             re6st_conf_generation
-        
+
         else
             # Manual configuration by user before upgrade
             echo "You seem to have no separate interface for ipv6, please proceed \
 with the configuration of re6st and SlapOS Node by yourself."
         fi
+    else
+        # New node
+        re6st_conf_generation
     fi
 fi
