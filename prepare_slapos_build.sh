@@ -43,8 +43,16 @@ function spec_generation
     sed $VERSION_REGEX $RPM_DIRECTORY/slapos.spec.base.in > $SLAPOS_SPEC
 
     # Scriplet insertion
-#    cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
-#    cat $RPM_DIRECTORY/slapos.spec.end.in >> $SLAPOS_SPEC
+    echo "%post" >> $SLAPOS_SPEC
+    cat $RE6STNET_SCRIPT >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/post.sh >> $SLAPOS_SPEC
+    
+    echo "%preun" >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/preun.sh >> $SLAPOS_SPEC
+
+    echo "%postun" >> $SLAPOS_SPEC
+    cat $RPM_DIRECTORY/postun.sh >> $SLAPOS_SPEC
+
 }
 
 function prepare_deb_packaging
@@ -110,22 +118,22 @@ if [ ! -d "$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY" ]; then
 fi
 
 # Prepare Makefile and offline script
-prepare_template_files
+#prepare_template_files
 
 # Prepare Download Cache for SlapOS
-prepare_download_cache
+#prepare_download_cache
 
 # Prepare tarball
-prepare_tarball
+#prepare_tarball
 
 # Generate spec file
 spec_generation
 
 # Prepare deb packaging
-prepare_deb_packaging
+#prepare_deb_packaging
 
 # Upload to obs
-obs_upload
+#obs_upload
 
 # Save current version
 echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
