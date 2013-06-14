@@ -55,7 +55,7 @@ def parseArgumentTuple():
                         default=300.0)
     parser.add_argument("--report-path",
                         help="Where to save TioXML report.",
-                        default=300.0)
+                        required=True)
     parser.add_argument("--data-file",
                         help="File used to save report data.",
                         default="net_drive_usage_report.data")
