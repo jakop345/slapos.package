@@ -52,6 +52,7 @@ BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-setuptools
 Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools, re6stnet
 %endif
 
+Requires(post): re6stnet
 AutoReqProv: no
 
 %description
