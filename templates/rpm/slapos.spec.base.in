@@ -43,11 +43,11 @@ Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedr
 
 
 %if 0%{?suse_version} == 1210
-BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-distribute, -post-build-checks
+BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-distribute
 
 Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute, re6stnet
 %else
-BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-setuptools, -post-build-checks
+BuildRequires: gcc-c++, make, patch, wget, python, chrpath, python-setuptools
 
 Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools, re6stnet
 %endif

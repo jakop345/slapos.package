@@ -3,10 +3,8 @@ SLAPOS_CFG_PATH=/etc/opt/slapos/slapos.cfg
 re6st_conf_generation()
 {
     # Generate re6st configuration
-    read -p "Please enter the registry you wish to use for re6st[http://re6stnet.nexedi.com]: " REGISTRY
-    REGISTRY=${REGISTRY:-http://re6stnet.nexedi.com}
-    read -p "Please enter your email for token generation: " EMAIL
-    re6st-conf --registry $REGISTRY --email $EMAIL -r emailAddress $EMAIL -d /etc/re6stnet
+    REGISTRY="http://re6stnet.nexedi.com"
+    re6st-conf -d /etc/re6stnet --registry $REGISTRY --anonymous
 	  echo "File /etc/re6stnet/re6stnet.conf generated"
     echo "You now need to reboot your server manually for the changes to take\
 effect"
@@ -61,3 +59,4 @@ with the configuration of re6st and SlapOS Node by yourself."
         re6st_conf_generation
     fi
 fi
+
