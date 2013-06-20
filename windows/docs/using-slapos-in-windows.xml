@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE book SYSTEM "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<book>
+<title>Using SlapOS in the Windows</title>
+<bookinfo> 
+   <author>
+      <firstname>Jondy</firstname>
+      <surname>Zhao</surname>
+   </author>
+   <revhistory>
+     <revision>
+       <revnumber>0.1</revnumber>
+       <date>2013-06-10</date>
+       <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
+       <revremark>Create the document.</revremark>
+     </revision>
+   </revhistory>
+</bookinfo>
+
+<chapter id="ch_introduction"><title>Introduction</title>
+<para>SlapOS can be described as a cloud operating system in which "everything is a process" unlike Unix in which "everything is a file". If one has to manage thousands of servers with thousands of processes, hundred different applications in multiple different releases or versions, SlapOS can help you a lot by making the whole management process well specified, automated and under control.</para>
+<para>The goal of this tutorial is to teach how to use SlapOS in the windows.
+<itemizedlist>
+<listitem><para>First you need register an account in the slapos.org (refer to <xref linkend="ch_register_slapos_org"/>)</para></listitem>
+<listitem><para>Then install SlapOS slave node in the windows (refer to <xref linkend="ch_install_slapos"/>)</para></listitem>
+<listitem><para>Finally release software and create instanace of software in the SlapOS node (refer to <xref linkend="ch_create_instance_wordpress"/>)</para></listitem>
+</itemizedlist>
+</para>
+</chapter>
+
+<chapter id="ch_register_slapos_org"><title>Registering in the slapos.org</title>
+<para>Before we start, we need to register in VIFIB community Cloud. By doing so, we will obtain X509 certificate and key, make sure you store both of them to your local files. Take also note of the computer id, for example "COMP-161", store it somewhere. All of these are later needed for the installing process.</para>
+<para>Refer to <ulink url="http://www.slapos.org/wiki/slapos-Wiki.Home/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Slave.Node.Source"></ulink> in the section VIFIB Registration.</para>
+</chapter>
+
+<chapter id="ch_install_slapos"><title>Installing SlapOS slave node</title>
+<para>There are 2 ways to install SlapOS slave node in the winodws. One is by MSI package, the other is by sources.</para>
+<section><title>Installing by MSI Package</title>
+<para>Download slapos windows installer: <ulink url="http://www.erp5.org/dists/installer/slapos-0.158.2-windows-x86-all-in-one.exe"></ulink></para>
+<para>Run this MSI installer, click Next and type the information: the destination path, startup menu name, etc.</para>
+<para>In the SlapOS Node Information wizard page, type the information got at above chapter.
+<itemizedlist>
+<listitem><para>Computer ID</para></listitem>
+<listitem><para>Key</para></listitem>
+<listitem><para>Certificate</para></listitem>
+</itemizedlist>
+At the final wizard page, click Install.
+</para>
+<para>Waiting for everything done.</para>
+</section>
+
+<section><title>Installing by sources</title>
+<para>We need Cygwin environment in order to install SlapOS slave node from sources in the Windows. </para>
+
+<section><title>Setting Up Cygwin</title>
+<para>Go to <ulink url="http://cygwin.com/">"http://cygwin.com/"</ulink> and click on <ulink url="http://cygwin.com/setup.exe">"Install Cygwin Now!"</ulink>. This will download a GUI installer called setup.exe which can be run to download a complete cygwin installation via the internet. Follow the instructions on each screen to install Cygwin. </para>
+<para>The Root Directory for Cygwin (default C:\cygwin) will become / within your Cygwin installation. You must have write access to the parent directory, and any ACLs on the parent directory will determine access to installed files.</para>
+<para>By default, setup.exe will install only the packages in the Base category and their dependencies, resulting in a minimal Cygwin installation. We need choose the packages required by SlapOS, see <xref linkend="appendix_cygwin_packages"/>. Since setup.exe automatically selects dependencies, be careful not to unselect any required packages.</para>
+<para>Refer to: <ulink url="http://cygwin.com/cygwin-ug-net/setup-net.html"/></para>
+<para>You can install cygwin in the command console either:
+<itemizedlist>
+<listitem><para>Click startup menu</para></listitem>
+<listitem><para>Click Run, type command: cmd, click OK to enter console widow</para></listitem>
+<listitem><para>Type the following commands:<programlisting>
+    C:\Documents and Settings\Administrator>D:
+    D:\>MD slapos
+    D:\>cd slapos
+</programlisting></para></listitem>
+<listitem><para>Download setup.exe to D:\slapos from cygwin.com</para></listitem>
+<listitem><para>In the windows console, run:<programlisting>
+    D:\slapos>setup.exe -X -n --site http://mirrors.163.com/cygwin --root C:/cygwin --quite-mode -P cygrunsrv -P binutils -P gcc4 -P libtool -P make -P autobuild -P autoconf -P automake -P patch -P python -P wget -P vim
+</programlisting>
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+<!--
+You can create your script to start Cygwin in a tty terminal
+<programlisting>
+$ cat &lt;&lt;EOF  &gt; C:/cygwin/cygtty.bat
+@echo off
+
+C:
+chdir C:\cygwin\bin
+
+start mintty.exe -i /Cygwin-Terminal.ico -
+</programlisting>
+ -->
+After installation, 
+<programlisting>
+Administrator@JONDY ~
+$ cp /etc/password /etc/password.orig
+$ cat /etc/password
+...
+Administrator:unused:500:513:U-JONDY\Administrator,S-1-5-21-xxx-500:/home/Administrator:/bin/bash
+...
+
+# Add one line after the above line:
+root:unused:0:513:U-JONDY\Administrator,S-1-5-21-xxx-500:/home/root:/bin/bash
+
+$ exit
+</programlisting>
+Now double click the desktop icon "Cygwin" or run C:\cygwin\Cygwin.bat (Assume the cygwin root directory is C:\cygwin) to open a cygwin box. First configure tty, make the font bigger:
+<programlisting>
+root@JONDY ~
+$ cat &lt;&lt;EOF  &gt; .minttyrc
+BoldAsFont=no
+Font=Courier New
+FontHeight=16
+Scrollbar=none
+EOF
+
+</programlisting>
+</para>
+</section>
+
+<section><title>Buildout SlapOS</title>
+<para>Double click the desktop icon "Cygwin" or C:\cygwin\Cygwin.bat (Assume the cygwin root directory is C:\cygwin). A cygwin box will open, the following commands are typed in this box.
+<programlisting>
+$ echo "export CYGWIN=server" >> ~/.bash_profile
+$ cygrunsrv --install cygslapos --path /usr/sbin/cygserver
+$ sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
+
+$ mkdir -p /opt/slapos
+$ mkdir -p /opt/download-cache
+$ cd /opt/slapos
+$ echo "[buildout]
+extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/slapos/buildout.cfg
+download-cache = /opt/download-cache
+prefix = ${buildout:directory}
+" > buildout.cfg 
+$ python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py
+$ python -S bootstrap.py
+$ bin/buildout
+</programlisting>
+Now we need patch slapos.core for supporting cygwin, after these code are merged, it don't need.
+<programlisting>
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/slapos-core.patch
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/slapos-cookbook-notifyx.patch
+$ cd eggs/slapos.core-0.35-py2.7.egg/slapos
+$ patch -p1 &lt; /opt/slapos/slapos-core.patch
+
+$ cd /usr/bin
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/ip
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/groupadd
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/useradd
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/brctl
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/cygwin/tunctl
+
+$ cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
+$ cp /opt/git/openvpn-2.3.0/src/openvpn/.libs/openvpn.exe /usr/local/bin
+$ cp /opt/git/babeld-1.3.4/babeld.exe /usr/local/bin
+
+</programlisting>
+It seems netifaces.dll need to rebase, 
+$ cp /etc/postinstall/autorebase.bat.done /autorebase.bat
+
+Then exit cygwin, double click autorebase.bat in the Windows explorer.
+</para>
+</section>
+
+<section><title>IPv6 Support</title>
+<para>If native IPv6 is available, skip this section. Otherwise be sure you have installed IPv6 by the command:
+<programlisting>$ netsh interface ipv6 install</programlisting>
+</para>
+<para>Download openvpn windows installer, for example, openvpn-2.2.1-install.exe, then install openvpn. By default, it installed at <filename>C:\Program Files\OpenVPN</filename></para>
+<para>Copy required files of openvpn to /opt/openvpn and edit client.ovpn
+<programlisting>
+$ mkdir -p /opt/openvpn
+$ cd /opt/openvpn
+$ cp "C:/Program Files/OpenVPN/bin/*" /opt/openvpn
+$ cp -a "C:/Program Files/OpenVPN/config" /opt/openvpn
+$ chmod 755 *.exe
+
+$ cd config
+$ wget http://www.slapos.org/vifib-ca.crt/getData  -O ca.crt
+$ http://www.slapos.org/vifib-client.crt/getData -O client-vifib.crt
+$ wget http://www.slapos.org/vifib-client.key/getData -O client-vifib.key
+$ mv client.ovpn vifib.ovpn
+$ vi vifib.ovpn
+# Edit the following options
+dev tap
+proto tcp
+remote 176.31.103.87 443
+ca ca.crt
+cert client-vifib.crt
+key client-vifib.key
+</programlisting>
+re6stnet configure or teredo.
+</para>
+</section>
+
+<section><title>Run slapformat</title>
+<para>Assume we have registered a server which id is 'COMP-161', and saved its key and certificate files in the home directory. So we can use script 'configure.sh' to do all the configuration.
+<programlisting>
+$ mkdir -p /etc/slapos/ssl
+$ mkdir -p /etc/slapos/ssl/partition_pki
+$ cd /
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/cygwin/configure.sh 
+$ /configure.sh COMP-161 ~/computer.key ~/computer.crt
+</programlisting>
+</para>
+<para>Finally, run slapformat
+<programlisting>
+$ cd /opt/slapos
+$ bin/slapformat -c --now /etc/slapos/slapos.cfg
+</programlisting>
+</para>
+</section>
+</section>
+</chapter>
+
+<chapter id="ch_create_instance_wordpress"><title>Creating an instancee of Wordpress in the SlapOS</title> 
+<para>Copy our cygwin inotifyx to download-cache/dist, so buildout will find it other than pypi.
+</para>
+<para>The common way to release a software is to login vifib website. But we haven't integrated this software.cfg into vifib, so we verify it in the local machine. It need a patch:
+<programlisting>
+$ cd /opt/slapos
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/slapos/slapgrid-test-local-software.patch
+$ cd /opt/slapos/eggs/slapos.core-0.33.1-py2.7.egg
+$ patch -p1 &lt; /opt/slapos/slapgrid-test-local-software.patch
+</programlisting>
+Release Wordpress:
+<programlisting>
+$ mkdir -p /var/slapgrid/instance
+$ mkdir -p /var/slapgrid/software
+$ bin/slapgrid --only_sr http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/software/wordpress/software.cfg /etc/slapos/slapos.cfg
+</programlisting>
+</para>
+<para>Some dlls need to rebase in order to avoid fork issue in the Cygwin. Refer to <ulink url="http://cygwin.com/faq.html"></ulink> question 4.44 or search "rebase" in this page. First, exit all Cygwin processes and stop all Cygwin services.
+<programlisting>
+$ net stop cfgslapos
+$ ps -ef | grep python2.7
+# kill all these process which start by supervisord
+$ exit
+</programlisting>
+If you install SlapOS node by MSI package, Click Start menu, select SlapOS program group, click Run rebaseall. Otherwise, download rebase-software.bat and save it in the cygwin root path.
+<programlisting>
+$ cd /
+$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/cygwin/rebase-software.bat
+$ exit
+</programlisting>
+Double click rebase-software.bat in the windows explorer. The file should be in the directory "C:/cygwin"
+</para>
+
+<para>Create an instance:
+<programlisting>
+$ net start cygslapos
+$ bin/slapgrid --only_sr http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/software/wordpress/software.cfg /etc/slapos/slapos.cfg
+</programlisting>
+Now wordpress should work. Type "http://localhost:8080/index.php" in your browser to check it.</para>
+<para>Run the following to show a demo:
+
+$ cd /opt/slapos
+$ export SLAPOS_CLIENT_CONFIGURATION=/opt/slapos/slapos-client.cfg
+$ echo "  demoapp file:///opt/git/slapos/software/demoapp/software.cfg" >> slapos-client.cfg
+
+or 
+
+$ echo "  demoapp http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/demoapp/software.cfg" >> ~/.slapos/slapos.cfg
+
+$ echo "  nodemanager http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg" >> ~/.slapos/slapos.cfg
+
+
+$ bin/slapos node register SlapOS-Windows
+  Login: jondy
+  Password:
+
+$ bin/slapos supply demoapp COMP-1500
+
+$ bin/slapos request mydemoapp demoapp
+
+Wait for a while, otherwise there is no partition assigned
+
+$ bin/slapos node software
+
+$ bin/slapos node instance 
+
+$ bin/slapos node start all
+or
+$ bin/slapos node start demoapp
+
+$ bin/slapos node restart all
+
+Recreate instance
+$ bin/slapos node instance --only_cp slappart9
+
+$ bin/slapos request mydemoapp demoapp # not this, it request node in the cloud
+
+Now, you can visit the demo in the browser by the url.
+Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client
+</para>
+</chapter>
+
+<chapter><title>Make installer from source</title>
+<section><title></title>
+<para></para></section>
+</chapter>
+
+<!-- 
+A.	
+To install the IPv6 protocol for Windows XP with SP2 or later, do the following:
+
+Log on to the computer with a user account that has privileges to change network configuration.
+Click Start, click Control Panel, and then double-click Network Connections.
+Right-click any local area connection, and then click Properties.
+Click Install.
+In the Select Network Component Type dialog box, click Protocol, and then click Add.
+In the Select Network Protocol dialog box, click Microsoft TCP/IP version 6, and then click OK.
+Click Close to save changes to your network connection.
+
+
+Alternately, from the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt. At the command prompt, type netsh interface ipv6 install.
+
+ For the IPv6 protocol for Windows XP with SP1, do the following:
+
+Log on to the computer with a user account that has privileges to change network configuration.
+Click Start, click Control Panel, and then double-click Network Connections.
+Right-click any local area connection, and then click Properties.
+Click Install.
+In the Select Network Component Type dialog box, click Protocol, and then click Add.
+In the Select Network Protocol dialog box, click Microsoft IPv6 Developer Edition, and then click OK.
+Click Close to save changes to your network connection.
+
+
+Alternately, from the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt. At the command prompt, type netsh interface ipv6 install.
+
+To install the IPv6 protocol for Windows XP with no service packs installed:
+
+Log on to the computer running Windows XP with a user account that has privileges to change network configuration.
+Open a command prompt. From the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt.
+At the command prompt, type ipv6 install.
+
+
+Regardless of the version of Windows XP, to use RPC applications over IPv6, you must first restart the computer.
+
+
+Q. How can I tell if the IPv6 protocol is installed for Windows XP with no service packs installed? It does not appear in the list of protocols in Network Connections. A.	The installation of the IPv6 Protocol for Windows XP with no service packs installed does not use the standard procedure for protocol installation in the Network Connections folder. Therefore, it is not visible as an installed protocol. To determine whether IPv6 is installed, type ipv6 if at a command prompt. If IPv6 is installed, you will see a display of your IPv6 interfaces and their configuration. Otherwise, the Ipv6.exe tool will indicate that IPv6 is not installed.
+ -->
+<appendix id="appendix_cygwin_packages"><title>Cygwin Required Packages List</title>
+<para>The following packages are requied by SlapOS Node
+<itemizedlist>
+<listitem><para>Devel/autobuild</para></listitem>
+<listitem><para>Devel/autoconf</para></listitem>
+<listitem><para>Devel/automake</para></listitem>
+<listitem><para>Net/autossh</para></listitem>
+<listitem><para>Devel/binutils</para></listitem>
+<listitem><para>Devel/bison</para></listitem>
+<listitem><para>Utils/bzip2<superscript></superscript></para></listitem>
+<listitem><para>Net/ca-certificates</para></listitem>
+<listitem><para>Admin/cron</para></listitem>
+<listitem><para>Devel/cygport</para></listitem>
+<listitem><para>Admin/cygrunsrv</para></listitem>
+<listitem><para>Utils/file<superscript>*</superscript></para></listitem>
+<listitem><para>Devel/flex</para></listitem>
+<listitem><para>Devel/gcc4</para></listitem>
+<listitem><para>Utils/gdbm</para></listitem>
+<listitem><para>Devel/libgdbm-devel</para></listitem>
+<listitem><para>Devel/gettext<superscript>*</superscript></para></listitem>
+<listitem><para>Devel/gettext-devel</para></listitem>
+<listitem><para>Devel/git</para></listitem>
+<listitem><para>GNOME/libglib2.0-devel</para></listitem>
+<listitem><para>GNOME/libglib2.0_0</para></listitem>
+<listitem><para>Libs/libexpat1</para></listitem>
+<listitem><para>Libs/libexpat1-devel</para></listitem>
+<listitem><para>Libs/libmpfr-devel</para></listitem>
+<listitem><para>Libs/libmpfr4</para></listitem>
+<listitem><para>Libs/libsqlite3-devel</para></listitem>
+<listitem><para>Libs/libsqlite3_0</para></listitem>
+<listitem><para>Devel/libtool</para></listitem>
+<listitem><para>Libs/libxml2</para></listitem>
+<listitem><para>Libs/libxml2-devel</para></listitem>
+<listitem><para>Libs/libxslt</para></listitem>
+<listitem><para>Libs/libxslt-devel</para></listitem>
+<listitem><para>Devel/make</para></listitem>
+<listitem><para>Interpreters/m4</para></listitem>
+<listitem><para>Devel/libncurses-devel</para></listitem>
+<listitem><para>Devel/libncursesw-devel</para></listitem>
+<listitem><para>Utils/patch</para></listitem>
+<listitem><para>Utils/patchutils</para></listitem>
+<listitem><para>Devel/pkg-config</para></listitem>
+<listitem><para>Python/python<superscript>2.7</superscript></para></listitem>
+<listitem><para>Python/python-openssl</para></listitem>
+<listitem><para>Python/python-setuptools</para></listitem>
+<listitem><para>Net/openssh</para></listitem>
+<listitem><para>Devel/openssl-devel</para></listitem>
+<listitem><para>Libs/libopenssl098</para></listitem>
+<listitem><para>Libs/libopenssl100</para></listitem>
+<listitem><para>Libs/popt</para></listitem>
+<listitem><para>Devel/readline<superscript>*</superscript></para></listitem>
+<listitem><para>Database/sqlite3</para></listitem>
+<listitem><para>Devel/swig</para></listitem>
+<listitem><para>Admin/syslog-ng</para></listitem>
+<listitem><para>Devel/zlib-devel</para></listitem>
+<listitem><para>Editor/vim</para></listitem>
+<listitem><para>Web/wget</para></listitem>
+</itemizedlist>
+</para>
+<para>
+The following packages are requied by re6stnet
+<itemizedlist>
+<listitem><para>openvpn<superscript>#</superscript></para></listitem>
+<listitem><para>babeld<superscript>#</superscript></para></listitem>
+</itemizedlist>
+</para>
+<para>The following packages are requied by wamp
+<itemizedlist>
+<listitem><para>Web/apache2</para></listitem>
+<listitem><para>Web/apache2-devel</para></listitem>
+<listitem><para>apache2-php<superscript>#</superscript></para></listitem>
+<listitem><para>Devel/cmake</para></listitem>
+<listitem><para>Admin/cron</para></listitem>
+<listitem><para>Admin/cygrunsrv</para></listitem>
+<listitem><para>Net/curl</para></listitem>
+<listitem><para>Libs/libbz2-devel</para></listitem>
+<listitem><para>Net/libcurl-devel</para></listitem>
+<listitem><para>Text/libenchant-devel</para></listitem>
+<listitem><para>Text/libenchant1</para></listitem>
+<listitem><para>X11/libfreetype-devel</para></listitem>
+<listitem><para>X11/libfreetype6</para></listitem>
+<listitem><para>Devel/libjpeg-devel</para></listitem>
+<listitem><para>Libs/libjpeg8</para></listitem>
+<listitem><para>Devel/libpng-devel</para></listitem>
+<listitem><para>Libs/libpng15</para></listitem>
+<listitem><para>X11/libXpm-devel</para></listitem>
+<listitem><para>X11/libXpm4</para></listitem>
+<listitem><para>dropbear<superscript>#</superscript></para></listitem>
+<listitem><para>logrotate<superscript>#</superscript></para></listitem>
+<listitem><para>mariadb<superscript>#</superscript></para></listitem>
+<listitem><para>Utils/rdiff-backup</para></listitem>
+<listitem><para>Net/stunnel</para></listitem>
+</itemizedlist>
+'*' means it's default package of cygwin, '#' means it need to build by myself, '?' means maybe it's not required.
+</para>
+</appendix>
+</book>
+

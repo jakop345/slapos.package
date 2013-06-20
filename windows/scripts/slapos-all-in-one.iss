@@ -69,8 +69,8 @@ Source: "opt\git\slapos.package\windows\scripts\slapos-node-config.sh"; DestDir:
 Source: "opt\git\slapos.package\windows\scripts\slapos-client-config.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\pre-uninstall.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 
-Source: "src\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html";
-Source: "src\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
+Source: "opt\git\slapos.package\windows\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html";
+Source: "opt\git\slapos.package\windows\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt";
 
 [Icons]
 Name: "{commondesktop}\SlapOS"; Filename: "{app}\cygwin\etc\slapos\desktop\index.html"; WorkingDir: "{app}\cygwin\etc\slapos\desktop"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
