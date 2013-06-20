@@ -35,7 +35,6 @@ if sys.platform.startswith("cygwin"):
 else:
     sys.exit('platform %s is not supported' % sys.platform)
 
-
 def main():
     setup_args = dict(
         name='netdrive',
@@ -57,12 +56,12 @@ def main():
             'zc.buildout', # plays with buildout
             'zc.recipe.egg', # for scripts generation
             ],
-      entry_points={
-        'console_scripts': [
-          'netdrive-reporter = netreport:main',
-          ],
-        }
-    )
+        entry_points={
+            'console_scripts': [
+                'netdrive-reporter = netreport:main',
+                ],
+            },
+        )
     if extensions is not None:
         setup_args["ext_modules"] = extensions
     setup(**setup_args)
