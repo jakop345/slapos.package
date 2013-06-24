@@ -55,15 +55,39 @@
 <chapter><title>Using Slapos in the Windows</title> 
 <para>After SlapOS has been installed successfully, you will find program group "SlapOS" which include the following entries:
 <itemizedlist>
-<listitem><para>Slapos</para></listitem>
+<listitem><para>SlapOS</para></listitem>
 <listitem><para>Node Runner</para></listitem>
-<listitem><para>Slap Console</para></listitem>
-<listitem><para>Cygwin Terminal</para></listitem> 
-<listitem><para>Configure Node</para></listitem> 
-<listitem><para>Configure Client</para></listitem> 
-<listitem><para>User Guide</para></listitem> 
+<listitem><para>Command Console</para></listitem>
+<listitem><para>Configure Node</para></listitem>
+<listitem><para>User Guide</para></listitem>
 </itemizedlist>
 </para>
+<section><title>SlapOS</title>
+<para>This is used by slapos client, now it's connected to <ulink url="https://www.slapos.org"/>. Login it to enter SlapOS Cloud world.</para>
+</section>
+<section><title>Node Runner</title>
+<para>Node Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
+<para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
+</section>
+<section><title>Command Console</title>
+<para>It will open a terminal, here you can run most of slapos command, 
+<programlisting>
+$ cd /opt/slapos
+$ ls bin
+bang                    slapconsole  slapgrid-sr             slapos
+buildout                slapformat   slapgrid-supervisorctl  slapos-watchdog
+generate-signature-key  slapgrid     slapgrid-supervisord    slapproxy
+py                      slapgrid-cp  slapgrid-ur             slapproxy-query
+</programlisting>
+</para>
+<para>Refer to <ulink url="http://git.erp5.org/gitweb/slapos.core.git/blob/HEAD:/documentation/source/slapos.usage.rst?js=1"/></para>
+</section>
+<section><title>Configure Node</title>
+<para>It used to generate all the configure files required by slapos slave node, you need pass certificate and key files of your registered server.</para>
+</section>
+<section><title>User Guide</title>
+<para>It just showes this documnet in the web browser.</para>
+</section>
 </chapter>
 
 <!--
