@@ -1,0 +1,192 @@
+SlapOS For Windows
+==================
+
+Installation
+============
+
+1. Double click installer to install slapos node. There are 2 installers:
+
+   slapos-0.158.2-windows-x86-all-in-one.exe: 
+     local install, all the files are included in the packages.
+
+   slapos-0.158.2-windows-x86.exe: network install.
+
+2. Register to slapos.org community, save certificate and key of your
+   account in local machine.
+ 
+   Refer to http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client
+
+3. Register your computer to slapos.org community Cloud, mark computer
+   id of your computer registered in the slapos cloud, save
+   certificate and key of your computer in local machine.
+
+   Refer to http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Slave.Node.Source
+
+4. Click Start -> All Programs -> SlapOS -> Configure Client
+
+5. Click Start -> All Programs -> SlapOS -> Configure Node
+
+Meantime, it will prompt to input your email address to receive token
+
+Please enter your email address: 
+
+Then, check your email and get the token, type it here:
+
+Please enter your token: 
+...
+
+Now it's ready to enjoy SlapOS!
+
+Usage
+=====
+
+SlapOS Desktop
+--------------
+
+The interface of slapos cloud, used by customers and users to get
+cloud services.
+
+Start it by
+  Click Start -> All Programs -> SlapOS -> SlapOS 
+
+Or
+
+  Double click desktop icon "SlapOS"
+
+
+SlapOS NodeManager
+------------------
+
+It's used by provider and developer to manage slapos node. Release software, create instance, start/stop/monitor node etc.
+
+Start it by
+  Click Start -> All Programs -> SlapOS -> Node Manager
+
+Command Console
+---------------
+
+If you prefer command line mode, it's your choice. You can run all the
+slapos command in the command console. Start slapos command console by 
+
+  Click Start -> All Programs -> SlapOS -> Command Console
+
+Refer to http://git.erp5.org/gitweb/slapos.core.git/blob/HEAD:/documentation/slapos.usage.rst?js=1
+
+User And Group
+==============
+
+About root user, in the cygwin, no root user but Administrator which
+uid is 0. And no root group but Administrators.
+
+Network Interface
+=================
+
+SlapOS use msloop network adapter as its network interface, which name
+is fixed as "re6stnet-lo".
+
+There is a problem if your have more than one msloop network adapter,
+it seems all of them share one same MAC address, so same IPv6 link
+layer adddress: fe80::4cff:fe4f:4f50
+
+Virtual Machine box will install its bridge network card, and it will
+result in breaking all the openvpn TAP-WINDOWS virtual network cards
+when installing a new one.
+
+OpenVPN TAP-WINDOWS Driver
+==========================
+
+When installing openvpn tap-windows driver, by default, it need you
+confirm to this non-test-signed driver, now in the ip scripts it will
+find the dialog and click Continue Installation. However, it seems
+there are so many dialog boxes. 
+
+Awful! How to avoid this, for Windows XP:
+
+1. On the Start menu, right click on the My Computer.
+
+2. Click Properties, then click Hardware in the System Properties Dialog.
+
+3. In the Hardware page, click Driver Signing.
+
+4. Check Ignore in the Driver Sign Options Dialog.
+
+5. Click OK.
+
+For Windows Server 2003 or others, maybe need to change local policies options:
+
+1. Click Start, and then click Run.
+
+2. In the Open box, type gpedit.msc and then click OK.
+
+3. In the left pane, expand the Computer Configuration branch, expand
+   the Windows Settings branch, expand the Security Settings branch,
+   expand the Local Policies branch, and then click the Security
+   Options folder.
+
+4. In the right pane, double-click the Devices: Unsigned driver installation behavior.
+
+5. Select Silent succeed, and then click OK. 
+
+General Terminology
+===================
+
+Re6stnet Network
+----------------
+
+SlapOS Cloud
+------------
+
+Customer
+--------
+
+A human which only use services provided by SlapOS Cloud.
+
+User
+----
+
+A human which use services provided by SlapOS Cloud, and his/her
+computer has joined SlapOS Re6stnet Network.
+
+Provider
+--------
+
+A human which computer has joined SlapOS Re6stnet Network, and share
+it as Slave Node so that it could be used by others.
+
+Developer
+---------
+
+A human which write the application for SlapOS.
+
+Desktop
+-------
+
+An interface used to visit SlapOS Cloud, and get services from SlapOS
+Cloud.
+
+Node
+----
+
+A computer which run any SlapOS application.
+
+
+Master Node
+-----------
+
+A computer which run SlapOS Vifib Service.
+
+Slave Node
+----------
+
+A computer which has been registered to master node.
+
+SlapOS Desktop
+--------------
+
+An application.
+
+SlapOS Node Manager
+-------------------
+
+An application.
+

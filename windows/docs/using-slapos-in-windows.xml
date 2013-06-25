@@ -191,7 +191,7 @@ Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/develope
     C:\Documents and Settings\Administrator>d:
     D:\>md slapos
     D:\>cd slapos
-    D:\slapos>SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P docbook
+    D:\slapos>SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P docbook-utils
     D:\slapos>move d:\temp\setup.exe ./
     D:\slapos>setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
 </programlisting>Waiting for the installer finished.</para></listitem>
@@ -299,12 +299,6 @@ $ make
 # check whether openvpn.exe is made
 $ ls -l src/openvpn/.libs/openvpn.exe
 $ cp src/openvpn/.libs/openvpn.exe /usr/local/bin
-</programlisting>
-Download openvpn windows installer, for example, openvpn-install-2.3.1-I001-i686.exe, use 7-zip or some other tools to pick up the driver files from the installer.
-<programlisting>
-Picking up tap-windows.exe from openvpn-install-2.3.1-I001-i686.exe\$TEMP\
-Picking up devcon.exe from tap-windows.exe\bin\
-Picking up all the files from tap-windows.exe\driver\
 </programlisting>
 Then generate user-guide.html from using-slapos-in-windows.xml, it requires xslt and dockbook, make sure these packages installed in the Cygwin
 <programlisting>
