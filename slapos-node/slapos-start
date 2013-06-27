@@ -18,11 +18,11 @@ if [ $ONLY_SLAPFORMAT = false ]; then
 
     # Check ipv4
     echo "Checking IPv4 connectivity..."
-    ping -c 2 -o $IPV4CHECK >/dev/null 2>&1
+    ping -c 2 $IPV4CHECK >/dev/null 2>&1
     while [ $? != 0 ]; do
         echo "IPv4 is not ready yet."
         sleep 2
-        ping -c 2 -o $IPV4CHECK >/dev/null 2>&1
+        ping -c 2 $IPV4CHECK >/dev/null 2>&1
     done
 
     # Launch openvpn
@@ -33,12 +33,12 @@ if [ $ONLY_SLAPFORMAT = false ]; then
 
     # Wait for ipv6 connection to be ready
     echo "Checking IPv6 connectivity. This may take a few seconds..."
-    ping6 -c 2 -o $IPV6CHECK >/dev/null 2>&1
+    ping6 -c 2 $IPV6CHECK >/dev/null 2>&1
     while [ $? != 0 ];
     do
         echo "IPv6 is not ready yet."
         sleep 2
-        ping6 -c 2 -o $IPV6CHECK >/dev/null 2>&1
+        ping6 -c 2 $IPV6CHECK >/dev/null 2>&1
     done
 else
     sleep 15
