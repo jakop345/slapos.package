@@ -59,6 +59,7 @@ Source: "opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
 
 Source: "opt\git\slapos.package\windows\scripts\init-slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
+Source: "opt\git\slapos.package\windows\scripts\slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-configure.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
@@ -71,14 +72,12 @@ Source: "opt\git\slapos.package\windows\docs\README.cygwin"; DestDir: "{app}"; D
 [Icons]
 Name: "{commondesktop}\SlapOS Desktop"; Filename: "https://www.slapos.org/"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
 Name: "{group}\SlapOS Desktop"; Filename: "https://www.slapos.org/"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
-Name: "{group}\Node Runner"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-w hide -l /var/log/slapos-node-runner.log /etc/slapos/scripts/slapos-node-runner.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
-; Name: "{group}\SlapOS Console"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -h always -t ""SlapOS Console"" /opt/slapos/bin/slapconsole /etc/opt/slapos/slapos.cfg"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
+Name: "{group}\Node Runner"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-w hide -h never -l /var/log/slapos-node-runner.log /etc/slapos/scripts/slapos-node-runner.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
+Name: "{group}\SlapOS Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-node.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\node.ico";
 Name: "{group}\Command Console"; Filename: "{app}\cygwin\cygtty.bat";  WorkingDir: "{app}\cygwin\opt\slapos"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
-Name: "{group}\Configure SlapOS"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -t ""Configure SlapOS Client"" /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
-; Name: "{group}\Configure Node"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -t ""Configure SlapOS Node"" /etc/slapos/scripts/slapos-node-config.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\node.ico";
+Name: "{group}\Configure SlapOS"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -h never -t ""Configure SlapOS Client"" /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
 Name: "{group}\User Guide"; Filename: "{app}\user-guide.html";
 Name: "{group}\Uninstall SlapOS"; Filename: "{uninstallexe}";
-
 
 [Run]
 Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"""; StatusMsg: "Installing Cygwin..."; Flags: runhidden;

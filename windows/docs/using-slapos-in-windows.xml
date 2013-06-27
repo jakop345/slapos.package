@@ -57,6 +57,7 @@
 <itemizedlist>
 <listitem><para>SlapOS Desktop</para></listitem>
 <listitem><para>Node Runner</para></listitem>
+<listitem><para>SlapOS Node</para></listitem>
 <listitem><para>Command Console</para></listitem>
 <listitem><para>Configure SlapOS</para></listitem>
 <listitem><para>User Guide</para></listitem>
@@ -68,6 +69,9 @@
 <section><title>Node Runner</title>
 <para>Node Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
 <para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
+</section>
+<section><title>SlapOS Node</title>
+<para>It's used to format slapos node, release software and create instance, you an run it at any time.</para>
 </section>
 <section><title>Command Console</title>
 <para>It will open a terminal, here you can run most of slapos command, 
@@ -191,10 +195,10 @@ Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/develope
 D:
 MD slapos
 CD slapos
-SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P docbook-utils
+SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget
 MOVE d:\temp\setup.exe .\
 setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
-</programlisting>Waiting for the installer finished.</para></listitem>
+</programlisting>Waiting for the installer finished. -P docbook-utils</para></listitem>
 </itemizedlist>
 A cygwin icon will be added in the windows desktop, click it to enter cygwin box, then run the following commands:
 <!--
@@ -212,7 +216,9 @@ start mintty.exe -i /Cygwin-Terminal.ico -
 <programlisting>
 echo "export CYGWIN=server" >> ~/.bash_profile
 sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
-cp /etc/password /etc/password.orig
+[[ -f /etc/passwd ]] || mkpasswd > /etc/passwd
+[[ -f /etc/group ]] || mkgroup > /etc/group
+cp /etc/passwd /etc/passwd.orig
 myaccount=$(grep "^Administrator:" /etc/passwd | \
               sed -e "s/Administrator:unused:500:/root:unused:0:/g")
 echo $myaccount >> /etc/passwd
@@ -243,7 +249,7 @@ mkdir -p /opt/slapos
 mkdir -p /opt/download-cache
 cd /opt/slapos
 echo "[buildout]
-extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin-0:/component/slapos/buildout.cfg
+extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
 " > buildout.cfg 
@@ -255,9 +261,9 @@ Now we need patch slapos.core for supporting cygwin, after these code are merged
 <programlisting>
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/slapos-patches.tar.gz
-tar xzf slapos-patches.tar.gz
-cd eggs/slapos.core-0.35-py2.7.egg/slapos
-patch -p1 &lt; /opt/patches/slapos-core.patch
+tar xzf slapos-patches.tar.gz --no-same-owner
+cd /opt/slapos/eggs/slapos.core-0.35-py2.7.egg
+patch -p1 &lt; /opt/patches/slapos-core-format.patch
 </programlisting>
 It seems netifaces.dll need to rebase, 
 <programlisting>
@@ -282,7 +288,6 @@ git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
 Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
 cd /opt/git/slapos.package/windows/babeld
-# If your os is windows xp, type the following command, otherwise type make only.
 make WINVER=XP
 cp babeld.exe /usr/local/bin
 
@@ -308,7 +313,7 @@ Download pyOpenSSL-0.13.tar.gz, miniupnpc-1.8.tar.gz,
 <programlisting>
 mkdir -p /opt/downloads
 cd /opt/downloads
-wget --no-verify-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929
+wget --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929
 wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O miniupnpc-1.8.tar.gz
 </programlisting>
 Get re6stnet for cygwin
@@ -323,8 +328,8 @@ Get the icons and openvpn drivers
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/images.tar.gz
 wget http://www.dashingsoft.com/products/slapos/openvpn-driver.tar.gz
-tar xzf images.tar.gz
-tar xzf openvpn-driver.tar.gz
+tar xzf images.tar.gz --no-same-owner
+tar xzf openvpn-driver.tar.gz --no-same-owner
 </programlisting>
 </para>
 </section>
