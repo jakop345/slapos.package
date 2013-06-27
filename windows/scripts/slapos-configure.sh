@@ -105,7 +105,7 @@ function query_parameter()
     if [[ X$1 == X || $1 == "*" || $1 == "all" ]] ; then
         return 1
     fi
-    if [[ $1 == "?" || $1 == "query"]] ; then
+    if [[ $1 == "?" || $1 == "query" ]] ; then
         read -n 1 -p $3 user_ack
         if [[ X$user_ack == X[Yy] ]] ; then
             return 1
@@ -181,14 +181,7 @@ if [[ ! -f $node_key_file ]] ; then
     cp $key_file $node_key_file
 fi
 
-if [[ "$1" == COMP-+([0-9]) ]] ; then
-    computer_id=$1
-else
-    [[ "X$1" == "X" ]] || echo "Invalid computer id: $1"
-    echo
-    echo Please input computer id you have registered, it looks like COMP-XXXX
-    read -p "computer id: " computer_id
-fi
+computer_id=$(grep  CN=COMP $node_certificate_file | sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
 
 [[ "$computer_id" == COMP-+([0-9]) ]] || \
     show_error_exit "Invalid computer id specified."
@@ -246,16 +239,6 @@ fi
 sed -i -e "s%^cert_file.*$%cert_file = $client_certificate_file%" \
        -e "s%^key_file.*$%key_file = $client_key_file%" \
        $client_configure_file
-
-# Config slapproxy
-if ! $(grep -q "^\[slapproxy\]" $node_config_file) ; then
-    echo "
-[slapproxy]
-host = 127.0.0.1
-port = 28080
-database_uri = /var/lib/slapproxy.db
-" >> $node_config_file
-fi
 
 #
 # Re6stnet
