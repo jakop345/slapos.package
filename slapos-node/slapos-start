@@ -79,3 +79,4 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     /opt/slapos/bin/slapgrid-cp --verbose --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 fi
 
+exit 0
