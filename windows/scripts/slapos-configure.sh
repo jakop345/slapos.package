@@ -133,6 +133,9 @@ run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 slapos_run_entry=SlapOS-Node
 slapos_ifname=re6stnet-lo
 
+mkdir -p /etc/opt/slapos/ssl/partition_pki
+mkdir -p $slapos_client_home
+
 #
 # Add msloop network adapter, ane name it as "re6stnet-lo"
 #
@@ -161,10 +164,8 @@ echo
 echo Refer to http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Slave.Node.Source
 echo
 
-mkdir -p /etc/opt/slapos/ssl/partition_pki
-
 if [[ ! -f $node_certificate_file ]] ; then
-    read -p "Where is certificate file: " certificate_file
+    read -p "Where is computer certificate file: " certificate_file
     [[ ! -f "$certificate_file" ]] && \
         show_error_exit "Certificate file $certificate_file doesn't exists."
     echo "Copy certificate from $certificate_file to $node_certificate_file"
@@ -172,19 +173,19 @@ if [[ ! -f $node_certificate_file ]] ; then
     cp $certificate_file $node_certificate_file
 fi
 
+computer_id=$(grep  CN=COMP $node_certificate_file | sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
+[[ "$computer_id" == COMP-+([0-9]) ]] || \
+    show_error_exit "Invalid computer id specified."
+echo Computer GUID is: $computer_id
+
 if [[ ! -f $node_key_file ]] ; then
-    read -p "Where is key file: " key_file
+    read -p "Where is computer key file: " key_file
     [[ ! -f "$key_file" ]] && \
         show_error_exit "Key file $key_file doesn't exists."
     echo "Copy key from $key_file to $node_key_file"
     key_file=$(cygpath -u $key_file)
     cp $key_file $node_key_file
 fi
-
-computer_id=$(grep  CN=COMP $node_certificate_file | sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
-
-[[ "$computer_id" == COMP-+([0-9]) ]] || \
-    show_error_exit "Invalid computer id specified."
 
 # Hope it will not confilct with original network in the local machine
 ipv4_local_network=10.201.67.0/24
@@ -210,9 +211,8 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^computer_id.*$%computer_id = $computer_id%" \
         $node_config_file
 
-
 if [[ ! -f $client_certificate_file ]] ; then
-    read -p "Where is certificate file: " certificate_file
+    read -p "Where is user certificate file: " certificate_file
     [[ ! -f "$certificate_file" ]] && \
         show_error_exit "Certificate file $certificate_file doesn't exists."
     echo "Copy certificate from $certificate_file to $client_certificate_file"
@@ -221,7 +221,7 @@ if [[ ! -f $client_certificate_file ]] ; then
 fi
 
 if [[ ! -f $client_key_file ]] ; then
-    read -p "Where is key file: " key_file
+    read -p "Where is user key file: " key_file
     [[ ! -f "$key_file" ]] && \
         show_error_exit "Key file $key_file doesn't exists."
     echo "Copy key from $key_file to $client_key_file"
