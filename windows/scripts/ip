@@ -308,8 +308,13 @@ function format_interface_name()
     if ! [[ "${guid:0:1}" == "{" ]] ; then
         echo $1
     else
-        ipv6 if | grep -B1 "${guid}" | \
-          sed -e "2d" -e "s/^Interface[0-9: ]\+\(Ethernet: \)\?//g"
+        which ipv6 > /dev/null 2>&1
+        if (( $? )) ; then            
+            getmac /fo list /v | grep -B3 "^Transport Name:.*$guid" | grep "^Connection Name:" |  sed -e "s/^Connection Name: *//g"
+        else
+            ipv6 if | grep -B1 "${guid}" | \
+                sed -e "2d" -e "s/^Interface[0-9: ]\+\(Ethernet: \)\?//g"
+        fi
     fi
 }
 

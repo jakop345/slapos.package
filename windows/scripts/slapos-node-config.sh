@@ -73,9 +73,8 @@ function reset_connection()
 function connection2guid()
 {
     ifname=${1-re6stnet-lo}
-    netsh interface ipv6 show interface $ifname | \
-        grep "^GUID\s*:" | \
-        sed -e "s/^GUID\s*:\s*//"
+    getmac /fo list /v | grep -A3 "^Connection Name: *$ifname\$" \
+        | grep "^Transport Name:" | sed -e "s/^.*Tcpip_//g"
 }
 
 #
