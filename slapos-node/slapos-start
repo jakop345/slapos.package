@@ -11,7 +11,7 @@ ${ONLY_SLAPFORMAT:=false}
 if [ $ONLY_SLAPFORMAT = false ]; then
     if [ ! -f  $SLAPOS_CONFIGURATION/slapos.cfg ]; then
         echo "No slapos.cfg found"
-        exit 0
+        exit 1
     fi
 
     echo "Starting slap script"
