@@ -46,15 +46,15 @@ fi
 
 # Run slapformat
 i=1
-echo -n "Running slapformat..." 
-/opt/slapos/bin/slapformat  --now --console --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
+echo -n "Running slapos node format..."
+/opt/slapos/bin/slapos node format --now --console --log_file=/opt/slapos/log/slapos-node-format.log $SLAPOS_CONFIGURATION/slapos.cfg
 while [ $? != 0 ]; do
     sleep $(($i*60))
     if [ $i -le 20 ]; then
         let i++
     fi
-    echo "Retrying slapformat"
-    /opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
+    echo "Retrying slapos node format"
+    /opt/slapos/bin/slapos node format --now --console --verbose --log_file=/opt/slapos/log/slapos-node-format.log $SLAPOS_CONFIGURATION/slapos.cfg
 done
 
 if [ $ONLY_SLAPFORMAT = false ]; then
@@ -75,8 +75,8 @@ if [ $ONLY_SLAPFORMAT = false ]; then
     # Delete timestamp of all partitions so that it will force slapgrid to process them.
     rm /srv/slapgrid/slappart*/.timestamp 2>/dev/null
 
-    # Run slapgrid now.
-    /opt/slapos/bin/slapgrid-cp --verbose --now --logfile=/opt/slapos/slapgrid-cp.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
+    # Start instances
+    /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 fi
 
 exit 0
