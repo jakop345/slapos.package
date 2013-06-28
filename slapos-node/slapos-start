@@ -74,9 +74,6 @@ if [ $ONLY_SLAPFORMAT = false ]; then
 
     # Delete timestamp of all partitions so that it will force slapgrid to process them.
     rm /srv/slapgrid/slappart*/.timestamp 2>/dev/null
-
-    # Start instances
-    /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log --pidfile=/opt/slapos/slapgrid-cp.pid $SLAPOS_CONFIGURATION/slapos.cfg >> /opt/slapos/slapgrid-cp.log 2>&1
 fi
 
 exit 0
