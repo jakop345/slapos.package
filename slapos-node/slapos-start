@@ -54,7 +54,7 @@ while [ $? != 0 ]; do
         let i++
     fi
     echo "Retrying slapformat"
-    /opt/slapos/bin/slapformat  --now --console --verbose --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
+    /opt/slapos/bin/slapformat  --now --console --verbose --log_file=/opt/slapos/slapformat.log $SLAPOS_CONFIGURATION/slapos.cfg
 done
 
 if [ $ONLY_SLAPFORMAT = false ]; then
