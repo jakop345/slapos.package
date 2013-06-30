@@ -1,6 +1,7 @@
 #! /bin/bash
 #
-# When uninstall slapos, it will be called by uninstaller.
+# When uninstall slapos, it will be called by uninstaller. Root right
+# required to run this script.
 #
 #    /bin/bash/ --login -i pre-uninstall.sh
 # 
@@ -8,24 +9,15 @@
 #
 #    1. Remove virtual netcards installed by re6stnet
 #
-#    2. Remove service cygserver and syslog-ng
+#    2. Remove service cron, cygserver and syslog-ng
 #
-if [[ ! "$(whoami)" == "Administrator" ]] ; then
-    exit 1
-fi
-
-#
-# Remove slapos-init script when windows startup
-#
-run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-slapos_run_entry=SlapOS-Node
-regtool -q unset "$run_key\\$slapos_run_entry"
 
 #
 # Remove virtual netcard installed by re6stnet 
 #
 for ifname in $(netsh interface show interface | gawk '{ print $3 }') ; do
     if [[ ("$ifname" == re6stnet*) && ("$ifname" != "re6stnet-lo") ]] ; then
+        echo Removing network connection: $ifname
         ip vpntap del dev $ifname mode true
     fi
 done
@@ -33,8 +25,10 @@ done
 #
 # Remove services installed by cygwin
 #
-cygrunsrv.exe --remove syslog-ng
-cygrunsrv.exe --remove cygserver
+for x in $(cygrunsrv --list) ; do
+    echo Removing cygservice $x
+    cygrunsrv -R $x    
+done
 
 exit 0
 

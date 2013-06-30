@@ -19,3 +19,22 @@ if [[ -f $current_path/node-runner.vbs ]] ; then
     cyg_cscript $current_path/node-runner.vbs || (echo Failed to start slap-runner ; exit 1)
     echo Start slap-runner OK.
 fi
+
+cat <<EOF > slap-runner.html
+
+
+
+d>
+<script LANGUAGE="JavaScript">
+<!--
+function openwin() {
+  location.reload("url")
+}
+//-->
+</script>
+</head>
+<body onload="openwin()">
+</body>
+</html>
+EOF
+

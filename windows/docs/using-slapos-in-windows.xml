@@ -20,75 +20,92 @@
 <chapter id="ch_introduction"><title>Introduction</title>
 <para>SlapOS can be described as a cloud operating system in which "everything is a process" unlike Unix in which "everything is a file". If one has to manage thousands of servers with thousands of processes, hundred different applications in multiple different releases or versions, SlapOS can help you a lot by making the whole management process well specified, automated and under control.</para>
 <para>The goal of this tutorial is to teach how to use SlapOS in the windows.</para>
-<!-- 
-<itemizedlist>
-<listitem><para>First you need register an account in the slapos.org (refer to <xref linkend="ch_register_slapos_org"/>)</para></listitem>
-<listitem><para>Then install SlapOS slave node in the windows (refer to <xref linkend="ch_install_slapos"/>)</para></listitem>
-<listitem><para>Finally enjoy slapos cloud in the Windows</para></listitem>
-</itemizedlist>
- -->
 </chapter>
-
-<!-- 
-<chapter id="ch_register_slapos_org"><title>Registering in the slapos.org</title>
-<para>Then, we need to register your computer to slapos.org community Cloud. By doing so, we will obtain X509 certificate and key which are later needed for the configuration process.
-<itemizedlist>
-<listitem><para>Login to www.slapos.org. Go to the "My Space" area and then to the "My Servers" section. Click on the button "New Server". This button will lead you to a page where you can specify the name of your server.</para></listitem>
-<listitem><para>Enter a self contained name to identify your server. Consider a name "VIFIB 19 Asus i7 for JB" rather than "My Server". This will help you find your server later on. Click on the "Add" button.</para></listitem>
-<listitem><para>X509 key and certificate are generated. Certificates are not stored by slapos.org server. They will be lost if you do not save them : Do not close this web page yet as we are going to store the key and certificate in files in next step. </para>
-<para>You can create 2 new files named as computer.key and computer.crt by Notepad or any editor your prefer, and save the content of certificate and key into both of files respectively.</para></listitem>
-</itemizedlist>
-</para>
-<para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Running.SlapOS.on.your.computer"></ulink> in the section VIFIB Registration.</para>
-</chapter>
- -->
 
 <chapter id="ch_install_slapos"><title>Installing SlapOS node in the Windows</title>
 <para>At first, we need to sign up in VIFIB community Cloud by clicking here <ulink url="https://www.slapos.org/login_form"/></para>
 <para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-x86-all-in-one.exe or slapos-XXX-windows.exe, XXX stands for version-release information. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
-<para>Double click the installer, click Next, Next ...</para>
+<para>Double click the installer, click Next, Next ... 
+<note><para>If the current user isn't Administrator, you need run it as Administrator. Right click the installer, then click Run As Administrator.</para></note>
+</para>
 <para>At the final wizard page, click Install.</para>
 <para>Waiting for everything done.</para>
-<para>If you'd like to install slapos node from sources, refer to the chapter <xref linkend="ch_generate_window_installer"/>.</para>
+<para>If you prefer to install slapos node from sources, refer to the chapter <xref linkend="ch_generate_window_installer"/>.</para>
 </chapter>
 
 <chapter><title>Using Slapos in the Windows</title> 
 <para>After SlapOS has been installed successfully, you will find program group "SlapOS" which include the following entries:
 <itemizedlist>
+<listitem><para>Configure SlapOS</para></listitem>
+<listitem><para>SlapOS Node</para></listitem>
 <listitem><para>SlapOS Desktop</para></listitem>
 <listitem><para>Node Runner</para></listitem>
-<listitem><para>SlapOS Node</para></listitem>
 <listitem><para>Command Console</para></listitem>
-<listitem><para>Configure SlapOS</para></listitem>
 <listitem><para>User Guide</para></listitem>
 </itemizedlist>
 </para>
+<section><title>Configure SlapOS</title>
+<para>It used to generate all the configure files required by slapos slave node, you can run it anytime when you need change the configure of your slapos slave node.</para>
+<para>Go to slapos.org (or any other SlapOS Master), register if not already done, go to My Account and request an SSL certificate:
+<itemizedlist>
+<listitem><para>Copy the certificate in a file, save it in C:/slapos/cygwin/certificate</para></listitem>
+<listitem><para>Copy the key in a file, save it in C:/slapos/cygwin/key</para></listitem>
+</itemizedlist>
+You can save them anywhere, but it's better to save them in the path C:/slapos/cygwin which is your slapos installed, because  it's the default path in the slapos configure script. More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client"></ulink></para>
+<para>Then register your computer to slapos.org community Cloud. By doing so, we will obtain X509 certificate and key which are later needed for the configuration process.
+<itemizedlist>
+<listitem><para>Login to www.slapos.org. Go to the "My Space" area and then to the "My Servers" section. Click on the button "New Server". This button will lead you to a page where you can specify the name of your server.</para></listitem>
+<listitem><para>Enter a self contained name to identify your server. Consider a name "VIFIB 19 Asus i7 for JB" rather than "My Server". This will help you find your server later on. Click on the "Add" button.</para></listitem>
+<listitem><para>X509 key and certificate are generated. Certificates are not stored by slapos.org server. They will be lost if you do not save them : Do not close this web page yet as we are going to store the key and certificate in files in next step. </para></listitem>
+<listitem><para>Copy the certificate in a file, save it in C:/slapos/cygwin/computer.crt</para></listitem>
+<listitem><para>Copy the key in a file, save it in C:/slapos/cygwin/computer.key</para></listitem>
+</itemizedlist>
+More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Running.SlapOS.on.your.computer"></ulink> in the section VIFIB Registration.</para>
+<para>Now it's time to run Configure SlapOS, click Start -> SlapOS -> Configure SlapOS, if the current user isn't Administrator, Right click Configure SlapOS, then Run As Administrator.</para>
+<para>Or you can run configure script in the command line, first click Start -> SlapOS -> Command Console, if the current user isn't Administrator, Right click Command Console, then Run As Administrator, then in the command line:
+<programlisting>
+/etc/opt/slapos/scripts/slapos-configure.sh
+</programlisting>
+The configure script will guide you to configure slapos slave node, as the prompt:
+<itemizedlist>
+<listitem><para>Type computer certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
+<listitem><para>Type computer key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
+<listitem><para>Type client certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
+<listitem><para>Type client key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
+</itemizedlist>
+Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all then configuration and update the configure files.
+</para>
+</section>
+
+<section><title>SlapOS Node</title>
+<para>It's used to format slapos node, release software and create instance, you an run it at any time.</para>
+<para>Click Start -> SlapOS -> SlapOS Node, if the current user isn't Administrator, Right click SlapOS Node, then Run As Administrator.</para>
+<para>Be sure the scrip reports successfully, otherwise fix the problem and run it again.</para>
+</section>
+
 <section><title>SlapOS Desktop</title>
 <para>This is used by slapos client, now it's connected to <ulink url="https://www.slapos.org"/>. Logon and enjoy the journey in the SlapOS Cloud world.</para>
 </section>
+
 <section><title>Node Runner</title>
 <para>Node Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
+<para>After installing slapos, Node Runner isn't available. You need run Configure SlapOS first. After that, Node Runner would be available.</para>
 <para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
 </section>
-<section><title>SlapOS Node</title>
-<para>It's used to format slapos node, release software and create instance, you an run it at any time.</para>
-</section>
 <section><title>Command Console</title>
-<para>It will open a terminal, here you can run most of slapos command, 
+<para>It will open a terminal, here you can run most of slapos command, for examples,
 <programlisting>
-cd /opt/slapos
-ls bin
-bang                    slapconsole  slapgrid-sr             slapos
-buildout                slapformat   slapgrid-supervisorctl  slapos-watchdog
-generate-signature-key  slapgrid     slapgrid-supervisord    slapproxy
-py                      slapgrid-cp  slapgrid-ur             slapproxy-query
+/opt/slapos/bin/slapos node foramt -cv --now
+/opt/slapos/bin/slapos supply slaprunner COMP-1658
+/opt/slapos/bin/slapos request "Jondy Web Runner In Windows 7" slaprunner --node computer_guid=COMP-1658
+/opt/slapos/bin/slapos node software
+/opt/slapos/bin/slapos node instance
+/opt/slapos/bin/slapos node status
 </programlisting>
 </para>
-<para>Refer to <ulink url="http://git.erp5.org/gitweb/slapos.core.git/blob/HEAD:/documentation/source/slapos.usage.rst?js=1"/></para>
+<para>For more information, refer to <ulink url="http://git.erp5.org/gitweb/slapos.core.git/blob/HEAD:/documentation/source/slapos.usage.rst?js=1"/></para>
 </section>
-<section><title>Configure SlapOS</title>
-<para>It used to generate all the configure files required by slapos slave node, it will be called when first run slapos. And you can run it anytime when you need change the configure of your slapos slave node.</para>
-</section>
+
 <section><title>User Guide</title>
 <para>It just showes this documnet in the web browser.</para>
 </section>
@@ -190,15 +207,17 @@ Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/develope
 <para>Or you can install cygwin by command console, first you need download setup.exe from cygwin.com, save to D:\temp\setup.exe or somewhere else.
 <itemizedlist>
 <listitem><para>In the Windows destktop, Click Start</para></listitem>
-<listitem><para>Click Run, type command: 'cmd', click OK to enter windows console</para></listitem>
+<listitem><para>Click Run, type command: 'cmd', click OK to enter windows console. Be sure you start 'cmd' as Administrator:</para></listitem>
 <listitem><para>Type the following commands:<programlisting>
 D:
 MD slapos
 CD slapos
 SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget
+REM If you require docbook-utils indeed, uncomment the next line (remove REM). Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
+REM SET PACKAGES=%PACKAGES% -P docbook-utils
 MOVE d:\temp\setup.exe .\
 setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
-</programlisting>Waiting for the installer finished. -P docbook-utils</para></listitem>
+</programlisting>Waiting for the installer finished.</para></listitem>
 </itemizedlist>
 A cygwin icon will be added in the windows desktop, click it to enter cygwin box, then run the following commands:
 <!--
@@ -245,7 +264,7 @@ Then restart cygwin command box.
 mkdir -p /cygdrive/d/slapos/opt
 cd /
 ln -s /cygdrive/d/slapos/opt
-mkdir -p /opt/slapos
+mkdir -p /opt/slapos/log
 mkdir -p /opt/download-cache
 cd /opt/slapos
 echo "[buildout]
@@ -323,11 +342,12 @@ git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 cd re6stnet
 python setup.py sdist
 </programlisting>
-Get the icons and openvpn drivers
+Get the icons and openvpn drivers, if you use 32-bit windows, uncomment the comment line to download openvpn-driver-i386.tar.gz other than openvpn-driver-x86_64.tar.gz:
 <programlisting>
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/images.tar.gz
-wget http://www.dashingsoft.com/products/slapos/openvpn-driver.tar.gz
+wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x86_64.tar.gz -O openvpn-driver.tar.gz
+# wget http://www.dashingsoft.com/products/slapos/openvpn-driver-i386.tar.gz -O openvpn-driver.tar.gz
 tar xzf images.tar.gz --no-same-owner
 tar xzf openvpn-driver.tar.gz --no-same-owner
 </programlisting>
@@ -406,46 +426,6 @@ $ bin/slapformat -c - -now /etc/slapos/slapos.cfg
 </section>
 </chapter>
 
-<!-- 
-A.	
-To install the IPv6 protocol for Windows XP with SP2 or later, do the following:
-
-Log on to the computer with a user account that has privileges to change network configuration.
-Click Start, click Control Panel, and then double-click Network Connections.
-Right-click any local area connection, and then click Properties.
-Click Install.
-In the Select Network Component Type dialog box, click Protocol, and then click Add.
-In the Select Network Protocol dialog box, click Microsoft TCP/IP version 6, and then click OK.
-Click Close to save changes to your network connection.
-
-
-Alternately, from the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt. At the command prompt, type netsh interface ipv6 install.
-
- For the IPv6 protocol for Windows XP with SP1, do the following:
-
-Log on to the computer with a user account that has privileges to change network configuration.
-Click Start, click Control Panel, and then double-click Network Connections.
-Right-click any local area connection, and then click Properties.
-Click Install.
-In the Select Network Component Type dialog box, click Protocol, and then click Add.
-In the Select Network Protocol dialog box, click Microsoft IPv6 Developer Edition, and then click OK.
-Click Close to save changes to your network connection.
-
-
-Alternately, from the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt. At the command prompt, type netsh interface ipv6 install.
-
-To install the IPv6 protocol for Windows XP with no service packs installed:
-
-Log on to the computer running Windows XP with a user account that has privileges to change network configuration.
-Open a command prompt. From the Windows XP desktop, click Start, point to Programs, point to Accessories, and then click Command Prompt.
-At the command prompt, type ipv6 install.
-
-
-Regardless of the version of Windows XP, to use RPC applications over IPv6, you must first restart the computer.
-
-
-Q. How can I tell if the IPv6 protocol is installed for Windows XP with no service packs installed? It does not appear in the list of protocols in Network Connections. A.	The installation of the IPv6 Protocol for Windows XP with no service packs installed does not use the standard procedure for protocol installation in the Network Connections folder. Therefore, it is not visible as an installed protocol. To determine whether IPv6 is installed, type ipv6 if at a command prompt. If IPv6 is installed, you will see a display of your IPv6 interfaces and their configuration. Otherwise, the Ipv6.exe tool will indicate that IPv6 is not installed.
- -->
 <appendix id="appendix_cygwin_packages"><title>Cygwin Required Packages List</title>
 <para>The following packages are requied by SlapOS Node
 <itemizedlist>
@@ -458,6 +438,7 @@ Q. How can I tell if the IPv6 protocol is installed for Windows XP with no servi
 <listitem><para>Utils/bzip2<superscript></superscript></para></listitem>
 <listitem><para>Net/ca-certificates</para></listitem>
 <listitem><para>Admin/cron</para></listitem>
+<listitem><para>Net/curl</para></listitem>
 <listitem><para>Devel/cygport</para></listitem>
 <listitem><para>Admin/cygrunsrv</para></listitem>
 <listitem><para>Utils/file<superscript>*</superscript></para></listitem>
@@ -504,7 +485,10 @@ Q. How can I tell if the IPv6 protocol is installed for Windows XP with no servi
 <listitem><para>Editor/vim</para></listitem>
 <listitem><para>Web/wget</para></listitem>
 </itemizedlist>
+<note id="package-docbook-utils"><para>
+There is another package: Text/docbook-utils, it only used to generate user-guide.html from source file. But this package will increase required disk size remarkable, because many dependent packages are installed by Cygwin, so it recommand not to check this package when building slapos source or the installer.</para></note>
 </para>
+<!-- 
 <para>
 The following packages are requied by re6stnet
 <itemizedlist>
@@ -518,9 +502,6 @@ The following packages are requied by re6stnet
 <listitem><para>Web/apache2-devel</para></listitem>
 <listitem><para>apache2-php<superscript>#</superscript></para></listitem>
 <listitem><para>Devel/cmake</para></listitem>
-<listitem><para>Admin/cron</para></listitem>
-<listitem><para>Admin/cygrunsrv</para></listitem>
-<listitem><para>Net/curl</para></listitem>
 <listitem><para>Libs/libbz2-devel</para></listitem>
 <listitem><para>Net/libcurl-devel</para></listitem>
 <listitem><para>Text/libenchant-devel</para></listitem>
@@ -541,6 +522,7 @@ The following packages are requied by re6stnet
 </itemizedlist>
 '*' means it's default package of cygwin, '#' means it need to build by myself, '?' means maybe it's not required.
 </para>
+ -->
 </appendix>
 </book>
 
