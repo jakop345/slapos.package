@@ -26,3 +26,54 @@
 #
 # ------------------------------------------------------------------------------
 #
+# Simulate the command usermod to change a user on the Cygwin
+#   usermod -d path -g init-group -s /bin/false -G group NAME
+#
+#   -g, --gid GROUP
+#     The group name or number of the user's new initial login group. The group must exist.
+#
+#   -G, --groups GROUP1[,GROUP2,...[,GROUPN]]]
+#     A list of supplementary groups which the user is also a member of.
+#
+#   -s
+#     Shell used by user
+#
+
+while getopts "Dd:g:G:p:s:r" opt ; do
+    case $opt in
+        d)
+            USER_HOME=$OPTARG
+            ;;
+        g)
+            USER_INIT_GROUP=grp_$OPTARG
+            ;;
+        G)
+            USER_OTHER_GROUP=grp_$OPTARG
+            ;;
+        p)
+            USER_PASSWORD=$OPTARG
+            ;;
+        s)
+            USER_SHELL=$OPTARG
+            ;;
+        r)
+            ;;
+        *)
+            echo Error when add user in the Cygwin
+            exit 1
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+USER_NAME=$1
+
+if [[ "$USER_NAME" == "" ]] ; then
+    echo Error: no user name specified.
+    exit 1
+fi
+USER_HOME=${USER_HOME:=/home/$USER_NAME}
+
+grep -q "^${USER_NAME}" /etc/passwd || mkpasswd | grep "^${USER_NAME}:" >> /etc/passwd
+[[ $USER_HOME == "/home/$USER_NAME" ]] || sed -i -e "s%:/home/${USER_NAME}:%:${USER_HOME}:%g" /etc/passwd
+[[ ! "$USER_HOME" == "" ]] && [[ ! -f $USER_HOME ]] && mkdir -p $USER_HOME && chown $USER_NAME $USER_HOME
