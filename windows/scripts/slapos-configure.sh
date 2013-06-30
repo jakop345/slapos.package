@@ -24,8 +24,9 @@
 #
 export PATH=/usr/local/bin:/usr/bin:$PATH
 
-grep -q "export CYGWIN=server" ~/.bash_profie || echo "export CYGWIN=server" >> ~/.bash_profile
-grep -q "export CYGWIN=server" ~/.profie || echo "export CYGWIN=server" >> ~/.profile
+for myprofile in ~/.bash_profile ~/.profile ; do
+    grep -q "export CYGWIN=server" $myprofile || echo "export CYGWIN=server" >> $myprofile
+done
 
 #-------------------------------------------------
 # Common functions
@@ -153,7 +154,8 @@ slapos_ifname=re6stnet-lo
 ipv4_local_network=10.201.67.0/24
 
 slapos_runner_file=/etc/slapos/scripts/slap-runner.html
-slaprunner_cfg=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg
+slaprunner_cfg='http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg'
+# slaprunner_title="SlapOS-Node-Runner-In-Windows"
 slaprunner_title="Node Runner"
 
 #-------------------------------------------------
@@ -168,37 +170,35 @@ mkdir -p $slapos_client_home
 #-------------------------------------------------
 
 echo Checking cygserver service ...
-cygrunsrv --query cygserver > /dev/null
+cygrunsrv --query cygserver > /dev/null 2>&1
 if (( $? )) ; then
     echo Run cygserver-config ...
     /usr/bin/cygserver-config --yes || \
         show_error_exit "Failed to run cygserver-config"
-    echo OK.
 else
     echo The cygserver service has been installed.
 fi
 
 echo Checking syslog-ng service ...
-cygrunsrv --query syslog-ng > /dev/null
+cygrunsrv --query syslog-ng > /dev/null 2>&1
 if (( $? )) ; then
     echo Run syslog-ng-config ...
     /usr/bin/syslog-ng-config --yes || \
         show_error_exit "Failed to run syslog-ng-config"
-    echo OK.
 else
     echo The syslog-ng service has been installed.
 fi
 
-echo Checking cron service ...
-cygrunsrv --query cron > /dev/null
-if (( $? )) ; then
-    echo Run cron-config ...
-    /usr/bin/cron-config --yes || \
-        show_error_exit "Failed to run cron-config"
-    echo OK.
-else
-    echo The cron service has been installed.
-fi
+# echo Checking cron service ...
+# cygrunsrv --query cron > /dev/null
+# if (( $? )) ; then
+#     echo Run cron-config ...
+#     /usr/bin/cron-config --yes || \
+#         show_error_exit "Failed to run cron-config"
+#     echo OK.
+# else
+#     echo The cron service has been installed.
+# fi
 
 #-------------------------------------------------
 # Configure slapos network
@@ -280,10 +280,10 @@ interface_guid=$(connection2guid $slapos_ifname) || \
     show_error_exit "Failed to get guid of interface: $slapos_ifname."
 
 echo Computer configuration information:
-echo    interface name:     $slapos_ifname
-echo              GUID:     $interface_guid
-echo    ipv4_local_network: $ipv4_local_network
-echo    computer_id:        $computer_id
+echo \t\tinterface name:     $slapos_ifname
+echo \t\tGUID:     $interface_guid
+echo \t\tipv4_local_network: $ipv4_local_network
+echo \t\tcomputer_id:        $computer_id
 # generate /etc/slapos/slapos.cfg
 sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
@@ -427,21 +427,57 @@ grep -q "^table " re6stnet.conf || \
 grep -q "^# Your subnet: " re6stnet.conf || \
     show_error_exit "Error: no subnet found in the /etc/re6stnet/re6stnet.conf"
 echo Check re6stnet configuration OK.
+echo
+
+#-------------------------------------------------
+# Create openvpn tap-windows drivers used by re6stnet
+#-------------------------------------------------
+
+# Adding tap-windows driver will break others, so we add all drivers
+# here. Get re6stnet client count, then remove extra drivers and add
+# required drivers.
+#
+echo 
+echo Installing OpenVPN Tap-Windows Driver ...
+echo 
+original_connections=$(echo $(get_all_connections))
+client_count=$(sed -n -e "s/^client-count *//p" /etc/re6stnet/re6stnet.conf)
+[[ -z $client_count ]] && client_count=10
+echo Re6stnet client count = $client_count
+re6stnet_name_list="re6stnet-tcp re6stnet-udp"
+for (( i=1; i<=client_count; i=i+1 )) ; do
+    re6stnet_name_list="$re6stnet_name_list re6stnet$i"
+done
+for re6stnet_ifname in $re6stnet_name_list ; do
+    echo Checking interface $re6stnet_ifname ...
+    if [[ ! " $original_connections " == *[\ ]$re6stnet_ifname[\ ]* ]] ; then
+        echo Installing  interface $re6stnet_ifname ...
+        ip vpntap add dev $re6stnet_ifname || show_error_exit "Failed to install openvpn tap-windows driver."
+        echo Interface $re6stnet_ifname installed.
+    else
+        echo $re6stnet_ifname has been installed.
+    fi
+done
+#
+# Remove OpenVPN Tap-Windows Driver
+# 
+# ip vpntap del dev re6stnet-x
+#
 
 #-------------------------------------------------
 # Create instance of Web Runner
 #-------------------------------------------------
-grep -q "location.reload" $slapos_runner_file
+grep -q "window.location.href" $slapos_runner_file
 if (( $? )) ; then
     echo
     echo Installing Web Runner ...
     echo
 
     re6stnet_ipv6=$(cat /etc/re6stnet/re6stnet.conf | grep "Your subnet" | \
-        sed -e "s/^.*subnet: //g" -e "s/ (CN.*\$//g")1
+        sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
     echo "Re6stnet address in this computer: $re6stnet_ipv6"
-    netsh interface ipv6 show addr $slapos_ifname | grep -q $re6stnet_ipv6 || \
-        netsh interface ipv6 add addr $slapos_ifname re6stnet_ipv6
+    netsh interface ipv6 show addr $slapos_ifname level=normal | grep -q $re6stnet_ipv6 || \
+        netsh interface ipv6 add addr $slapos_ifname $re6stnet_ipv6
     echo Run slapformat ...
     /opt/slapos/bin/slapos node format -cv --now ||
         show_error_exit "Failed to run slapos format."
@@ -451,29 +487,30 @@ if (( $? )) ; then
     /opt/slapos/bin/slapos supply  $slaprunner_cfg $computer_id
     echo "Request an instance 'Node Runner' ..."
     while true ; do
-        /opt/slapos/bin/slapos node software
-        /opt/slapos/bin/slapos node instance
-        /opt/slapos/bin/slapos request $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_id && break
+        /opt/slapos/bin/slapos node software --verbose
+        /opt/slapos/bin/slapos node instance --verbose
+        /opt/slapos/bin/slapos node report --verbose
+        /opt/slapos/bin/slapos request $client_config_file "Node Runner" $slaprunner_cfg --node computer_guid=$computer_id && break
+        sleep 5
     done
-
     # Connection parameters of instance are:
     #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
     #  'cloud9-url': 'http://localhost:9999',
     #  'password_recovery_code': 'e2d01c14',
     #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
     #  'url': 'http://softinst39090.host.vifib.net/'}
-    slaprunner_url=$(/opt/slapos/bin/slapos request $slaprunner_title \
-        $slaprunner_cfg --node computer_guid=$computer_id \
-        | grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
+    slaprunner_url=$(/opt/slapos/bin/slapos request $client_config_file "Node Runner" $slaprunner_cfg --node computer_guid=$computer_id | \
+        grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
     echo Got node runner url: $slaprunner_url
+    [[ -z $slaprunner_url ]] && show_error_exit "Failed to create instance of SlapOS Web Runner."
 
-    echo <<EOF > $slapos_runner_file
+    cat <<EOF > $slapos_runner_file
 <html>
 <head><title>SlapOS Web Runner</title>
 <script LANGUAGE="JavaScript">
 <!--
 function openwin() {
-  location.reload("$slaprunner_url")
+  window.location.href = "$slaprunner_url"
 }
 //-->
 </script>
@@ -490,7 +527,7 @@ EOF
         for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
             echo Apply to $x
             cd $x
-            patch -p1 < $patch_file
+            patch --dry-run -p1 < $patch_file && patch -p1 < $patch_file
         done
     fi
     echo
@@ -501,9 +538,9 @@ fi
 #-------------------------------------------------
 # Configure crontab
 #-------------------------------------------------
-cron_file=/var/cron/tabs/$(whoami)
-if [[ ! -f $cron_file ]] ; then
-    cat <<EOF  > $cron_file
+crontab_file=/var/cron/tabs/$(whoami)
+if [[ ! -f $crontab_file ]] ; then
+    cat <<EOF  > $crontab_file
 SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
@@ -522,6 +559,7 @@ MAILTO=""
 # Make sure we have only good network routes if we use VPN
 # * * * * * root if [ -f /etc/opt/slapos/openvpn-needed  ]; then ifconfig tapVPN | grep "Scope:Global" > /dev/null ;if [ $? = 0 ]; then ROUTES=$(ip -6 r l | grep default | awk '{print $5}'); for GW in $ROUTES ; do if [ ! $GW = tapVPN ]; then /sbin/ip -6 route del default dev $GW > /dev/null 2>&1;fi ;done ;fi ;fi
 EOF
+    echo Cron file $crontab_file created.
 fi
 
 echo SlapOS Node configure successfully.

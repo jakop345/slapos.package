@@ -3,11 +3,11 @@
 [Setup]
 AppName=SlapOS
 AppVersion=0.158
-AppVerName=SlapOS Windows 0.158.4
+AppVerName=SlapOS Windows 0.158.5
 DefaultDirName=C:\slapos
 DefaultGroupName=SlapOS
 OutputDir=D:\slapos\publish\Output
-OutputBaseFilename=slapos-0.158.4-windows-x86
+OutputBaseFilename=slapos-0.158.5-windows-i386
 SourceDir=D:\slapos
 Uninstallable=yes
 
@@ -49,7 +49,7 @@ Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cy
 Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\usr\local\bin";
 
-Source: "opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\usr\local\bin";
+Source: "opt\openvpn\bin\*"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
 
 Source: "opt\git\slapos.package\windows\scripts\init-slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
@@ -67,8 +67,8 @@ Source: "opt\git\slapos.package\windows\docs\README.cygwin"; DestDir: "{app}"; D
 [Icons]
 Name: "{commondesktop}\SlapOS Desktop"; Filename: "https://www.slapos.org/"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
 Name: "{group}\Command Console"; Filename: "{app}\cygwin\cygtty.bat";  WorkingDir: "{app}\cygwin\opt\slapos"; IconFilename: "{app}\cygwin\etc\slapos\images\terminal.ico";
-Name: "{group}\Configure SlapOS"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -h never -t ""Configure SlapOS Node"" /etc/slapos/scripts/slapos-client-config.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
-Name: "{group}\Node Runner"; Filename: "http://{app}\cygwin\etc\slapos\scripts\slap-runner.html"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
+Name: "{group}\Configure SlapOS"; Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -h never -t ""Configure SlapOS Node"" /etc/slapos/scripts/slapos-configure.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\configure.ico";
+Name: "{group}\Node Runner"; Filename: "{app}\cygwin\etc\slapos\scripts\slap-runner.html"; IconFilename: "{app}\cygwin\etc\slapos\images\manager.ico";
 Name: "{group}\SlapOS Desktop"; Filename: "https://www.slapos.org/"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
 Name: "{group}\SlapOS Node"; Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-node.sh"; WorkingDir: "{app}\cygwin\bin"; IconFilename: "{app}\cygwin\etc\slapos\images\node.ico";
 Name: "{group}\Uninstall SlapOS"; Filename: "{uninstallexe}";
@@ -81,7 +81,7 @@ Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scrip
 Filename: "{app}\cygwin\autorebase.bat"; WorkingDir: "{app}\cygwin";  Flags: skipifdoesntexist;
 
 [UninstallRun]
-Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/pre-uninstall.sh"; WorkingDir: "{app}\cygwin\bin"; Flags: skipifdoesntexist runhidden;
+Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/pre-uninstall.sh"; WorkingDir: "{app}\cygwin\bin"; Flags: skipifdoesntexist;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\cygwin" ;

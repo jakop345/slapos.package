@@ -24,13 +24,13 @@
 
 <chapter id="ch_install_slapos"><title>Installing SlapOS node in the Windows</title>
 <para>At first, we need to sign up in VIFIB community Cloud by clicking here <ulink url="https://www.slapos.org/login_form"/></para>
-<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-x86-all-in-one.exe or slapos-XXX-windows.exe, XXX stands for version-release information. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
+<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be i386 or x86_64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
 <para>Double click the installer, click Next, Next ... 
 <note><para>If the current user isn't Administrator, you need run it as Administrator. Right click the installer, then click Run As Administrator.</para></note>
 </para>
 <para>At the final wizard page, click Install.</para>
 <para>Waiting for everything done.</para>
-<para>If you prefer to install slapos node from sources, refer to the chapter <xref linkend="ch_generate_window_installer"/>.</para>
+<para>If you prefer to install slapos node from sources, refer to the chapter <xref linkend="ch_run_slapos_from_sources"/>.</para>
 </chapter>
 
 <chapter><title>Using Slapos in the Windows</title> 
@@ -44,14 +44,15 @@
 <listitem><para>User Guide</para></listitem>
 </itemizedlist>
 </para>
-<section><title>Configure SlapOS</title>
+<section id="sec_configure_slapos"><title>Configure SlapOS</title>
 <para>It used to generate all the configure files required by slapos slave node, you can run it anytime when you need change the configure of your slapos slave node.</para>
 <para>Go to slapos.org (or any other SlapOS Master), register if not already done, go to My Account and request an SSL certificate:
 <itemizedlist>
 <listitem><para>Copy the certificate in a file, save it in C:/slapos/cygwin/certificate</para></listitem>
 <listitem><para>Copy the key in a file, save it in C:/slapos/cygwin/key</para></listitem>
 </itemizedlist>
-You can save them anywhere, but it's better to save them in the path C:/slapos/cygwin which is your slapos installed, because  it's the default path in the slapos configure script. More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client"></ulink></para>
+You can save them anywhere, but it's better to save them in the path C:/slapos/cygwin which is your slapos installed, because  it's the default path in the slapos configure script. </para>
+<para>More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client"></ulink></para>
 <para>Then register your computer to slapos.org community Cloud. By doing so, we will obtain X509 certificate and key which are later needed for the configuration process.
 <itemizedlist>
 <listitem><para>Login to www.slapos.org. Go to the "My Space" area and then to the "My Servers" section. Click on the button "New Server". This button will lead you to a page where you can specify the name of your server.</para></listitem>
@@ -73,7 +74,7 @@ The configure script will guide you to configure slapos slave node, as the promp
 <listitem><para>Type client certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type client key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 </itemizedlist>
-Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all then configuration and update the configure files.
+Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all the configuration and update the configure files.
 </para>
 </section>
 
@@ -111,91 +112,6 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 </section>
 </chapter>
 
-<!--
-<chapter><title>Create slapos instance of Workpress in the Windows</title> 
-<para>After SlapOS has been installed successfully, you will find program group "SlapOS" which include the following entries:
-Copy our cygwin inotifyx to download-cache/dist, so buildout will find it other than pypi.
-</para>
-<para>The common way to release a software is to login vifib website. But we haven't integrated this software.cfg into vifib, so we verify it in the local machine. It need a patch:
-<programlisting>
-$ cd /opt/slapos
-$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/slapos/slapgrid-test-local-software.patch
-$ cd /opt/slapos/eggs/slapos.core-0.33.1-py2.7.egg
-$ patch -p1 &lt; /opt/slapos/slapgrid-test-local-software.patch
-</programlisting>
-Release Wordpress:
-<programlisting>
-$ mkdir -p /var/slapgrid/instance
-$ mkdir -p /var/slapgrid/software
-$ bin/slapgrid - - only_sr http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/software/wordpress/software.cfg /etc/slapos/slapos.cfg
-</programlisting>
-</para>
-<para>Some dlls need to rebase in order to avoid fork issue in the Cygwin. Refer to <ulink url="http://cygwin.com/faq.html"></ulink> question 4.44 or search "rebase" in this page. First, exit all Cygwin processes and stop all Cygwin services.
-<programlisting>
-$ net stop cfgslapos
-$ ps -ef | grep python2.7
-# kill all these process which start by supervisord
-$ exit
-</programlisting>
-If you install SlapOS node by MSI package, Click Start menu, select SlapOS program group, click Run rebaseall. Otherwise, download rebase-software.bat and save it in the cygwin root path.
-<programlisting>
-$ cd /
-$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/cygwin/rebase-software.bat
-$ exit
-</programlisting>
-Double click rebase-software.bat in the windows explorer. The file should be in the directory "C:/cygwin"
-</para>
-
-<para>Create an instance:
-<programlisting>
-$ net start cygslapos
-$ bin/slapgrid - -only_sr http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/software/wordpress/software.cfg /etc/slapos/slapos.cfg
-</programlisting>
-Now wordpress should work. Type "http://localhost:8080/index.php" in your browser to check it.</para>
-<para>Run the following to show a demo:
-
-$ cd /opt/slapos
-$ export SLAPOS_CLIENT_CONFIGURATION=/opt/slapos/slapos-client.cfg
-$ echo "  demoapp file:///opt/git/slapos/software/demoapp/software.cfg" >> slapos-client.cfg
-
-or 
-
-$ echo "  demoapp http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/demoapp/software.cfg" >> ~/.slapos/slapos.cfg
-
-$ echo "  nodemanager http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg" >> ~/.slapos/slapos.cfg
-
-
-$ bin/slapos node register SlapOS-Windows
-  Login: jondy
-  Password:
-
-$ bin/slapos supply demoapp COMP-1500
-
-$ bin/slapos request mydemoapp demoapp - -node computer_guid=COMP-1500
-
-Wait for a while, otherwise there is no partition assigned
-
-$ bin/slapos node software
-
-$ bin/slapos node instance 
-
-$ bin/slapos node start all
-or
-$ bin/slapos node start demoapp
-
-$ bin/slapos node restart all
-
-Recreate instance
-$ bin/slapos node instance - -only_cp slappart9
-
-$ bin/slapos request mydemoapp demoapp # not this, it request node in the cloud
-
-Now, you can visit the demo in the browser by the url.
-Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client
-</para>
-</chapter>
--->
-
 <chapter id="ch_generate_window_installer"><title>Generating windows installer from sources</title>
 <para>This chapter describes how to generate windows installer from sources.</para>
 <section><title>Setting Up Cygwin</title>
@@ -207,19 +123,17 @@ Refer to: http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/develope
 <para>Or you can install cygwin by command console, first you need download setup.exe from cygwin.com, save to D:\temp\setup.exe or somewhere else.
 <itemizedlist>
 <listitem><para>In the Windows destktop, Click Start</para></listitem>
-<listitem><para>Click Run, type command: 'cmd', click OK to enter windows console. Be sure you start 'cmd' as Administrator:</para></listitem>
+<listitem><para>Click Run, type command: 'cmd', click OK to enter windows console. Be sure you start 'cmd' as Administrator, if the login user isn't Administrator, run 'cmd' as Administrator:</para></listitem>
 <listitem><para>Type the following commands:<programlisting>
 D:
 MD slapos
 CD slapos
 SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget
-REM If you require docbook-utils indeed, uncomment the next line (remove REM). Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
-REM SET PACKAGES=%PACKAGES% -P docbook-utils
 MOVE d:\temp\setup.exe .\
 setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
 </programlisting>Waiting for the installer finished.</para></listitem>
 </itemizedlist>
-A cygwin icon will be added in the windows desktop, click it to enter cygwin box, then run the following commands:
+A cygwin icon will be added in the windows desktop, click it to enter cygwin box. If the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
 <!--
 You can create your script to start Cygwin in a tty terminal
 <programlisting>
@@ -290,11 +204,9 @@ cp /etc/postinstall/autorebase.bat.done /autorebase.bat
 echo Pause >> /autorebase.bat
 exit
 </programlisting>
-After exit cygwin, double click autorebase.bat in the Windows explorer.
+After exit cygwin, double click autorebase.bat in the Windows explorer. If the current user isn't Administrator, then right click it, click Run As Administrator.
 </para>
 </section>
-
-<section><title>Generating windows installer</title>
 
 <section><title>Preparing the sources files for installer</title>
 <para>Let's we start cygwin box, then clone slapos.package.git
@@ -303,6 +215,7 @@ mkdir /opt/git
 cd /opt/git
 git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
 git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
+cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
 </programlisting>
 Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
@@ -320,12 +233,12 @@ ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws
 make
 cp src/openvpn/.libs/openvpn.exe /usr/local/bin
 </programlisting>
-Then generate user-guide.html from using-slapos-in-windows.xml, it requires xslt and dockbook, make sure these packages installed in the Cygwin
+Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
 <programlisting>
 cd /opt/git/slapos.package/windows/docs
 # Before run make, be sure there is the file /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl, if not, find it first
 # find /usr -name docbook.xsl
-# Then replace the old file name with this one in the Makefile, then run make
+# Then replace the old file name with this one in the ./Makefile, then run make
 make
 </programlisting>
 Download pyOpenSSL-0.13.tar.gz, miniupnpc-1.8.tar.gz, 
@@ -373,57 +286,20 @@ Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:
 <para>Click menu Build -> Compile, then wait for the building process finished. You can check the installer in the OutputDir.</para>
 <para>There is another script "slapos.iss", it used to build network installer. All-in-one installer will include all the files, so no internet access required. However network installer need internet connection to download the files and packages. It's remarkable smaller than all-in-one installer.</para>
 </section>
+</chapter>
 
-<!--
-<section><title>IPv6 Support</title>
-<para>If native IPv6 is available, skip this section. Otherwise be sure you have installed IPv6 by the command:
-<programlisting>$ netsh interface ipv6 install</programlisting>
-</para>
-<para>Download openvpn windows installer, for example, openvpn-2.2.1-install.exe, then install openvpn. By default, it installed at <filename>C:\Program Files\OpenVPN</filename></para>
-<para>Copy required files of openvpn to /opt/openvpn and edit client.ovpn
+<chapter id="ch_run_slapos_from_sources"><title>Run SlapOS From Sources</title>
+<para>This chapter describes how to run slapos slave node from sources in the windows.</para>
+<para>First follow the instructions in the above chapter <xref linkend="ch_generate_window_installer"/>, except the last section Making Installer.</para>
+<para>Next register to slapos community to get client and computer certificate and key files, refer to <xref linkend="sec_configure_slapos"/>.</para>
+<para>Then open cygwin box as Administrator, if the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
 <programlisting>
-$ mkdir -p /opt/openvpn
-$ cd /opt/openvpn
-$ cp "C:/Program Files/OpenVPN/bin/*" /opt/openvpn
-$ cp -a "C:/Program Files/OpenVPN/config" /opt/openvpn
-$ chmod 755 *.exe
-$ cd config
-$ wget http://www.slapos.org/vifib-ca.crt/getData  -O ca.crt
-$ http://www.slapos.org/vifib-client.crt/getData -O client-vifib.crt
-$ wget http://www.slapos.org/vifib-client.key/getData -O client-vifib.key
-$ mv client.ovpn vifib.ovpn
-$ vi vifib.ovpn
-# Edit the following options
-dev tap
-proto tcp
-remote 176.31.103.87 443
-ca ca.crt
-cert client-vifib.crt
-key client-vifib.key
+(cd /opt/downloads; cp pyOpenSSL-0.13.tar.gz miniupnpc-1.8.tar.gz /)
+/usr/local/bin/slapos-configure.sh
+/usr/local/bin/slapos-node.sh
 </programlisting>
-re6stnet configure or teredo.
+If there are some errors when run both of scripts, fix them and run again, until no any error reported, and now you can run any slapos command in this terminal.
 </para>
-</section>
-
-<section><title>Run slapformat</title>
-<para>Assume we have registered a server which id is 'COMP-161', and saved its key and certificate files in the home directory. So we can use script 'configure.sh' to do all the configuration.
-<programlisting>
-$ mkdir -p /etc/slapos/ssl
-$ mkdir -p /etc/slapos/ssl/partition_pki
-$ cd /
-$ wget http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/cygwin:/component/cygwin/configure.sh 
-$ /configure.sh COMP-161 ~/computer.key ~/computer.crt
-</programlisting>
-</para>
-<para>Finally, run slapformat
-<programlisting>
-$ cd /opt/slapos
-$ bin/slapformat -c - -now /etc/slapos/slapos.cfg
-</programlisting>
-</para>
-</section>
--->
-</section>
 </chapter>
 
 <appendix id="appendix_cygwin_packages"><title>Cygwin Required Packages List</title>
@@ -486,7 +362,7 @@ $ bin/slapformat -c - -now /etc/slapos/slapos.cfg
 <listitem><para>Web/wget</para></listitem>
 </itemizedlist>
 <note id="package-docbook-utils"><para>
-There is another package: Text/docbook-utils, it only used to generate user-guide.html from source file. But this package will increase required disk size remarkable, because many dependent packages are installed by Cygwin, so it recommand not to check this package when building slapos source or the installer.</para></note>
+There is another package: Text/docbook-utils, it only used to generate user-guide.html from source file. But this package will increase required disk size remarkable, because many dependent packages are installed by Cygwin, so it recommand not to check this package when building slapos source or the installer. Only you really need to build the document, then install this package from cygwin setup gui interface by double clicking setup.exe downloaded from cygwin.com</para></note>
 </para>
 <!-- 
 <para>

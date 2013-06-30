@@ -30,5 +30,7 @@ for x in $(cygrunsrv --list) ; do
     cygrunsrv -R $x    
 done
 
+echo Run pre-uninstall script successfully.
+read -n 1 -p "Press any key to exit..."
 exit 0
 

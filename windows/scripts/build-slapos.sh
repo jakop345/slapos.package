@@ -40,7 +40,13 @@ bin/buildout -v -N
 patch_file=/etc/slapos/patches/slapos-core-format.patch
 if [[ -f $patch_file ]] ; then
     echo "Apply patch: $patch_file"
-    (cd `ls -d $slapos_home/eggs/slapos.core-*-py2.7.egg` ; \
-     patch -p1 < $patch_file)
-    (cd  /etc/slapos/patches ; mv $patch_file{,.done})
+    for x in $(find $slapos_home/eggs -name slapos.core-*.egg ; do
+        echo Patching $x ...
+        cd $x
+        patch --dry-run -p1 < $patch_file && patch -p1 < $patch_file && echo Patch $x OK.
+    done
 fi
+
+echo Build SlapOS successfully.
+read -n 1 -p "Press any key to exit..."
+exit 0

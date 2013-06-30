@@ -73,7 +73,7 @@ fi
 # Copy rebaseall.bat to /
 if [[ ! -f /autorebase.bat ]] ; then
     echo Create /autorebase.bat
-    copy <<EOF > /autorebase.bat
+    cat <<EOF > /autorebase.bat
 @echo off
 rem Postinstall scripts are always started from the Cygwin root dir
 rem so we can just call dash from here
@@ -99,5 +99,7 @@ for x in $(cygrunsrv --list) ; do
     cygrunsrv -R $x    
 done
 
+echo Run post-install script successfully.
+read -n 1 -p "Press any key to exit..."
 exit 0
 

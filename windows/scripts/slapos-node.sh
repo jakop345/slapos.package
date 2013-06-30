@@ -23,11 +23,14 @@ function check_cygwin_service()
 
     service_account="$(cygrunsrv -VQ $service_name | sed -n -e 's/^Account[ :]*//p')" || \
         show_error_exit "No $1 service install, please run Configure SlapOS to install it."
-    
+
     service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
     if [[ ! x$service_state == "xRunning" ]] ; then
-        echo Warning: Cygwin service $1 currnt state is $service_state, Running is expeted 
-        echo Try to use cygrunsrv --start $1 to start this service
+        echo Cygwin service $1 currnt state is $service_state, try to use
+        echo \t\tcygrunsrv --start $1
+        echo to start this service
+        cygrunsrv --start $1 || show_error_exit "Failed to start service $1"
+        echo Cygwin $1 service is running. 
     fi
     echo Check $1 service OVER.
 }
@@ -49,6 +52,12 @@ function show_error_exit()
 slapos_ifname=re6stnet-lo
 
 #-------------------------------------------------
+# Check cygserver, syslog-ng
+#-------------------------------------------------
+check_cygwin_service cygserver
+check_cygwin_service syslog-ng
+
+#-------------------------------------------------
 # IPv6 Connection
 #-------------------------------------------------
 
@@ -58,15 +67,19 @@ check_ipv6_connection
 if (( $? )) ; then
     echo "No native IPv6."
     echo Check re6stnet network ...
-    which re6stnet > /dev/null || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."    
+    which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."
     # re6st-conf --is-needed --registry http://re6stnet.nexedi.com/
+    # Check if babeld is running, so we guess whether re6stnet is running or not
     ps -ef | grep -q babeld.exe
     if (( $? )) ; then
         echo "Start re6stnet ..."
         # It need root rights to install tap-driver
-        (cd /etc/re6stnet; re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname &)
-        echo "Start re6stent in the background OK. You can check log files in the /var/log/re6stnet"
-
+        cd /etc/re6stnet
+        re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
+        echo $! > /var/run/slapos-node-re6stnet.pid        
+        echo "Start re6stent (pid=$!) in the background OK."
+        echo "You can check log files in the /var/log/slapos-node-re6stnet.log and /var/log/re6stnet."
+        echo 
         echo "Waiting re6stent network work ..."
         while true ; do
             check_ipv6_connection && break
@@ -78,34 +91,27 @@ else
 fi
 
 #-------------------------------------------------
-# Check cygserver, syslog-ng
-#-------------------------------------------------
-check_cygwin_service cygserver
-check_cygwin_service syslog-ng
-
-#-------------------------------------------------
 # Format slapos node, need root right
 #-------------------------------------------------
 [[ -f /etc/opt/slapos/slapos.cfg ]] || \
-    show_error_exit "Error: no node configure file found, please run Configure SlapOS first."    
+    show_error_exit "Error: no node configure file found, please run Configure SlapOS first."
 
-echo "Run Slapos format ..."
+echo "Formating SlapOS Node ..."
 /opt/slapos/bin/slapos node format -cv --now || \
     show_error_exit "Failed to run slapos format."
-echo "Format slapos node OK."
 
 #-------------------------------------------------
 # Release software
 #-------------------------------------------------
 
 echo "Releasing software ..."
-/opt/slapos/bin/slapos node software --verbose 
+/opt/slapos/bin/slapos node software --verbose
 
 #-------------------------------------------------
 # Instance software
 #-------------------------------------------------
 echo "Creating instance ..."
-/opt/slapos/bin/slapos node instance --verbose 
+/opt/slapos/bin/slapos node instance --verbose
 
 #-------------------------------------------------
 # Send report
