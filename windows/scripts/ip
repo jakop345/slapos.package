@@ -782,13 +782,8 @@ elif [[ $object == "vpntap" ]] ; then
         install_tap_driver "$dev"
         exit $?
     elif [[ "$command" == "del" ]] ; then
-        if [[ "$mode" == "" ]] ; then
-            echo $orig_cmd
-            exit 0
-        else
-            uninstall_tap_driver "$dev"
-            exit $?
-        fi
+        uninstall_tap_driver "$dev"
+        exit $?
     else
         echo $orig_cmd
         echo "Error: unsupported command \"$command\" for tuntap"
