@@ -155,8 +155,6 @@ ipv4_local_network=10.201.67.0/24
 
 slapos_runner_file=/etc/slapos/scripts/slap-runner.html
 slaprunner_cfg='http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg'
-# slaprunner_title="SlapOS-Node-Runner-In-Windows"
-slaprunner_title="Node Runner"
 
 #-------------------------------------------------
 # Create paths
@@ -279,11 +277,11 @@ fi
 interface_guid=$(connection2guid $slapos_ifname) || \
     show_error_exit "Failed to get guid of interface: $slapos_ifname."
 
-echo Computer configuration information:
-echo \t\tinterface name:     $slapos_ifname
-echo \t\tGUID:     $interface_guid
-echo \t\tipv4_local_network: $ipv4_local_network
-echo \t\tcomputer_id:        $computer_id
+echo "Computer configuration information:"
+echo "  interface name:     $slapos_ifname"
+echo "  GUID:               $interface_guid"
+echo "  ipv4_local_network: $ipv4_local_network"
+echo "  computer_id:        $computer_id"
 # generate /etc/slapos/slapos.cfg
 sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
@@ -467,6 +465,9 @@ done
 #-------------------------------------------------
 # Create instance of Web Runner
 #-------------------------------------------------
+
+slaprunner_title="SlapOS-Node-Runner-In-$computer_id"
+
 grep -q "window.location.href" $slapos_runner_file
 if (( $? )) ; then
     echo
@@ -490,7 +491,7 @@ if (( $? )) ; then
         /opt/slapos/bin/slapos node software --verbose
         /opt/slapos/bin/slapos node instance --verbose
         /opt/slapos/bin/slapos node report --verbose
-        /opt/slapos/bin/slapos request $client_config_file "Node Runner" $slaprunner_cfg --node computer_guid=$computer_id && break
+        /opt/slapos/bin/slapos request $client_config_file $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_id && break
         sleep 5
     done
     # Connection parameters of instance are:
@@ -499,11 +500,12 @@ if (( $? )) ; then
     #  'password_recovery_code': 'e2d01c14',
     #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
     #  'url': 'http://softinst39090.host.vifib.net/'}
-    slaprunner_url=$(/opt/slapos/bin/slapos request $client_config_file "Node Runner" $slaprunner_cfg --node computer_guid=$computer_id | \
+    slaprunner_url=$(/opt/slapos/bin/slapos request $client_config_file $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_id | \
         grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
     echo Got node runner url: $slaprunner_url
     [[ -z $slaprunner_url ]] && show_error_exit "Failed to create instance of SlapOS Web Runner."
 
+    cp $slapos_runner_file{.html, .html.orig}
     cat <<EOF > $slapos_runner_file
 <html>
 <head><title>SlapOS Web Runner</title>

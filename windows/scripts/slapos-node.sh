@@ -26,9 +26,8 @@ function check_cygwin_service()
 
     service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
     if [[ ! x$service_state == "xRunning" ]] ; then
-        echo Cygwin service $1 currnt state is $service_state, try to use
-        echo \t\tcygrunsrv --start $1
-        echo to start this service
+        echo "Cygwin service $1 currnt state is $service_state, try to use"
+        echo "  cygrunsrv --start $1 to start this service"
         cygrunsrv --start $1 || show_error_exit "Failed to start service $1"
         echo Cygwin $1 service is running.
     fi
@@ -75,6 +74,7 @@ if (( $? )) ; then
         echo "Start re6stnet ..."
         # It need root rights to install tap-driver
         cd /etc/re6stnet
+        mkdir -p /var/log/re6stnet
         re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
         echo $! > /var/run/slapos-node-re6stnet.pid
         disown -h

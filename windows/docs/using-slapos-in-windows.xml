@@ -196,7 +196,7 @@ cd /opt
 wget http://www.dashingsoft.com/products/slapos/slapos-patches.tar.gz
 tar xzf slapos-patches.tar.gz --no-same-owner
 cd /opt/slapos/eggs/slapos.core-0.35-py2.7.egg
-patch -p1 &lt; /opt/patches/slapos-core-format.patch
+patch --dry-run -p1 &lt; /opt/patches/slapos-core-format.patch &amp;&amp; patch -p1 &lt; /opt/patches/slapos-core-format.patch
 </programlisting>
 It seems netifaces.dll need to rebase, 
 <programlisting>
@@ -213,8 +213,8 @@ After exit cygwin, double click autorebase.bat in the Windows explorer. If the c
 <programlisting>
 mkdir /opt/git
 cd /opt/git
-git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
-git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
+git pull || git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
+git pull || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
 cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
 </programlisting>
 Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
@@ -251,7 +251,7 @@ wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O min
 Get re6stnet for cygwin
 <programlisting>
 cd /opt/git
-git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
+git pull || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 cd re6stnet
 python setup.py sdist
 </programlisting>
