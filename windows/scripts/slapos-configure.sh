@@ -565,6 +565,20 @@ EOF
     echo Cron file $crontab_file created.
 fi
 
+#-------------------------------------------------
+# Add slapos-configure to windows startup item
+#-------------------------------------------------
+slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+slapos_run_entry=SlapOS-Node
+slapos_run_script=/etc/slapos/scripts/slapos-configure.sh
+echo Checking startup item ...
+regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
+    regtool -q set "$slapos_run_key\\$slapos_run_entry" \
+    "\"$(cygpath -w /usr/bin/bash)\" --login -i $slapos_run_script" || \
+    show_error_exit "Failed to add slapos-configure.sh as windows startup item."
+echo Startup item "$slapos_run_key\\$slapos_run_entry": $(regtool get "$slapos_run_key\\$slapos_run_entry")
+echo 
+
 echo SlapOS Node configure successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

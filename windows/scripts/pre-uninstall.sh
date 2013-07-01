@@ -7,10 +7,11 @@
 # 
 # It will do:
 #
-#    1. Remove virtual netcards installed by re6stnet
+#    * Remove virtual netcards installed by re6stnet
 #
-#    2. Remove service cron, cygserver and syslog-ng
+#    * Remove service cron, cygserver and syslog-ng
 #
+#    * Remove slapos configure script from windows startup item
 
 #
 # Remove virtual netcard installed by re6stnet 
@@ -29,6 +30,14 @@ for x in $(cygrunsrv --list) ; do
     echo Removing cygservice $x
     cygrunsrv -R $x    
 done
+
+#
+# Remove slapos-configure from windows startup item
+#
+slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+slapos_run_entry=SlapOS-Node
+echo Removing startup item "$slapos_run_key\\$slapos_run_entry"
+regtool -q unset "$slapos_run_key\\$slapos_run_entry"
 
 echo Run pre-uninstall script successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
