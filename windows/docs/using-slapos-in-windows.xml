@@ -38,8 +38,8 @@
 <itemizedlist>
 <listitem><para>Configure SlapOS</para></listitem>
 <listitem><para>SlapOS Node</para></listitem>
-<listitem><para>SlapOS Desktop</para></listitem>
-<listitem><para>Node Runner</para></listitem>
+<listitem><para>SlapOS</para></listitem>
+<listitem><para>SlapOS Runner</para></listitem>
 <listitem><para>Command Console</para></listitem>
 <listitem><para>User Guide</para></listitem>
 </itemizedlist>
@@ -84,12 +84,12 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 <para>Be sure the scrip reports successfully, otherwise fix the problem and run it again.</para>
 </section>
 
-<section><title>SlapOS Desktop</title>
+<section><title>SlapOS</title>
 <para>This is used by slapos client, now it's connected to <ulink url="https://www.slapos.org"/>. Logon and enjoy the journey in the SlapOS Cloud world.</para>
 </section>
 
-<section><title>Node Runner</title>
-<para>Node Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
+<section><title>SlapOS Runner</title>
+<para>SlapOS Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
 <para>After installing slapos, Node Runner isn't available. You need run Configure SlapOS first. After that, Node Runner would be available.</para>
 <para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
 </section>

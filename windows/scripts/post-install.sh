@@ -99,6 +99,9 @@ for x in $(cygrunsrv --list) ; do
     cygrunsrv -R $x    
 done
 
+# Backup slap-runner.html
+cp /etc/slapos/scripts/slap-runner.html{,.orig}
+
 echo Run post-install script successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

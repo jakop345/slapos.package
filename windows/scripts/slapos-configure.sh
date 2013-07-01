@@ -513,8 +513,17 @@ if (( $? )) ; then
     echo "Supply $slaprunner_cfg in the computer $computer_id"
     /opt/slapos/bin/slapos supply  $slaprunner_cfg $computer_id
     echo "Request an instance $slaprunner_title ..."
+    patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
     while true ; do
         /opt/slapos/bin/slapos node software --verbose
+        # Apply patches to slapos.cookbook for inotifix        
+        if [[ -f $patch_file ]] ; then            
+            for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
+                echo Apply patch $patch_file at $x
+                cd $x
+                patch -f --dry-run -p1 < $patch_file > /dev/null && patch -p1 < $patch_file
+            done
+        fi    
         /opt/slapos/bin/slapos node instance --verbose
         /opt/slapos/bin/slapos node report --verbose
         /opt/slapos/bin/slapos request $client_config_file $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_id && break
@@ -531,7 +540,6 @@ if (( $? )) ; then
     echo Got node runner url: $slaprunner_url
     [[ -z $slaprunner_url ]] && show_error_exit "Failed to create instance of SlapOS Web Runner."
 
-    cp $slapos_runner_file{.html, .html.orig}
     cat <<EOF > $slapos_runner_file
 <html>
 <head><title>SlapOS Web Runner</title>
@@ -548,16 +556,6 @@ function openwin() {
 EOF
     echo Generate file: $slapos_runner_file
 
-    # Apply patches to slapos.cookbook for inotifix
-    patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
-    if [[ -f $patch_file ]] ; then
-        echo "Apply patch: $patch_file"
-        for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
-            echo Apply to $x
-            cd $x
-            patch -f --dry-run -p1 < $patch_file > /dev/null && patch -p1 < $patch_file
-        done
-    fi
     echo
     echo Install Web Runner OK.
     echo
