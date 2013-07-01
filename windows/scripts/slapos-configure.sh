@@ -468,7 +468,6 @@ done
 #-------------------------------------------------
 
 slaprunner_title="SlapOS-Node-Runner-In-$computer_id"
-
 grep -q "window.location.href" $slapos_runner_file
 if (( $? )) ; then
     echo
@@ -487,7 +486,7 @@ if (( $? )) ; then
 
     echo "Supply $slaprunner_cfg in the computer $computer_id"
     /opt/slapos/bin/slapos supply  $slaprunner_cfg $computer_id
-    echo "Request an instance 'Node Runner' ..."
+    echo "Request an instance $slaprunner_title ..."
     while true ; do
         /opt/slapos/bin/slapos node software --verbose
         /opt/slapos/bin/slapos node instance --verbose
@@ -530,7 +529,7 @@ EOF
         for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
             echo Apply to $x
             cd $x
-            patch --dry-run -p1 < $patch_file && patch -p1 < $patch_file
+            patch -f --dry-run -p1 < $patch_file > /dev/null && patch -p1 < $patch_file
         done
     fi
     echo

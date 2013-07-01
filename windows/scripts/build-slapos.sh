@@ -43,7 +43,7 @@ if [[ -f $patch_file ]] ; then
     for x in $(find $slapos_home/eggs -name slapos.core-*.egg ; do
         echo Patching $x ...
         cd $x
-        patch --dry-run -p1 < $patch_file && patch -p1 < $patch_file && echo Patch $x OK.
+        patch -f --dry-run -p1 < $patch_file > /dev/null && patch -p1 < $patch_file && echo Patch $x OK.
     done
 fi
 
