@@ -30,7 +30,7 @@ function check_cygwin_service()
         echo \t\tcygrunsrv --start $1
         echo to start this service
         cygrunsrv --start $1 || show_error_exit "Failed to start service $1"
-        echo Cygwin $1 service is running. 
+        echo Cygwin $1 service is running.
     fi
     echo Check $1 service OVER.
 }
@@ -68,7 +68,7 @@ if (( $? )) ; then
     echo "No native IPv6."
     echo Check re6stnet network ...
     which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."
-    # re6st-conf --is-needed --registry http://re6stnet.nexedi.com/
+    # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
     # Check if babeld is running, so we guess whether re6stnet is running or not
     ps -ef | grep -q babeld.exe
     if (( $? )) ; then
@@ -76,10 +76,11 @@ if (( $? )) ; then
         # It need root rights to install tap-driver
         cd /etc/re6stnet
         re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
-        echo $! > /var/run/slapos-node-re6stnet.pid        
+        echo $! > /var/run/slapos-node-re6stnet.pid
+        disown -h
         echo "Start re6stent (pid=$!) in the background OK."
-        echo "You can check log files in the /var/log/slapos-node-re6stnet.log and /var/log/re6stnet."
-        echo 
+        echo "You can check log files in the /var/log/re6stnet/."
+        echo
         echo "Waiting re6stent network work ..."
         while true ; do
             check_ipv6_connection && break
