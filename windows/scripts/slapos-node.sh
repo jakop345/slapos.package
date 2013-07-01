@@ -68,7 +68,7 @@ if (( $? )) ; then
     which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."
     # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
     # Check if babeld is running, so we guess whether re6stnet is running or not
-    ps -ef | grep -q babeld.exe
+    ps -ef | grep -q /usr/local/bin/babeld
     if (( $? )) ; then
         echo "Start re6stnet ..."
         # It need root rights to install tap-driver
