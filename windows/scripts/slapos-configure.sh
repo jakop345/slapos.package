@@ -602,36 +602,6 @@ regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
 echo Startup item "$slapos_run_key\\$slapos_run_entry": $(regtool get "$slapos_run_key\\$slapos_run_entry")
 echo 
 
-#-------------------------------------------------
-# IPv6 Connection
-#-------------------------------------------------
-echo "Checking native IPv6 ..."
-check_ipv6_connection
-# Run re6stnet if no native ipv6
-if (( $? )) ; then
-    echo "No native IPv6."
-    echo Check re6stnet network ...
-    which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed."
-    # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
-    # Check if babeld is running, so we guess whether re6stnet is running or not
-    ps -ef | grep -q /usr/local/bin/babeld
-    if (( $? )) ; then
-        echo "Start re6stnet ..."
-        # It need root rights to install tap-driver
-        cd /etc/re6stnet
-        [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
-        re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
-        echo $! > /var/run/slapos-node-re6stnet.pid
-        disown -h
-        echo "Start re6stent (pid=$!) in the background OK."
-        echo "You can check log files in the /var/log/re6stnet/."
-        echo
-    fi
-    echo "re6stnet network OK."
-else
-    echo "Native IPv6 Found."
-fi
-
 echo SlapOS Node configure successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

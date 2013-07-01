@@ -75,8 +75,8 @@ if (( $? )) ; then
         cd /etc/re6stnet
         [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
         re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
-        echo $! > /var/run/slapos-node-re6stnet.pid
         disown -h
+        echo $! > /var/run/slapos-node-re6stnet.pid
         echo "Start re6stent (pid=$!) in the background OK."
         echo "You can check log files in the /var/log/re6stnet/."
         echo
