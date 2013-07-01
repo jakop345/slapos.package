@@ -15,7 +15,7 @@
 #
 # Remove virtual netcard installed by re6stnet 
 #
-for ifname in $(netsh interface show interface | gawk '{ print $3 }') ; do
+for ifname in $(netsh interface ipv6 show interface | gawk '{ print $5 }') ; do
     if [[ ("$ifname" == re6stnet*) && ("$ifname" != "re6stnet-lo") ]] ; then
         echo Removing network connection: $ifname
         ip vpntap del dev $ifname mode true

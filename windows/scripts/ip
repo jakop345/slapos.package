@@ -335,7 +335,7 @@ function install_tap_driver()
 
     # check if ifname has been installed
     if [[ ! "$1" == "" ]] ; then
-        netsh interface show interface | grep -q "\\b$1\\b"
+        netsh interface ipv6 show interface | grep -q "\\b$1\\b"
         if (( $? == 0 )) ; then
             echo "Nothing need to do, \"$1\" has been installed."
             return 0
