@@ -196,7 +196,7 @@ cd /opt
 wget http://www.dashingsoft.com/products/slapos/slapos-patches.tar.gz
 tar xzf slapos-patches.tar.gz --no-same-owner
 cd /opt/slapos/eggs/slapos.core-0.35-py2.7.egg
-patch --dry-run -p1 &lt; /opt/patches/slapos-core-format.patch &amp;&amp; patch -p1 &lt; /opt/patches/slapos-core-format.patch
+patch -f --dry-run -p1 &lt; /opt/patches/slapos-core-format.patch &gt; /dev/null  &amp;&amp; patch -p1 &lt; /opt/patches/slapos-core-format.patch
 </programlisting>
 It seems netifaces.dll need to rebase, 
 <programlisting>
@@ -211,10 +211,10 @@ After exit cygwin, double click autorebase.bat in the Windows explorer. If the c
 <section><title>Preparing the sources files for installer</title>
 <para>Let's we start cygwin box, then clone slapos.package.git
 <programlisting>
-mkdir /opt/git
+mkdir -p /opt/git
 cd /opt/git
-git pull || git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
-git pull || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
+(cd slapos.core ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
+(cd slapos.package ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
 cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
 </programlisting>
 Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
@@ -251,7 +251,7 @@ wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O min
 Get re6stnet for cygwin
 <programlisting>
 cd /opt/git
-git pull || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
+(cd re6stnet ; git pull) || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 cd re6stnet
 python setup.py sdist
 </programlisting>
@@ -295,6 +295,8 @@ Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:
 <para>Then open cygwin box as Administrator, if the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
 <programlisting>
 (cd /opt/downloads; cp pyOpenSSL-0.13.tar.gz miniupnpc-1.8.tar.gz /)
+mkdir -p /etc/slapos/scripts
+cp /opt/git/slapos.core/slapos*.cfg.example /etc/slapos
 /usr/local/bin/slapos-configure.sh
 /usr/local/bin/slapos-node.sh
 </programlisting>
