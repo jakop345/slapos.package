@@ -187,16 +187,17 @@ else
     echo The syslog-ng service has been installed.
 fi
 
-# echo Checking cron service ...
-# cygrunsrv --query cron > /dev/null
-# if (( $? )) ; then
-#     echo Run cron-config ...
-#     /usr/bin/cron-config --yes || \
-#         show_error_exit "Failed to run cron-config"
-#     echo OK.
-# else
-#     echo The cron service has been installed.
-# fi
+echo Checking cron job ...
+ps -ef | grep -q "/usr/sbin/cron"
+if (( $? )) ; then
+    echo Starting cron job ...
+    /usr/sbin/cron &
+    (( $? )) && show_error_exit "Failed to run cron-config"
+    disown -h
+    echo The cron job started.
+else
+    echo The cron job is running.
+fi
 
 #-------------------------------------------------
 # Configure slapos network
@@ -435,9 +436,9 @@ echo
 # here. Get re6stnet client count, then remove extra drivers and add
 # required drivers.
 #
-echo 
+echo
 echo Installing OpenVPN Tap-Windows Driver ...
-echo 
+echo
 original_connections=$(echo $(get_all_connections))
 client_count=$(sed -n -e "s/^client-count *//p" /etc/re6stnet/re6stnet.conf)
 [[ -z $client_count ]] && client_count=10
@@ -458,7 +459,7 @@ for re6stnet_ifname in $re6stnet_name_list ; do
 done
 #
 # Remove OpenVPN Tap-Windows Driver
-# 
+#
 # ip vpntap del dev re6stnet-x
 #
 
@@ -483,7 +484,7 @@ if (( $? )) ; then
     /opt/slapos/bin/slapos node format -cv --now ||
         show_error_exit "Failed to run slapos format."
     echo
-    
+
     echo "Supply $slaprunner_cfg in the computer $computer_id"
     /opt/slapos/bin/slapos supply  $slaprunner_cfg $computer_id
     echo "Request an instance 'Node Runner' ..."
@@ -565,5 +566,5 @@ EOF
 fi
 
 echo SlapOS Node configure successfully.
-read -n 1 -p "Press any key to exit..."
+read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

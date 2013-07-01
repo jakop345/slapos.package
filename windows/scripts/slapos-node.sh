@@ -120,4 +120,5 @@ echo "Creating instance ..."
 echo "Sending report ..."
 /opt/slapos/bin/slapos node report --verbose
 
+read -n 1 -t 60 -p "Press any key to exit..."
 exit 0
