@@ -59,7 +59,6 @@ check_cygwin_service syslog-ng
 #-------------------------------------------------
 # IPv6 Connection
 #-------------------------------------------------
-
 echo "Checking native IPv6 ..."
 check_ipv6_connection
 # Run re6stnet if no native ipv6
@@ -74,17 +73,17 @@ if (( $? )) ; then
         echo "Start re6stnet ..."
         # It need root rights to install tap-driver
         cd /etc/re6stnet
-        mkdir -p /var/log/re6stnet
+        [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
         re6stnet @re6stnet.conf --ovpnlog -I $slapos_ifname -i $slapos_ifname >> /var/log/re6stnet/slapos-node.log 2>&1 &
         echo $! > /var/run/slapos-node-re6stnet.pid
         disown -h
         echo "Start re6stent (pid=$!) in the background OK."
         echo "You can check log files in the /var/log/re6stnet/."
         echo
-        echo "Waiting re6stent network work ..."
-        while true ; do
-            check_ipv6_connection && break
-        done
+        # echo "Waiting re6stent network work ..."
+        # while true ; do
+        #     check_ipv6_connection && break
+        # done
     fi
     echo "re6stnet network OK."
 else
