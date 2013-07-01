@@ -24,7 +24,7 @@
 
 <chapter id="ch_install_slapos"><title>Installing SlapOS node in the Windows</title>
 <para>At first, we need to sign up in VIFIB community Cloud by clicking here <ulink url="https://www.slapos.org/login_form"/></para>
-<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be i386 or x86_64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
+<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be X86 or x64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
 <para>Double click the installer, click Next, Next ... 
 <note><para>If the current user isn't Administrator, you need run it as Administrator. Right click the installer, then click Run As Administrator.</para></note>
 </para>
@@ -259,8 +259,8 @@ Get the icons and openvpn drivers, if you use 32-bit windows, uncomment the comm
 <programlisting>
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/images.tar.gz
-wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x86_64.tar.gz -O openvpn-driver.tar.gz
-# wget http://www.dashingsoft.com/products/slapos/openvpn-driver-i386.tar.gz -O openvpn-driver.tar.gz
+wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz -O openvpn-driver.tar.gz
+# wget http://www.dashingsoft.com/products/slapos/openvpn-driver-X86.tar.gz -O openvpn-driver.tar.gz
 tar xzf images.tar.gz --no-same-owner
 tar xzf openvpn-driver.tar.gz --no-same-owner
 </programlisting>
