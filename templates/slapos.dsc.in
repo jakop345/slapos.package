@@ -6,7 +6,7 @@ Version: %VERSION%+%RECIPE_VERSION%+%RELEASE%-1
 Maintainer: Arnaud Fontaine <arnaud.fontaine@nexedi.com>
 Homepage: http://www.slapos.org
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 4.1.16), chrpath, po-debconf, wget, python, python-setuptools
+Build-Depends: debhelper (>= 4.1.16), chrpath, po-debconf, wget, python, python-dev, python-setuptools
 Files: 
  1c2803e4693c74042985d753c9c3ba53 73736102 slapos-node_%VERSION%+%RECIPE_VERSION%+%RELEASE%.orig.tar.gz
  1c2803e4693c74042985d753c9c3ba53 6102 slapos-node_%VERSION%+%RECIPE_VERSION%+%RELEASE%-1.diff.tar.gz
