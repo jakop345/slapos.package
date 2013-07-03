@@ -38,18 +38,19 @@ Source: "opt\images\manager.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 Source: "setup.exe"; DestDir: "{app}";
 Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
 
-Source: "opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\usr\local\bin"; Permissions: readexec;
+Source: "opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\usr\local\bin";
 
-Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
-Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
+Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin";
+Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin";
 
-Source: "opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\bin"; Permissions: readexec;
+Source: "opt\openvpn\bin\*.exe"; DestDir: "{app}\cygwin\bin";
+Source: "opt\openvpn\bin\*.dll"; DestDir: "{app}\cygwin\bin";
 Source: "opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin";
 Source: "opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin";
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
