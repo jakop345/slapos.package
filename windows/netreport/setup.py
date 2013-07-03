@@ -13,7 +13,7 @@ def get_description():
     finally:
         f.close()
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 if sys.platform.startswith("cygwin"):
 
@@ -42,7 +42,7 @@ def main():
         description='A tool used to report the usage of net drive in the Windows',
         long_description=get_description(),
         keywords=['netdrive',],
-        py_modules=['src/netreport'],
+        py_modules=['netreport'],
         author='Nexedi',
         author_email='jondy.zhao@nexedi.com',
         maintainer='Jondy Zhao',
