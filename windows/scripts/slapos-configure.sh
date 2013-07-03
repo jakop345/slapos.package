@@ -594,7 +594,7 @@ if (( $? )) ; then
         echo "Starting $service_name service ..."
         cygrunsrv --start $service_name || show_error_exit "Failed to start $service_name service."
         service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
-    fi    
+    fi
     [[ x$service_state == "xRunning" ]] || show_error_exit "Failed to start $service_name service."
     echo Cygwin $service_name service is running.
     echo "You can check log files in the /var/log/re6stnet/*.log"
@@ -607,7 +607,6 @@ fi
 #-------------------------------------------------
 # Create instance of Web Runner
 #-------------------------------------------------
-
 slaprunner_title="SlapOS-Node-Runner-In-$computer_id"
 grep -q "window.location.href" $slapos_runner_file
 if (( $? )) ; then
@@ -631,14 +630,14 @@ if (( $? )) ; then
     patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
     while true ; do
         /opt/slapos/bin/slapos node software --verbose
-        # Apply patches to slapos.cookbook for inotifix        
-        if [[ -f $patch_file ]] ; then            
+        # Apply patches to slapos.cookbook for inotifix
+        if [[ -f $patch_file ]] ; then
             for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
                 echo Apply patch $patch_file at $x
                 cd $x
                 patch -f --dry-run -p1 < $patch_file > /dev/null && patch -p1 < $patch_file
             done
-        fi    
+        fi
         /opt/slapos/bin/slapos node instance --verbose
         /opt/slapos/bin/slapos node report --verbose
         /opt/slapos/bin/slapos request $client_config_file $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_id && break
@@ -728,7 +727,7 @@ regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
     "\"$(cygpath -w /usr/bin/bash)\" --login -i $slapos_run_script" || \
     show_error_exit "Failed to add slapos-configure.sh as windows startup item."
 echo Startup item "$slapos_run_key\\$slapos_run_entry": $(regtool get "$slapos_run_key\\$slapos_run_entry")
-echo 
+echo
 
 echo SlapOS Node configure successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
