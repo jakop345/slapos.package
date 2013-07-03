@@ -267,18 +267,6 @@ else
 fi
 check_service_state syslog-ng
 
-echo Checking cron job ...
-ps -ef | grep -q "/usr/sbin/cron"
-if (( $? )) ; then
-    echo Starting cron job ...
-    /usr/sbin/cron &
-    (( $? )) && show_error_exit "Failed to run cron-config"
-    disown -h
-    echo The cron job started.
-else
-    echo The cron job is running.
-fi
-
 #-------------------------------------------------
 # Configure slapos network
 #-------------------------------------------------
@@ -593,7 +581,7 @@ if (( $? )) ; then
     if (( $? )) ; then
         [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
         echo "Install slapos-re6stnet service ..."
-        cygrunsrv -I $service_name -c /etc/re6stnet -p $(which re6stnet) -a "@re6stnet.conf" -u Administrator|| \
+        cygrunsrv -I $service_name -c /etc/re6stnet -p $(which re6stnet) -a "@re6stnet.conf" || \
             show_error_exit "Failed to install $service_name service."
         echo "Cygwin $service_name service installed."
         # echo "Waiting re6stent network work ..."
@@ -694,8 +682,8 @@ fi
 crontab_file=/var/cron/tabs/$(whoami)
 if [[ ! -f $crontab_file ]] ; then
     cat <<EOF  > $crontab_file
-SHELL=/bin/sh
-PATH=/usr/bin:/usr/sbin:/sbin:/bin
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
 # Run "Installation/Destruction of Software Releases" and "Deploy/Start/Stop Partitions" once per minute
@@ -714,6 +702,19 @@ MAILTO=""
 EOF
     echo Cron file $crontab_file created.
 fi
+
+echo Checking cron job ...
+ps -ef | grep -q "/usr/sbin/cron"
+if (( $? )) ; then
+    echo Starting cron job ...
+    /usr/sbin/cron &
+    (( $? )) && show_error_exit "Failed to run cron-config"
+    disown -h
+    echo The cron job started.
+else
+    echo The cron job is running.
+fi
+
 
 #-------------------------------------------------
 # Add slapos-configure to windows startup item

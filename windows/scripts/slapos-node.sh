@@ -123,7 +123,7 @@ if (( $? )) ; then
     if (( $? )) ; then
         [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
         echo "Install slapos-re6stnet service ..."
-        cygrunsrv -I $service_name -c /etc/re6stnet -p $(which re6stnet) -a "@re6stnet.conf" -u Administrator|| \
+        cygrunsrv -I $service_name -c /etc/re6stnet -p $(which re6stnet) -a "@re6stnet.conf" || \
             show_error_exit "Failed to install $service_name service."
         echo "Cygwin $service_name service installed."
         # echo "Waiting re6stent network work ..."

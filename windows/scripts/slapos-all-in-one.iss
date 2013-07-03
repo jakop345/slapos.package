@@ -58,12 +58,10 @@ Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; 
 Source: "opt\openvpn\bin\*"; DestDir: "{app}\cygwin\usr\local\bin";
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
 
-Source: "opt\git\slapos.package\windows\scripts\init-slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-configure.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
-Source: "opt\git\slapos.package\windows\scripts\slapos-node-runner.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slap-runner.html"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\pre-uninstall.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 
