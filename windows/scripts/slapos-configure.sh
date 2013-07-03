@@ -519,6 +519,7 @@ if [[ ! -f re6stnet.conf ]] ; then
     echo "ovpnlog" >> re6stnet.conf
     echo "interface $slapos_ifname" >> re6stnet.conf
     echo "main-interface $slapos_ifname" >> re6stnet.conf
+    echo "log $(cygpath -m /var/log/re6stnet)"
 
 fi
 [[ ! -f re6stnet.conf ]] && \
@@ -572,10 +573,20 @@ echo "Checking native IPv6 ..."
 check_ipv6_connection
 # Run re6stnet if no native ipv6
 if (( $? )) ; then
-    echo "No native IPv6."
+    re6stnet_script=/etc/re6stnet/ovpn-cygwin.bat
+    service_name=slapos-re6stnet
+
+    echo No native IPv6.
     echo Check re6stnet network ...
     which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."
-    service_name=slapos-re6stnet
+
+    if [[ ! -f ${re6stnet_script} ]] ; then
+        cat <<EOF > /${re6stnet_script}
+$(cygpath -w /bin/bash.exe) --login -c 'python %*'
+EOF
+    fi
+    chmod +x ${re6stnet_script}
+    
     # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
     cygrunsrv --query $service_name >/dev/null 2>&1
     if (( $? )) ; then
@@ -589,6 +600,7 @@ if (( $? )) ; then
         #     check_ipv6_connection && break
         # done
     fi
+
     service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
     if [[ ! x$service_state == "xRunning" ]] ; then
         echo "Starting $service_name service ..."
@@ -596,6 +608,7 @@ if (( $? )) ; then
         service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
     fi
     [[ x$service_state == "xRunning" ]] || show_error_exit "Failed to start $service_name service."
+
     echo Cygwin $service_name service is running.
     echo "You can check log files in the /var/log/re6stnet/*.log"
     echo
