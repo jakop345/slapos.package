@@ -47,6 +47,9 @@ def main():
         author_email='jondy.zhao@nexedi.com',
         maintainer='Jondy Zhao',
         maintainer_email='jondy.zhao@nexedi.com',
+        url='https://github.com/jondy/netdrive/',
+        download_url='http://dashingsoft.com/products/slapos/netdrive-%s.tar.gz' % VERSION,
+        platforms='Windows',
         license='GPLv3',
         zip_safe=False,
         install_requires=[
