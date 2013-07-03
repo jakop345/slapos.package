@@ -35,7 +35,7 @@ done
 # Remove slapos-configure from windows startup item
 #
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-slapos_run_entry=SlapOS-Node
+slapos_run_entry=slapos-configure
 echo Removing startup item "$slapos_run_key\\$slapos_run_entry"
 regtool -q unset "$slapos_run_key\\$slapos_run_entry"
 

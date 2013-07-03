@@ -26,9 +26,50 @@
 #
 export PATH=/usr/local/bin:/usr/bin:$PATH
 
-for myprofile in ~/.bash_profile ~/.profile ; do
-    grep -q "export CYGWIN=server" $myprofile || echo "export CYGWIN=server" >> $myprofile
-done
+# ======================================================================
+# Routine: get_system_and_admins_gids
+# Get the ADMINs ids from /etc/group and /etc/passwd
+# ======================================================================
+get_system_and_admins_ids() {
+    ret=0
+    for fname in /etc/passwd /etc/group; do
+	if ls -ld "${fname}" | grep -Eq  '^-r..r..r..'; then
+	    true
+	else
+	    echo "The file $fname is not readable by all."
+	    echo "Please run 'chmod +r $fname'."
+	    echo
+	    ret=1
+	fi
+    done
+
+    [ ! -r /etc/passwd -o ! -r  /etc/group ] && return 1;
+
+    ADMINSGID=$(sed -ne '/^[^:]*:S-1-5-32-544:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/group)
+    SYSTEMGID=$(sed -ne '/^[^:]*:S-1-5-18:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/group)
+    if [ -z "$ADMINSGID" -o -z "$SYSTEMGID" ]; then
+		echo "It appears that you do not have correct entries for the"
+		echo "ADMINISTRATORS and/or SYSTEM sids in /etc/group."
+		echo
+		echo "Use the 'mkgroup' utility to generate them"
+		echo "   mkgroup -l > /etc/group"
+		warning_for_etc_file group
+		ret=1;
+    fi
+
+    ADMINSUID=$(sed -ne '/^[^:]*:[^:]*:[0-9]*:[0-9]*:[^:]*,S-1-5-32-544:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/passwd)
+    SYSTEMUID=$(sed -ne '/^[^:]*:[^:]*:[0-9]*:[0-9]*:[^:]*,S-1-5-18:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/passwd)
+    if [ -z "$ADMINSUID" -o -z "$SYSTEMUID" ]; then
+		echo "It appears that you do not have correct entries for the"
+		echo "ADMINISTRATORS and/or SYSTEM sids in /etc/passwd."
+		echo
+		echo "Use the 'mkpasswd' utility to generate it"
+		echo "   mkpasswd -l > /etc/passwd."
+		warning_for_etc_file passwd
+		ret=1;
+    fi
+    return "${ret}"
+}  # === get_system_and_admins_ids() === #
 
 #-------------------------------------------------
 # Common functions
@@ -158,6 +199,17 @@ function query_parameter()
 }
 
 #-------------------------------------------------
+# Check adminsitrator rights
+#-------------------------------------------------
+get_system_and_admins_ids ||  show_error_exit "Failed to get uids of system and amdinistrator account."
+id | grep -q "$ADMINSUID(Administrators)" ||  show_error_exit "Error: Administrator right required to run this script."
+
+for myprofile in ~/.bash_profile ~/.profile ; do
+    grep -q "export CYGWIN=server" $myprofile || echo "export CYGWIN=server" >> $myprofile
+    grep -q "export PATH=/opt/slapos/bin:" $myprofile || echo "export PATH=/opt/slapos/bin:$$PATH" >> $myprofile
+done
+
+#-------------------------------------------------
 # Constants
 #-------------------------------------------------
 slapos_client_home=~/.slapos
@@ -178,7 +230,9 @@ slapos_ifname=re6stnet-lo
 ipv4_local_network=10.201.67.0/24
 
 slapos_runner_file=/etc/slapos/scripts/slap-runner.html
-slaprunner_cfg='http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg'
+slaprunner_cfg=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg
+netdrive_reporter_cfg=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/netdrive-reporter/software.cfg
+wordpress_cfg=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin:/software/wordpress/software.cfg
 
 #-------------------------------------------------
 # Create paths
@@ -351,11 +405,42 @@ echo Checking computer key OK.
 
 echo Checking client configure file ...
 if [[ ! -f $client_configure_file ]] ; then
-    [[ -f $client_template_file ]] || \
-    (cd /etc/slapos; wget $url_client_template_file -O $client_template_file) || \
-    show_error_exit "Download slapos-client.cfg.example failed."
-    echo "Copy client configure file from $client_template_file to $client_config_file"
-    cp $client_template_file $client_configure_file
+    cat <<EOF > $client_configure_file
+[slapos]
+master_url = https://slap.vifib.com/
+
+[slapconsole]
+# Put here retrieved certificate from SlapOS Master.
+# Beware: put certificate from YOUR account, not the one from your node.
+# You (as identified person from SlapOS Master) will request an instance, node your node.
+# Conclusion: node certificate != person certificate.
+cert_file = certificate file location coming from your slapos master account
+key_file = key file location coming from your slapos master account
+# Below are softwares maintained by slapos.org and contributors
+alias =
+  apache_frontend http://git.erp5.org/gitweb/slapos.git/blob_plain/HEAD:/software/apache-frontend/software.cfg
+  dokuwiki http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.158:/software/dokuwiki/software.cfg
+  drupal http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.151:/software/erp5/software.cfg
+  erp5 http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.143:/software/erp5/software.cfg
+  erp5_branch http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/erp5:/software/erp5/software.cfg
+  fengoffice http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.158:/software/fengoffice/software.cfg
+  kumofs http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.141:/software/kumofs/software.cfg
+  kvm http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.156:/software/kvm/software.cfg
+  maarch http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.159:/software/maarch/software.cfg
+  mariadb http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.152:/software/mariadb/software.cfg
+  memcached http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.82:/software/memcached/software.cfg
+  mysql http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.65:/software/mysql-5.1/software.cfg
+  opengoo http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.158:/software/opengoo/software.cfg
+  postgresql http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.157:/software/postgres/software.cfg
+  slaposwebrunner http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner/software.cfg
+  slaposwebrunner_lite http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/slaprunner-lite/software.cfg
+  wordpress http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin:/software/wordpress/software.cfg
+  xwiki http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.46:/software/xwiki/software.cfg
+  zabbixagent http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.162:/software/zabbix-agent/software.cfg
+  netdrive_reporter http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/netdrive-reporter/software.cfg
+  demoapp http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/demoapp/software.cfg
+EOF
+    echo "Client configure file $client_config_file created."
 fi
 
 echo Client configuration information:
@@ -443,11 +528,14 @@ if [[ ! -f re6stnet.conf ]] ; then
     echo "# $mysubnet" >> re6stnet.conf
     echo Write "table 0" to re6stnet.conf
     echo "table 0" >> re6stnet.conf
+    echo "ovpnlog" >> re6stnet.conf
+    echo "interface $slapos_ifname" >> re6stnet.conf
+    echo "main-interface $slapos_ifname" >> re6stnet.conf
 
 fi
 [[ ! -f re6stnet.conf ]] && \
     show_error_exit "Failed to register to nexedi re6stnet: no /etc/re6stnet/re6stnet.conf found."
-grep -q "^table " re6stnet.conf || \
+grep -q "^table 0" re6stnet.conf || \
     show_error_exit "Error: no parameter 'table 0' found in the /etc/re6stnet/re6stnet.conf"
 grep -q "^# Your subnet: " re6stnet.conf || \
     show_error_exit "Error: no subnet found in the /etc/re6stnet/re6stnet.conf"
@@ -488,6 +576,45 @@ done
 #
 # ip vpntap del dev re6stnet-x
 #
+
+#-------------------------------------------------
+# IPv6 Connection
+#-------------------------------------------------
+echo "Checking native IPv6 ..."
+check_ipv6_connection
+# Run re6stnet if no native ipv6
+if (( $? )) ; then
+    echo "No native IPv6."
+    echo Check re6stnet network ...
+    which re6stnet > /dev/null 2>&1 || show_error_exit "Error: no re6stnet installed, please run Configure SlapOS first."
+    service_name=slapos-re6stnet
+    # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
+    cygrunsrv --query $service_name >/dev/null 2>&1
+    if (( $? )) ; then
+        [[ -d /var/log/re6stnet ]] || mkdir -p /var/log/re6stnet
+        echo "Install slapos-re6stnet service ..."
+        cygrunsrv -I $service_name -c /etc/re6stnet -p $(which re6stnet) -a "@re6stnet.conf" -u Administrator|| \
+            show_error_exit "Failed to install $service_name service."
+        echo "Cygwin $service_name service installed."
+        # echo "Waiting re6stent network work ..."
+        # while true ; do
+        #     check_ipv6_connection && break
+        # done
+    fi
+    service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
+    if [[ ! x$service_state == "xRunning" ]] ; then
+        echo "Starting $service_name service ..."
+        cygrunsrv --start $service_name || show_error_exit "Failed to start $service_name service."
+        service_state=$(cygrunsrv --query $service_name | sed -n -e 's/^Current State[ :]*//p')
+    fi    
+    [[ x$service_state == "xRunning" ]] || show_error_exit "Failed to start $service_name service."
+    echo Cygwin $service_name service is running.
+    echo "You can check log files in the /var/log/re6stnet/*.log"
+    echo
+    echo "re6stnet network OK."
+else
+    echo "Native IPv6 Found."
+fi
 
 #-------------------------------------------------
 # Create instance of Web Runner
@@ -592,7 +719,7 @@ fi
 # Add slapos-configure to windows startup item
 #-------------------------------------------------
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-slapos_run_entry=SlapOS-Node
+slapos_run_entry=slapos-configure
 slapos_run_script=/etc/slapos/scripts/slapos-configure.sh
 echo Checking startup item ...
 regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
