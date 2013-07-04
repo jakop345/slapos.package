@@ -15,6 +15,7 @@
 #
 #    * Remove instance root /srv/slapgrid
 #    
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 
 #
 # Remove virtual netcard installed by re6stnet 

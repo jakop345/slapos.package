@@ -1,6 +1,4 @@
 #! /bin/bash
-#
-export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 
 # ======================================================================
 # Constants
@@ -13,7 +11,7 @@ client_template_file=/etc/slapos/slapos-client.cfg.example
 
 node_certificate_file=/etc/opt/slapos/ssl/computer.crt
 node_key_file=/etc/opt/slapos/ssl/computer.key
-node_config_file=/etc/opt/slapos/slapos.cfg
+node_configure_file=/etc/opt/slapos/slapos.cfg
 node_template_file=/etc/slapos/slapos.cfg.example
 
 slapos_ifname=re6stnet-lo
@@ -82,13 +80,13 @@ function check_administrator_right()
 {
     get_system_and_admins_ids || exit 1
     groups=" $(id -G) "
-    if [[ ! $groups == *\ $ADMINGUID\ * ]] ; then
+    if [[ ! $groups == *\ $ADMINSGID\ * ]] ; then
         echo
         echo "You haven't right to run this script $0. "
         echo "Please login as Administrator to run it, or right-click this script and"
         echo "then click Run as administrator."
         echo
-        exit 1
+        return 1
     fi
 }  # === check_administrator_right() === #
 
@@ -104,20 +102,20 @@ function check_cygwin_service()
 
     echo Checking cygwin service $name ...
 
-    if [ ! -e /usr/bin/cygrunsrv.exe ]; then
+    if [[ ! -e /usr/bin/cygrunsrv.exe ]] ; then
         echo "Error: Download the cygrunsrv package to start the $name daemon as a service."
         exit 1
     fi
-    if [[ ! cygrunsrv --query $name > /dev/null 2>&1 ]] ; then
+    if ! cygrunsrv --query $name > /dev/null 2>&1 ; then
         echo "Error: No cygwin service $name installed, please run Configure SlapOS to install it."
         return 1
     fi
 
-    account="$(cygrunsrv -VQ $name | sed -n -e 's/^Account[ :]*//p')"
+    account=$(cygrunsrv -VQ $name | sed -n -e 's/^Account[ :]*//p')
     state=$(cygrunsrv --query $name | sed -n -e 's/^Current State[ :]*//p')
     [[ "$state" == "Running" ]] || cygrunsrv --start $name
     state=$(cygrunsrv --query $name | sed -n -e 's/^Current State[ :]*//p')
-    cygrunsrv --query --verbose $name
+    cygrunsrv --query $name --verbose
     echo Check cygwin service $name OVER.
     [[ "$state" == "Running" ]] || ret=1
     return "${ret}"
@@ -189,8 +187,8 @@ function check_cron_configure()
 function check_re6stnet_configure()
 {
     echo Checking slapos re6stnet confiure ...
-    ! which re6stnet > /dev/null 2>&1 && \
-        echo "No re6stnet installed, please run Configure SlapOS first." && \
+    ! which re6stnet > /dev/null 2>&1 &&
+        echo "No re6stnet installed, please run Configure SlapOS first." &&
         return 1
 
     echo Check slapos re6stnet configure Over.
@@ -204,8 +202,11 @@ function check_re6stnet_needed()
 {
     # This doesn't work in the cygwin now, need hack ip script
     # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
-    netsh interface ipv6 show route | grep -q " ::/0 "
-    return ! $?
+    if netsh interface ipv6 show route | grep -q " ::/0 " ; then
+        return 1
+    fi
+    # re6stnet is required
+    return 0
 }  # === check_re6stnet_needed() === #
 
 # ======================================================================
@@ -367,6 +368,7 @@ alias =
   netdrive_reporter http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/netdrive-reporter/software.cfg
   demoapp http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/software/demoapp/software.cfg
 EOF
+    echo $client_template_file has been generated.
 
     cat <<EOF > $node_template_file
 [slapos]
@@ -544,4 +546,5 @@ upload-to-binary-cache-url-blacklist =
   http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads
   /
 EOF
+    echo $node_template_file has been generated.
 }  # === create_template_configure_file() === #

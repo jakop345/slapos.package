@@ -44,8 +44,9 @@
 #        startup        Run slapos-configure.sh on windows startup
 #        runner         Install web runner for this node
 #
-source $0/../slapos-include.sh
-check_administrator_right
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+source $(dirname $0)/slapos-include.sh
+check_administrator_right || show_error_exit
 
 if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
     for profile in ~/.bash_profile ~/.profile ; do
@@ -74,26 +75,24 @@ mkdir -p /etc/re6stnet
 echo
 echo Starting configure cygwin services ...
 echo
-cygrunsrv --query cygserver > /dev/null 2>&1
-if (( $? )) ; then
+if ! cygrunsrv --query cygserver > /dev/null 2>&1 ; then
     echo Run cygserver-config ...
     /usr/bin/cygserver-config --yes || \
         show_error_exit "Failed to run cygserver-config"
 else
     echo The cygserver service has been installed.
 fi
-check_service_state cygserver
+check_cygwin_service cygserver
 
-echo Checking syslog-ng service ...
-cygrunsrv --query syslog-ng > /dev/null 2>&1
-if (( $? )) ; then
+if ! cygrunsrv --query syslog-ng > /dev/null 2>&1 ; then
     echo Run syslog-ng-config ...
     /usr/bin/syslog-ng-config --yes || \
         show_error_exit "Failed to run syslog-ng-config"
 else
     echo The syslog-ng service has been installed.
 fi
-check_service_state syslog-ng
+check_cygwin_service syslog-ng
+
 echo
 echo Configure cygwin services OK.
 echo
@@ -119,9 +118,6 @@ if [[ ! " $original_connections " == *[\ ]$slapos_ifname[\ ]* ]] ; then
 fi
 #ip -4 addr add $ipv4_local_network dev $slapos_ifname
 # reset_connection $slapos_ifname
-echo "  Slapos ipv4_local_network is $ipv4_local_network"
-echo "  If it confilcts with your local network, change it in the file:"
-echo "     $(dirname $0)/slapos-include.sh"
 echo
 echo Configure slapos network OK.
 echo
@@ -177,13 +173,13 @@ fi
 openssl rsa -noout -in $node_key_file -check || \
     show_error_exit "Invalid node key: $node_key_file."
 
-if [[ ! -f $node_config_file ]] ; then
-    echo "Copy computer configure file from $node_template_file to $node_config_file"
-    cp $node_template_file $node_config_file
+if [[ ! -f $node_configure_file ]] ; then
+    echo "Copy computer configure file from $node_template_file to $node_configure_file"
+    cp $node_template_file $node_configure_file
 fi
 
 [[ -z $interface_guid ]] && \
-    interface_guid=$(sed -n -e "s/^\\sinterface_name\\s*=\\s*//p" $node_config_file)
+    interface_guid=$(sed -n -e "s/^\\sinterface_name\\s*=\\s*//p" $node_configure_file)
 [[ -z $interface_guid ]] && \
     interface_guid=$(connection2guid $slapos_ifname)
 [[ -z $interface_guid ]] && \
@@ -199,19 +195,25 @@ echo "  interface name:     $slapos_ifname"
 echo "  GUID:               $interface_guid"
 echo "  ipv4_local_network: $ipv4_local_network"
 echo "  computer_id:        $computer_guid"
+echo 
+echo "  If ipv4_local_network confilcts with your local network, change it"
+echo "  in the file: $node_configure_file "
+echo "  Or change it in the $(dirname $0)/slapos-include.sh"
+echo "  and run Configure SlapOS again."
+
 sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = $ipv4_local_network%" \
         -e "s%^computer_id.*$%computer_id = $computer_guid%" \
-        $node_config_file
+        $node_configure_file
 
 if [[ ! -f $client_certificate_file ]] ; then
     read -p "Where is client certificate file (/certificate): " filename
-    [[ -z $filename ]] && certificate_file="/certificate"
+    [[ -z $filename ]] && filename="/certificate"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Client certificate file $filename doesn't exists."
     echo "Copy client certificate from $filename to $client_certificate_file"
-    certificate_file=$(cygpath -u $filename)
+    filename=$(cygpath -u $filename)
     cp $filename $client_certificate_file
 fi
 openssl x509 -noout -in $client_certificate_file || \
@@ -219,19 +221,19 @@ openssl x509 -noout -in $client_certificate_file || \
 
 if [[ ! -f $client_key_file ]] ; then
     read -p "Where is client key file (/key): " filename
-    [[ -z $filename ]] && key_file="/key"
+    [[ -z $filename ]] && filename="/key"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Key file $filename doesn't exists."
     echo "Copy client key from $filename to $client_key_file"
-    key_file=$(cygpath -u $filename)
+    filename=$(cygpath -u $filename)
     cp $filename $client_key_file
 fi
 openssl rsa -noout -in $client_key_file -check || \
     show_error_exit "Invalid client key: $client_key_file."
 
 if [[ ! -f $client_configure_file ]] ; then
-    echo "Copy client configure file from $client_template_file to $client_config_file"
-    cp $client_template_file $client_config_file
+    echo "Copy client configure file from $client_template_file to $client_configure_file"
+    cp $client_template_file $client_configure_file
 fi
 
 echo "Client configuration information:"
@@ -253,10 +255,11 @@ echo
 
 echo Checking miniupnpc ...
 if [[ ! -d /opt/miniupnpc ]] ; then
-    [[ -f /miniupnpc.tar.gz ]] || show_error_exit "No package found: /miniupnpc.tar.gz"
+    package=/opt/downloads/miniupnpc.tar.gz
+    [[ -r $package ]] || show_error_exit "No package found: $package"
     echo "Installing miniupnpc ..."
     cd /opt
-    tar xzf /miniupnpc.tar.gz --no-same-owner
+    tar xzf $package --no-same-owner
     mv $(ls -d miniupnpc-*) miniupnpc
     cd miniupnpc
     make
@@ -268,10 +271,11 @@ fi
 
 echo Checking pyOpenSSL ...
 if [[ ! -d /opt/pyOpenSSL ]] ; then
-    [[ -f /pyOpenSSL.tar.gz ]] || show_error_exit "No package found: /pyOpenSSL.tar.gz"
+    package=/opt/downloads/pyOpenSSL.tar.gz
+    [[ -r $package ]] || show_error_exit "No package found: $package"
     echo "Installing pyOpenSSL ..."
     cd /opt
-    tar xzf /pyOpenSSL.tar.gz --no-same-owner
+    tar xzf $package --no-same-owner
     mv $(ls -d pyOpenSSL-*) pyOpenSSL
     cd pyOpenSSL
     python setup.py install ||  show_error_exit "Failed ot install pyOpenSSL."
@@ -283,13 +287,15 @@ fi
 echo Checking re6stnet ...
 if [[ ! -d /opt/re6stnet ]] ; then
     echo "Installing re6stnet ..."
+    package=/opt/downloads/re6stnet.tar.gz
     cd /opt
-    if [[ -f /re6stnet.tar.gz ]] ; then
-        tar xzf /re6stnet.tar.gz --no-same-owner
+    if [[ -r $package ]] ; then
+        tar xzf $package --no-same-owner
         mv $(ls -d re6stnet-*) re6stnet
     else
         echo "Clone re6stnet from http://git.erp5.org/repos/re6stnet.git"
-	git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
+	git clone -b cygwin http://git.erp5.org/repos/re6stnet.git ||
+        show_error_exit "Failed to clone re6stnet.git"
     fi
     cd re6stnet
     python setup.py install || show_error_exit "Failed to install re6stnet."
@@ -326,11 +332,11 @@ fi
 # Run re6stnet if no native ipv6
 if check_re6stnet_needed ; then
     check_re6stnet_configure || exit 1
-    if [[ ! -r ${re6stnet_cgywin_script} ]] ; then
-        cat <<EOF > /${re6stnet_cgywin_script}
+    if [[ ! -r $re6stnet_cygwin_script ]] ; then
+        cat <<EOF > $re6stnet_cygwin_script
 $(cygpath -w /bin/bash.exe) --login -c 'python %*'
 EOF
-        chmod +x ${re6stnet_cgywin_script}
+        chmod +x $re6stnet_cygwin_script
     fi
     
     if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
@@ -338,8 +344,8 @@ EOF
             -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" || \
             show_error_exit "Failed to install cygwin service $re6stnet_service_name."
     fi
-    check_cygwin_service $re6stnet_service_name || exit 1
     echo "You can check log files in the /var/log/re6stnet/*.log"
+    # check_cygwin_service $re6stnet_service_name || exit 1
 else
     echo "Native IPv6 found, no re6stnet required."
 fi
@@ -394,7 +400,7 @@ echo Starting configure section runner ...
 echo
 slaprunner_title="SlapOS-Node-Runner-In-$computer_guid"
 feature_code="#-*- SlapOS Web Runner JavaScript Boot Code -*-#"
-if ! grep -q -F "$feature_code" $slapos_runner_file ; then
+if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
     echo Installing SlapOS Web Runner ...
 
     if [[ -r $re6stnet_configure_file ]] ; then
@@ -446,7 +452,7 @@ if ! grep -q -F "$feature_code" $slapos_runner_file ; then
     [[ -z $slaprunner_url ]] && \
         show_error_exit "Failed to create instance of SlapOS Web Runner."
 
-    cat <<EOF > $slapos_runner_file
+    cat <<EOF > $slaprunner_startup_file
 <html>
 <head><title>SlapOS Web Runner</title>
 <script LANGUAGE="JavaScript">
@@ -461,7 +467,7 @@ function openwin() {
 <!-- $feature_code -->
 </html>
 EOF
-    echo SlapOS Web Runner boot file $slapos_runner_file generated.
+    echo SlapOS Web Runner boot file $slaprunner_startup_file generated.
 
     echo
     echo Install Web Runner OK.

@@ -109,6 +109,15 @@ done
 # Backup slap-runner.html
 cp /etc/slapos/scripts/slap-runner.html{,.orig}
 
+# Unzip slapos.tar.gz
+if [[ -r /opt/downloads/slapos.tar.gz ]] ; then
+    echo Extracting slapos.tar.gz
+    cd /opt
+    tar xzf /opt/downloads/slapos.tar.gz --no-same-owner ||
+    show_error_exit "Failed to untar slapos.tar.gz"
+    echo Extracte slapos.tar.gz OK.
+fi
+
 echo Run post-install script successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

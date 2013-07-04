@@ -1,6 +1,7 @@
 #! /bin/bash
-source $0/../slapos-include.sh
-check_administrator_right
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+source $(dirname $0)/slapos-include.sh
+check_administrator_right || show_error_exit
 
 # -----------------------------------------------------------
 # Check all the configure files
