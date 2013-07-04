@@ -110,6 +110,11 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 <section><title>User Guide</title>
 <para>It just showes this documnet in the web browser.</para>
 </section>
+
+<section><title>Background Jobs</title>
+<para>After run Configure SlapOS, then a cron job will run in the background which used to release software and create instance periodically.</para>
+</section>
+
 </chapter>
 
 <chapter id="ch_generate_window_installer"><title>Generating windows installer from sources</title>
@@ -213,26 +218,21 @@ After exit cygwin, double click autorebase.bat in the Windows explorer. If the c
 <programlisting>
 mkdir -p /opt/git
 cd /opt/git
-(cd slapos.core ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.core.git
 (cd slapos.package ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
 cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
+cd /opt
+tar czf slapos.tar.gz slapos/
+mv slapos.tar.gz slapos/
 </programlisting>
-Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
+Then build babeld for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
 cd /opt/git/slapos.package/windows/babeld
 make WINVER=XP
-cp babeld.exe /usr/local/bin
-
-cd /opt/git/slapos.package/windows/openvpn
-libtoolize
-aclocal -I m4
-autoheader
-automake --add-missing
-autoreconf
-ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root
-make
-cp src/openvpn/.libs/openvpn.exe /usr/local/bin
+cp babeld.exe /usr/bin
 </programlisting>
+Now downlaod openvpn 2.3 for your window version, and install it. 
+</para>
+<para>
 Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
 <programlisting>
 cd /opt/git/slapos.package/windows/docs
@@ -296,7 +296,6 @@ Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:
 <programlisting>
 (cd /opt/downloads; cp pyOpenSSL-0.13.tar.gz miniupnpc-1.8.tar.gz /)
 mkdir -p /etc/slapos/scripts
-cp /opt/git/slapos.core/slapos*.cfg.example /etc/slapos
 /usr/local/bin/slapos-configure.sh
 /usr/local/bin/slapos-node.sh
 </programlisting>

@@ -36,6 +36,29 @@ for x in $(cygrunsrv --list) ; do
 done
 
 #
+# Remove users installed by slapos node
+#
+for name in $(net user) ; do
+    if [[ "x$name" == x\*slapuser* ]] ; then
+        echo Remove user: $name
+        net user $name /delete
+    elif [[ "$name" == "sshd" ]] ; then
+        echo Remove user: $name
+        net user $name /delete
+    fi
+done
+
+#
+# Remove local group installed by slapos node
+# 
+for name in $(net localgroup) ; do
+    if [[ "x$name" == x\*grp_slapuser* ]] ; then
+        echo Remove localgroup: $name
+        net localgroup $name /delete
+    fi
+done
+
+#
 # Remove slapos-configure from windows startup item
 #
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'

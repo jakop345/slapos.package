@@ -56,6 +56,9 @@ if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
 fi
 
 # cygrunsrv
+# cron-config
+# ssh-host-config
+# syslog-ng-config
 # devcon
 # openssl
 # export WINDIR
@@ -92,6 +95,15 @@ else
     echo The syslog-ng service has been installed.
 fi
 check_cygwin_service syslog-ng
+
+if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
+    echo Run ssh-host-config ...
+    /usr/bin/ssh-host-config --yes --cygwin ntsec || \
+        show_error_exit "Failed to run ssh-host-config"
+else
+    echo The sshd service has been installed.
+fi
+check_cygwin_service sshd
 
 echo
 echo Configure cygwin services OK.
@@ -417,8 +429,8 @@ if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
     /opt/slapos/bin/slapos node format -cv --now || \
         show_error_exit "Failed to run slapos format."
 
-    echo "Supply $slaprunner_cfg in the computer $computer_guid"
-    /opt/slapos/bin/slapos supply  $slaprunner_cfg $computer_guid
+    echo "Supply slapwebrunner in the computer $computer_guid"
+    /opt/slapos/bin/slapos supply slaposwebrunner $computer_guid
 
     echo "Request an instance $slaprunner_title ..."
     patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
@@ -436,7 +448,7 @@ if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
         /opt/slapos/bin/slapos node instance --verbose
         /opt/slapos/bin/slapos node report --verbose
         /opt/slapos/bin/slapos request $client_config_file $slaprunner_title \
-            $slaprunner_cfg --node computer_guid=$computer_guid && break
+            slaposwebrunner --node computer_guid=$computer_guid && break
         sleep 3
     done
     # Connection parameters of instance are:
@@ -446,7 +458,7 @@ if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
     #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
     #  'url': 'http://softinst39090.host.vifib.net/'}
     slaprunner_url=$(/opt/slapos/bin/slapos request $client_config_file \
-        $slaprunner_title $slaprunner_cfg --node computer_guid=$computer_guid | \
+        $slaprunner_title slaposwebrunner --node computer_guid=$computer_guid | \
         grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
     echo "SlapOS Web Runner URL: $slaprunner_url"
     [[ -z $slaprunner_url ]] && \
