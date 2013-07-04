@@ -3,7 +3,7 @@
 # When cygwin is installed, then call this script by Administrator:
 #
 #    /bin/bash/ --login -i init-cygwin.sh
-# 
+#
 # It will do:
 #
 #    * Set uid of Adminstrator to 0, and create root account
@@ -13,12 +13,19 @@
 #    * Create autorebase.bat, it used to fix cygwin dll problem
 #
 #    * Change readme.txt to dos format
-#    
+#
+function show_error_exit()
+{
+    echo Error: $1
+    read -n 1 -p "Press any key to exit..."
+    exit 1
+}
+
 password_filename=/etc/passwd
 echo Checking passwd file ...
 if [[ ! -f $password_filename ]] ; then
     echo No passwd file found.
-    mkpasswd > $password_filename 
+    mkpasswd -l > $password_filename || show_error_exit "mkpasswd failed"
     echo Generate passwd file OK.
 else
     echo Check passwd file OK.
@@ -27,7 +34,7 @@ fi
 echo Checking group file ...
 if [[ ! -f /etc/group ]] ; then
     echo No group file found.
-    mkgroup > /etc/group 
+    mkgroup -l > /etc/group || show_error_exit "mkgroup failed"
     echo Generate group file OK.
 else
     echo Check group file OK.
@@ -96,7 +103,7 @@ fi
 # installed in this computer.
 for x in $(cygrunsrv --list) ; do
     echo Removing cygservice $x
-    cygrunsrv -R $x    
+    cygrunsrv -R $x
 done
 
 # Backup slap-runner.html
@@ -105,4 +112,3 @@ cp /etc/slapos/scripts/slap-runner.html{,.orig}
 echo Run post-install script successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0
-
