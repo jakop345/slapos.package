@@ -19,7 +19,6 @@ slapos_ifname=re6stnet-lo
 ipv4_local_network=10.201.67.0/24
 
 re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
-re6stnet_cygwin_script=/etc/re6stnet/ovpn-cygwin.bat
 re6stnet_service_name=slapos-re6stnet
 
 slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html

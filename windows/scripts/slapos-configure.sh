@@ -207,7 +207,7 @@ echo "  interface name:     $slapos_ifname"
 echo "  GUID:               $interface_guid"
 echo "  ipv4_local_network: $ipv4_local_network"
 echo "  computer_id:        $computer_guid"
-echo 
+echo
 echo "  If ipv4_local_network confilcts with your local network, change it"
 echo "  in the file: $node_configure_file "
 echo "  Or change it in the $(dirname $0)/slapos-include.sh"
@@ -334,23 +334,14 @@ if [[ ! -r $re6stnet_configure_file ]] ; then
     echo "  ovpnlog"
     echo "  main-interface $slapos_ifname"
     echo "  interface $slapos_ifname"
-    echo "  log $(cygpath -m /var/log/re6stnet)"
     echo -e "# $subnet\ntable 0\novpnlog" \
         "\nmain-interface $slapos_ifname\ninterface $slapos_ifname" \
-        "\nlog $(cygpath -m /var/log/re6stnet)" \
         >> $re6stnet_configure_file
 fi
 
 # Run re6stnet if no native ipv6
 if check_re6stnet_needed ; then
     check_re6stnet_configure || exit 1
-    if [[ ! -r $re6stnet_cygwin_script ]] ; then
-        cat <<EOF > $re6stnet_cygwin_script
-$(cygpath -w /bin/bash.exe) --login -c 'python %*'
-EOF
-        chmod +x $re6stnet_cygwin_script
-    fi
-    
     if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
         cygrunsrv -I $re6stnet_service_name -c $(dirname $re6stnet_configure_file) \
             -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" || \
@@ -369,7 +360,7 @@ echo
 # -----------------------------------------------------------
 # taps: Install openvpn tap-windows drivers used by re6stnet
 # -----------------------------------------------------------
-# 
+#
 # Adding tap-windows driver will break others, so we add all drivers
 # here. Get re6stnet client count, then remove extra drivers and add
 # required drivers.
@@ -517,7 +508,7 @@ echo
 echo
 cat $crontab_file || show_error_exit "No crob tab found."
 echo
-echo 
+echo
 if ps -ef | grep -q "/usr/sbin/cron" ; then
     echo "The cron job is running."
 else
