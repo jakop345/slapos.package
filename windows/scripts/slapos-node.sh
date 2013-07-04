@@ -1,5 +1,5 @@
 #! /bin/bash
-source $(dirname $0)/slapos-include.sh
+source $0/../slapos-include.sh
 check_administrator_right
 
 # -----------------------------------------------------------

@@ -44,7 +44,7 @@
 #        startup        Run slapos-configure.sh on windows startup
 #        runner         Install web runner for this node
 #
-source $(dirname $0)/slapos-include.sh
+source $0/../slapos-include.sh
 check_administrator_right
 
 if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
