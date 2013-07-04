@@ -10,6 +10,8 @@
 #
 #     * Check IPv6 protocol and install it if require
 #
+#     * Create user slaproot who owns Administrator group rights
+#
 #     * Configure and start cygwin service: cygserver, syslog-ng, sshd
 #
 #     * config: Create node and client configure file by parameters ca/key
@@ -44,14 +46,12 @@
 #        startup        Run slapos-configure.sh on windows startup
 #        runner         Install web runner for this node
 #
-export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
-source $(dirname $0)/slapos-include.sh
-check_administrator_right || show_error_exit
+source $(/usr/bin/dirname $0)/slapos-include.sh
 
 if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
     for profile in ~/.bash_profile ~/.profile ; do
-        grep -q "export PATH=/opt/slapos/bin:" $profile || \
-            echo "export PATH=/opt/slapos/bin:$$PATH" >> $profile
+        grep -q "export PATH=/opt/slapos/bin:" $profile ||
+        echo "export PATH=/opt/slapos/bin:\${PATH}" >> $profile
     done
 fi
 
@@ -69,8 +69,20 @@ fi
 mkdir -p /etc/opt/slapos/ssl/partition_pki
 mkdir -p $slapos_client_home
 mkdir -p /opt/slapos/log
+mkdir -p /opt/download-cache
+mkdir -p /opt/downloads
 mkdir -p /etc/slapos/scripts
 mkdir -p /etc/re6stnet
+
+# -----------------------------------------------------------
+# Create account: slaproot
+# -----------------------------------------------------------
+if ! csih_privileged_account_exists $slapos_administrator
+then
+    csih_create_privileged_user $slapos_administrator
+else
+    csih_account_has_necessary_privileges $slapos_administrator
+fi
 
 # -----------------------------------------------------------
 # Configure cygwin services: cygserver syslog-ng sshd

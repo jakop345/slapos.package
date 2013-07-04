@@ -1,4 +1,21 @@
 #! /bin/bash
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
+    echo "Error: Download the csih package at first, I need this file:"
+    echo "  /usr/share/csih/cygwin-service-installation-helper.sh"
+    exit 1
+fi
+
+# Check Administrator rights
+csih_get_system_and_admins_ids
+if [[ ! " $(id -G) " == *\ $csih_ADMINSUID\ * ]] ; then
+    echo
+    echo "You haven't right to run this script. "
+    echo "Please login as Administrator to run it, or right-click this script"
+    echo "then click Run as administrator."
+    echo
+    exit 1
+fi
 
 # ======================================================================
 # Constants
@@ -25,72 +42,10 @@ slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
 
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 slapos_run_entry=slapos-configure
+slapos_administrator=slaproot
 
 # ======================================================================
-# Routine: get_system_and_admins_gids
-# Get the ADMINs ids from /etc/group and /etc/passwd
-# ======================================================================
-function get_system_and_admins_ids() {
-    ret=0
-    for fname in /etc/passwd /etc/group; do
-	if ls -ld "${fname}" | grep -Eq  '^-r..r..r..'; then
-	    true
-	else
-	    echo "The file $fname is not readable by all."
-	    echo "Please run 'chmod +r $fname'."
-	    echo
-	    ret=1
-	fi
-    done
-
-    [ ! -r /etc/passwd -o ! -r  /etc/group ] && return 1;
-
-    ADMINSGID=$(sed -ne '/^[^:]*:S-1-5-32-544:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/group)
-    SYSTEMGID=$(sed -ne '/^[^:]*:S-1-5-18:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/group)
-    if [ -z "$ADMINSGID" -o -z "$SYSTEMGID" ]; then
-		echo "It appears that you do not have correct entries for the"
-		echo "ADMINISTRATORS and/or SYSTEM sids in /etc/group."
-		echo
-		echo "Use the 'mkgroup' utility to generate them"
-		echo "   mkgroup -l > /etc/group"
-		warning_for_etc_file group
-		ret=1;
-    fi
-
-    ADMINSUID=$(sed -ne '/^[^:]*:[^:]*:[0-9]*:[0-9]*:[^:]*,S-1-5-32-544:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/passwd)
-    SYSTEMUID=$(sed -ne '/^[^:]*:[^:]*:[0-9]*:[0-9]*:[^:]*,S-1-5-18:.*:/{s/[^:]*:[^:]*:\([0-9]*\):.*$/\1/p;q}' /etc/passwd)
-    if [ -z "$ADMINSUID" -o -z "$SYSTEMUID" ]; then
-		echo "It appears that you do not have correct entries for the"
-		echo "ADMINISTRATORS and/or SYSTEM sids in /etc/passwd."
-		echo
-		echo "Use the 'mkpasswd' utility to generate it"
-		echo "   mkpasswd -l > /etc/passwd."
-		warning_for_etc_file passwd
-		ret=1;
-    fi
-    return "${ret}"
-}  # === get_system_and_admins_ids() === #
-
-# ======================================================================
-# Routine: check_administrator_right
-# Check script run as Administrator or not
-# ======================================================================
-function check_administrator_right()
-{
-    get_system_and_admins_ids || exit 1
-    groups=" $(id -G) "
-    if [[ ! $groups == *\ $ADMINSGID\ * ]] ; then
-        echo
-        echo "You haven't right to run this script $0. "
-        echo "Please login as Administrator to run it, or right-click this script and"
-        echo "then click Run as administrator."
-        echo
-        return 1
-    fi
-}  # === check_administrator_right() === #
-
-# ======================================================================
-# Routine: check_administrator_right
+# Routine: check_cygwin_service
 # Check cygwin service is install or not, running state, and run by
 #   which account
 # ======================================================================
@@ -301,30 +256,6 @@ function start_cygwin_service()
     state=$(cygrunsrv --query $name | sed -n -e 's/^Current State[ :]*//p')
     [[ "$state" == "Running" ]] || return 1
 }  # === start_cygwin_service() === #
-
-#
-# Query the parameter, usage:
-#
-#   query_parameter ACTUAL EXCPETED MESSAGE
-#
-function query_parameter()
-{
-    if [[ X$1 == X || $1 == "*" || $1 == "all" ]] ; then
-        return 1
-    fi
-    if [[ $1 == "?" || $1 == "query" ]] ; then
-        read -n 1 -p $3 user_ack
-        if [[ X$user_ack == X[Yy] ]] ; then
-            return 1
-        else
-            return 0
-        fi
-    fi
-    if [[ $1 == $2 ]] ; then
-        return 1
-    fi
-    return 0
-}
 
 # ======================================================================
 # Routine: create_template_configure_file

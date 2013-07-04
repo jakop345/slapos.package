@@ -112,7 +112,30 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 </section>
 
 <section><title>Background Jobs</title>
-<para>After run Configure SlapOS, then a cron job will run in the background which used to release software and create instance periodically.</para>
+<para>After run Configure SlapOS, then a cron job will run in the background which used to release software and create instance periodically. Open Cygwin Terminal, type the following command to check these jobs:
+<programlisting>
+# List all cron tabs
+crontab -l
+# Check cron works
+tail /var/log/messages
+# Edit cron tasks
+crontab -e
+# Stop cron
+pid=$(ps -ef | grep "/usr/sbin/cron" | gawk '{ print $2; }') &amp;&amp; kill $pid
+# Start cron
+/usr/sbin/cron
+disown -h
+</programlisting>
+</para>
+</section>
+
+<section><title>Known issues</title>
+<para>service slapos-re6stnet cound't be stop, except kill all the openvpn in the windows task manager by manual, or:
+<programlisting>
+TASKKILL /F /IM openvpn.exe
+net stop slapos-re6stnet 
+</programlisting>
+</para>
 </section>
 
 </chapter>
@@ -224,13 +247,23 @@ cd /opt
 tar czf slapos.tar.gz slapos/
 mv slapos.tar.gz slapos/
 </programlisting>
-Then build babeld for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
+Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
 cd /opt/git/slapos.package/windows/babeld
 make WINVER=XP
 cp babeld.exe /usr/bin
+
+cd /opt/git/slapos.package/windows/openvpn
+libtoolize
+aclocal -I m4
+autoheader
+automake --add-missing
+autoreconf
+ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root
+make
+cp src/openvpn/.libs/openvpn.exe /usr/bin
 </programlisting>
-Now downlaod openvpn 2.3 for your window version, and install it. 
+Now downlaod openvpn 2.3 for your window version, and install it. We need OpenVPN Tap-Windows Drivers files.
 </para>
 <para>
 Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
