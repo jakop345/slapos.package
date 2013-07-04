@@ -55,6 +55,7 @@ Source: "opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin";
 Source: "opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin";
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver";
 
+Source: "opt\git\slapos.package\windows\scripts\slapos-include.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
 Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts";
