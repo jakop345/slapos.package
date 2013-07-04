@@ -12,6 +12,9 @@
 #    * Remove service cron, cygserver and syslog-ng
 #
 #    * Remove slapos configure script from windows startup item
+#
+#    * Remove instance root /srv/slapgrid
+#    
 
 #
 # Remove virtual netcard installed by re6stnet 
@@ -38,6 +41,12 @@ slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 slapos_run_entry=slapos-configure
 echo Removing startup item "$slapos_run_key\\$slapos_run_entry"
 regtool -q unset "$slapos_run_key\\$slapos_run_entry"
+
+#
+# Remove default instance root, because it belong to slapuser, and
+# would be removed by the windows uninstaller.
+#
+[[ -f /srv/slapgrid ]] && echo Removing /srv/slapgrid && rm -rf /srv/slapgrid
 
 echo Run pre-uninstall script successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
