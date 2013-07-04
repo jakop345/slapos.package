@@ -309,7 +309,7 @@ function format_interface_name()
         echo $1
     else
         which ipv6 > /dev/null 2>&1
-        if (( $? )) ; then            
+        if (( $? )) ; then
             getmac /fo list /v | grep -B3 "^Transport Name:.*$guid" | grep "^Connection Name:" |  sed -e "s/^Connection Name: *//g"
         else
             ipv6 if | grep -B1 "${guid}" | \
@@ -317,6 +317,36 @@ function format_interface_name()
         fi
     fi
 }
+
+# ======================================================================
+# Routine: get_all_connections
+# Return all connection names line by line, and replace space with '%'
+# ======================================================================
+function get_all_connections()
+{
+    netsh interface ipv6 show interface | \
+        grep "^[ 0-9]\+ " | \
+        sed -e "s/^[ 0-9]\+[a-zA-Z]\+//" -e "s/^\s*//" -e "s/ /%/g"
+}  # === get_all_connections() === #
+
+# ======================================================================
+# Routine: get_new_connection
+# Check all the connection names, and compare the original connection
+# list, return the new connection name
+#
+# Note: If nothing found, return empty
+#       If more than one, return the first one
+# ======================================================================
+function get_new_connection()
+{
+    original_connections=" $* "
+    current_connections=$(get_all_connections)
+
+    for name in $current_connections ; do
+        [[ ! "$original_connections" == *[\ ]$name[\ ]* ]] && \
+        echo ${name//%/ } && return 0
+    done
+}  # === get_new_connections() === #
 
 #
 # Parameter:
@@ -330,8 +360,6 @@ function install_tap_driver()
     local FILENAME="/etc/slapos/driver/OemWin2k.inf"
     local DEVFILE=$(cygpath -w $FILENAME)
     local HWID=tap0901
-    local CHECKSCRIPT=$(cygpath -m /etc/slapos/scripts/check_driver_signing_dialog.vbs)
-    local GETSCRIPT=$(cygpath -m /etc/slapos/scripts/get_last_connection.vbs)
 
     # check if ifname has been installed
     if [[ ! "$1" == "" ]] ; then
@@ -353,67 +381,17 @@ function install_tap_driver()
         return 1
     fi
 
-    local CSCRIPT=$(which cscript.exe)
-    if [[ ! -x $CSCRIPT ]] ; then
-        echo "Error: no cscript.exe found"
-        return 1
-    fi
-
-    if ! [[ -f $CHECKSCRIPT ]] ; then
-        cat <<EOF > $CHECKSCRIPT
-  Set oShell = CreateObject("WScript.Shell")
-  Do
-    If oShell.AppActivate("Hardware Installation") Then
-       WScript.Sleep 1000
-       oShell.SendKeys "%C"
-       WScript.Sleep 2000
-    End If
-    WScript.Sleep 1000
-  Loop While True
-EOF
-    fi
-
-    # install driver
-    $CSCRIPT $CHECKSCRIPT > /dev/null &
-    local sid=$!
+    original_connections=$(echo $(get_all_connections))
     $DEVCON install $DEVFILE $HWID
-    kill $sid
 
     # rename the connection name
     if [[ ! "$1" == "" ]] ; then
-
-        if [[ ! -f $GETSCRIPT ]] ; then
-            cat <<EOF > $GETSCRIPT
-  strComputer = "."
-  strPrefix = "Local Area Connection"
-  Set objWMIService = GetObject("winmgmts:\\\\" & strComputer & "\root\CIMV2")
-  Set colItems = objWMIService.ExecQuery( _
-      "SELECT NetConnectionID FROM Win32_NetworkAdapter WHERE " & _
-             "NetConnectionID Like '" & strPrefix & "%'", _
-      "WQL", 48)
-  strLastConnectionName = ""
-  i = -1
-  k = Len(strPrefix)
-  For Each objItem In colItems
-    s = Right(objItem.NetConnectionID, Len(objItem.NetConnectionID) - k)
-    If s = "" Then
-      j = 0
-    Else
-      j = Int(s)
-    End If
-    If j > i Then
-      strLastConnectionName = objItem.NetConnectionID
-      i = j
-    End If
-  Next
-  WScript.StdOut.Write(strLastConnectionName)
-  WScript.Quit(0)
-EOF
-        fi
-        # nodosfilewarning
-        local OLDNAME=$($CSCRIPT //Nologo $GETSCRIPT)
-        if (( $? == 0 )) ; then
+        OLDNAME=$(get_new_connection $original_connections)
+        if [[ -n $OLDNAME ]] ; then
             netsh interface set interface name="$OLDNAME" newname="$1"
+        else
+            echo Failed to get new connection name.
+            return 1
         fi
     fi
 }
@@ -430,7 +408,7 @@ function uninstall_tap_driver()
     local DEVCON=$(which devcon.exe)
     local CSCRIPT=$(which cscript.exe)
     local GETSCRIPT=$(cygpath -m /etc/slapos/scripts/get_pnpid_connection.vbs)
-    
+
     if [[ "$1" == "" ]] ; then
         echo "Error: missing connection name"
         return 1
@@ -730,14 +708,14 @@ elif [[ $object == "route" ]] ; then
 
     if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
         # rtmroute need that the Routing and Remote Access Service is running
-        # ipcmd="netsh routing ip $command rtmroute" 
+        # ipcmd="netsh routing ip $command rtmroute"
         # ipcmd="netsh routing ip $command persistentroute"
         if [[ $command == "list" ]] ; then
             route print
             exit $?
         elif [[ $command == "del" ]] ; then
             command="delete"
-        fi        
+        fi
         address=$(dirname $prefix)
         mask=$(prefix_to_netmask $(basename $prefix))
         ipcmd="route $command $address MASK $mask $nexthop"
@@ -754,7 +732,7 @@ elif [[ $object == "route" ]] ; then
         echo $orig_cmd
         echo "Error: unsupported family \"$opt_family\""
         exit 1
-    fi    
+    fi
 
 elif [[ $object == "tuntap" ]] ; then
     echo $orig_cmd
