@@ -581,7 +581,7 @@ def prepare_from_scratch(config):
     if config.force_vpn:
       # Force use of openvpn
       open(openvpn_needed_file_path, 'w')
-    else:
+    elif os.path.exists(openvpn_needed_file_path):
       # Forbid use of openvpn if not explicitely defined
       os.remove(openvpn_needed_file_path)
 
