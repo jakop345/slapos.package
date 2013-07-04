@@ -38,7 +38,123 @@
 #   -s
 #     Shell used by user
 #
-ACTION=ADD
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
+    echo "Error: Download the csih package at first, I need this file:"
+    echo "  /usr/share/csih/cygwin-service-installation-helper.sh"
+    exit 1
+fi
+
+# Check Administrator rights
+csih_get_system_and_admins_ids
+if [[ ! " $(id -G) " == *\ $csih_ADMINSUID\ * ]] ; then
+    echo
+    echo "Note that creating a new user requires that the current account have"
+    echo "Administrator privileges.  You haven't right to run this script. "
+    echo "Please login as Administrator, or right-click this script"
+    echo "then click Run as administrator."
+    echo
+    exit 1
+fi
+
+# ======================================================================
+# Routine: create_unprivileged_user
+#   Creates a new (unprivileged) user as specified by $1.
+#   Useful for running services that do not require elevated privileges,
+#     or running servers like sshd in "privilege separation" mode.
+#   
+#   Exits on catastrophic error
+#   Returns 0 on total success
+#   Returns 1 on failure
+#
+# csih_auto_answer=no behavior
+#   if already exists
+#     use it
+#   else
+#     do nothing, return 1
+# ======================================================================
+function create_unprivileged_user()
+{
+  csih_stacktrace "${@}"
+  $_csih_trace
+  local unpriv_user="$1"
+  local unpriv_user_in_passwd=no
+  local unpriv_user_in_sam=no
+  local dos_var_empty=
+  local ret=0
+
+  _csih_setup
+
+  /usr/bin/grep -q "^${unpriv_user}:" "${SYSCONFDIR}/passwd" && unpriv_user_in_passwd=yes
+  csih_call_winsys32 net user "${unpriv_user}" >/dev/null 2>&1 && unpriv_user_in_sam=yes
+  if [ "${unpriv_user_in_passwd}" != "yes" ]
+  then
+    if [ "${unpriv_user_in_sam}" != "yes" ]
+    then
+        dos_var_empty=$(/usr/bin/cygpath -w ${2-${LOCALSTATEDIR}/empty})
+        csih_call_winsys32 net user "${unpriv_user}" /add /fullname:"${unpriv_user} nexedi slapos" \
+          "/homedir:${dos_var_empty}" /active:no > /dev/null 2>&1 && unpriv_user_in_sam=yes
+        if [ "${unpriv_user_in_sam}" != "yes" ]
+        then
+          csih_warning "Creating the user '${unpriv_user}' failed!"
+        fi
+    fi
+    if [ "${unpriv_user_in_sam}" = "yes" ]
+    then
+      # user either already existed in local SAM, or we just created a new local
+      # user.  Therefore, mkpasswd -l is appropriate.  However, the user does not
+      # (yet) appear in /etc/passwd, so add it.
+      /usr/bin/mkpasswd -l -u "${unpriv_user}" | /usr/bin/sed -n -e "/^${unpriv_user}/s/bash\$/false/p" >>\
+        ${SYSCONFDIR}/passwd
+      # make sure the previous command succeeded
+      /usr/bin/grep -q "^${unpriv_user}:" "${SYSCONFDIR}/passwd" && unpriv_user_in_passwd=yes
+      if [ "${unpriv_user_in_passwd}" != "yes" ]
+      then
+        csih_warning "Created new user '${unpriv_user}', but failed to add"
+        csih_warning "corresponding entry to /etc/passwd!"
+      fi
+    fi
+  else
+    if [ "${unpriv_user_in_sam}" != "yes" ]
+    then
+      # FIXME: Needs real domain awareness to not print spurious warnings
+      csih_warning "${unpriv_user} is in ${SYSCONFDIR}/passwd, but the"
+      csih_warning "local machine's SAM does not know about ${unpriv_user}."
+      csih_warning "Perhaps ${unpriv_user} is a pre-existing domain account."
+      csih_warning "Continuing, but check if this is ok."
+    fi
+  fi
+  # as long as the user is in /etc/passwd, return success
+  # if missing from SAM, we've already issued a diagnostic
+  # and are assuming the user is a valid domain account.
+  [ "x${unpriv_user_in_passwd}" = "xyes" ] && return 0
+  return 1
+} # === End of create_unprivileged_user() === #
+
+# ======================================================================
+# Routine: add_member_to_group
+#   Add a member $1 to a group $2, there is a special for slapos:
+#   if $2 is not a group name, we'll try grp_$2 as group name
+#   
+#   Exits on catastrophic error
+#   Returns 0 on total success
+#   Returns 1 on failure
+#
+#   if already exists
+#     use it
+#   else
+#     do nothing, return 1
+# ======================================================================
+
+function add_member_to_group()
+{
+  local name=$1
+  local grpname=$2
+  if ! net localgroup $grpname | grep -q -e "^$name$" ; then
+      net localgroup $grpname $name /add
+  fi
+  net localgroup $grpname | grep -q -e "^$name$"
+} # === End of add_member_to_group() === #
 
 while getopts "Dd:g:G:p:s:r" opt ; do
     case $opt in
@@ -46,10 +162,10 @@ while getopts "Dd:g:G:p:s:r" opt ; do
             USER_HOME=$OPTARG
             ;;
         g)
-            USER_INIT_GROUP=grp_$OPTARG
+            USER_INIT_GROUP=$OPTARG
             ;;
         G)
-            USER_OTHER_GROUP=grp_$OPTARG
+            USER_OTHER_GROUP=$OPTARG
             ;;
         p)
             USER_PASSWORD=$OPTARG
@@ -69,28 +185,20 @@ done
 shift $(($OPTIND - 1))
 USER_NAME=$1
 
-if [[ "$USER_NAME" == "" ]] ; then
+if [[ -z "${USER_NAME}" ]] ; then
     echo Error: no user name specified.
     exit 1
 fi
-USER_HOME=${USER_HOME:=/home/$USER_NAME}
 
-if (( $? == 0 )) ; then
-    if [[ $ACTION == "ADD" ]] ; then
-        if [[ "${USER_PASSWORD}" == "" ]] ; then
-            NET USER "${USER_NAME}" /ADD /PASSWORDREQ:No
-        else
-            NET USER "${USER_NAME}" "${USER_PASSWORD}" /ADD
-        fi
-        grep -q "^${USER_NAME}" /etc/passwd && sed -i -e "/^${USER_NAME}/d" /etc/passwd
-        mkpasswd | grep "^${USER_NAME}:" >> /etc/passwd
-        [[ $USER_HOME == "/home/$USER_NAME" ]] || sed -i -e "s%:/home/${USER_NAME}:%:${USER_HOME}:%g" /etc/passwd
-        [[ ! "$USER_HOME" == "" ]] && [[ ! -f $USER_HOME ]] && mkdir -p $USER_HOME && chown $USER_NAME $USER_HOME
-        [[ "$USER_INIT_GROUP" == "" ]] || NET LOCALGROUP $USER_INIT_GROUP $USER_NAME /ADD
-        [[ "$USER_OTHER_GROUP" == "" ]] || NET LOCALGROUP $USER_OTHER_GROUP $USER_NAME /ADD
-    elif [[ $ACTION == "DELETE" ]] ; then
-        NET USER "${USER_NAME}" /DELETE
-        grep -q "^${USER_NAME}" /etc/passwd && sed -i -e "/^${USER_NAME}/d" /etc/passwd
-        [[ ! "$USER_HOME" == "" ]] && [[ -f $USER_HOME ]] && rm -rf $USER_HOME
-    fi
-fi
+create_unprivileged_user ${USER_NAME} $USER_HOME ||
+(echo "Failed to create user ${USER_NAME}" ; exit 1)
+
+for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
+    [[ -z $grpname ]] && continue    
+    add_member_to_group ${USER_NAME} $grpname ||
+    (echo "Failed to add ${USER_NAME} to group $group" ; exit 1)
+done
+        
+# net user "${USER_NAME}" /delete ||
+# (echo "Faild to delete user ${USER_NAME}" ; exit 1)
+# sed -i -e "/^${USER_NAME}/d" /etc/passwd
