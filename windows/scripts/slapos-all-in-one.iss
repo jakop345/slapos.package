@@ -4,7 +4,7 @@
 AppName=SlapOS
 AppVersion=0.158
 AppVerName=SlapOS Windows 0.158.6
-DefaultDirName=C:\slapos
+DefaultDirName=C:\slapos-node
 DefaultGroupName=SlapOS
 OutputBaseFilename=slapos-0.158.6-windows-x86-all-in-one
 OutputDir=D:\slapos\publish\Output

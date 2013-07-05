@@ -67,14 +67,34 @@ More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lect
 <programlisting>
 /etc/opt/slapos/scripts/slapos-configure.sh
 </programlisting>
-The configure script will guide you to configure slapos slave node, as the prompt:
+The configure script will guide you to configure slapos slave node, first, your need configure cron service:
+<programlisting>
+You must decide under what account the cron daemon will run.
+If you are the only user on this machine, the daemon can run as yourself.
+   This gives access to all network drives but only allows you as user.
+Otherwise cron should run under the local system account.
+  It will be capable of changing to other users without requiring a
+  password, using one of the three methods detailed in
+  http://cygwin.com/cygwin-ug-net/ntsec.html#ntsec-nopasswd1
+Do you want the cron daemon to run as yourself? (yes/no) no
+
+
+Running cron_diagnose ...
+WARNING: Your computer does not appear to have a cron table for Administrator.
+Please generate a cron table for Administrator using 'crontab -e'
+
+... no problem found.
+
+Do you want to start the cron daemon as a service now? (yes/no) yes
+</programlisting>
+Next configure script need certificate and key information:
 <itemizedlist>
 <listitem><para>Type computer certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type computer key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type client certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type client key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 </itemizedlist>
-Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all the configuration and update the configure files.
+Then waiting for configure script finished. Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all the configuration and update the configure files.
 </para>
 </section>
 
@@ -96,12 +116,12 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 <section><title>Command Console</title>
 <para>It will open a terminal, here you can run most of slapos command, for examples,
 <programlisting>
-/opt/slapos/bin/slapos node foramt -cv --now
-/opt/slapos/bin/slapos supply slaprunner COMP-1658
-/opt/slapos/bin/slapos request "Jondy Web Runner In Windows 7" slaprunner --node computer_guid=COMP-1658
-/opt/slapos/bin/slapos node software
-/opt/slapos/bin/slapos node instance
-/opt/slapos/bin/slapos node status
+slapos node foramt -cv --now
+slapos supply slaprunner COMP-1658
+slapos request "Jondy Web Runner In Windows 7" slaposwebrunner --node computer_guid=COMP-1658
+slapos node software
+slapos node instance
+slapos node status
 </programlisting>
 </para>
 <para>For more information, refer to <ulink url="http://git.erp5.org/gitweb/slapos.core.git/blob/HEAD:/documentation/source/slapos.usage.rst?js=1"/></para>
@@ -111,8 +131,8 @@ Be sure the configure scrip report successfully, otherwise fix the problem and r
 <para>It just showes this documnet in the web browser.</para>
 </section>
 
-<section><title>Background Jobs</title>
-<para>After run Configure SlapOS, then a cron job will run in the background which used to release software and create instance periodically. Open Cygwin Terminal, type the following command to check these jobs:
+<section><title>Cron Service</title>
+<para>After run Configure SlapOS, a cron service will start in the background which used to release software and create instance periodically. Open Cygwin Terminal, type the following command to check cron jobs:
 <programlisting>
 # List all cron tabs
 crontab -l
@@ -121,20 +141,30 @@ tail /var/log/messages
 # Edit cron tasks
 crontab -e
 # Stop cron
-pid=$(ps -ef | grep "/usr/sbin/cron" | gawk '{ print $2; }') &amp;&amp; kill $pid
+net stop cron
 # Start cron
-/usr/sbin/cron
-disown -h
+net start cron
 </programlisting>
 </para>
 </section>
 
 <section><title>Known issues</title>
-<para>service slapos-re6stnet cound't be stop, except kill all the openvpn in the windows task manager by manual, or:
+<para>Sometime cygwin service re6stnet cound't be stop by command "net stop", you need kill openvpn at first:
 <programlisting>
 TASKKILL /F /IM openvpn.exe
-net stop slapos-re6stnet 
+net stop re6stnet 
 </programlisting>
+If you're in non-english environment, be sure Cygwin Terminal works well in your own chareset. Click Start -> SlapOS -> Command Console, then
+<programlisting>
+netsh interface ipv6 show interface
+</programlisting>
+Check localize connection name show correctly. If not, you need set your locale and charset
+<programlisting>
+echo "Locale=C" >> ~/.bashrc
+echo "Charset=$(python -c 'import sys; print sys.getfilesystemencoding()')" >> ~/.bashrc
+tail ~/.bashrc
+</programlisting>
+Then restart your command terminal.
 </para>
 </section>
 
@@ -175,25 +205,22 @@ start mintty.exe -i /Cygwin-Terminal.ico -
 </programlisting>
  -->
 <programlisting>
-echo "export CYGWIN=server" >> ~/.bash_profile
 sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
 [[ -f /etc/passwd ]] || mkpasswd > /etc/passwd
 [[ -f /etc/group ]] || mkgroup > /etc/group
 cp /etc/passwd /etc/passwd.orig
-myaccount=$(grep "^Administrator:" /etc/passwd | \
-              sed -e "s/Administrator:unused:500:/root:unused:0:/g")
-echo $myaccount >> /etc/passwd
-/usr/bin/cygserver-config --yes
-/usr/bin/syslog-ng-config --yes
 </programlisting>
 If you'd like to make the font of command box bigger
 <programlisting>
 cd ~
+DEFAULT_SYSTEM_CHARSET=$(python -c 'import sys; print sys.getfilesystemencoding()')
 cat &lt;&lt;EOF  &gt; .minttyrc
 BoldAsFont=no
 Font=Courier New
 FontHeight=16
 Scrollbar=none
+Locale=C
+Charset=${DEFAULT_SYSTEM_CHARSET}
 EOF
 </programlisting>
 Then restart cygwin command box.
@@ -263,7 +290,7 @@ ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws
 make
 cp src/openvpn/.libs/openvpn.exe /usr/bin
 </programlisting>
-Now downlaod openvpn 2.3 for your window version, and install it. We need OpenVPN Tap-Windows Drivers files.
+<!-- Now downlaod openvpn 2.3 for your window version, and install it. We need OpenVPN Tap-Windows Drivers files. -->
 </para>
 <para>
 Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
