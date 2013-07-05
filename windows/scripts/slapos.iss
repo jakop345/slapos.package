@@ -3,11 +3,11 @@
 [Setup]
 AppName=SlapOS
 AppVersion=0.158
-AppVerName=SlapOS Windows 0.158.5
+AppVerName=SlapOS Windows 0.158.6
 DefaultDirName=C:\slapos
 DefaultGroupName=SlapOS
 OutputDir=D:\slapos\publish\Output
-OutputBaseFilename=slapos-0.158.5-windows-x86
+OutputBaseFilename=slapos-0.158.6-windows-x86
 SourceDir=D:\slapos
 Uninstallable=yes
 
@@ -44,9 +44,9 @@ Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\
 Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
 Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
-Source: "opt\openvpn\bin\*.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\openvpn\bin\*.dll"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver"; Permissions: everyone-readexec;
