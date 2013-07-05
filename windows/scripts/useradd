@@ -194,7 +194,7 @@ create_unprivileged_user ${USER_NAME} $USER_HOME ||
 (echo "Failed to create user ${USER_NAME}" ; exit 1)
 
 for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
-    [[ -z $grpname ]] && continue    
+    [[ -z "$grpname" ]] && continue    
     add_member_to_group ${USER_NAME} $grpname ||
     (echo "Failed to add ${USER_NAME} to group $group" ; exit 1)
 done

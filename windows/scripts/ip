@@ -386,9 +386,9 @@ function install_tap_driver()
 
     # rename the connection name
     if [[ ! "$1" == "" ]] ; then
-        OLDNAME=$(get_new_connection $original_connections)
-        if [[ -n $OLDNAME ]] ; then
-            netsh interface set interface name="$OLDNAME" newname="$1"
+        connection_name=$(get_new_connection $original_connections)
+        if [[ -n "$connection_name" ]] ; then
+            netsh interface set interface name="$connection_name" newname="$1"
         else
             echo Failed to get new connection name.
             return 1

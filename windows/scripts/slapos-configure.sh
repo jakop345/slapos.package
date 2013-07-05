@@ -188,7 +188,7 @@ echo
 
 if [[ ! -f $node_certificate_file ]] ; then
     read -p "Where is computer certificate file (/computer.crt): " filename
-    [[ -z $filenname ]] && filename="/computer.crt"
+    [[ -z "$filename" ]] && filename="/computer.crt"
     [[ ! -r "$filename" ]] && \
         show_error_exit "Computer certificate file $filename doesn't exists."
     echo "Copy certificate from $filename to $node_certificate_file"
@@ -202,7 +202,7 @@ openssl x509 -noout -in $node_certificate_file || \
 
 if [[ ! -f $node_key_file ]] ; then
     read -p "Where is computer key file (/computer.key): " filename
-    [[ -z $filename ]] && filename="/computer.key"
+    [[ -z "$filename" ]] && filename="/computer.key"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Key file $filename doesn't exists."
     echo "Copy key from $filename to $node_key_file"
@@ -250,7 +250,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
 
 if [[ ! -f $client_certificate_file ]] ; then
     read -p "Where is client certificate file (/certificate): " filename
-    [[ -z $filename ]] && filename="/certificate"
+    [[ -z "$filename" ]] && filename="/certificate"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Client certificate file $filename doesn't exists."
     echo "Copy client certificate from $filename to $client_certificate_file"
@@ -262,7 +262,7 @@ openssl x509 -noout -in $client_certificate_file || \
 
 if [[ ! -f $client_key_file ]] ; then
     read -p "Where is client key file (/key): " filename
-    [[ -z $filename ]] && filename="/key"
+    [[ -z "$filename" ]] && filename="/key"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Key file $filename doesn't exists."
     echo "Copy client key from $filename to $client_key_file"
@@ -398,7 +398,7 @@ echo Starting configure section taps ...
 echo
 original_connections=$(echo $(get_all_connections))
 client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
-[[ -z $client_count ]] && client_count=10
+[[ -z "$client_count" ]] && client_count=10
 echo "  Client count: $client_count"
 re6stnet_name_list="re6stnet-tcp re6stnet-udp"
 for (( i=1; i<=client_count; i=i+1 )) ; do
@@ -438,7 +438,7 @@ if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
     if [[ -r $re6stnet_configure_file ]] ; then
         re6stnet_ipv6=$(grep "Your subnet" $re6stnet_configure_file| \
             sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
-        if [[ ! -z $re6stnet_ipv6 ]] ; then
+        if [[ ! -z "$re6stnet_ipv6" ]] ; then
             echo "Re6stnet address in this computer: $re6stnet_ipv6"
             netsh interface ipv6 show addr $slapos_ifname level=normal | \
                 grep -q $re6stnet_ipv6 || \
@@ -481,7 +481,7 @@ if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
         $slaprunner_title slaposwebrunner --node computer_guid=$computer_guid | \
         grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
     echo "SlapOS Web Runner URL: $slaprunner_url"
-    [[ -z $slaprunner_url ]] && \
+    [[ -z "$slaprunner_url" ]] && \
         show_error_exit "Failed to create instance of SlapOS Web Runner."
 
     cat <<EOF > $slaprunner_startup_file
