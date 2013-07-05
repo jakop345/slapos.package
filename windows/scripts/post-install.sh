@@ -51,6 +51,8 @@ fi
 #     fi
 # fi
 
+DEFAULT_SYSTEM_CHARSET=$(python -c 'import sys; print sys.getfilesystemencoding()') ||
+DEFAULT_SYSTEM_CHARSET=""
 if [[ ! -f ~/.minttyrc ]] ; then
     echo Creating ~/.minttyrc
     cat <<EOF > ~/.minttyrc
@@ -58,6 +60,8 @@ BoldAsFont=no
 Font=Courier New
 FontHeight=16
 Scrollbar=none
+Locale=C
+Charset=${DEFAULT_SYSTEM_CHARSET}
 EOF
     echo File ~/.minttyrc created
 fi

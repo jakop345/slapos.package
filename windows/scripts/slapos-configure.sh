@@ -77,12 +77,20 @@ mkdir -p /etc/re6stnet
 # -----------------------------------------------------------
 # Create account: slaproot
 # -----------------------------------------------------------
-if ! csih_privileged_account_exists $slapos_administrator
-then
-    csih_create_privileged_user $slapos_administrator
-else
-    csih_account_has_necessary_privileges $slapos_administrator
-fi
+# if csih_privileged_account_exists $slapos_administrator
+# then
+#     echo $slapos_administrator has been existsed.
+#     csih_account_has_necessary_privileges $slapos_administrator
+# else
+#     echo create account $slapos_administrator
+#     csih_FORCE_PRIVILEGED_USER=yes
+#     csih_create_privileged_user $slapos_administrator ||
+#     (echo Error: failed to create account. ; exit 1)
+# fi
+
+# Start seclogon service in the Windows XP
+# sc config seclogon start= auto
+# In the later, it's RunAs service, and will start by default
 
 # -----------------------------------------------------------
 # Configure cygwin services: cygserver syslog-ng sshd
@@ -116,6 +124,15 @@ else
     echo The sshd service has been installed.
 fi
 check_cygwin_service sshd
+
+if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
+    echo Run cron-config ...
+    /usr/bin/cron-config --yes --cygwin ntsec || \
+        show_error_exit "Failed to run cron-config"
+else
+    echo The cron service has been installed.
+fi
+check_cygwin_service cron
 
 echo
 echo Configure cygwin services OK.
@@ -498,6 +515,7 @@ echo
 echo
 echo Starting configure section cron ...
 echo
+cron_user=SYSTEM
 crontab_file="/var/cron/tabs/${USER}"
 if [[ ! -r $crontab_file ]] ; then
     cat <<EOF  > $crontab_file
@@ -506,30 +524,19 @@ PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
 # Run "Installation/Destruction of Software Releases" and "Deploy/Start/Stop Partitions" once per minute
-* * * * * ${USER} /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
-* * * * * ${USER} /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1
+* * * * * $cron_user /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
+* * * * * $cron_user /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1
 
 # Run "Destroy Partitions to be destroyed" once per hour
-0 * * * * ${USER} /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1
+0 * * * * $cron_user /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1
 
 # Run "Check/add IPs and so on" once per hour
-0 * * * * ${USER} /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
+0 * * * * $cron_user /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
 EOF
 fi
 echo
 echo
 cat $crontab_file || show_error_exit "No crob tab found."
-echo
-echo
-if ps -ef | grep -q "/usr/sbin/cron" ; then
-    echo "The cron job is running."
-else
-    echo Starting cron job ...
-    /usr/sbin/cron &
-    (( $? )) && show_error_exit "Failed to start cron job."
-    disown -h
-    echo "The cron job started."
-fi
 echo
 echo Configure section cron OK.
 echo
@@ -537,20 +544,20 @@ echo
 # -----------------------------------------------------------
 # startup: Start slapos-configure when windows startup
 # -----------------------------------------------------------
-echo
-echo Starting configure section startup ...
-echo
-slapos_run_script=$(cygpath -a $0)
-regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
-    regtool -q set "$slapos_run_key\\$slapos_run_entry" \
-    "\"$(cygpath -w /usr/bin/bash)\" --login -i $slapos_run_script" || \
-    show_error_exit "Failed to add slapos-configure.sh as windows startup item."
-echo "Windows startup item:"
-echo "  $slapos_run_key\\$slapos_run_entry = " \
-     $(regtool get "$slapos_run_key\\$slapos_run_entry")
-echo
-echo Configure section startup OK.
-echo
+# echo
+# echo Starting configure section startup ...
+# echo
+# slapos_run_script=$(cygpath -a $0)
+# regtool -q get "$slapos_run_key\\$slapos_run_entry" || \
+#     regtool -q set "$slapos_run_key\\$slapos_run_entry" \
+#     "\"$(cygpath -w /usr/bin/bash)\" --login -i $slapos_run_script" || \
+#     show_error_exit "Failed to add slapos-configure.sh as windows startup item."
+# echo "Windows startup item:"
+# echo "  $slapos_run_key\\$slapos_run_entry = " \
+#      $(regtool get "$slapos_run_key\\$slapos_run_entry")
+# echo
+# echo Configure section startup OK.
+# echo
 
 echo Configure SlapOS successfully.
 read -n 1 -t 60 -p "Press any key to exit..."
