@@ -125,10 +125,18 @@ else
 fi
 check_cygwin_service sshd
 
+#
+# Use our own cron-config, no prompt
+#
+slapos_cron_config=/usr/local/bin/slapos-cron-config
+if [[ ! -r $slapos_cron_config ]] ; then
+    cp -a /usr/bin/cron-config $slapos_cron_config
+    sed -i -e "s%elif request \"Do you want to install the cron daemon as a service.*$%else%g" \
+        -e 's/getcygenv " "/cygenv="ntsec"/g' $slapos_cron_config
+fi
 if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
     echo Run cron-config ...
-    /usr/bin/cron-config --yes --cygwin ntsec || \
-        show_error_exit "Failed to run cron-config"
+    $slapos_cron_config || show_error_exit "Failed to run cron-config"
 else
     echo The cron service has been installed.
 fi
@@ -377,7 +385,7 @@ if check_re6stnet_needed ; then
             show_error_exit "Failed to install cygwin service $re6stnet_service_name."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
-    # check_cygwin_service $re6stnet_service_name || exit 1
+    check_cygwin_service $re6stnet_service_name || exit 1
 else
     echo "Native IPv6 found, no re6stnet required."
 fi
