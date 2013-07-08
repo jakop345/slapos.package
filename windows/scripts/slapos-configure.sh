@@ -296,6 +296,46 @@ echo Configure section config OK.
 echo
 
 # -----------------------------------------------------------
+# taps: Install openvpn tap-windows drivers used by re6stnet
+# -----------------------------------------------------------
+#
+# Adding tap-windows driver will break others, so we add all drivers
+# here. Get re6stnet client count, then remove extra drivers and add
+# required drivers.
+if check_re6stnet_needed ; then
+echo
+echo Starting configure section taps ...
+echo
+original_connections=$(echo $(get_all_connections))
+client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
+[[ -z "$client_count" ]] && client_count=10
+echo "  Client count: $client_count"
+re6stnet_name_list="re6stnet-tcp re6stnet-udp"
+for (( i=1; i<=client_count; i=i+1 )) ; do
+    re6stnet_name_list="$re6stnet_name_list re6stnet$i"
+done
+for name in $re6stnet_name_list ; do
+    echo "Checking interface $name ..."
+    if [[ ! " $original_connections " == *[\ ]$name[\ ]* ]] ; then
+        echo "Installing  interface $name ..."
+        ip vpntap add dev $name || \
+            show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
+        echo "Interface $name installed."
+    else
+        echo "$name has been installed."
+    fi
+done
+#
+# Remove OpenVPN Tap-Windows Driver
+#
+# ip vpntap del dev re6stnet-x
+#
+echo
+echo Configure section taps OK.
+echo
+fi
+
+# -----------------------------------------------------------
 # re6stnet: Install required packages and register to nexedi
 # -----------------------------------------------------------
 echo
@@ -392,44 +432,6 @@ fi
 
 echo
 echo Configure section re6stnet OK.
-echo
-
-# -----------------------------------------------------------
-# taps: Install openvpn tap-windows drivers used by re6stnet
-# -----------------------------------------------------------
-#
-# Adding tap-windows driver will break others, so we add all drivers
-# here. Get re6stnet client count, then remove extra drivers and add
-# required drivers.
-echo
-echo Starting configure section taps ...
-echo
-original_connections=$(echo $(get_all_connections))
-client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
-[[ -z "$client_count" ]] && client_count=10
-echo "  Client count: $client_count"
-re6stnet_name_list="re6stnet-tcp re6stnet-udp"
-for (( i=1; i<=client_count; i=i+1 )) ; do
-    re6stnet_name_list="$re6stnet_name_list re6stnet$i"
-done
-for name in $re6stnet_name_list ; do
-    echo "Checking interface $name ..."
-    if [[ ! " $original_connections " == *[\ ]$name[\ ]* ]] ; then
-        echo "Installing  interface $name ..."
-        ip vpntap add dev $name || \
-            show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
-        echo "Interface $name installed."
-    else
-        echo "$name has been installed."
-    fi
-done
-#
-# Remove OpenVPN Tap-Windows Driver
-#
-# ip vpntap del dev re6stnet-x
-#
-echo
-echo Configure section taps OK.
 echo
 
 # -----------------------------------------------------------

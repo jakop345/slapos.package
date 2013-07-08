@@ -9,6 +9,12 @@
    </author>
    <revhistory>
      <revision>
+       <revnumber>0.2</revnumber>
+       <date>2013-07-05</date>
+       <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
+       <revremark>Add Cron Service and Know Issues section, fix some problems in the chapter Generating windows installer from sources.</revremark>
+     </revision>
+     <revision>
        <revnumber>0.1</revnumber>
        <date>2013-06-20</date>
        <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>

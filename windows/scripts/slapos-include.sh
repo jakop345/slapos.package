@@ -234,6 +234,25 @@ function connection2guid()
 }  # === connection2guid() === #
 
 # ======================================================================
+# Routine: rename_connection_name
+# Rename connection name by guid by changing registry
+#   $1 guid
+#   $2 new name
+# ======================================================================
+function rename_connection_name()
+{
+    local guid=$1
+    local name=$2
+    local key='\HKLMHKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Network\{4D36E972-E325-11CE-BFC1-08002BE10318}\$guid\Connection'
+    if regtool check $key ; then
+        regtool set $key\\Name $name
+    else
+        echo Missing key name in the registry.
+        return 1
+    fi
+}  # === rename_connection_name() === #
+
+# ======================================================================
 # Routine: show_error_exit
 # Show error message and wait for user to press any key to exit
 # ======================================================================
