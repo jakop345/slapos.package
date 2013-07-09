@@ -106,7 +106,7 @@ int _tmain(int argc, TCHAR * argv[])
     }
     else {
       hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
-      printf("%s\n", hr == S_OK ? pGUID : pErrMsg);
+      printf("%s", hr == S_OK ? pGUID : pErrMsg);
     }
   }
   else if (wcscmp(argv[1], L"test") == 0) {
