@@ -43,7 +43,6 @@
 #        taps           Install OpenVPN Tap-Windows Driver for re6stnet
 #        config         Generate slapos node and client configure files
 #        cron           Generate cron file and start cron job
-#        startup        Run slapos-configure.sh on windows startup
 #        runner         Install web runner for this node
 #
 source $(/usr/bin/dirname $0)/slapos-include.sh
@@ -62,6 +61,7 @@ fi
 # devcon
 # openssl
 # export WINDIR
+# ipwin
 
 # -----------------------------------------------------------
 # Create paths

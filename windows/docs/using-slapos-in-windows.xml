@@ -297,6 +297,12 @@ make
 cp src/openvpn/.libs/openvpn.exe /usr/bin
 </programlisting>
 <!-- Now downlaod openvpn 2.3 for your window version, and install it. We need OpenVPN Tap-Windows Drivers files. -->
+Now, build ipwin.exe which used to manage slapos network. If you have msvc build environments, build the solution "D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin.sln" as your perfer. If you have no idea about msvc, do as the following steps:
+<itemizedlist>
+<listitem><para>Install Microsoft Visual C++ 2008 Express Edition, you can download package from <ulink url=""/>, it's free.</para></listitem>
+<listitem><para>If you're running X64 environments, install Microsoft Windows SDK v7.0. You can download the package from <ulink url="http://download.microsoft.com/download/2/E/9/2E911956-F90F-4BFB-8231-E292A7B6F287/GRMSDKX_EN_DVD.iso"/>.</para></listitem>
+<listitem><para>Double click D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin/build.bat, be sure there is no error.</para></listitem>
+</itemizedlist>
 </para>
 <para>
 Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.

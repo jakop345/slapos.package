@@ -43,6 +43,8 @@ Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\b
 Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
+Source: "opt\git\slapos.package\windows\ipwin\ipwin\ipwin.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+
 Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 

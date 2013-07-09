@@ -105,9 +105,9 @@ fi
 # Remove cygwin services to be sure these services will be configured
 # in this cygwin enviroments when there are many cygwin instances
 # installed in this computer.
-for x in $(cygrunsrv --list) ; do
-    echo Removing cygservice $x
-    cygrunsrv -R $x
+for name in $(cygrunsrv --list) ; do
+    echo Removing cygservice $name
+    cygrunsrv -R $name
 done
 
 # Backup slap-runner.html

@@ -295,7 +295,7 @@ function prefix_to_netmask()
 # Parameter:
 #     ifname: interface name or guid name
 #
-# If ifname is guid name, return the corresponding connection name,
+# If ifname is guid name, return fix connection name: re6stnet-lo,
 # otherwise return the original ifname.
 #
 function format_interface_name()
@@ -308,45 +308,9 @@ function format_interface_name()
     if ! [[ "${guid:0:1}" == "{" ]] ; then
         echo $1
     else
-        which ipv6 > /dev/null 2>&1
-        if (( $? )) ; then
-            getmac /fo list /v | grep -B3 "^Transport Name:.*$guid" | grep "^Connection Name:" |  sed -e "s/^Connection Name: *//g"
-        else
-            ipv6 if | grep -B1 "${guid}" | \
-                sed -e "2d" -e "s/^Interface[0-9: ]\+\(Ethernet: \)\?//g"
-        fi
+        echo "re6stnet-lo"
     fi
 }
-
-# ======================================================================
-# Routine: get_all_connections
-# Return all connection names line by line, and replace space with '%'
-# ======================================================================
-function get_all_connections()
-{
-    netsh interface ipv6 show interface | \
-        grep "^[ 0-9]\+ " | \
-        sed -e "s/^[ 0-9]\+[a-zA-Z]\+//" -e "s/^\s*//" -e "s/ /%/g"
-}  # === get_all_connections() === #
-
-# ======================================================================
-# Routine: get_new_connection
-# Check all the connection names, and compare the original connection
-# list, return the new connection name
-#
-# Note: If nothing found, return empty
-#       If more than one, return the first one
-# ======================================================================
-function get_new_connection()
-{
-    original_connections=" $* "
-    current_connections=$(get_all_connections)
-
-    for name in $current_connections ; do
-        [[ ! "$original_connections" == *[\ ]$name[\ ]* ]] && \
-        echo ${name//%/ } && return 0
-    done
-}  # === get_new_connections() === #
 
 #
 # Parameter:
@@ -375,25 +339,13 @@ function install_tap_driver()
         return 1
     fi
 
-    local DEVCON=$(which devcon.exe)
-    if [[ ! -x $DEVCON ]] ; then
-        echo "Error: no devcon.exe found"
+    local IPWIN=$(which ipwin.exe)
+    if [[ ! -x "$IPWIN" ]] ; then
+        echo "Error: no ipwin.exe found"
         return 1
     fi
 
-    original_connections=$(echo $(get_all_connections))
-    $DEVCON install $DEVFILE $HWID
-
-    # rename the connection name
-    if [[ ! "$1" == "" ]] ; then
-        connection_name=$(get_new_connection $original_connections)
-        if [[ -n "$connection_name" ]] ; then
-            netsh interface set interface name="$connection_name" newname="$1"
-        else
-            echo Failed to get new connection name.
-            return 1
-        fi
-    fi
+    $IPWIN install $DEVFILE $HWID $1
 }
 
 #
@@ -405,56 +357,21 @@ function install_tap_driver()
 #
 function uninstall_tap_driver()
 {
-    local DEVCON=$(which devcon.exe)
-    local CSCRIPT=$(which cscript.exe)
-    local GETSCRIPT=$(cygpath -m /etc/slapos/scripts/get_pnpid_connection.vbs)
+    local ipwin=$(which ipwin.exe)
 
     if [[ "$1" == "" ]] ; then
         echo "Error: missing connection name"
         return 1
     fi
 
-    local IFNAME=$1
+    local ifname=$1
 
-    if [[ ! -x $DEVCON ]] ; then
-        echo "Error: no devcon.exe found"
+    if [[ ! -x "$ipwin" ]] ; then
+        echo "Error: no ipwin.exe found"
         return 1
     fi
 
-    if [[ ! -x $CSCRIPT ]] ; then
-        echo "Error: no cscript.exe found"
-        return 1
-    fi
-
-    if [[ ! -f $GETSCRIPT ]] ; then
-            cat <<EOF > $GETSCRIPT
-  If WScript.Arguments.Count < 1 Then
-    WScript.Echo "Error: missing paramter connection name"
-    WScript.Quit(1)
-  End If
-
-  strComputer = "."
-  strDriverName = "TAP-Windows Adapter V9"
-  strConnectionName = WScript.Arguments(0)
-  Set objWMIService = GetObject("winmgmts:\\\\" & strComputer & "\root\CIMV2")
-  Set colItems = objWMIService.ExecQuery(_
-      "SELECT PNPDeviceID FROM Win32_NetworkAdapter WHERE Name='" _
-      & strDriverName & "' AND NetConnectionID='" & strConnectionName & "'", _
-      "WQL", 48)
-  strDeviceID = ""
-  For Each objItem In colItems
-     strDeviceID = objItem.PNPDeviceID
-  Next
-  WScript.StdOut.Write(strDeviceId)
-  WScript.Quit(0)
-EOF
-    fi
-
-    local PNPDEVICEID=$($CSCRIPT //Nologo "$GETSCRIPT" "$IFNAME")
-    if (( $? == 0 )) ; then
-        $DEVCON remove =Net "@$PNPDEVICEID"
-        return $?
-    fi
+    $ipwin remove tap0901 $ifname
 }
 
 orig_cmd="$0 $*"

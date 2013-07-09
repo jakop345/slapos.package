@@ -164,53 +164,13 @@ function check_re6stnet_needed()
 }  # === check_re6stnet_needed() === #
 
 # ======================================================================
-# Routine: get_all_connections
-# Return all connection names line by line, and replace space with '%'
-# ======================================================================
-function get_all_connections()
-{
-    netsh interface ipv6 show interface | \
-        grep "^[ 0-9]\+ " | \
-        sed -e "s/^[ 0-9]\+[a-zA-Z]\+//" -e "s/^\s*//" -e "s/ /%/g"
-}  # === get_all_connections() === #
-
-# ======================================================================
-# Routine: get_new_connection
-# Check all the connection names, and compare the original connection
-# list, return the new connection name
-#
-# Note: If nothing found, return empty
-#       If more than one, return the first one
-# ======================================================================
-function get_new_connection()
-{
-    original_connections=" $* "
-    current_connections=$(get_all_connections)
-
-    for name in $current_connections ; do
-        [[ ! "$original_connections" == *[\ ]$name[\ ]* ]] && \
-        echo ${name//%/ } && return 0
-    done
-}  # === get_new_connections() === #
-
-# ======================================================================
 # Routine: reset_slapos_connection
 # Remove all ipv4/ipv6 addresses in the connection re6stnet-lo
 # ======================================================================
 function reset_slapos_connection()
 {
     ifname=${1-re6stnet-lo}
-    for addr in $(netsh interface ipv6 show address $ifname level=normal | \
-                grep "^Manual" | \
-                sed -e "s/^\(\w\+\s\+\)\{4\}//") ; do
-        netsh interface ipv6 del address $ifname $addr
-    done
     netsh interface ip set address $ifname source=dhcp
-    # for addr in $(netsh interface ip show address $ifname | \
-    #             grep "IP Address:" | \
-    #             sed -e "s/IP Address://") ; do
-    #     netsh interface del address $ifname $addr
-    # done
 }  # === reset_slapos_connection() === #
 
 # ======================================================================
@@ -219,38 +179,10 @@ function reset_slapos_connection()
 # ======================================================================
 function connection2guid()
 {
-    ifname=${1-re6stnet-lo}
-    #
-    # This command doesn't work in the Windows 7, Window 8, maybe
-    # Vista. Because no guid information in these platforms.
-    #
-    # netsh interface ipv6 show interface $ifname | \
-    #     grep "^GUID\s*:" | \
-    #     sed -e "s/^GUID\s*:\s*//"
-    #
-    # So we use getmac to repleace it:
-    getmac /fo list /v | grep -A3 "^Connection Name: *$ifname\$" \
-        | grep "^Transport Name:" | sed -e "s/^.*Tcpip_//g"
+    local ifname=${1-re6stnet-lo}
+    local hwid=${2-*msloop}
+    ipwin guid tap0901 $hwid $ifname
 }  # === connection2guid() === #
-
-# ======================================================================
-# Routine: rename_connection_name
-# Rename connection name by guid by changing registry
-#   $1 guid
-#   $2 new name
-# ======================================================================
-function rename_connection_name()
-{
-    local guid=$1
-    local name=$2
-    local key='\HKLMHKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Network\{4D36E972-E325-11CE-BFC1-08002BE10318}\$guid\Connection'
-    if regtool check $key ; then
-        regtool set $key\\Name $name
-    else
-        echo Missing key name in the registry.
-        return 1
-    fi
-}  # === rename_connection_name() === #
 
 # ======================================================================
 # Routine: show_error_exit
