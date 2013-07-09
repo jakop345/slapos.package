@@ -51,7 +51,7 @@ fi
 #     fi
 # fi
 
-DEFAULT_SYSTEM_CHARSET=$(python -c 'import sys; print sys.getfilesystemencoding()') ||
+DEFAULT_SYSTEM_CHARSET=$(ipwin codepage) ||
 DEFAULT_SYSTEM_CHARSET=""
 if [[ ! -f ~/.minttyrc ]] ; then
     echo Creating ~/.minttyrc

@@ -47,7 +47,7 @@ for name in $(net user) ; do
     if [[ "x$name" == x\*slapuser* ]] ; then
         echo Remove user: $name
         net user $name /delete
-    elif echo "$name" | grep -q -E "(sshd)|(cyg_server)" ; then
+    elif echo "$name" | grep -q -E "(sshd)|(cyg_server)|(slaproot)" ; then
         echo Remove user: $name
         net user $name /delete
     fi
@@ -56,8 +56,8 @@ done
 #
 # Remove local group installed by slapos node
 #
-for name in $(net localgroup) ; do
-    if [[ "x$name" == x\*grp_slapuser* ]] ; then
+for name in $(net localgroup | sed -n -e "s/^*//p" | sed -e "s/\\s//g") ; do
+    if [[ "$name" == grp_slapuser* ]] ; then
         echo Remove localgroup: $name
         net localgroup $name /delete
     fi
