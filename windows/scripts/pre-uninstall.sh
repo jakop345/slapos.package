@@ -31,8 +31,10 @@ for ifname in $(netsh interface ipv6 show interface | gawk '{ print $5 }') ; do
 done
 
 #
-# Remove services installed by cygwin
+# Remove services installed by cygwin,
 #
+echo Try to kill openvpn process ...
+ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F
 for name in $(cygrunsrv --list) ; do
     echo Removing cygservice $name
     cygrunsrv -R $name
