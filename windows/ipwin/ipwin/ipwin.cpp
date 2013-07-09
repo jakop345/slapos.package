@@ -44,7 +44,7 @@ HRESULT SlaposNetCfgGetNetworkInterfaceGuid(IN LPCWSTR pHwid,
                                             );
 void usage()
 {
-    printf("Usage: ipwin [command] [options] \n\n\
+  printf("Usage: ipwin [command] [options] \n\n\
 Get guid of interface:\n\
   ipwin guid HWID CONNECTION-NAME\n\n\
 For example,\n\
@@ -70,51 +70,51 @@ Exit status:\n\
 
 int _tmain(int argc, TCHAR * argv[])
 {
-    GUID guid;
-    BSTR pErrMsg[1024] = {0};
-    BSTR pGUID[512] = {0};
+  GUID guid;
+  BSTR pErrMsg[1024] = {0};
+  BSTR pGUID[512] = {0};
 
-    HRESULT hr = CoInitialize(NULL);
+  HRESULT hr = CoInitialize(NULL);
 
-    if (argc == 1) {
+  if (argc == 1) {
+    usage();
+  }
+  else if (wcscmp(argv[1], L"install") == 0) {
+    if (argc != 5) {
       usage();
+      hr = E_FAIL;
     }
-    else if (wcscmp(argv[1], L"install") == 0) {
-      if (argc != 5) {
-        usage();
-        hr = E_FAIL;
-      }
-      else
-        hr = SlaposNetCfgWinCreateNetworkInterface(argv[2], TRUE, argv[3], argv[4], &guid, pErrMsg);
-    }
-    else if (wcscmp(argv[1], L"remove") == 0) {
-      if (argc != 4) {
-        usage();
-        hr = E_FAIL;
-      }
-      else {
-        hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
-        if (hr == S_OK) {
-          hr = SlaposNetCfgWinRemoveNetworkInterface(argv[2], (LPCSTR)pGUID, pErrMsg);
-        }
-      }
-    }
-    else if (wcscmp(argv[1], L"guid") == 0) {
-      if (argc != 4) {
-        usage();
-        hr = E_FAIL;
-      }
-      else {
-        hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
-        printf("%s\n", hr == S_OK ? pGUID : pErrMsg);
-      }
-    }
-    else if (wcscmp(argv[1], L"test") == 0) {
+    else
+      hr = SlaposNetCfgWinCreateNetworkInterface(argv[2], TRUE, argv[3], argv[4], &guid, pErrMsg);
+  }
+  else if (wcscmp(argv[1], L"remove") == 0) {
+    if (argc != 4) {
+      usage();
+      hr = E_FAIL;
     }
     else {
-      usage();
+      hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
+      if (hr == S_OK) {
+        hr = SlaposNetCfgWinRemoveNetworkInterface(argv[2], (LPCSTR)pGUID, pErrMsg);
+      }
     }
+  }
+  else if (wcscmp(argv[1], L"guid") == 0) {
+    if (argc != 4) {
+      usage();
+      hr = E_FAIL;
+    }
+    else {
+      hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
+      printf("%s\n", hr == S_OK ? pGUID : pErrMsg);
+    }
+  }
+  else if (wcscmp(argv[1], L"test") == 0) {
+  }
+  else {
+    usage();
+  }
 
-    CoUninitialize();
-	return hr;
+  CoUninitialize();
+  return hr == S_OK ? 0 : 1;
 }
