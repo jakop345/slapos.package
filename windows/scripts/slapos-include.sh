@@ -200,6 +200,164 @@ function start_cygwin_service()
 }  # === start_cygwin_service() === #
 
 # ======================================================================
+# Routine: slapos_create_privileged_user
+#
+# Copied from csih_create_privileged_user, just create fix account:
+#   slaproot
+# ======================================================================
+slapos_create_privileged_user()
+{
+  csih_stacktrace "${@}"
+  $_csih_trace
+  local username_in_sam
+  local username
+  local admingroup
+  local dos_var_empty
+  local _password
+  local password_value="$1"
+  local passwd_has_expiry_flags
+  local ret=0
+  local username_in_admingroup
+  local username_got_all_rights
+  local pwd_entry
+  local username_in_passwd
+  local entry_in_passwd
+  local tmpfile1
+  local tmpfile2
+
+  _csih_setup
+  csih_select_privileged_username -f -u $slapos_administrator
+
+  username="${csih_PRIVILEGED_USERNAME}"
+
+  if ! csih_privileged_account_exists "$csih_PRIVILEGED_USERNAME" 
+  then
+      username_in_sam=no
+      dos_var_empty=$(/usr/bin/cygpath -w ${LOCALSTATEDIR}/empty)
+      while [ "${username_in_sam}" != "yes" ]
+      do
+          if [ -n "${password_value}" ]
+          then
+              _password="${password_value}"
+              csih_inform "Please enter a password for new user ${username}.  Please be sure"
+              csih_inform "that this password matches the password rules given on your system."
+              csih_inform "Entering no password will exit the configuration."
+              csih_get_value "Please enter the password:" -s
+              _password="${csih_value}"
+              if [ -z "${_password}" ]
+              then
+                  csih_error_multi "Exiting configuration.  No user ${username} has been created," \
+                      "and no services have been installed."
+              fi
+          fi
+          tmpfile1=$(csih_mktemp) || csih_error "Could not create temp file"
+          csih_call_winsys32 net user "${username}" "${_password}" /add /fullname:"SlapOS Administraoter" \
+              "/homedir:${dos_var_empty}" /yes > "${tmpfile1}" 2>&1 && username_in_sam=yes
+          if [ "${username_in_sam}" != "yes" ]
+          then
+              csih_warning "Creating the user '${username}' failed!  Reason:"
+              /usr/bin/cat "${tmpfile1}"
+              echo
+          fi
+          /usr/bin/rm -f "${tmpfile1}"
+      done
+          
+      csih_PRIVILEGED_PASSWORD="${_password}"
+      csih_inform "User '${username}' has been created with password '${_password}'."
+      csih_inform "If you change the password, please remember also to change the"
+      csih_inform "password for the installed services which use (or will soon use)"
+      csih_inform "the '${username}' account."
+      echo ""
+      csih_inform "Also keep in mind that the user '${username}' needs read permissions"
+      csih_inform "on all users' relevant files for the services running as '${username}'."
+      csih_inform "In particular, for the sshd server all users' .ssh/authorized_keys"
+      csih_inform "files must have appropriate permissions to allow public key"
+      csih_inform "authentication. (Re-)running ssh-user-config for each user will set"
+      csih_inform "these permissions correctly. [Similar restrictions apply, for"
+      csih_inform "instance, for .rhosts files if the rshd server is running, etc]."
+      echo ""
+
+      if ! passwd -e "${username}"
+      then
+          csih_warning "Setting password expiry for user '${username}' failed!"
+          csih_warning "Please check that password never expires or set it to your needs."
+      fi
+  else
+      # ${username} already exists. Use it, and make no changes.
+      # use passed-in value as first guess
+      csih_PRIVILEGED_PASSWORD="${password_value}"
+      return 0
+  fi
+
+  # username did NOT previously exist, but has been successfully created.
+  # set group memberships, privileges, and passwd timeout.
+  if [ "$username_in_sam" = "yes" ]
+  then
+      # always try to set group membership and privileges
+      admingroup=$(/usr/bin/mkgroup -l | /usr/bin/awk -F: '{if ( $2 == "S-1-5-32-544" ) print $1;}')
+      if [ -z "${admingroup}" ]
+      then
+        csih_warning "Cannot obtain the Administrators group name from 'mkgroup -l'."
+        ret=1
+      elif csih_call_winsys32 net localgroup "${admingroup}" | /usr/bin/grep -Eiq "^${username}.?$"
+      then
+          true
+      else
+          csih_call_winsys32 net localgroup "${admingroup}" "${username}" /add > /dev/null 2>&1 && username_in_admingroup=yes
+          if [ "${username_in_admingroup}" != "yes" ]
+          then
+              csih_warning "Adding user '${username}' to local group '${admingroup}' failed!"
+              csih_warning "Please add '${username}' to local group '${admingroup}' before"
+              csih_warning "starting any of the services which depend upon this user!"
+              ret=1
+          fi
+      fi
+  
+      if ! csih_check_program_or_warn /usr/bin/editrights editrights
+      then
+          csih_warning "The 'editrights' program cannot be found or is not executable."
+          csih_warning "Unable to ensure that '${username}' has the appropriate privileges."
+          ret=1
+      else
+          /usr/bin/editrights -a SeAssignPrimaryTokenPrivilege -u ${username} &&
+          /usr/bin/editrights -a SeCreateTokenPrivilege -u ${username} &&
+          /usr/bin/editrights -a SeTcbPrivilege -u ${username} &&
+          /usr/bin/editrights -a SeDenyRemoteInteractiveLogonRight -u ${username} &&
+          /usr/bin/editrights -a SeServiceLogonRight -u ${username} &&
+          username_got_all_rights="yes"
+          if [ "${username_got_all_rights}" != "yes" ]
+          then
+              csih_warning "Assigning the appropriate privileges to user '${username}' failed!"
+              ret=1
+          fi
+      fi
+ 
+      # we just created the user, so of course it's in the local SAM,
+      # and mkpasswd -l is appropriate 
+      pwd_entry="$(/usr/bin/mkpasswd -l -u "${username}" | /usr/bin/sed -n -e '/^'${username}'/s?\(^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*?\1'${LOCALSTATEDIR}'/empty:/bin/false?p')"
+      /usr/bin/grep -Eiq "^${username}:" "${SYSCONFDIR}/passwd" && username_in_passwd=yes &&
+      /usr/bin/grep -Fiq "${pwd_entry}" "${SYSCONFDIR}/passwd" && entry_in_passwd=yes
+      if [ "${entry_in_passwd}" != "yes" ]
+      then
+          if [ "${username_in_passwd}" = "yes" ]
+          then
+              tmpfile2=$(csih_mktemp) || csih_error "Could not create temp file"
+	      /usr/bin/chmod --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
+	      /usr/bin/chown --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
+              /usr/bin/getfacl "${SYSCONFDIR}/passwd" | /usr/bin/setfacl -f - "${tmpfile2}"
+	      # use >> instead of > to preserve permissions and acls
+              /usr/bin/grep -Ev "^${username}:" "${SYSCONFDIR}/passwd" >> "${tmpfile2}" &&
+              /usr/bin/mv -f "${tmpfile2}" "${SYSCONFDIR}/passwd" || return 1
+          fi
+          echo "${pwd_entry}" >> "${SYSCONFDIR}/passwd" || ret=1
+      fi
+      return "${ret}"
+  fi # ! username_in_sam
+  return 1
+} # === End of csih_create_privileged_user() === #
+readonly -f slapos_create_privileged_user
+
+# ======================================================================
 # Routine: create_template_configure_file
 # Generate the template file for node and client
 # ======================================================================

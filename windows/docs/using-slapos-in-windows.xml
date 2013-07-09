@@ -73,24 +73,11 @@ More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lect
 <programlisting>
 /etc/opt/slapos/scripts/slapos-configure.sh
 </programlisting>
-The configure script will guide you to configure slapos slave node, first, your need configure cron service:
+The configure script will guide you to configure slapos slave node, first, a super account "slaproot" will be created, you need type the password for this account
 <programlisting>
-You must decide under what account the cron daemon will run.
-If you are the only user on this machine, the daemon can run as yourself.
-   This gives access to all network drives but only allows you as user.
-Otherwise cron should run under the local system account.
-  It will be capable of changing to other users without requiring a
-  password, using one of the three methods detailed in
-  http://cygwin.com/cygwin-ug-net/ntsec.html#ntsec-nopasswd1
-Do you want the cron daemon to run as yourself? (yes/no) no
-
-
-Running cron_diagnose ...
-WARNING: Your computer does not appear to have a cron table for Administrator.
-Please generate a cron table for Administrator using 'crontab -e'
-
-... no problem found.
-
+</programlisting>
+Then the configure script will ask you whether start cron service:
+<programlisting>
 Do you want to start the cron daemon as a service now? (yes/no) yes
 </programlisting>
 Next configure script need certificate and key information:

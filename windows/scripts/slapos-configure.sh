@@ -77,19 +77,19 @@ mkdir -p /etc/re6stnet
 # -----------------------------------------------------------
 # Create account: slaproot
 # -----------------------------------------------------------
-# if csih_privileged_account_exists $slapos_administrator
-# then
-#     echo $slapos_administrator has been existsed.
-#     csih_account_has_necessary_privileges $slapos_administrator
-# else
-#     echo create account $slapos_administrator
-#     csih_FORCE_PRIVILEGED_USER=yes
-#     csih_create_privileged_user $slapos_administrator ||
-#     (echo Error: failed to create account. ; exit 1)
-# fi
+if csih_privileged_account_exists $slapos_administrator
+then
+    echo $slapos_administrator has been existed.
+    csih_account_has_necessary_privileges $slapos_administrator
+else
+    echo create account $slapos_administrator
+    csih_FORCE_PRIVILEGED_USER=yes
+    slapos_create_privileged_user || exit 1
+    _password=$csih_PRIVILEGED_PASSWORD
+fi
 
 # Start seclogon service in the Windows XP
-# sc config seclogon start= auto
+# sc config seclogon start=auto
 # In the later, it's RunAs service, and will start by default
 
 # -----------------------------------------------------------
@@ -118,8 +118,9 @@ check_cygwin_service syslog-ng
 
 if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
     echo Run ssh-host-config ...
-    /usr/bin/ssh-host-config --yes --cygwin ntsec || \
-        show_error_exit "Failed to run ssh-host-config"
+    /usr/bin/ssh-host-config --yes --cygwin ntsec \
+        --user $slapos_administrator --pwd ${_password} ||
+    show_error_exit "Failed to run ssh-host-config"
 else
     echo The sshd service has been installed.
 fi
@@ -132,11 +133,18 @@ slapos_cron_config=/usr/local/bin/slapos-cron-config
 if [[ ! -r $slapos_cron_config ]] ; then
     cp -a /usr/bin/cron-config $slapos_cron_config
     sed -i -e "s%elif request \"Do you want to install the cron daemon as a service.*$%else%g" \
-        -e 's/getcygenv " "/cygenv="ntsec"/g' $slapos_cron_config
+        -e 's/getcygenv " "/cygenv="ntsec"/g' \
+        -e "s/request \"Do you want the cron daemon to run as yourself\?\"/username=$slapos_administrator/g" \
+        $slapos_cron_config
 fi
 if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
     echo Run cron-config ...
-    $slapos_cron_config || show_error_exit "Failed to run cron-config"
+    if [[ -z "${_password}" ]] ; then
+        csih_inform "Install cron service need the password of $slapos_administrator."
+        csih_get_value "Please enter the password:" -s
+        _password="${csih_value}"
+    fi
+    $slapos_cron_config "${_password}" || show_error_exit "Failed to run cron-config"
 else
     echo The cron service has been installed.
 fi
@@ -218,7 +226,7 @@ if [[ ! -f $node_configure_file ]] ; then
     cp $node_template_file $node_configure_file
 fi
 
-interface_guid=$(ipwin guid *msloop $slapos_ifname) || 
+interface_guid=$(ipwin guid *msloop $slapos_ifname) ||
 show_error_exit "Failed to get guid of interface: $slapos_ifname."
 [[ "$interface_guid" == {*-*-*-*} ]] ||
 show_error_exit "Invalid interface guid $interface_guid specified."
@@ -283,50 +291,6 @@ sed -i -e "s%^cert_file.*$%cert_file = $client_certificate_file%" \
 echo
 echo Configure section config OK.
 echo
-
-# -----------------------------------------------------------
-# taps: Install openvpn tap-windows drivers used by re6stnet
-# -----------------------------------------------------------
-#
-# Adding tap-windows driver will break others, so we add all drivers
-# here. Get re6stnet client count, then remove extra drivers and add
-# required drivers.
-if check_re6stnet_needed ; then
-echo
-echo Starting configure section taps ...
-echo
-client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
-[[ -z "$client_count" ]] && client_count=10
-echo "  Client count: $client_count"
-re6stnet_name_list="re6stnet-tcp re6stnet-udp"
-for (( i=1; i<=client_count; i=i+1 )) ; do
-    re6stnet_name_list="$re6stnet_name_list re6stnet$i"
-done
-filename=$(cygpath -w $openvpn_tap_driver_inf)
-for name in $re6stnet_name_list ; do
-    echo "Checking interface $name ..."
-    if ! netsh interface ipv6 show interface | grep -q "\\b$name\\b" ; then
-        [[ -r $openvpn_tap_driver_inf ]] ||
-        show_error_exit "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: $filename"
-            
-        echo "Installing  interface $name ..."
-        # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
-        ip vpntap add dev $name || 
-        show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
-        echo "Interface $name installed."
-    else
-        echo "$name has been installed."
-    fi
-done
-#
-# Remove OpenVPN Tap-Windows Driver
-#
-# ip vpntap del dev re6stnet-x
-#
-echo
-echo Configure section taps OK.
-echo
-fi
 
 # -----------------------------------------------------------
 # re6stnet: Install required packages and register to nexedi
@@ -409,22 +373,66 @@ if [[ ! -r $re6stnet_configure_file ]] ; then
         >> $re6stnet_configure_file
 fi
 
-# Run re6stnet if no native ipv6
+echo
+echo Configure section re6stnet OK.
+echo
+
+# -----------------------------------------------------------
+# taps: Install openvpn tap-windows drivers used by re6stnet
+# -----------------------------------------------------------
+#
+# Adding tap-windows driver will break others, so we add all drivers
+# here. Get re6stnet client count, then remove extra drivers and add
+# required drivers.
+echo
+echo Starting configure section taps ...
+echo
 if check_re6stnet_needed ; then
+    client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
+    [[ -z "$client_count" ]] && client_count=10
+    echo "  Client count: $client_count"
+    re6stnet_name_list="re6stnet-tcp re6stnet-udp"
+    for (( i=1; i<=client_count; i=i+1 )) ; do
+        re6stnet_name_list="$re6stnet_name_list re6stnet$i"
+    done
+    filename=$(cygpath -w $openvpn_tap_driver_inf)
+    for name in $re6stnet_name_list ; do
+        echo "Checking interface $name ..."
+        if ! netsh interface ipv6 show interface | grep -q "\\b$name\\b" ; then
+            [[ -r $openvpn_tap_driver_inf ]] ||
+            show_error_exit "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: $filename"
+
+            echo "Installing  interface $name ..."
+        # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
+            ip vpntap add dev $name ||
+            show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
+            echo "Interface $name installed."
+        else
+            echo "$name has been installed."
+        fi
+    done
+
+    # Run re6stnet if no native ipv6
     check_re6stnet_configure || exit 1
     if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
+        if [[ -z "${_password}" ]] ; then
+            csih_inform "Install re6stnet service need the password of $slapos_administrator."
+            csih_get_value "Please enter the password:" -s
+            _password="${csih_value}"
+        fi
         cygrunsrv -I $re6stnet_service_name -c $(dirname $re6stnet_configure_file) \
-            -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" || \
-            show_error_exit "Failed to install cygwin service $re6stnet_service_name."
+            -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" \
+            -u $slapos_administrator -w ${_password} ||
+        show_error_exit "Failed to install cygwin service $re6stnet_service_name."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
     check_cygwin_service $re6stnet_service_name || exit 1
 else
-    echo "Native IPv6 found, no re6stnet required."
+    echo "Native IPv6 found, no taps required."
 fi
 
 echo
-echo Configure section re6stnet OK.
+echo Configure section taps OK.
 echo
 
 # -----------------------------------------------------------
@@ -518,8 +526,8 @@ echo
 echo
 echo Starting configure section cron ...
 echo
-cron_user=SYSTEM
-crontab_file="/var/cron/tabs/${USER}"
+cron_user=$slapos_administrator
+crontab_file="/var/cron/tabs/$(whoami)"
 if [[ ! -r $crontab_file ]] ; then
     cat <<EOF  > $crontab_file
 SHELL=/bin/bash
