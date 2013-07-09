@@ -33,12 +33,17 @@ if [ $ONLY_SLAPFORMAT = false ]; then
 
     # Wait for ipv6 connection to be ready
     echo "Checking IPv6 connectivity. This may take a few seconds..."
-    ping6 -c 2 $IPV6CHECK >/dev/null 2>&1
+    if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
+        PING6_COMMAND="ping6 -I tapVPN -c 2 $IPV6CHECK"
+    else
+        PING6_COMMAND="ping6 -c 2 $IPV6CHECK"
+    fi
+    $PING6_COMMAND
     while [ $? != 0 ];
     do
         echo "IPv6 is not ready yet."
         sleep 2
-        ping6 -c 2 $IPV6CHECK >/dev/null 2>&1
+        $PING6_COMMAND >/dev/null 2>&1
     done
 else
     sleep 15
