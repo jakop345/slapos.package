@@ -1,7 +1,7 @@
 @ECHO OFF
 
 SETLOCAL
-SET VCVARSALL="C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bata"
+SET VCVARSALL="C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"
 SET SETENV="C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd"
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "x86" GOTO ARCH_X86 
@@ -14,7 +14,7 @@ GOTO END
 
 :ARCH_X86
 IF EXIST %VCVARSALL%. (    
-   %VCVARSALL% 
+   CALL %VCVARSALL% 
    cl /D"UNICODE" /D"_UNICODE" ipwin.cpp netcfg.cpp setupapi.lib iphlpapi.lib advapi32.lib
    GOTO END )
 
