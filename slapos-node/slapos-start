@@ -47,14 +47,15 @@ fi
 # Run slapformat
 i=1
 echo -n "Running slapos node format..."
-/opt/slapos/bin/slapos node format --now --console --log_file=/opt/slapos/log/slapos-node-format.log $SLAPOS_CONFIGURATION/slapos.cfg
+SLAPOS_FORMAT_COMMAND="/opt/slapos/bin/slapos node format --cfg $SLAPOS_CONFIGURATION/slapos.cfg --now --log-file=/opt/slapos/log/slapos-node-format.log"
+$SLAPOS_FORMAT_COMMAND
 while [ $? != 0 ]; do
     sleep $(($i*60))
     if [ $i -le 20 ]; then
         let i++
     fi
     echo "Retrying slapos node format"
-    /opt/slapos/bin/slapos node format --now --console --verbose --log_file=/opt/slapos/log/slapos-node-format.log $SLAPOS_CONFIGURATION/slapos.cfg
+    $SLAPOS_FORMAT_COMMAND
 done
 
 if [ $ONLY_SLAPFORMAT = false ]; then
