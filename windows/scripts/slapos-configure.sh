@@ -152,18 +152,9 @@ echo
 echo
 echo Starting configure slapos network ...
 echo
-original_connections=$(echo $(get_all_connections))
-if [[ ! " $original_connections " == *[\ ]$slapos_ifname[\ ]* ]] ; then
+if ! netsh interface ipv6 show interface | grep -q "\\b$slapos_ifname\\b" ; then
     echo Installing slapos network adapter ...
-    devcon install $WINDIR\\inf\\netloop.inf *MSLOOP
-    connection_name=$(get_new_connection $original_connections)
-    [[ "X$connection_name" == "X" ]] && \
-        show_error_exit "Add msloop network adapter failed."
-    echo
-    netsh interface set interface name="$connection_name" newname="$slapos_ifname" || \
-        show_error_exit "Failed to rename connection to $slapos_ifname."
-    interface_guid=$(connection2guid $slapos_ifname) || \
-        show_error_exit "Failed to get guid of interface: $slapos_ifname."
+    ipwin install $WINDIR\\inf\\netloop.inf *msloop re6stnet-lo
 fi
 #ip -4 addr add $ipv4_local_network dev $slapos_ifname
 # reset_connection $slapos_ifname
@@ -195,7 +186,7 @@ echo
     show_error_exit "Failed to create template configure file."
 
 if [[ ! -f $node_certificate_file ]] ; then
-    read -p "Where is computer certificate file (/computer.crt): " filename
+    read -p "Where is computer certificate file $(cygpath -w /computer.crt): " filename
     [[ -z "$filename" ]] && filename="/computer.crt"
     [[ ! -r "$filename" ]] && \
         show_error_exit "Computer certificate file $filename doesn't exists."
@@ -209,7 +200,7 @@ openssl x509 -noout -in $node_certificate_file || \
     show_error_exit "Invalid computer certificate: $node_certificate_file."
 
 if [[ ! -f $node_key_file ]] ; then
-    read -p "Where is computer key file (/computer.key): " filename
+    read -p "Where is computer key file $(cygpath -w /computer.key): " filename
     [[ -z "$filename" ]] && filename="/computer.key"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Key file $filename doesn't exists."
@@ -219,25 +210,23 @@ if [[ ! -f $node_key_file ]] ; then
 else
     echo "Found computer key file: $node_key_file"
 fi
-openssl rsa -noout -in $node_key_file -check || \
-    show_error_exit "Invalid node key: $node_key_file."
+openssl rsa -noout -in $node_key_file -check ||
+show_error_exit "Invalid node key: $node_key_file."
 
 if [[ ! -f $node_configure_file ]] ; then
     echo "Copy computer configure file from $node_template_file to $node_configure_file"
     cp $node_template_file $node_configure_file
 fi
 
-[[ -z $interface_guid ]] && \
-    interface_guid=$(sed -n -e "s/^\\sinterface_name\\s*=\\s*//p" $node_configure_file)
-[[ -z $interface_guid ]] && \
-    interface_guid=$(connection2guid $slapos_ifname)
-[[ -z $interface_guid ]] && \
-    show_error_exit "Failed to get guid of interface: $slapos_ifname."
+interface_guid=$(ipwin guid *msloop $slapos_ifname) || 
+show_error_exit "Failed to get guid of interface: $slapos_ifname."
+[[ "$interface_guid" == {*-*-*-*} ]] ||
+show_error_exit "Invalid interface guid $interface_guid specified."
 
 computer_guid=$(grep "CN=COMP" $node_certificate_file | \
     sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
-[[ "$computer_guid" == COMP-+([0-9]) ]] || \
-    show_error_exit "Invalid computer id '$computer_guid' specified."
+[[ "$computer_guid" == COMP-+([0-9]) ]] ||
+show_error_exit "Invalid computer id '$computer_guid' specified."
 
 echo "Computer configuration information:"
 echo "  interface name:     $slapos_ifname"
@@ -257,7 +246,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         $node_configure_file
 
 if [[ ! -f $client_certificate_file ]] ; then
-    read -p "Where is client certificate file (/certificate): " filename
+    read -p "Where is client certificate file $(cygpath -w /certificate): " filename
     [[ -z "$filename" ]] && filename="/certificate"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Client certificate file $filename doesn't exists."
@@ -269,7 +258,7 @@ openssl x509 -noout -in $client_certificate_file || \
     show_error_exit "Invalid client certificate: $client_certificate_file."
 
 if [[ ! -f $client_key_file ]] ; then
-    read -p "Where is client key file (/key): " filename
+    read -p "Where is client key file $(cygpath -w /key): " filename
     [[ -z "$filename" ]] && filename="/key"
     [[ ! -f "$filename" ]] && \
         show_error_exit "Key file $filename doesn't exists."
@@ -306,7 +295,6 @@ if check_re6stnet_needed ; then
 echo
 echo Starting configure section taps ...
 echo
-original_connections=$(echo $(get_all_connections))
 client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
 [[ -z "$client_count" ]] && client_count=10
 echo "  Client count: $client_count"
@@ -314,12 +302,17 @@ re6stnet_name_list="re6stnet-tcp re6stnet-udp"
 for (( i=1; i<=client_count; i=i+1 )) ; do
     re6stnet_name_list="$re6stnet_name_list re6stnet$i"
 done
+filename=$(cygpath -w $openvpn_tap_driver_inf)
 for name in $re6stnet_name_list ; do
     echo "Checking interface $name ..."
-    if [[ ! " $original_connections " == *[\ ]$name[\ ]* ]] ; then
+    if ! netsh interface ipv6 show interface | grep -q "\\b$name\\b" ; then
+        [[ -r $openvpn_tap_driver_inf ]] ||
+        show_error_exit "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: $filename"
+            
         echo "Installing  interface $name ..."
-        ip vpntap add dev $name || \
-            show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
+        # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
+        ip vpntap add dev $name || 
+        show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
         echo "Interface $name installed."
     else
         echo "$name has been installed."

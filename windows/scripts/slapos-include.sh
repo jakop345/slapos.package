@@ -35,6 +35,9 @@ slapos_ifname=re6stnet-lo
 # Change it if it confilcts with your local network
 ipv4_local_network=10.201.67.0/24
 
+openvpn_tap_driver_inf=/etc/slapos/driver/OemWin2k.inf
+openvpn_tap_driver_hwid=tap0901
+
 re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
 re6stnet_service_name=re6stnet
 
@@ -82,8 +85,7 @@ function check_cygwin_service()
 function check_network_configure()
 {
     echo Checking slapos network ...
-    original_connections=$(echo $(get_all_connections))
-    if [[ ! " $original_connections " == *[\ ]$slapos_ifname[\ ]* ]] ; then
+    if ! netsh interface ipv6 show interface | grep -q "\\b$slapos_ifname\\b" ; then
         echo "Error: No connection name $slapos_ifname found, please "
         echo "run Configure SlapOS to install it."
         return 1
@@ -172,17 +174,6 @@ function reset_slapos_connection()
     ifname=${1-re6stnet-lo}
     netsh interface ip set address $ifname source=dhcp
 }  # === reset_slapos_connection() === #
-
-# ======================================================================
-# Routine: connection2guid
-# Transfer connection name to GUID
-# ======================================================================
-function connection2guid()
-{
-    local ifname=${1-re6stnet-lo}
-    local hwid=${2-*msloop}
-    ipwin guid tap0901 $hwid $ifname
-}  # === connection2guid() === #
 
 # ======================================================================
 # Routine: show_error_exit

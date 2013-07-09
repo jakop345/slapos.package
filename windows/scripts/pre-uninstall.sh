@@ -45,7 +45,7 @@ for name in $(net user) ; do
     if [[ "x$name" == x\*slapuser* ]] ; then
         echo Remove user: $name
         net user $name /delete
-    elif [[ "$name" == "sshd" ]] ; then
+    elif echo "$name" | grep -q -E "(sshd)|(cyg_server)" ; then
         echo Remove user: $name
         net user $name /delete
     fi
