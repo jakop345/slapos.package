@@ -41,11 +41,12 @@ openvpn_tap_driver_hwid=tap0901
 re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
 re6stnet_service_name=re6stnet
 
+slapos_cron_config=/usr/bin/slapos-cron-config
 slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
 
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 slapos_run_entry=slapos-configure
-slapos_administrator=slaproot
+slapos_admin=slaproot
 
 # ======================================================================
 # Routine: check_cygwin_service
@@ -200,21 +201,38 @@ function start_cygwin_service()
 }  # === start_cygwin_service() === #
 
 # ======================================================================
+# Routine: slapos_request_password
+# Get slaproot password, save it to _password
+# ======================================================================
+slapos_request_password()
+{
+    local username="${1-slaproot}"
+
+    csih_inform "$2"
+    csih_get_value "Please enter the password:" -s
+    _password="${csih_value}"
+    if [ -z "${_password}" ]
+    then
+        csih_error_multi "Exiting configuration.  I don't know the password of ${username}."
+    fi
+}  # === slapos_request_password() === #
+
+# ======================================================================
 # Routine: slapos_create_privileged_user
 #
-# Copied from csih_create_privileged_user, just create fix account:
+# Copied from csih_check_and_create_privileged_user, just create fix account:
 #   slaproot
 # ======================================================================
-slapos_create_privileged_user()
+slapos_check_and_create_privileged_user()
 {
   csih_stacktrace "${@}"
   $_csih_trace
   local username_in_sam
-  local username
+  local username="${1-slaproot}"
   local admingroup
   local dos_var_empty
   local _password
-  local password_value="$1"
+  local password_value="$2"
   local passwd_has_expiry_flags
   local ret=0
   local username_in_admingroup
@@ -226,9 +244,8 @@ slapos_create_privileged_user()
   local tmpfile2
 
   _csih_setup
-  csih_select_privileged_username -f -u $slapos_administrator
 
-  username="${csih_PRIVILEGED_USERNAME}"
+  csih_PRIVILEGED_USERNAME="${username}"
 
   if ! csih_privileged_account_exists "$csih_PRIVILEGED_USERNAME" 
   then
@@ -236,7 +253,7 @@ slapos_create_privileged_user()
       dos_var_empty=$(/usr/bin/cygpath -w ${LOCALSTATEDIR}/empty)
       while [ "${username_in_sam}" != "yes" ]
       do
-          if [ -n "${password_value}" ]
+          if [ -z "${password_value}" ]
           then
               _password="${password_value}"
               csih_inform "Please enter a password for new user ${username}.  Please be sure"
@@ -286,7 +303,6 @@ slapos_create_privileged_user()
       # ${username} already exists. Use it, and make no changes.
       # use passed-in value as first guess
       csih_PRIVILEGED_PASSWORD="${password_value}"
-      return 0
   fi
 
   # username did NOT previously exist, but has been successfully created.
@@ -331,31 +347,30 @@ slapos_create_privileged_user()
               ret=1
           fi
       fi
- 
-      # we just created the user, so of course it's in the local SAM,
-      # and mkpasswd -l is appropriate 
-      pwd_entry="$(/usr/bin/mkpasswd -l -u "${username}" | /usr/bin/sed -n -e '/^'${username}'/s?\(^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*?\1'${LOCALSTATEDIR}'/empty:/bin/false?p')"
-      /usr/bin/grep -Eiq "^${username}:" "${SYSCONFDIR}/passwd" && username_in_passwd=yes &&
-      /usr/bin/grep -Fiq "${pwd_entry}" "${SYSCONFDIR}/passwd" && entry_in_passwd=yes
-      if [ "${entry_in_passwd}" != "yes" ]
-      then
-          if [ "${username_in_passwd}" = "yes" ]
-          then
-              tmpfile2=$(csih_mktemp) || csih_error "Could not create temp file"
-	      /usr/bin/chmod --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
-	      /usr/bin/chown --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
-              /usr/bin/getfacl "${SYSCONFDIR}/passwd" | /usr/bin/setfacl -f - "${tmpfile2}"
-	      # use >> instead of > to preserve permissions and acls
-              /usr/bin/grep -Ev "^${username}:" "${SYSCONFDIR}/passwd" >> "${tmpfile2}" &&
-              /usr/bin/mv -f "${tmpfile2}" "${SYSCONFDIR}/passwd" || return 1
-          fi
-          echo "${pwd_entry}" >> "${SYSCONFDIR}/passwd" || ret=1
-      fi
-      return "${ret}"
   fi # ! username_in_sam
-  return 1
-} # === End of csih_create_privileged_user() === #
-readonly -f slapos_create_privileged_user
+
+  # we just created the user, so of course it's in the local SAM,
+  # and mkpasswd -l is appropriate 
+  pwd_entry="$(/usr/bin/mkpasswd -l -u "${username}" | /usr/bin/sed -n -e '/^'${username}'/s?\(^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*?\1'${LOCALSTATEDIR}'/empty:/bin/false?p')"
+  /usr/bin/grep -Eiq "^${username}:" "${SYSCONFDIR}/passwd" && username_in_passwd=yes &&
+  /usr/bin/grep -Fiq "${pwd_entry}" "${SYSCONFDIR}/passwd" && entry_in_passwd=yes
+  if [ "${entry_in_passwd}" != "yes" ]
+  then
+      if [ "${username_in_passwd}" = "yes" ]
+      then
+          tmpfile2=$(csih_mktemp) || csih_error "Could not create temp file"
+	  /usr/bin/chmod --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
+	  /usr/bin/chown --reference="${SYSCONFDIR}/passwd" "${tmpfile2}"
+          /usr/bin/getfacl "${SYSCONFDIR}/passwd" | /usr/bin/setfacl -f - "${tmpfile2}"
+	      # use >> instead of > to preserve permissions and acls
+          /usr/bin/grep -Ev "^${username}:" "${SYSCONFDIR}/passwd" >> "${tmpfile2}" &&
+          /usr/bin/mv -f "${tmpfile2}" "${SYSCONFDIR}/passwd" || return 1
+      fi
+      echo "${pwd_entry}" >> "${SYSCONFDIR}/passwd" || ret=1
+  fi
+  return "${ret}"
+} # === End of csih_check_and_create_privileged_user() === #
+readonly -f slapos_check_and_create_privileged_user
 
 # ======================================================================
 # Routine: create_template_configure_file

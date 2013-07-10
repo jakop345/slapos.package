@@ -62,6 +62,7 @@ fi
 # openssl
 # export WINDIR
 # ipwin
+# slapos_cron_config
 
 # -----------------------------------------------------------
 # Create paths
@@ -77,20 +78,14 @@ mkdir -p /etc/re6stnet
 # -----------------------------------------------------------
 # Create account: slaproot
 # -----------------------------------------------------------
-if csih_privileged_account_exists $slapos_administrator
-then
-    echo $slapos_administrator has been existed.
-    csih_account_has_necessary_privileges $slapos_administrator
-else
-    echo create account $slapos_administrator
-    csih_FORCE_PRIVILEGED_USER=yes
-    slapos_create_privileged_user || exit 1
-    _password=$csih_PRIVILEGED_PASSWORD
-fi
-
 # Start seclogon service in the Windows XP
-# sc config seclogon start=auto
+csih_is_xp && sc config seclogon start= auto
 # In the later, it's RunAs service, and will start by default
+
+# echo Checking slapos account $slapos_admin ...
+slapos_check_and_create_privileged_user $slapos_admin ||
+show_error_exit "Failed to create account $slapos_admin."
+_password="${csih_PRIVILEGED_PASSWORD}"
 
 # -----------------------------------------------------------
 # Configure cygwin services: cygserver syslog-ng sshd
@@ -117,38 +112,34 @@ fi
 check_cygwin_service syslog-ng
 
 if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
+    if csih_is_xp && [[ -z "${_password}" ]] ; then
+        slapos_request_password $slapos_admin "Install sshd service need the password of $slapos_admin."
+    fi
     echo Run ssh-host-config ...
     /usr/bin/ssh-host-config --yes --cygwin ntsec \
-        --user $slapos_administrator --pwd ${_password} ||
+        --user $slapos_admin --pwd ${_password} ||
     show_error_exit "Failed to run ssh-host-config"
 else
     echo The sshd service has been installed.
 fi
 check_cygwin_service sshd
 
-#
-# Use our own cron-config, no prompt
-#
-slapos_cron_config=/usr/local/bin/slapos-cron-config
-if [[ ! -r $slapos_cron_config ]] ; then
-    cp -a /usr/bin/cron-config $slapos_cron_config
-    sed -i -e "s%elif request \"Do you want to install the cron daemon as a service.*$%else%g" \
-        -e 's/getcygenv " "/cygenv="ntsec"/g' \
-        -e "s/request \"Do you want the cron daemon to run as yourself\?\"/username=$slapos_administrator/g" \
-        $slapos_cron_config
-fi
+# Use slapos-cron-config to configure slapos cron service. 
 if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
-    echo Run cron-config ...
-    if [[ -z "${_password}" ]] ; then
-        csih_inform "Install cron service need the password of $slapos_administrator."
-        csih_get_value "Please enter the password:" -s
-        _password="${csih_value}"
+    [[ -x $slapos_cron_config ]] ||
+    show_error_exit "Couldn't find slapos cron config script: $slapos_cron_config"
+
+    if csih_is_xp && [[ -z "${_password}" ]] ; then
+        slapos_request_password $slapos_admin "Install cron service need the password of $slapos_admin."
     fi
-    $slapos_cron_config "${_password}" || show_error_exit "Failed to run cron-config"
+
+    echo Run slapos-cron-config ...
+    $slapos_cron_config $slapos_admin ${_password} || show_error_exit "Failed to run cron-config"
 else
     echo The cron service has been installed.
 fi
 check_cygwin_service cron
+
 
 echo
 echo Configure cygwin services OK.
@@ -390,7 +381,7 @@ echo
 if check_re6stnet_needed ; then
     client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
     [[ -z "$client_count" ]] && client_count=10
-    echo "  Client count: $client_count"
+    echo "Re6stnet client-count: $client_count"
     re6stnet_name_list="re6stnet-tcp re6stnet-udp"
     for (( i=1; i<=client_count; i=i+1 )) ; do
         re6stnet_name_list="$re6stnet_name_list re6stnet$i"
@@ -403,7 +394,7 @@ if check_re6stnet_needed ; then
             show_error_exit "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: $filename"
 
             echo "Installing  interface $name ..."
-        # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
+            # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
             ip vpntap add dev $name ||
             show_error_exit "Failed to install OpenVPN Tap-Windows Driver."
             echo "Interface $name installed."
@@ -416,13 +407,11 @@ if check_re6stnet_needed ; then
     check_re6stnet_configure || exit 1
     if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
         if [[ -z "${_password}" ]] ; then
-            csih_inform "Install re6stnet service need the password of $slapos_administrator."
-            csih_get_value "Please enter the password:" -s
-            _password="${csih_value}"
+            slapos_request_password $slapos_admin "Install re6stnet service need the password of $slapos_admin."
         fi
         cygrunsrv -I $re6stnet_service_name -c $(dirname $re6stnet_configure_file) \
             -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" \
-            -u $slapos_administrator -w ${_password} ||
+            -u $slapos_admin -w ${_password} ||
         show_error_exit "Failed to install cygwin service $re6stnet_service_name."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
@@ -526,28 +515,34 @@ echo
 echo
 echo Starting configure section cron ...
 echo
-cron_user=$slapos_administrator
-crontab_file="/var/cron/tabs/$(whoami)"
-if [[ ! -r $crontab_file ]] ; then
-    cat <<EOF  > $crontab_file
+cron_user=$slapos_admin
+slapos_crontab_file="/var/cron/tabs/$cron_user"
+if [[ ! -f $slapos_crontab_file ]] ; then
+    cat <<EOF  > $slapos_crontab_file
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
 # Run "Installation/Destruction of Software Releases" and "Deploy/Start/Stop Partitions" once per minute
-* * * * * $cron_user /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
-* * * * * $cron_user /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1
+* * * * * /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
+* * * * * /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1
 
 # Run "Destroy Partitions to be destroyed" once per hour
-0 * * * * $cron_user /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1
+0 * * * * /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1
 
 # Run "Check/add IPs and so on" once per hour
-0 * * * * $cron_user /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
+0 * * * * /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
 EOF
+    echo Change owner of $slapos_crontab_file to $cron_user
+    chown $cron_user $slapos_crontab_file
+    echo Change mode of $slapos_crontab_file to 644
+    chmod 644 $slapos_crontab_file
+else
+    ls -l $slapos_crontab_file
 fi
 echo
 echo
-cat $crontab_file || show_error_exit "No crob tab found."
+cat $slapos_crontab_file || show_error_exit "No crob tab found."
 echo
 echo Configure section cron OK.
 echo

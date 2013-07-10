@@ -52,6 +52,7 @@ for name in $(net user) ; do
         net user $name /delete
     fi
 done
+mkpasswd -l > /etc/passwd
 
 #
 # Remove local group installed by slapos node
@@ -62,6 +63,15 @@ for name in $(net localgroup | sed -n -e "s/^*//p" | sed -e "s/\\s//g") ; do
         net localgroup $name /delete
     fi
 done
+mkgroup -l > /etc/group
+
+#
+# Remove configure files
+# 
+echo Removing /etc/opt/slapos
+rm -rf /etc/opt/slapos/
+echo Removing ~/.slapos
+rm -rf ~/.slapos
 
 #
 # Remove slapos-configure from windows startup item

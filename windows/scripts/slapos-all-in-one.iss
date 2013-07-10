@@ -15,7 +15,7 @@ Uninstallable=yes
 Name: "{app}\cygwin"
 Name: "{app}\cygwin\opt\slapos"
 Name: "{app}\cygwin\opt\downloads"
-Name: "{app}\cygwin\usr\local\bin"
+Name: "{app}\cygwin\bin"
 Name: "{app}\cygwin\etc\slapos\driver"
 Name: "{app}\cygwin\etc\slapos\scripts"
 Name: "{app}\cygwin\etc\slapos\images"
@@ -46,7 +46,7 @@ Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin
 Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\cyg_wscript"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "opt\git\slapos.package\windows\scripts\slapos_cron_config"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
 Source: "opt\git\slapos.package\windows\ipwin\ipwin\ipwin.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 

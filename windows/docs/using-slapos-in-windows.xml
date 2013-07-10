@@ -49,6 +49,7 @@
 <listitem><para>Command Console</para></listitem>
 <listitem><para>User Guide</para></listitem>
 </itemizedlist>
+<note><para>On Windows Vista or Windows 7, you need to run as administrator when launching the cygwin shell to allow the registry changes required in some of the steps below. You can configure cygwin to always launch with admin privileges if you wish.</para></note>
 </para>
 <section id="sec_configure_slapos"><title>Configure SlapOS</title>
 <para>It used to generate all the configure files required by slapos slave node, you can run it anytime when you need change the configure of your slapos slave node.</para>
@@ -154,7 +155,7 @@ netsh interface ipv6 show interface
 Check localize connection name show correctly. If not, you need set your locale and charset
 <programlisting>
 echo "Locale=C" >> ~/.bashrc
-echo "Charset=$(python -c 'import sys; print sys.getfilesystemencoding()')" >> ~/.bashrc
+echo "Charset=$(ipwin codepage)" >> ~/.bashrc
 tail ~/.bashrc
 </programlisting>
 Then restart your command terminal.
