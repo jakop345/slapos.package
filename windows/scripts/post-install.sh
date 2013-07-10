@@ -16,28 +16,26 @@
 #
 function show_error_exit()
 {
-    echo Error: $1
+    echo Error: ${1-Run post-install script failed.}
     read -n 1 -p "Press any key to exit..."
     exit 1
 }
 
 password_filename=/etc/passwd
-echo Checking passwd file ...
+echo Checking /etc/passwd ...
 if [[ ! -f $password_filename ]] ; then
-    echo No passwd file found.
-    mkpasswd -l > $password_filename || show_error_exit "mkpasswd failed"
-    echo Generate passwd file OK.
+    mkpasswd -l > $password_filename || show_error_exit "Error: mkpasswd failed"
+    echo File /etc/passwd has been generated.
 else
-    echo Check passwd file OK.
+    echo OK.
 fi
 
-echo Checking group file ...
+echo Checking /etc/group ...
 if [[ ! -f /etc/group ]] ; then
-    echo No group file found.
-    mkgroup -l > /etc/group || show_error_exit "mkgroup failed"
-    echo Generate group file OK.
+    mkgroup -l > /etc/group || show_error_exit "Error: mkgroup failed"
+    echo File /etc/group has been generated.
 else
-    echo Check group file OK.
+    echo OK.
 fi
 
 # grep -q "^root:" $password_filename
@@ -51,25 +49,32 @@ fi
 #     fi
 # fi
 
-DEFAULT_SYSTEM_CHARSET=$(ipwin codepage) ||
-DEFAULT_SYSTEM_CHARSET=""
-if [[ ! -f ~/.minttyrc ]] ; then
-    echo Creating ~/.minttyrc
-    cat <<EOF > ~/.minttyrc
+echo Checking Windows OEM Codepage ...
+_charset=$(ipwin codepage) || _charset=""
+echo Windows OEM Codepage is ${_charset}
+
+_filename="~/.minttyrc"
+echo Checking  ${_filename} ...
+if [[ ! -f ${_filename} ]] ; then
+    echo Creating ${_filename}
+    cat <<EOF > ${_filename}
 BoldAsFont=no
 Font=Courier New
 FontHeight=16
 Scrollbar=none
 Locale=C
-Charset=${DEFAULT_SYSTEM_CHARSET}
+Charset=${_charset}
 EOF
-    echo File ~/.minttyrc created
+    echo File ${_filename} has been generated.
+else
+    echo OK.
 fi
 
-if [[ ! -f /cygtty.bat ]] ; then
-    echo Creating /cygtty.bat
+_filename="/cygtty.bat"
+echo Checking  ${_filename} ...
+if [[ ! -x ${_filename} ]] ; then
     cyghome=$(cygpath -w /)
-    cat <<EOF > /cygtty.bat
+    cat <<EOF > ${_filename}
 @echo off
 
 ${cyghome:0:2}
@@ -77,13 +82,15 @@ chdir ${cyghome}\\bin
 
 start mintty.exe -i /Cygwin-Terminal.ico -
 EOF
-    chmod +x /cygtty.bat
-    echo File /cygtty.bat created.
+    chmod +x ${_filename}
+    echo File ${_filename} has been generated.
+else
+    echo OK.
 fi
 
-# Copy rebaseall.bat to /
-if [[ ! -f /autorebase.bat ]] ; then
-    echo Create /autorebase.bat
+_filename="/autorebase.bat"
+echo Checking  ${_filename} ...
+if [[ ! -f ${_filename} ]] ; then
     cat <<EOF > /autorebase.bat
 @echo off
 rem Postinstall scripts are always started from the Cygwin root dir
@@ -91,37 +98,49 @@ rem so we can just call dash from here
 path .\bin;%path%
 dash /bin/rebaseall -p
 EOF
-    chmod +x /autorebase.bat
-    echo /autorebase.bat created.
+    chmod +x ${_filename}
+    echo File ${_filename} has been generated.
+else
+    echo OK.
 fi
 
 # Change format of readme.txt
-readme_filepath=$(cygpath -m /)/..
-if [[ -f $readme_filepath/Readme.txt ]] ; then
-    unix2dos $readme_filepath/Readme.txt
-    echo Change readme.txt to dos format OK.
+_filename=$(cygpath -u $(cygpath -m /)/../readme.txt)
+if [[ -f ${_filename} ]] ; then
+    echo Changing $(cygpath -w ${_filename}) as dos format ...
+    unix2dos ${_filename} && echo OK.
 fi
 
 # Remove cygwin services to be sure these services will be configured
 # in this cygwin enviroments when there are many cygwin instances
 # installed in this computer.
 for name in $(cygrunsrv --list) ; do
-    echo Removing cygservice $name
-    cygrunsrv -R $name
+    echo Removing $name service
+    cygrunsrv -R $name || show_error_exit
+    echo OK.
 done
 
 # Backup slap-runner.html
-cp /etc/slapos/scripts/slap-runner.html{,.orig}
-
-# Unzip slapos.tar.gz
-if [[ -r /opt/downloads/slapos.tar.gz ]] ; then
-    echo Extracting slapos.tar.gz
-    cd /opt
-    tar xzf /opt/downloads/slapos.tar.gz --no-same-owner ||
-    show_error_exit "Failed to untar slapos.tar.gz"
-    echo Extracte slapos.tar.gz OK.
+_filename=/etc/slapos/scripts/slap-runner.html
+if [[ -r ${_filename} ]] ; then
+    echo Backuping ${_filename} as ${_filename}.orig
+    cp ${_filename}{,.orig} && echo OK.
+else
+    echo Warning: Missing ${_filename}
 fi
 
-echo Run post-install script successfully.
+# Unzip slapos.tar.gz
+_filename=/opt/downloads/slapos.tar.gz
+if [[ -r ${_filename} ]] ; then
+    echo Extracting ${_filename} ...
+    (cd /opt ; tar xzf ${_filename} --no-same-owner) || show_error_exit
+    echo OK.
+elif [[ ! -d /opt/slapos ]] ; then
+    echo Warning: Missing ${_filename}
+fi
+
+echo
+echo Run post-install.sh script successfully.
+echo
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

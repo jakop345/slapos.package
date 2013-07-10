@@ -1,6 +1,13 @@
 #! /bin/bash
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 
+function show_error_exit()
+{
+    echo Error: ${1-Error: build slapos failed.}
+    read -n 1 -p "Press any key to exit..."
+    exit 1
+}
+
 slapos_home=${1-/opt/slapos}
 slapos_cache=/opt/download-cache
 slapos_url=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
@@ -11,8 +18,9 @@ patch_files=/etc/slapos/patches/slapos-core-format.patch
 mkdir -p $slapos_home/log
 mkdir -p $slapos_cache
 
+echo "Checking $slapos_cfg ..."
 if [[ -r $slapos_cfg ]] ; then
-    echo "Change $slapos_home/buildout.cfg with "
+    echo "Change $slapos_cfg:"
     echo "  extends = ${slapos_url}"
     sed -i -e "s%^extends = .*$%extends = ${slapos_url}%g" $slapos_cfg
 else
@@ -22,36 +30,44 @@ extends = ${slapos_url}
 download-cache = ${slapos_cache}
 prefix = $${buildout:directory}
 EOF
-    echo "$slapos_home/buildout.cfg created."
+    echo "File $slapos_cfg has been generated."
 fi
 
+echo "Checking $slapos_bootstrap ..."
 if [[ ! -f $slapos_bootstrap ]] ; then
-    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > $slapos_bootstrap
-    echo "$slapos_bootstrap downloaded."
-    if (! cd $slapos_home ; python -S bootstrap.py) ; then
-        echo "SlapOS bootstrap failed."
-        exit 1
-    fi
+    echo "Downloading $slapos_bootstrap ..."
+    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > $slapos_bootstrap ||
+    show_error_exit "Error: download $slapos_bootstrap"
+    echo "Downlaod $slapos_bootstrap OK."
+else
+    echo OK.
 fi
 
-# cd $slapos_home
-if (! cd $slapos_home ; $slapos_home/bin/buildout -v -N) ; then
-    echo "SlapOS buildout failed."
-    exit 1
+if [[ ! -x $slapos_home/run/buildout ]] ; then
+    echo "Bootstrap slapos ..."
+    (cd $slapos_home ; python -S bootstrap.py) || show_error_exit "Error: slapos bootstrap failed."
+    echo "Bootstrap slapos OK."
 fi
+
+echo
+echo Start buildout of slapos ...
+echo
+(cd $slapos_home ; $slapos_home/bin/buildout -v -N) || show_error_exit "Error slapos buildout failed."
 
 # apply patches
-for filename in $patch_files ; do
-    if [[ -r $filename ]] ; then
-        echo "Apply patch: $filename"
-        for x in $(find $slapos_home/eggs -name slapos.core-*.egg) ; do
-            echo "  at $x ..."
-            (cd $x ; patch -f --dry-run -p1 < $filename > /dev/null && \
-                patch -p1 < $filename && echo "  OK.")
+for _filename in $patch_files ; do
+    if [[ -r ${_filename} ]] ; then
+        echo "Apply patch: ${_filename}"
+        for _path in $(find $slapos_home/eggs -name slapos.core-*.egg) ; do
+            echo "  at ${_path} ..."
+            (cd ${_path} ; patch -f --dry-run -p1 < ${_filename} > /dev/null &&
+                patch -p1 < ${_filename} && echo "OK.")
         done
     fi
 done
 
-echo Build SlapOS successfully.
+echo
+echo Build slapos node successfully.
+echo
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

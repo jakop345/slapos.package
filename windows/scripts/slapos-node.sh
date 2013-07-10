@@ -1,5 +1,8 @@
 #! /bin/bash
 source $(/usr/bin/dirname $0)/slapos-include.sh
+echo 
+echo "Start slapos-node script ..."
+echo
 
 # -----------------------------------------------------------
 # Check all the configure files
@@ -43,5 +46,8 @@ echo "Creating instance ..."
 echo "Sending report ..."
 /opt/slapos/bin/slapos node report --verbose
 
+echo 
+echo "Run slapos-node script successfully."
+echo 
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

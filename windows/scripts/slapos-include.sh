@@ -182,7 +182,7 @@ function reset_slapos_connection()
 # ======================================================================
 function show_error_exit()
 {
-    echo ${1-Error: run Configure Slapos failed.}
+    echo ${1-Error: configure SlapOS failed.}
     read -n 1 -p "Press any key to exit..."
     exit 1
 }  # === show_error_exit() === #
@@ -213,8 +213,9 @@ slapos_request_password()
     _password="${csih_value}"
     if [ -z "${_password}" ]
     then
-        csih_error_multi "Exiting configuration.  I don't know the password of ${username}."
+        csih_error_multi "Exiting configuration." "I don't know the password of ${username}."
     fi
+    csih_PRIVILEGED_PASSWORD="${_password}"
 }  # === slapos_request_password() === #
 
 # ======================================================================
