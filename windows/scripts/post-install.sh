@@ -53,10 +53,9 @@ echo Checking Windows OEM Codepage ...
 _charset=$(ipwin codepage) || _charset=""
 echo Windows OEM Codepage is ${_charset}
 
-_filename="~/.minttyrc"
+_filename=".minttyrc"
 echo Checking  ${_filename} ...
 if [[ ! -f ${_filename} ]] ; then
-    echo Creating ${_filename}
     cat <<EOF > ${_filename}
 BoldAsFont=no
 Font=Courier New

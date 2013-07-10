@@ -463,17 +463,6 @@ elif [[ $object == "addr" ]] ; then
         exit 1
     fi
 
-    if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
-        ipcmd="netsh interface ip $command address"
-        address="$address $mask"
-    elif [[ "$opt_family" == "ipv6" ]] ; then
-        ipcmd="netsh interface ipv6 $command address"
-    else
-        echo $orig_cmd
-        echo "Error: unsupported family \"$opt_family\""
-        exit 1
-    fi
-
     while [[ "$1" != "" ]] ; do
         case $1 in
             dev)
@@ -485,6 +474,26 @@ elif [[ $object == "addr" ]] ; then
 
         shift
     done
+
+    if [[ "$opt_family" == "ipv4" || "$opt_family" == "" ]] ; then
+        if [[ "$command" == "add" ]] ; then
+            netsh interface ip show address \"$dev\" | grep -q -F $address && exit 0
+        fi
+
+        ipcmd="netsh interface ip $command address"
+        address="$address $mask"
+    elif [[ "$opt_family" == "ipv6" ]] ; then
+        if [[ "$command" == "add" ]] ; then
+            netsh interface ipv6 show address \"$dev\" level=normal | \
+                grep -q -F $address && exit 0
+        fi
+
+        ipcmd="netsh interface ipv6 $command address"
+    else
+        echo $orig_cmd
+        echo "Error: unsupported family \"$opt_family\""
+        exit 1
+    fi
 
     ipcmd="$ipcmd \"$dev\" $address"
 
@@ -513,6 +522,7 @@ elif [[ $object == "addrlabel" ]] ; then
       fi
 
       if [[ $command == "add" ]] ; then
+          netsh interface ipv6 show prefixpolicies | grep -q -F $prefix && exit 0
           ipcmd="$ipcmd $command prefixpolicy $prefix $precedence $label"
       else
           ipcmd="$ipcmd $command prefixpolicy $prefix"
