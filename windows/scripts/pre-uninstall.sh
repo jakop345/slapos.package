@@ -76,6 +76,12 @@ echo Removing ~/.slapos
 rm -rf ~/.slapos && echo OK.
 
 #
+# Remove crontab
+# 
+echo Removing /var/cron/tabs/slaproot
+rm -rf /var/cron/tabs/slaproot && echo OK.
+
+#
 # Remove slapos-configure from windows startup item
 #
 slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'

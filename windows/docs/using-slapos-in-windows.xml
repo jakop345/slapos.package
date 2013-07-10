@@ -49,7 +49,6 @@
 <listitem><para>Command Console</para></listitem>
 <listitem><para>User Guide</para></listitem>
 </itemizedlist>
-<note><para>On Windows Vista or Windows 7, you need to run as administrator when launching the cygwin shell to allow the registry changes required in some of the steps below. You can configure cygwin to always launch with admin privileges if you wish.</para></note>
 </para>
 <section id="sec_configure_slapos"><title>Configure SlapOS</title>
 <para>It used to generate all the configure files required by slapos slave node, you can run it anytime when you need change the configure of your slapos slave node.</para>
@@ -76,12 +75,15 @@ More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lect
 </programlisting>
 The configure script will guide you to configure slapos slave node, first, a super account "slaproot" will be created, you need type the password for this account
 <programlisting>
+*** Info: Please enter a password for new user slaproot.  Please be sure
+*** Info: that this password matches the password rules given on your system.
+*** Info: Entering no password will exit the configuration.
+*** Query: Please enter the password:
 </programlisting>
-Then the configure script will ask you whether start cron service:
+Remember this password, it may be required when you run slapos configure again.
 <programlisting>
-Do you want to start the cron daemon as a service now? (yes/no) yes
 </programlisting>
-Next configure script need certificate and key information:
+Next the configure script need certificate and key information:
 <itemizedlist>
 <listitem><para>Type computer certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type computer key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
@@ -152,10 +154,9 @@ If you're in non-english environment, be sure Cygwin Terminal works well in your
 <programlisting>
 netsh interface ipv6 show interface
 </programlisting>
-Check localize connection name show correctly. If not, you need set your locale and charset
+Check localize connection name show correctly. If not, maybe you need set environment variable "LANG" as the following command:
 <programlisting>
-echo "Locale=C" >> ~/.bashrc
-echo "Charset=$(ipwin codepage)" >> ~/.bashrc
+echo "LANG=C.$(ipwin codepage)" >> ~/.bashrc
 tail ~/.bashrc
 </programlisting>
 Then restart your command terminal.
@@ -218,6 +219,7 @@ Charset=${DEFAULT_SYSTEM_CHARSET}
 EOF
 </programlisting>
 Then restart cygwin command box.
+<note><para>On Windows Vista or Windows 7, you need to run as administrator when launching the cygwin shell to allow the system configuration changes required in some of the steps below. You can configure cygwin to always launch with admin privileges if you wish.</para></note>
 </para>
 </section>
 

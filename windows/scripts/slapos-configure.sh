@@ -540,17 +540,21 @@ MAILTO=""
 # Run "Check/add IPs and so on" once per hour
 0 * * * * /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
 EOF
-    echo Change owner of $slapos_crontab_file to $cron_user
-    chown $cron_user $slapos_crontab_file
-    echo Change mode of $slapos_crontab_file to 644
-    chmod 644 $slapos_crontab_file
-else
-    ls -l $slapos_crontab_file
 fi
+echo Change owner of $slapos_crontab_file to $cron_user
+chown $cron_user $slapos_crontab_file
+echo Change mode of $slapos_crontab_file to 644
+chmod 644 $slapos_crontab_file
+ls -l $slapos_crontab_file
+
 echo
-echo
+echo Begin of crontab of $slapos_admin:
+echo ------------------------------------------------------------
 cat $slapos_crontab_file || csih_error "No crob tab found."
-echo
+echo ------------------------------------------------------------
+echo End of crontab of $slapos_admin.
+
+echo 
 echo Configure section cron OK.
 echo
 
