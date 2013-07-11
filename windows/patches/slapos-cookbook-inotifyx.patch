@@ -1,0 +1,39 @@
+diff --git a/slapos/recipe/librecipe/execute.py b/slapos/recipe/librecipe/execute.py
+index 1b229bb..bd76740 100644
+--- a/slapos/recipe/librecipe/execute.py
++++ b/slapos/recipe/librecipe/execute.py
+@@ -43,7 +43,8 @@ def _wait_files_creation(file_list):
+             directories[dirname][event.name] = True
+ 
+   finally:
+-    os.close(fd)
++    if isinstance(fd, int):
++      os.close(fd)
+ 
+ def execute(args):
+   """Portable execution with process replacement"""
+diff --git a/slapos/recipe/librecipe/inotify.py b/slapos/recipe/librecipe/inotify.py
+index 3448ab7..b93a876 100644
+--- a/slapos/recipe/librecipe/inotify.py
++++ b/slapos/recipe/librecipe/inotify.py
+@@ -48,4 +48,5 @@ def subfiles(directory):
+       subfiles = [file_.name for file_ in inotifyx.get_events(watchfd)]
+ 
+   finally:
+-    os.close(watchfd)
++    if isinstance(watchfd, int): 
++      os.close(watchfd)
+diff --git a/slapos/recipe/lockfile.py b/slapos/recipe/lockfile.py
+index b27975f..897b0ca 100644
+--- a/slapos/recipe/lockfile.py
++++ b/slapos/recipe/lockfile.py
+@@ -57,7 +57,8 @@ class LockFile(object):
+     except IOError: # add_watch failed
+       pass
+     finally:
+-      os.close(inotify_fd)
++        if isinstance(inotify_fd, int):
++          os.close(inotify_fd)
+ 
+     self.__enter__()
+ 
