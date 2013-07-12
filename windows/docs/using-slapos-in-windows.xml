@@ -239,7 +239,7 @@ mkdir -p /opt/slapos/log
 mkdir -p /opt/download-cache
 cd /opt/slapos
 echo "[buildout]
-extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
+extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
 " > buildout.cfg 
@@ -369,6 +369,63 @@ mkdir -p /etc/slapos/scripts
 </programlisting>
 If there are some errors when run both of scripts, fix them and run again, until no any error reported, and now you can run any slapos command in this terminal.
 </para>
+</chapter>
+
+<chapter><title>SlapOS Sources Changed  For Windows</title>
+<para>There are so many slapos sources changed for Windows. In the branch 'cygwin-share' in the slapos.git:
+<itemizedlist>
+<listitem><para>Change the buildout.cfg files for components, softwares and stack</para></listitem>
+<listitem><para>Add patch files for building some component</para></listitem>
+<listitem><para>Patch recipe slapos.cookbook</para></listitem>
+</itemizedlist>
+Re6stnet for windows:
+<itemizedlist>
+<listitem><para>Branch 'cygwin' in the re6stnet.git</para></listitem>
+<listitem><para>Babeld package for cygwin, in branch 'cygwin' of slapos.package.git, location: windows/babeld</para></listitem>
+<listitem><para>OpenVPN package for cygwin, in branch 'cygwin' of slapos.package.git, location: windows/openvpn</para></listitem>
+</itemizedlist>
+In the slapos.core.git:
+<itemizedlist>
+<listitem><para>Add branch 'cygwin'</para></listitem>
+</itemizedlist>
+In the slapos.package.git, add branch 'cygwin', it includes most of sources for cygwin:
+<itemizedlist>
+<listitem><para>babeld</para></listitem>
+<listitem><para>docs</para></listitem>
+<listitem><para>openvpn</para></listitem>
+<listitem><para>netreport</para></listitem>
+<listitem><para>ipwin</para></listitem>
+<listitem><para>psutils</para></listitem>
+<listitem><para>inotifyw</para></listitem>
+<listitem><para>patches</para></listitem>
+<listitem><para>scripts</para></listitem>
+</itemizedlist>
+</para>
+
+<section><title>How to upgrade the sources</title>
+<para>Update sources in the slapos.git, then push it</para>
+<para>Update sources in the slapos.core.git, then push it</para>
+<para>Update sources in the re6stnet.git, then push it</para>
+<para>Update sources in the slapos.package.git, then push it.</para>
+<para>If you change any egg, for examples, netifaces, inotifyx, psutil, you need:
+<programlisting>
+python setup.py sdist
+</programlisting>
+Then upload the source packages to http://www.nexedi.org/static/packages/source/slapos.buildout/
+</para>
+</section>
+
+<section><title>How to upgrade installer</title>
+<para>Redo all the action in the chapter Generate Installer For Windows</para>
+</section>
+
+<section><title>Merge sources to master branch</title>
+<para>merge cygwin to master in the slapos.core.git</para>
+<para>merge cygwin to master in the slapos.package.git</para>
+<para>merge cygwin-share to master in the slapos.git</para>
+<para>merge cygwin to master in the re6stnet.git</para>
+</section>
+
 </chapter>
 
 <appendix id="appendix_cygwin_packages"><title>Cygwin Required Packages List</title>
