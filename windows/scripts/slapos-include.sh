@@ -382,14 +382,10 @@ function create_template_configure_file()
     wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O $client_template_file || return 1
     sed -i -e "/^alias/,\$d" $client_template_file
     echo "alias =
-  apache_frontend http://git.erp5.org/gitweb/slapos.git/blob_plain/HEAD:/software/apache-frontend/software.cfg
-  erp5 http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/erp5/software.cfg
-  erp5_branch http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/erp5:/software/erp5/software.cfg
+  apache_frontend http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/apache-frontend/software.cfg
+  erp5 http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.143:/software/erp5/software.cfg
   mariadb http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/mariadb/software.cfg
-  memcached http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/memcached/software.cfg
   mysql http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/mysql-5.1/software.cfg
-  postgresql http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/postgres/software.cfg
-  slaposwebrunner http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slaprunner/software.cfg
   slaposwebrunner_lite http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slaprunner-lite/software.cfg
   wordpress http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/wordpress/software.cfg
   netdrive_reporter http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/netdrive-reporter/software.cfg" \
