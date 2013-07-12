@@ -27,8 +27,10 @@ Source: "opt\downloads\pyOpenSSL-0.13.tar.gz"; DestDir: "{app}\cygwin\opt\downlo
 Source: "opt\git\re6stnet\dist\re6stnet-0.1.tar.gz"; DestDir: "{app}\cygwin\opt\downloads"; DestName: "re6stnet.tar.gz";
 Source: "opt\downloads\miniupnpc-1.8.tar.gz"; DestDir: "{app}\cygwin\opt\downloads"; DestName: "miniupnpc.tar.gz";
 
-Source: "opt\patches\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
-Source: "opt\patches\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "opt\git\slapos.package\windows\patches\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "opt\git\slapos.package\windows\patches\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "opt\slapos\slapos.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
+Source: "opt\slapos\slapos-client.cfg.example"; DestDir: "{app}\cygwin\etc\slapos";
 
 Source: "opt\images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 Source: "opt\images\terminal.ico"; DestDir: "{app}\cygwin\etc\slapos\images"; DestName: "terminal.ico";

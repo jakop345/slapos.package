@@ -9,6 +9,12 @@
    </author>
    <revhistory>
      <revision>
+       <revnumber>0.3</revnumber>
+       <date>2013-07-11</date>
+       <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
+       <revremark>Add chapter SlapOS Sources Changed  For Windows.</revremark>
+     </revision>
+     <revision>
        <revnumber>0.2</revnumber>
        <date>2013-07-05</date>
        <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
@@ -331,6 +337,11 @@ wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz -O ope
 # wget http://www.dashingsoft.com/products/slapos/openvpn-driver-X86.tar.gz -O openvpn-driver.tar.gz
 tar xzf images.tar.gz --no-same-owner
 tar xzf openvpn-driver.tar.gz --no-same-owner
+</programlisting>
+Get configure template file:
+<programlisting>
+wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O /opt/slapos/slapos.cfg.example
+wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O /opt/slapos/slapos-client.cfg.example
 </programlisting>
 </para>
 </section>
