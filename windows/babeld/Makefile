@@ -19,7 +19,12 @@ ifneq "$(WINVER)" ""
 SRCS += cyginet.c
 OBJS += cyginet.o
 LDLIBS +=  -liphlpapi -lws2_32 -lwlanapi -lole32 -lsetupapi
+
+ifeq "$(WINVER)" "XP"
 CFLAGS += -D_WIN32_WINNT=0x0503
+else
+CFLAGS += -D_WIN32_WINNT=0x0600
+endif
 
 endif
 

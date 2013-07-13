@@ -2,7 +2,7 @@
 <!DOCTYPE book SYSTEM "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
 <book>
 <title>Using SlapOS in the Windows</title>
-<bookinfo> 
+<bookinfo>
    <author>
       <firstname>Jondy</firstname>
       <surname>Zhao</surname>
@@ -37,7 +37,7 @@
 <chapter id="ch_install_slapos"><title>Installing SlapOS node in the Windows</title>
 <para>At first, we need to sign up in VIFIB community Cloud by clicking here <ulink url="https://www.slapos.org/login_form"/></para>
 <para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be X86 or x64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
-<para>Double click the installer, click Next, Next ... 
+<para>Double click the installer, click Next, Next ...
 <note><para>If the current user isn't Administrator, you need run it as Administrator. Right click the installer, then click Run As Administrator.</para></note>
 </para>
 <para>At the final wizard page, click Install.</para>
@@ -45,7 +45,7 @@
 <para>If you prefer to install slapos node from sources, refer to the chapter <xref linkend="ch_run_slapos_from_sources"/>.</para>
 </chapter>
 
-<chapter><title>Using Slapos in the Windows</title> 
+<chapter><title>Using Slapos in the Windows</title>
 <para>After SlapOS has been installed successfully, you will find program group "SlapOS" which include the following entries:
 <itemizedlist>
 <listitem><para>Configure SlapOS</para></listitem>
@@ -248,7 +248,7 @@ echo "[buildout]
 extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
-" > buildout.cfg 
+" > buildout.cfg
 python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py
 python -S bootstrap.py
 bin/buildout
@@ -261,7 +261,7 @@ tar xzf slapos-patches.tar.gz --no-same-owner
 cd /opt/slapos/eggs/slapos.core-0.35-py2.7.egg
 patch -f --dry-run -p1 &lt; /opt/patches/slapos-core-format.patch &gt; /dev/null  &amp;&amp; patch -p1 &lt; /opt/patches/slapos-core-format.patch
 </programlisting>
-It seems netifaces.dll need to rebase, 
+It seems netifaces.dll need to rebase,
 <programlisting>
 cp /etc/postinstall/autorebase.bat.done /autorebase.bat
 echo Pause >> /autorebase.bat
@@ -285,7 +285,8 @@ mv slapos.tar.gz slapos/
 Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
 cd /opt/git/slapos.package/windows/babeld
-make WINVER=XP
+# WINVER could be XP, VISTA, WIN7, WIN8
+WINVER=XP make
 cp babeld.exe /usr/bin
 
 cd /opt/git/slapos.package/windows/openvpn
@@ -315,7 +316,7 @@ cd /opt/git/slapos.package/windows/docs
 # Then replace the old file name with this one in the ./Makefile, then run make
 make
 </programlisting>
-Download pyOpenSSL-0.13.tar.gz, miniupnpc-1.8.tar.gz, 
+Download pyOpenSSL-0.13.tar.gz, miniupnpc-1.8.tar.gz,
 <programlisting>
 mkdir -p /opt/downloads
 cd /opt/downloads
@@ -418,13 +419,13 @@ In the slapos.package.git, add branch 'cygwin', it includes most of sources for 
 <para>Update sources in the slapos.core.git, then push it</para>
 <para>Update sources in the re6stnet.git, then push it</para>
 <para>Update sources in the slapos.package.git, then push it.</para>
-<para>Update egg psutil, for example, upgrade from 0.6.1 to 1.0.0, 
+<para>Update egg psutil, for example, upgrade from 0.6.1 to 1.0.0,
 <programlisting>
 wget http://psutil.googlecode.com/files/psutil-1.0.0.tar.gz
 tar xzf psutil-1.0.0.tar.gz
 cd psutil-1.0.0
 patch -p1 &lt; /opt/git/slapos.package/windows/patches/psutil-0.6.2.patch
-# change the version to 1.0.1 in the psutil/__init__.py 
+# change the version to 1.0.1 in the psutil/__init__.py
 python setup.py sdist
 </programlisting>
 Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.org/static/packages/source/slapos.buildout/
@@ -507,7 +508,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <note id="package-docbook-utils"><para>
 There is another package: Text/docbook-utils, it only used to generate user-guide.html from source file. But this package will increase required disk size remarkable, because many dependent packages are installed by Cygwin, so it recommand not to check this package when building slapos source or the installer. Only you really need to build the document, then install this package from cygwin setup gui interface by double clicking setup.exe downloaded from cygwin.com</para></note>
 </para>
-<!-- 
+<!--
 <para>
 The following packages are requied by re6stnet
 <itemizedlist>
@@ -544,4 +545,3 @@ The following packages are requied by re6stnet
  -->
 </appendix>
 </book>
-

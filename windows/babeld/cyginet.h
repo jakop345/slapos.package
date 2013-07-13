@@ -172,12 +172,17 @@ typedef struct _LIBWINET_INTERFACE {
   SOCKADDR                           Address;
 } LIBWINET_INTERFACE, *PLIBWINET_INTERFACE;
 
+#if _WIN32_WINNT < _WIN32_WINNT_VISTA
 extern unsigned             if_nametoindex (const char *);
 extern char                *if_indextoname (unsigned, char *);
-extern struct if_nameindex *if_nameindex (void);
-extern void                 if_freenameindex (struct if_nameindex *);
 extern const char          *inet_ntop (int, const void *, char *, socklen_t);
 extern int                  inet_pton (int, const char *, void *);
+#else
+WINSOCK_API_LINKAGE u_long WSAAPI ntohl(u_long netlong);
+#endif
+
+extern struct if_nameindex *if_nameindex (void);
+extern void                 if_freenameindex (struct if_nameindex *);
 extern int                  getifaddrs(struct ifaddrs **);
 extern void                 freeifaddrs(struct ifaddrs *);
 

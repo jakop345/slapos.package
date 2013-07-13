@@ -31,12 +31,14 @@ Later Windows Vista,
 
 $ WINVER=VISTA make
 
+WINVER could be XP, VISTA, WIN7, WIN8.
+
 It will generate babeld.exe in the current directory.
 
-Build testc.exe, it's used to verify the functions in the cyginet.c
+Build test.exe, it's used to verify the functions in the cyginet.c
 
-$ WINVER=XP make testc.exe
-$ ./testc.exe
+$ WINVER=XP make test.exe
+$ ./test.exe
 
 Interface Names
 ===============

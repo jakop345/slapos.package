@@ -450,7 +450,7 @@ libwinet_run_command(const char *command)
  *   Gateway could be an address or interface name.
  *
  *   In the Windows 7, there is a little difference:
- *   
+ *
  *       Destination Prefix:     ::/0
  *       Source Prefix:          ::/0
  *       Interface Index:        15
@@ -461,7 +461,7 @@ libwinet_run_command(const char *command)
  *       SitePrefixLength        0
  *       ValidLifeTime           Infinite
  *       PreferredLifeTime       Infinite
- *        
+ *
  *
  */
 static int
@@ -953,13 +953,13 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
     char sgate[INET6_ADDRSTRLEN];
 
     if (NULL == inet_ntop(AF_INET6,
-                          (const void*)(&(((SOCKADDR_IN6*)dest)->sin6_addr)),
+                          (PVOID)(&(((SOCKADDR_IN6*)dest)->sin6_addr)),
                           sdest,
                           INET6_ADDRSTRLEN
                           ))
       return -1;
     if (NULL == inet_ntop(AF_INET6,
-                          (const void*)(&(((SOCKADDR_IN6*)gate)->sin6_addr)),
+                          (PVOID)(&(((SOCKADDR_IN6*)gate)->sin6_addr)),
                           sgate,
                           INET6_ADDRSTRLEN
                           ))
@@ -1086,13 +1086,14 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
 #endif  /* if 0 */
 
 #else
-  /* Add route entry after Windows Vista */
-    MIB_IPFORWARDROW2 Row2;
+  do {
+    /* Add route entry after Windows Vista */
+    MIB_IPFORWARD_ROW2 Row2;
     unsigned long Res;
 
-    memset(&Row2, 0, sizeof(MIB_IPFORWARDROW2));
+    memset(&Row2, 0, sizeof(MIB_IPFORWARD_ROW2));
 
-    Row2.InterfaceLuid = NULL;
+    /* Row2.InterfaceLuid = 0; */
     /* Maybe in the Vista, both of indexs are same. */
     Row2.InterfaceIndex = dest->sa_family == AF_INET6 ?
       ifindex : libwinet_map_ifindex(AF_INET6, ifindex);
@@ -1106,7 +1107,7 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
     Row2.Protocol = MIB_IPPROTO_NETMGMT;
     Row2.Loopback = gate->sa_family == AF_INET6 ?
       IN6_IS_ADDR_LOOPBACK(&(((SOCKADDR_IN6*)gate)->sin6_addr)) :
-      IN_LOOPBACK(ntohl(((SOCKADDR_IN*)gate)->sin_addr.S_un.S_addr));
+      IN_LOOPBACK(ntohl((u_long)((SOCKADDR_IN*)gate)->sin_addr.S_un.S_addr));
     Row2.AutoconfigureAddress = FALSE;
     Row2.Publish = FALSE;
     Row2.Immortal = 0;
@@ -1115,19 +1116,19 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
 
     switch(cmdflag) {
     case 0:
-      Res = CreateIpForwardEntry2(&Row);
+      Res = CreateIpForwardEntry2(&Row2);
       break;
     case 1:
-      Res = SetIpForwardEntry2(&Row);
+      Res = SetIpForwardEntry2(&Row2);
       break;
     case 2:
-      Res = DeleteIpForwardEntry2(&Row);
+      Res = DeleteIpForwardEntry2(&Row2);
       break;
     }
 
     if (Res != NO_ERROR)
       return -1;
-  }
+  } while (0);
 
 #endif  /*  _WIN32_WINNT < _WIN32_WINNT_VISTA */
 
@@ -1497,7 +1498,7 @@ cyginet_getifaddresses(char *ifname,
   size_t size;
   WCHAR *friendlyname = 0;
 
-  if (ifname) { 
+  if (ifname) {
     size = MultiByteToWideChar(CP_ACP,
                                0,
                                ifname,
@@ -1545,7 +1546,7 @@ cyginet_getifaddresses(char *ifname,
   if (NO_ERROR == dwRet) {
     pTmpAdaptAddr = pAdaptAddr;
     while (pTmpAdaptAddr) {
-      if ((pTmpAdaptAddr -> OperStatus == IfOperStatusUp) && 
+      if ((pTmpAdaptAddr -> OperStatus == IfOperStatusUp) &&
           ((ifname == NULL) ||
            (wcscmp(pTmpAdaptAddr -> FriendlyName, friendlyname) == 0))) {
 
@@ -1671,18 +1672,18 @@ cyginet_dump_route_table(struct cyginet_route *routes, int maxroutes)
   PMIB_IPFORWARD_ROW2 pRow2;
 
   /* From Windows Vista later, use GetIpForwardTable2 instead */
-  if (NO_ERROR == GetIpForwardTable2(family,
-                                     pIpForwardTable2
-                                     0)) {
+  if (NO_ERROR == GetIpForwardTable2(AF_UNSPEC,
+                                     &pIpForwardTable2
+                                     )) {
 
-    NumEntries = pIpForwardTable2->dwNumEntries;
+    NumEntries = pIpForwardTable2->NumEntries;
     if ((routes == NULL) || (NumEntries > maxroutes)) {
       FreeMibTable(pIpForwardTable2);
       return NumEntries;
     }
 
     proute = routes;
-    NumEntries = pIpForwardTable2->dwNumEntries;
+    NumEntries = pIpForwardTable2->NumEntries;
     pRow2 = pIpForwardTable2 -> Table;
 
     for (i = 0; i < NumEntries; i++, proute ++, pRow2 ++) {
@@ -1690,12 +1691,12 @@ cyginet_dump_route_table(struct cyginet_route *routes, int maxroutes)
       proute -> metric = pRow2 -> Metric;
       proute -> proto = pRow2 -> Protocol;
       proute -> plen = (pRow2 -> DestinationPrefix).PrefixLength;
-      memcpy(proute -> prefix,
-             (pRow2 -> DestinationPrefix).DestinationPrefix,
+      memcpy(&proute -> prefix,
+             &(pRow2 -> DestinationPrefix).Prefix,
              sizeof(SOCKADDR_INET)
              );
-      memcpy(proute -> gateway,
-             pRow2 -> NextHop,
+      memcpy(&proute -> gateway,
+             &pRow2 -> NextHop,
              sizeof(SOCKADDR_INET)
              );
     }
@@ -2616,6 +2617,8 @@ DWORD GetConnectedNetworks()
 /* ------------------------------------------------------------- */
 #ifdef TEST_CYGINET
 
+#define MAX_ROUTES 200
+
 VOID PrintAllInterfaces()
 {
   IP_ADAPTER_ADDRESSES *pAdaptAddr = NULL;
@@ -2895,7 +2898,6 @@ runTestCases()
 
   printf("\n\nTest cyginet_dump_route_table:\n\n");
   do {
-    #define MAX_ROUTES 120
     struct cyginet_route routes[MAX_ROUTES];
     memset(routes, 0, sizeof(struct cyginet_route) * MAX_ROUTES);
     int n = cyginet_dump_route_table(routes, MAX_ROUTES);
@@ -2968,7 +2970,6 @@ runTestCases()
 
   printf("\n\nTest cyginet_dump_route_table:\n\n");
   do {
-    #define MAX_ROUTES 120
     struct cyginet_route routes[MAX_ROUTES];
     memset(routes, 0, sizeof(struct cyginet_route) * MAX_ROUTES);
     int n = cyginet_dump_route_table(routes, MAX_ROUTES);
@@ -3153,11 +3154,11 @@ int main(int argc, char* argv[])
     rc = cyginet_getifaddresses(NULL, ptable, 255);
     printf("return %d\n", rc);
     while (rc--) {
-      
+
     }
   } while(0);
 
-  // runTestCases();
+  runTestCases();
 
   /* printf("\n\nTest libwinet_init_ipv6_interface:\n\n"); */
   /* libwinet_init_ipv6_interface(); */
