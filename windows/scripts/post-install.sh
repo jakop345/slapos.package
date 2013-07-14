@@ -138,6 +138,20 @@ elif [[ ! -d /opt/slapos ]] ; then
     echo Warning: Missing ${_filename}
 fi
 
+# Patch cygport
+_filename=/usr/share/cygport/cygclass/autotools.cygclass
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/prefix=$(__host_prefix)/prefix=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &&
+    echo OK.
+fi
+_filename=/usr/share/cygport/cygclass/cmake.cygclass
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/-DCMAKE_INSTALL_PREFIX=$(__host_prefix)/-DCMAKE_INSTALL_PREFIX=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &&
+    echo OK.
+fi
+
 echo
 echo Run post-install.sh script successfully.
 echo
