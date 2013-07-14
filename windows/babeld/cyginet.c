@@ -941,9 +941,8 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
                           unsigned int metric,
                           int cmdflag)
 {
-#if _WIN32_WINNT < _WIN32_WINNT_VISTA
-  /* Add ipv6 route before Windows Vista */
   if(dest->sa_family == AF_INET6) {
+
     const int MAX_BUFFER_SIZE = 1024;
     const char * cmdformat = "netsh interface ipv6 %s route "
                              "prefix=%s/%d interface=%d "
@@ -1083,9 +1082,7 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
     if (libwinet_run_command(cmdbuf) != 0)
       return -1;
   }
-#endif  /* if 0 */
 
-#else
   do {
     /* Add route entry after Windows Vista */
     MIB_IPFORWARD_ROW2 Row2;
@@ -1130,7 +1127,7 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
       return -1;
   } while (0);
 
-#endif  /*  _WIN32_WINNT < _WIN32_WINNT_VISTA */
+#endif  /* if 0 */
 
   return 1;
 }
