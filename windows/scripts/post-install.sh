@@ -138,7 +138,13 @@ elif [[ ! -d /opt/slapos ]] ; then
     echo Warning: Missing ${_filename}
 fi
 
-# Patch cygport
+# Patch cygport, so that we can specify package prefix by ourself.
+_filename=/usr/bin/cygport
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/D="${workdir}\/inst"/D="${CYGCONF_PREFIX-${workdir}\/inst}"/g' ${_filename} &&
+    echo OK.
+fi
 _filename=/usr/share/cygport/cygclass/autotools.cygclass
 if [[ -f ${_filename} ]] ; then
     echo Patching ${_filename} ...
