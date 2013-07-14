@@ -1681,16 +1681,14 @@ cyginet_dump_route_table(struct cyginet_route *routes, int maxroutes)
       FreeMibTable(pIpForwardTable2);
       return NumEntries;
     }
-
     proute = routes;
-    NumEntries = pIpForwardTable2->NumEntries;
     pRow2 = pIpForwardTable2 -> Table;
-
-    for (i = 0; i < NumEntries; i++, proute ++, pRow2 ++) {
-      proute -> ifindex = pRow2 -> InterfaceIndex;
+    for (i = 0; i < NumEntries; i++, pRow2 ++, proute ++) {
+      pRow2 = (PMIB_IPFORWARD_ROW2)((long)((VOID*)pRow2 + 7) & ~7);
+      proute -> ifindex = (unsigned int)(pRow2 -> InterfaceIndex);
       proute -> metric = pRow2 -> Metric;
       proute -> proto = pRow2 -> Protocol;
-      proute -> plen = (pRow2 -> DestinationPrefix).PrefixLength;
+      proute -> plen = pRow2 -> DestinationPrefix.PrefixLength;
       memcpy(&proute -> prefix,
              &(pRow2 -> DestinationPrefix).Prefix,
              sizeof(SOCKADDR_INET)
@@ -1701,9 +1699,9 @@ cyginet_dump_route_table(struct cyginet_route *routes, int maxroutes)
              );
     }
     FreeMibTable(pIpForwardTable2);
+
   }
 #endif
-
   return NumEntries;
 }
 
@@ -2754,34 +2752,10 @@ runTestCases()
            );
   }
 
-#if _WIN32_WINNT < _WIN32_WINNT_VISTA
-
-  printf("\n\nTest libwinet_dump_ipv6_route_table:\n\n");
-  {
-    struct cyginet_route routes[100];
-    memset(routes, 0, sizeof(struct cyginet_route) * 100);
-    int n = libwinet_dump_ipv6_route_table(routes, 100);
-    printf("Get route numbers: %d\n", n);
-  }
-
   printf("\n\nTest libwinet_run_command:\n\n");
   {
     printf("ls command return %d\n", libwinet_run_command("ls"));
   }
-
-  printf("\n\nTest libwinet_is_wireless_interface:\n\n");
-  {
-    PLIBWINET_INTERFACE_MAP_TABLE p = g_interface_map_table;
-    while (p) {
-      printf("%s is wireless netcard: %d\n",
-             p -> FriendlyName,
-             libwinet_is_wireless_interface(p -> FriendlyName)
-             );
-      p = p -> next;
-    }
-  }
-
-#endif  /* _WIN32_WINNT < _WIN32_WINNT_VISTA */
 
   /*
   printf("\n\nTest libwinet_get_loopback_index:\n\n");
@@ -2902,7 +2876,62 @@ runTestCases()
     memset(routes, 0, sizeof(struct cyginet_route) * MAX_ROUTES);
     int n = cyginet_dump_route_table(routes, MAX_ROUTES);
     printf("Get route numbers: %d\n", n);
+    int i;
+    char prefix[200];
+    char gate[200];
+    printf("No. Prefix Gateway IfIndex\n");
+    for (i=0; i<n; i++) {
+      memset(prefix, 0, 200);
+      memset(gate, 0, 200);
+      if (routes[i].prefix.ss_family == AF_INET){
+        inet_ntop(AF_INET,
+                  (PVOID)(&(((SOCKADDR_IN*)(&routes[i].prefix))->sin_addr)),
+                  prefix,
+                  200
+                  );
+        inet_ntop(AF_INET,
+                  (PVOID)(&(((SOCKADDR_IN*)(&routes[i].gateway))->sin_addr)),
+                  gate,
+                  200
+                  );
+      }
+      else {
+        inet_ntop(AF_INET6,
+                  (PVOID)(&(((SOCKADDR_IN6*)(&routes[i].prefix))->sin6_addr)),
+                  prefix,
+                  200
+                  );
+        inet_ntop(AF_INET6,
+                  (PVOID)(&(((SOCKADDR_IN6*)(&routes[i].gateway))->sin6_addr)),
+                  gate,
+                  200
+                  );
+      }
+      printf("%i: %32s/%i %32s %i\n", i, prefix, routes[i].plen, gate, routes[i].ifindex);
+    }
   } while (0);
+
+#if _WIN32_WINNT < _WIN32_WINNT_VISTA
+
+  printf("\n\nTest libwinet_is_wireless_interface:\n\n");
+  {
+    PLIBWINET_INTERFACE_MAP_TABLE p = g_interface_map_table;
+    while (p) {
+      printf("%s is wireless netcard: %d\n",
+             p -> FriendlyName,
+             libwinet_is_wireless_interface(p -> FriendlyName)
+             );
+      p = p -> next;
+    }
+  }
+
+  printf("\n\nTest libwinet_dump_ipv6_route_table:\n\n");
+  {
+    struct cyginet_route routes[100];
+    memset(routes, 0, sizeof(struct cyginet_route) * 100);
+    int n = libwinet_dump_ipv6_route_table(routes, 100);
+    printf("Get route numbers: %d\n", n);
+  }
 
   printf("\n\nTest libwinet_monitor_route_thread_proc:\n\n");
   do {
@@ -2934,16 +2963,19 @@ runTestCases()
     close(mypipes[1]);
   } while(0);
 
+#else
+
   printf("\n\nTest select and pipe with \n");
   printf("\tcyginet_start_monitor_route_changes\n");
   printf("\tcyginet_stop_monitor_route_changes\n\n");
   do {
-    break;                      /* We don't run it beacuse it need
-                                   manual intervention. */
     int mypipes[2];
     int n;
     fd_set readfds;
     char buf[16];
+    char *cmd1 = "netsh interface set interface re6stnet-lo admin=DISABLED";
+    char *cmd2 = "netsh interface set interface re6stnet-lo admin=ENABLED";
+
     if (-1 == pipe(mypipes))
       break;
     if (fcntl(mypipes[0], F_SETFL, O_NONBLOCK) < 0)
@@ -2952,29 +2984,26 @@ runTestCases()
     n = cyginet_start_monitor_route_changes(mypipes[1]);
     if (n == 0) {
       FD_SET(mypipes[0], &readfds);
-      printf("Please disable/enable your netcard or plug/unplug "
-             "netting wire so as to change route table.\n");
+      printf("Run command: %s\n", cmd1);
+      libwinet_run_command(cmd1);
       fflush(NULL);
       printf("select return: %d\n",
              select(FD_SETSIZE, &readfds, NULL, NULL, NULL)
              );
+
+      printf("Run command: %s\n", cmd2);
+      libwinet_run_command(cmd2);
       memset(buf, 0, 16);
       printf("read pipe, return %d\n",
              read(mypipes[0], buf, 16));
-      printf("Event number is %s\n",buf);
+      printf("Event number is %c\n", buf[0]);
       cyginet_stop_monitor_route_changes();
     }
     close(mypipes[0]);
     close(mypipes[1]);
   } while(0);
 
-  printf("\n\nTest cyginet_dump_route_table:\n\n");
-  do {
-    struct cyginet_route routes[MAX_ROUTES];
-    memset(routes, 0, sizeof(struct cyginet_route) * MAX_ROUTES);
-    int n = cyginet_dump_route_table(routes, MAX_ROUTES);
-    printf("Get route numbers: %d\n", n);
-  } while (0);
+#endif  /* _WIN32_WINNT < _WIN32_WINNT_VISTA */
 
   printf("\n\nTest libwinet_edit_route_entry:\n\n");
   do {
