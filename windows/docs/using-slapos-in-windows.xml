@@ -478,6 +478,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <listitem><para>Libs/libsqlite3-devel</para></listitem>
 <listitem><para>Libs/libsqlite3_0</para></listitem>
 <listitem><para>Devel/libtool</para></listitem>
+<listitem><para>Devel/libwrap-devel</para></listitem>
 <listitem><para>Libs/libxml2</para></listitem>
 <listitem><para>Libs/libxml2-devel</para></listitem>
 <listitem><para>Libs/libxslt</para></listitem>
