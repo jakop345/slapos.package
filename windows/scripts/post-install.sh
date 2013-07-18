@@ -21,8 +21,8 @@ function show_error_exit()
     exit 1
 }
 
-local cyghome=$(cygpath -w /)
-local password_filename=/etc/passwd
+declare -r cyghome=$(cygpath -w /)
+declare -r password_filename=/etc/passwd
 
 echo Checking /etc/passwd ...
 if [[ ! -f ${password_filename} ]] ; then
