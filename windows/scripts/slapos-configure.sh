@@ -433,14 +433,14 @@ if check_re6stnet_needed ; then
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
     if ! check_cygwin_service $re6stnet_service_name ; then
-        csih_error_multi "Failed to start $re6stnet_service_name service. " \
-            "One possible case is that re6stnet service is shutdown in unusual ways, " \
-            "and in this case, you can fix it by removing '/var/lib/re6stnet'."
+        csih_inform "Service $re6stnet_service_name is not running. "
+        csih_inform "One possible case is that re6stnet service is shutdown in unusual ways, "
+        csih_inform "and in this case, you can fix it by removing '/var/lib/re6stnet'."
         if csih_request "Do you want to let me remove '/var/lib/re6stnet' for you?" ; then
             rm -rf /var/lib/re6stnet
-            check_cygwin_service $re6stnet_service_name ||
-            csih_error "Failed to start $re6stnet_service_name service."
         fi
+        check_cygwin_service $re6stnet_service_name ||
+        csih_error "Failed to start $re6stnet_service_name service."
     fi
 else
     echo "Native IPv6 found, no taps required."
