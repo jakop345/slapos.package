@@ -433,10 +433,10 @@ if check_re6stnet_needed ; then
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
     if ! check_cygwin_service $re6stnet_service_name ; then
-        csih_inform "Service $re6stnet_service_name is not running. "
-        csih_inform "One possible case is that re6stnet service is shutdown in unusual ways, "
-        csih_inform "and in this case, you can fix it by removing '/var/lib/re6stnet'."
-        if csih_request "Do you want to let me remove '/var/lib/re6stnet' for you?" ; then
+        csih_inform "Service $re6stnet_service_name is not running. One possible case"
+        csih_inform "is that re6stnet service is shutdown in unusual ways, in this case"
+        csih_inform "you can fix it by removing '/var/lib/re6stnet'."
+        if csih_request "Do you want to let me remove it for you?" ; then
             rm -rf /var/lib/re6stnet
         fi
         check_cygwin_service $re6stnet_service_name ||
