@@ -62,7 +62,7 @@ fi
 #   Creates a new (unprivileged) user as specified by $1.
 #   Useful for running services that do not require elevated privileges,
 #     or running servers like sshd in "privilege separation" mode.
-#   
+#
 #   Exits on catastrophic error
 #   Returns 0 on total success
 #   Returns 1 on failure
@@ -135,7 +135,7 @@ function create_unprivileged_user()
 # Routine: add_member_to_group
 #   Add a member $1 to a group $2, there is a special for slapos:
 #   if $2 is not a group name, we'll try grp_$2 as group name
-#   
+#
 #   Exits on catastrophic error
 #   Returns 0 on total success
 #   Returns 1 on failure
@@ -150,10 +150,11 @@ function add_member_to_group()
 {
   local name=$1
   local grpname=$2
+  net localgroup $grpname > /dev/null 2>&1 || grpname="grp_$grpname"
+  net localgroup $grpname > /dev/null 2>&1 || return 1
   if ! net localgroup $grpname | grep -q -e "^$name$" ; then
       net localgroup $grpname $name /add
   fi
-  net localgroup $grpname | grep -q -e "^$name$"
 } # === End of add_member_to_group() === #
 
 while getopts "Dd:g:G:p:s:r" opt ; do
@@ -165,7 +166,7 @@ while getopts "Dd:g:G:p:s:r" opt ; do
             USER_INIT_GROUP=$OPTARG
             ;;
         G)
-            USER_OTHER_GROUP=$OPTARG
+            USER_OTHER_GROUP="$USER_OTHER_GROUP $OPTARG"
             ;;
         p)
             USER_PASSWORD=$OPTARG
@@ -194,11 +195,11 @@ create_unprivileged_user ${USER_NAME} $USER_HOME ||
 (echo "Failed to create user ${USER_NAME}" ; exit 1)
 
 for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
-    [[ -z "$grpname" ]] && continue    
+    [[ -z "$grpname" ]] && continue
     add_member_to_group ${USER_NAME} $grpname ||
     (echo "Failed to add ${USER_NAME} to group $group" ; exit 1)
 done
-        
+
 # net user "${USER_NAME}" /delete ||
 # (echo "Faild to delete user ${USER_NAME}" ; exit 1)
 # sed -i -e "/^${USER_NAME}/d" /etc/passwd
