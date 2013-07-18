@@ -21,7 +21,9 @@ function show_error_exit()
     exit 1
 }
 
-password_filename=/etc/passwd
+local cyghome=$(cygpath -w /)
+local password_filename=/etc/passwd
+
 echo Checking /etc/passwd ...
 if [[ ! -f $password_filename ]] ; then
     mkpasswd -l > $password_filename || show_error_exit "Error: mkpasswd failed"
@@ -72,7 +74,6 @@ fi
 _filename="/cygtty.bat"
 echo Checking  ${_filename} ...
 if [[ ! -x ${_filename} ]] ; then
-    cyghome=$(cygpath -w /)
     cat <<EOF > ${_filename}
 @echo off
 
@@ -90,12 +91,21 @@ fi
 _filename="/autorebase.bat"
 echo Checking  ${_filename} ...
 if [[ ! -f ${_filename} ]] ; then
-    cat <<EOF > /autorebase.bat
+    cat <<EOF > ${_filename}
 @echo off
-rem Postinstall scripts are always started from the Cygwin root dir
-rem so we can just call dash from here
+${cyghome}\bin\find /opt/slapos -name "*.dll" > /myfile.list
+TASKKILL /F /IM openvpn.exe
+NET STOP re6stnet
+NET STOP cygserver
+NET STOP syslog-ng
+NET STOP cron
+NET STOP sshd
+TASKKILL /F /IM python2.7.exe
+${cyghome:0:2}
+chdir ${cyghome}
 path .\bin;%path%
-dash /bin/rebaseall -p
+dash /bin/rebaseall -T /myfile.list -v
+PAUSE ...
 EOF
     chmod +x ${_filename}
     echo File ${_filename} has been generated.
