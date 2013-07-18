@@ -18,6 +18,26 @@
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 
 #
+# Remove services installed by cygwin,
+#
+echo Try to kill openvpn process ...
+ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F && echo OK.
+for name in $(cygrunsrv --list) ; do
+    echo Removing cygservice $name
+    cygrunsrv -R $name && echo OK.
+done
+
+#
+# Stop slapos
+#
+if [[ -x /opt/slapos/bin/slapos ]] ; then
+    echo Stoping slapos node ...
+    /opt/slapos/bin/slapos node stop all && echo OK.
+fi
+echo Try to kill python2.7 process ...
+ps -ef | grep -q "/usr/bin/python2.7" && TASKKILL /IM python2.7.exe /F && echo OK.
+
+#
 # Remove virtual netcard installed by re6stnet
 #
 for ifname in $(netsh interface ipv6 show interface | gawk '{ print $5 }') ; do
@@ -28,16 +48,6 @@ for ifname in $(netsh interface ipv6 show interface | gawk '{ print $5 }') ; do
         echo Removing network connection: $ifname
         ipwin remove tap0901 $ifname && echo OK.
     fi
-done
-
-#
-# Remove services installed by cygwin,
-#
-echo Try to kill openvpn process ...
-ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F && echo OK.
-for name in $(cygrunsrv --list) ; do
-    echo Removing cygservice $name
-    cygrunsrv -R $name && echo OK.
 done
 
 #
