@@ -93,8 +93,8 @@ echo Checking  ${_filename} ...
 if [[ ! -f ${_filename} ]] ; then
     cat <<EOF > ${_filename}
 @echo off
-${cyghome}\bin\find /opt/slapos -name "*.dll" > /myfile.list
-IF EXIST ${cyghome}\opt\slapgrid. ${cyghome}\bin\find /opt/slapgrid -name "*.dll" >> /myfile.list
+${cyghome}\bin\find /opt/slapos -name "*.dll" > ${cyghome}\myfile.list
+IF EXIST ${cyghome}\opt\slapgrid. ${cyghome}\bin\find /opt/slapgrid -name "*.dll" >> ${cyghome}\myfile.list
 TASKKILL /F /IM openvpn.exe
 NET STOP re6stnet
 NET STOP cygserver

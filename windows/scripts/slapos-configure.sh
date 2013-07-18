@@ -421,10 +421,16 @@ if check_re6stnet_needed ; then
         csih_error "Failed to install $re6stnet_service_name service."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
-    check_cygwin_service $re6stnet_service_name ||
-    csih_error_multi "Failed to start $re6stnet_service_name service. " \
-        "Sometimes it's occurred when shutdown service re6stnet in unusual ways, " \
-        "Try run 'rm -rf /var/lib/re6stnet' then re-configure again."
+    if ! check_cygwin_service $re6stnet_service_name ; then
+        csih_error_multi "Failed to start $re6stnet_service_name service. " \
+            "One possible case is that re6stnet service is shutdown in unusual ways, " \
+            "and in this case, you can fix it by removing '/var/lib/re6stnet'."
+        if csih_request "Do you want to let me remove '/var/lib/re6stnet' for you?" ; then
+            rm -rf /var/lib/re6stnet
+            check_cygwin_service $re6stnet_service_name ||
+            csih_error "Failed to start $re6stnet_service_name service."
+        fi
+    fi
 else
     echo "Native IPv6 found, no taps required."
 fi
