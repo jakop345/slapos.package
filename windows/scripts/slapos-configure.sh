@@ -422,7 +422,9 @@ if check_re6stnet_needed ; then
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
     check_cygwin_service $re6stnet_service_name ||
-    csih_error "Failed to start $re6stnet_service_name service."
+    csih_error_multi "Failed to start $re6stnet_service_name service. " \
+        "Sometimes it's occurred when shutdown service re6stnet in unusual ways, " \
+        "Try run 'rm -rf /var/lib/re6stnet' then re-configure again."
 else
     echo "Native IPv6 found, no taps required."
 fi
