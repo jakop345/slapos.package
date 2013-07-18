@@ -94,6 +94,7 @@ if [[ ! -f ${_filename} ]] ; then
     cat <<EOF > ${_filename}
 @echo off
 ${cyghome}\bin\find /opt/slapos -name "*.dll" > /myfile.list
+IF EXIST ${cyghome}\opt\slapgrid. ${cyghome}\bin\find /opt/slapgrid -name "*.dll" >> /myfile.list
 TASKKILL /F /IM openvpn.exe
 NET STOP re6stnet
 NET STOP cygserver
@@ -105,7 +106,6 @@ ${cyghome:0:2}
 chdir ${cyghome}
 path .\bin;%path%
 dash /bin/rebaseall -T /myfile.list -v
-PAUSE ...
 EOF
     chmod +x ${_filename}
     echo File ${_filename} has been generated.
