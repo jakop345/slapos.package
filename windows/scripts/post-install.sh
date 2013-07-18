@@ -25,8 +25,8 @@ local cyghome=$(cygpath -w /)
 local password_filename=/etc/passwd
 
 echo Checking /etc/passwd ...
-if [[ ! -f $password_filename ]] ; then
-    mkpasswd -l > $password_filename || show_error_exit "Error: mkpasswd failed"
+if [[ ! -f ${password_filename} ]] ; then
+    mkpasswd -l > ${password_filename} || show_error_exit "Error: mkpasswd failed"
     echo File /etc/passwd has been generated.
 else
     echo OK.
@@ -40,12 +40,12 @@ else
     echo OK.
 fi
 
-# grep -q "^root:" $password_filename
+# grep -q "^root:" ${password_filename}
 # if (( $? != 0 )) ; then
-#     myaccount=$(grep "^Administrator:" $password_filename | \
+#     myaccount=$(grep "^Administrator:" ${password_filename} | \
 #               sed -e "s/Administrator:unused:500:/root:unused:0:/g")
 #     if [[ "${myaccount:0:4}" == root ]] ; then
-#         echo $myaccount >> $password_filename
+#         echo $myaccount >> ${password_filename}
 #     else
 #         exit 1
 #     fi

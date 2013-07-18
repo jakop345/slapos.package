@@ -173,7 +173,7 @@ Check localize connection name show correctly. If not, maybe you need set enviro
 echo "LANG=C.$(ipwin codepage)" >> ~/.bashrc
 tail ~/.bashrc
 </programlisting>
-Then restart your command terminal. 
+Then restart your command terminal.
 </para></listitem>
 <listitem><para>Sometimes cygwin report remap errors, for example
 <programlisting>
@@ -181,25 +181,7 @@ Then restart your command terminal.
   0 [main] python2.7 2332 child_info_fork::abort: unable to remap etree.dll to same address as parent (0x28B0000) - try running rebaseall
   0 [main] python2.7 3604 child_info_fork::abort: unable to remap _zope_interface_coptimizations.dll to same address as parent (0x450000) - try running rebaseall
 </programlisting>
-You need first exit all the cygwin process, include services. Run the following command in the cygwin terminal
-<programlisting>
-find /opt/slapos -name "*.dll" > /myfile.list
-TASKKILL /F /IM openvpn.exe
-for name in $(cygrunsrv --list) ; do
-  net stop $name
-done
-slapos node stop all
-TASKKILL /F /IM python2.7.exe
-exit
-</programlisting>
-Then double click autorebase.bat in the C:/slapos-node/cygwin/autorebase.bat, or you can open windows command box,
-<programlisting>
-C:
-cd \slapos-node\cygwin
-path=.\;%path%
-dash /bin/rebaseall -T /myfile.list -v
-exit
-</programlisting>
+You need close all the cygwin box, and double click autorebase.bat in the C:/slapos-node/cygwin/autorebase.bat.
 </para></listitem>
 <listitem><para>Sometimes service re6stnet can't start, in this case, open cygwin terminal:
 <programlisting>
