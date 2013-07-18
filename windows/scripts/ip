@@ -507,7 +507,7 @@ elif [[ $object == "addrlabel" ]] ; then
           echo "Error: no preifx"
           exit 1
       fi
-      prefix="prefix=$2"; shift; shift
+      prefix="$2"; shift; shift
 
       if [[ "$1" == "dev" ]] ; then
           shift; shift
@@ -523,9 +523,9 @@ elif [[ $object == "addrlabel" ]] ; then
 
       if [[ $command == "add" ]] ; then
           netsh interface ipv6 show prefixpolicies | grep -q -F $prefix && exit 0
-          ipcmd="$ipcmd $command prefixpolicy $prefix $precedence $label"
+          ipcmd="$ipcmd $command prefixpolicy prefix=$prefix $precedence $label"
       else
-          ipcmd="$ipcmd $command prefixpolicy $prefix"
+          ipcmd="$ipcmd $command prefixpolicy prefix=$prefix"
       fi
 
   elif [[ $command == "list" ]] ; then
