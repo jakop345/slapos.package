@@ -112,7 +112,7 @@ Then waiting for configure script finished. Be sure the configure scrip report s
 </section>
 
 <section><title>SlapOS Runner</title>
-<para>SlapOS Runner is a web based development tool which uses slapgrid to install and instantiate the software, and it could be used to manage your slapos slave node in your computer.</para>
+<para>SlapOS Runner is a web based development tool which uses slapgrid to install the software, and it could be used to manage your slapos slave node in your computer.</para>
 <para>After installing slapos, Node Runner isn't available. You need run Configure SlapOS first. After that, Node Runner would be available.</para>
 <para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
 </section>
@@ -152,7 +152,9 @@ net start cron
 </section>
 
 <section><title>Known issues</title>
-<para>Sometime cygwin service re6stnet cound't be stop by command "net stop", you need kill openvpn at first:
+<para>
+<itemizedlist>
+<listitem><para>Sometime cygwin service re6stnet cound't be stop by command "net stop", you need kill openvpn at first:
 <programlisting>
 TASKKILL /F /IM openvpn.exe
 net stop re6stnet
@@ -161,20 +163,53 @@ rm -rf /var/lib/re6stnet
 Then you can start re6stnet again:
 <programlisting>
 net start re6stnet
-</programlisting>
-If you're in non-english environment, be sure Cygwin Terminal works well in your own chareset. Click Start -> SlapOS -> Command Console, then
+</programlisting></para></listitem>
+<listitem><para>If you're in non-english environment, be sure Cygwin Terminal works well in your own chareset. Click Start -> SlapOS -> Command Console, then
 <programlisting>
 netsh interface ipv6 show interface
 </programlisting>
-Check localize connection name show correctly. If not, maybe you need set environment variable "LANG" as the following command:
+Check localize connection name show correctly. If not, maybe you need set environment variable "LANG" by command "ipwin" which is distributed with slapos windows installer. To be sure it's available. Type the following command:
 <programlisting>
 echo "LANG=C.$(ipwin codepage)" >> ~/.bashrc
 tail ~/.bashrc
 </programlisting>
-Then restart your command terminal.
+Then restart your command terminal. 
+</para></listitem>
+<listitem><para>Sometimes cygwin report remap errors, for example
+<programlisting>
+  0 [main] python2.7 3416 child_info_fork::abort: unable to remap _zope_interface_coptimizations.dll to same address as parent (0x450000) - try running rebaseall
+  0 [main] python2.7 2332 child_info_fork::abort: unable to remap etree.dll to same address as parent (0x28B0000) - try running rebaseall
+  0 [main] python2.7 3604 child_info_fork::abort: unable to remap _zope_interface_coptimizations.dll to same address as parent (0x450000) - try running rebaseall
+</programlisting>
+You need first exit all the cygwin process, include services. Run the following command in the cygwin terminal
+<programlisting>
+find /opt/slapos -name "*.dll" > /myfile.list
+TASKKILL /F /IM openvpn.exe
+for name in $(cygrunsrv --list) ; do
+  net stop $name
+done
+slapos node stop all
+TASKKILL /F /IM python2.7.exe
+exit
+</programlisting>
+Then double click autorebase.bat in the C:/slapos-node/cygwin/autorebase.bat, or you can open windows command box,
+<programlisting>
+C:
+cd \slapos-node\cygwin
+path=.\;%path%
+dash /bin/rebaseall -T /myfile.list -v
+exit
+</programlisting>
+</para></listitem>
+<listitem><para>Sometimes service re6stnet can't start, in this case, open cygwin terminal:
+<programlisting>
+rm -rf /var/lib/re6stnet
+net start re6stnet
+</programlisting>
+</para></listitem>
+</itemizedlist>
 </para>
 </section>
-
 </chapter>
 
 <chapter id="ch_generate_window_installer"><title>Generating windows installer from sources</title>
@@ -193,7 +228,7 @@ Then restart your command terminal.
 D:
 MD slapos
 CD slapos
-SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget
+SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P libwrap-devel
 MOVE d:\temp\setup.exe .\
 setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
 </programlisting>Waiting for the installer finished.</para></listitem>
@@ -217,17 +252,35 @@ sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
 [[ -f /etc/group ]] || mkgroup > /etc/group
 cp /etc/passwd /etc/passwd.orig
 </programlisting>
+Now we need patch cygport, otherwise we can't specify install path in the buildout.cfg:
+<programlisting>
+_filename=/usr/bin/cygport
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/D="${workdir}\/inst"/D="${CYGCONF_PREFIX-${workdir}\/inst}"/g' ${_filename} &amp;&amp;
+    echo OK.
+fi
+_filename=/usr/share/cygport/cygclass/autotools.cygclass
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/prefix=$(__host_prefix)/prefix=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &amp;&amp;
+    echo OK.
+fi
+_filename=/usr/share/cygport/cygclass/cmake.cygclass
+if [[ -f ${_filename} ]] ; then
+    echo Patching ${_filename} ...
+    sed -i -e 's/-DCMAKE_INSTALL_PREFIX=$(__host_prefix)/-DCMAKE_INSTALL_PREFIX=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &amp;&amp;
+    echo OK.
+fi
+</programlisting>
 If you'd like to make the font of command box bigger
 <programlisting>
 cd ~
-DEFAULT_SYSTEM_CHARSET=$(python -c 'import sys; print sys.getfilesystemencoding()')
 cat &lt;&lt;EOF  &gt; .minttyrc
 BoldAsFont=no
 Font=Courier New
 FontHeight=16
 Scrollbar=none
-Locale=C
-Charset=${DEFAULT_SYSTEM_CHARSET}
 EOF
 </programlisting>
 Then restart cygwin command box.
@@ -255,11 +308,9 @@ bin/buildout
 </programlisting>
 Now we need patch slapos.core for supporting cygwin, after these code are merged, it don't need.
 <programlisting>
-cd /opt
-wget http://www.dashingsoft.com/products/slapos/slapos-patches.tar.gz
-tar xzf slapos-patches.tar.gz --no-same-owner
-cd /opt/slapos/eggs/slapos.core-0.35-py2.7.egg
-patch -f --dry-run -p1 &lt; /opt/patches/slapos-core-format.patch &gt; /dev/null  &amp;&amp; patch -p1 &lt; /opt/patches/slapos-core-format.patch
+cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/)
+_filename=/opt/git/slapos.package/windows/patches/slapos-core-format.patch
+patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &lt; ${_filename}
 </programlisting>
 It seems netifaces.dll need to rebase,
 <programlisting>
@@ -308,11 +359,11 @@ Now, build ipwin.exe which used to manage slapos network. If you have msvc build
 </itemizedlist>
 </para>
 <para>
-Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you require want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
+Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you really want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
 <programlisting>
 cd /opt/git/slapos.package/windows/docs
 # Before run make, be sure there is the file /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl, if not, find it first
-# find /usr -name docbook.xsl
+# find /usr/share -name docbook.xsl
 # Then replace the old file name with this one in the ./Makefile, then run make
 make
 </programlisting>
@@ -364,7 +415,7 @@ Source: "images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:\slapos\images\slapos.ico" as the source, so this file should be exsited.
 </para>
 <para>Click menu Build -> Compile, then wait for the building process finished. You can check the installer in the OutputDir.</para>
-<para>There is another script "slapos.iss", it used to build network installer. All-in-one installer will include all the files, so no internet access required. However network installer need internet connection to download the files and packages. It's remarkable smaller than all-in-one installer.</para>
+<para>There is another script "slapos.iss", it used to build network installer. All-in-one installer will include all the files, so no internet connection required. However network installer need internet connection to download the files and packages. It's remarkable smaller than all-in-one installer.</para>
 </section>
 </chapter>
 
@@ -428,7 +479,7 @@ patch -p1 &lt; /opt/git/slapos.package/windows/patches/psutil-0.6.2.patch
 # change the version to 1.0.1 in the psutil/__init__.py
 python setup.py sdist
 </programlisting>
-Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.org/static/packages/source/slapos.buildout/
+Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.org/static/packages/source/
 </para>
 <para>Update egg netifaces, same as psutil, except use patch file netifaces-0.8-1-cygwin.patch</para>
 </section>
