@@ -113,7 +113,7 @@ Then waiting for configure script finished. Be sure the configure scrip report s
 
 <section><title>SlapOS Runner</title>
 <para>SlapOS Runner is a web based development tool which uses slapgrid to install the software, and it could be used to manage your slapos slave node in your computer.</para>
-<para>After installing slapos, Node Runner isn't available. You need run Configure SlapOS first. After that, Node Runner would be available.</para>
+<para>After installing slapos, Node Runner isn't available. You need run SlapOS Node first. After that, Node Runner would be available.</para>
 <para>Refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Howto.Use.SlapOS.Web.Runner.html5"/></para>
 </section>
 <section><title>Command Console</title>

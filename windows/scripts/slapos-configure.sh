@@ -25,7 +25,7 @@
 # Usage:
 #
 #    ./slapos-configure [--install | --query | --overwrite | --uninstall]
-#                       [ * | re6stnet | taps | config | cron | startup | runner]
+#                       [ * | re6stnet | taps | config | cron ]
 #
 #    The action option:
 #
@@ -43,7 +43,6 @@
 #        taps           Install OpenVPN Tap-Windows Driver for re6stnet
 #        config         Generate slapos node and client configure files
 #        cron           Generate cron file and start cron job
-#        runner         Install web runner for this node
 #
 source $(/usr/bin/dirname $0)/slapos-include.sh
 
@@ -448,91 +447,6 @@ fi
 
 echo
 echo Configure section taps OK.
-echo
-
-# -----------------------------------------------------------
-# runner: Create instance of slap web runner
-# -----------------------------------------------------------
-echo
-echo Starting configure section runner ...
-echo
-slaprunner_title="SlapOS-Node-Runner-In-$computer_guid"
-feature_code="#-*- SlapOS Web Runner JavaScript Boot Code -*-#"
-if ! grep -q -F "$feature_code" $slaprunner_startup_file ; then
-    echo Installing SlapOS Web Runner ...
-
-    if [[ -r $re6stnet_configure_file ]] ; then
-        re6stnet_ipv6=$(grep "Your subnet" $re6stnet_configure_file| \
-            sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
-        if [[ ! -z "$re6stnet_ipv6" ]] ; then
-            echo "Re6stnet address in this computer: $re6stnet_ipv6"
-            netsh interface ipv6 show addr $slapos_ifname level=normal | \
-                grep -q $re6stnet_ipv6 || \
-                netsh interface ipv6 add addr $slapos_ifname $re6stnet_ipv6
-        fi
-    fi
-
-    /opt/slapos/bin/slapos node format -cv --now || \
-        csih_error "Failed to run slapos format."
-
-    echo "Supply slapwebrunner in the computer $computer_guid"
-    /opt/slapos/bin/slapos supply slaposwebrunner $computer_guid
-
-    echo "Request an instance $slaprunner_title ..."
-    patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
-    while true ; do
-        /opt/slapos/bin/slapos node software --verbose
-        # Apply patches to slapos.cookbook for inotifix
-        if [[ -r $patch_file ]] ; then
-            for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
-                echo Apply patch $patch_file at $x
-                cd $x
-                patch -f --dry-run -p1 < $patch_file > /dev/null && \
-                    patch -p1 < $patch_file
-            done
-        fi
-        /opt/slapos/bin/slapos node instance --verbose
-        /opt/slapos/bin/slapos node report --verbose
-        /opt/slapos/bin/slapos request $client_config_file $slaprunner_title \
-            slaposwebrunner --node computer_guid=$computer_guid && break
-        sleep 3
-    done
-    # Connection parameters of instance are:
-    #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
-    #  'cloud9-url': 'http://localhost:9999',
-    #  'password_recovery_code': 'e2d01c14',
-    #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
-    #  'url': 'http://softinst39090.host.vifib.net/'}
-    slaprunner_url=$(/opt/slapos/bin/slapos request $client_config_file \
-        $slaprunner_title slaposwebrunner --node computer_guid=$computer_guid | \
-        grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
-    echo "SlapOS Web Runner URL: $slaprunner_url"
-    [[ -z "$slaprunner_url" ]] && \
-        csih_error "Failed to create instance of SlapOS Web Runner."
-
-    cat <<EOF > $slaprunner_startup_file
-<html>
-<head><title>SlapOS Web Runner</title>
-<script LANGUAGE="JavaScript">
-<!--
-function openwin() {
-  window.location.href = "$slaprunner_url"
-}
-//-->
-</script>
-</head>
-<body onload="openwin()"/>
-<!-- $feature_code -->
-</html>
-EOF
-    echo SlapOS Web Runner boot file $slaprunner_startup_file generated.
-
-    echo
-    echo Install Web Runner OK.
-    echo
-fi
-echo
-echo Configure section runner OK.
 echo
 
 # -----------------------------------------------------------

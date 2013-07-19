@@ -385,3 +385,101 @@ function create_template_configure_file()
     wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O $node_template_file || return 1
     echo Got $node_template_file.
 }  # === create_template_configure_file() === #
+
+# ======================================================================
+# Routine: create_slapos_webrunner_instance
+# Create one instance of slapos webrunner in local computer
+# ======================================================================
+function create_slapos_webrunner_instance()
+{
+    local _title
+    local _guid
+    local _feature_code="#-*- SlapOS Web Runner JavaScript Boot Code -*-#"
+    local _re6stnet_ipv6
+    local _patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
+    local _url
+
+    echo Checking SlapOS Webruner ...    
+    if grep -q -F "${_feature_code}" ${slaprunner_startup_file} ; then
+
+        echo "Find feature code ${_feature_code} in the ${slaprunner_startup_file}"
+        echo "Check SlapOS Webrunner OK."
+
+    else
+
+        echo Installing SlapOS Webrunner ...
+
+        _guid=$(grep "CN=COMP" $node_certificate_file | \
+            sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
+        [[ "${_guid}" == COMP-+([0-9]) ]] ||
+        csih_error "Invalid computer id '${_guid}' specified."
+
+        _title="SlapOS-Node-Runner-In-${_guid}"
+        if [[ -r $re6stnet_configure_file ]] ; then
+            _re6stnet_ipv6=$(grep "Your subnet" $re6stnet_configure_file| \
+                sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
+            if [[ ! -z "${_re6stnet_ipv6}" ]] ; then
+                echo "Re6stnet address in this computer: ${_re6stnet_ipv6}"
+                netsh interface ipv6 show addr $slapos_ifname level=normal | \
+                    grep -q ${_re6stnet_ipv6} || \
+                    netsh interface ipv6 add addr $slapos_ifname ${_re6stnet_ipv6}
+            fi
+        fi
+
+        /opt/slapos/bin/slapos node format -cv --now || \
+            csih_error "Failed to run slapos format."
+
+        echo "Supply slapwebrunner in the computer ${_guid}"
+        /opt/slapos/bin/slapos supply slaposwebrunner ${_guid}
+
+        echo "Request an instance ${_title} ..."
+        while true ; do
+            /opt/slapos/bin/slapos node software --verbose
+            # Apply patches to slapos.cookbook for inotifix
+            if [[ -r ${_patch_file} ]] ; then
+                for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
+                    echo Apply patch ${_patch_file} at $x
+                    cd $x
+                    patch -f --dry-run -p1 < ${_patch_file} > /dev/null && \
+                        patch -p1 < ${_patch_file}
+                done
+            fi
+            /opt/slapos/bin/slapos node instance --verbose
+            /opt/slapos/bin/slapos node report --verbose
+            /opt/slapos/bin/slapos request $client_config_file ${_title} \
+                slaposwebrunner --node computer_guid=${_guid} && break
+            sleep 3
+        done
+        # Connection parameters of instance are:
+        #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
+        #  'cloud9-url': 'http://localhost:9999',
+        #  'password_recovery_code': 'e2d01c14',
+        #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
+        #  'url': 'http://softinst39090.host.vifib.net/'}
+        _url=$(/opt/slapos/bin/slapos request $client_config_file \
+            ${_title} slaposwebrunner --node computer_guid=${_guid} | \
+            grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
+        echo "SlapOS Web Runner URL: ${_url}"
+        [[ -z "${_url}" ]] && \
+            csih_error "Failed to create instance of SlapOS Web Runner."
+
+        cat <<EOF > $slaprunner_startup_file
+<html>
+<head><title>SlapOS Web Runner</title>
+<script LANGUAGE="JavaScript">
+<!--
+function openwin() {
+  window.location.href = "${_url}"
+}
+//-->
+</script>
+</head>
+<body onload="openwin()"/>
+<!-- $feature_code -->
+</html>
+EOF
+        echo SlapOS Webrunner boot file $slaprunner_startup_file generated.
+        echo Install Web Runner OK.
+        echo
+    fi
+}  # === create_slapos_webrunner_instance() === #

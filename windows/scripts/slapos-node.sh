@@ -23,6 +23,11 @@ check_cygwin_service cron
 check_re6stnet_needed && check_cygwin_service re6stnet
 
 # -----------------------------------------------------------
+# Create instance of slap web runner
+# -----------------------------------------------------------
+create_slapos_webrunner_instance || exit 1
+
+# -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
 echo "Formating SlapOS Node ..."
