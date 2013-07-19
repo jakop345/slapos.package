@@ -20,8 +20,11 @@ export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 #
 # Remove services installed by cygwin,
 #
-echo Try to kill openvpn process ...
-ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F && echo OK.
+echo Try to stop re6stnet service ...
+if ! net stop re6stnet ; then
+    echo Try to kill openvpn process ...
+    ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F && echo OK.
+fi
 for name in $(cygrunsrv --list) ; do
     echo Removing cygservice $name
     cygrunsrv -R $name && echo OK.
