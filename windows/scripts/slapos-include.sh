@@ -20,33 +20,33 @@ fi
 # ======================================================================
 # Constants
 # ======================================================================
-slapos_client_home=~/.slapos
-client_configure_file=$slapos_client_home/slapos.cfg
-client_certificate_file=$slapos_client_home/certificate
-client_key_file=$slapos_client_home/key
-client_template_file=/etc/slapos/slapos-client.cfg.example
+declare -r slapos_client_home=~/.slapos
+declare -r client_configure_file=$slapos_client_home/slapos.cfg
+declare -r client_certificate_file=$slapos_client_home/certificate
+declare -r client_key_file=$slapos_client_home/key
+declare -r client_template_file=/etc/slapos/slapos-client.cfg.example
 
-node_certificate_file=/etc/opt/slapos/ssl/computer.crt
-node_key_file=/etc/opt/slapos/ssl/computer.key
-node_configure_file=/etc/opt/slapos/slapos.cfg
-node_template_file=/etc/slapos/slapos.cfg.example
+declare -r node_certificate_file=/etc/opt/slapos/ssl/computer.crt
+declare -r node_key_file=/etc/opt/slapos/ssl/computer.key
+declare -r node_configure_file=/etc/opt/slapos/slapos.cfg
+declare -r node_template_file=/etc/slapos/slapos.cfg.example
 
-slapos_ifname=re6stnet-lo
+declare -r slapos_ifname=re6stnet-lo
 # Change it if it confilcts with your local network
-ipv4_local_network=10.201.67.0/24
+declare -r ipv4_local_network=10.201.67.0/24
 
-openvpn_tap_driver_inf=/etc/slapos/driver/OemWin2k.inf
-openvpn_tap_driver_hwid=tap0901
+declare -r openvpn_tap_driver_inf=/etc/slapos/driver/OemWin2k.inf
+declare -r openvpn_tap_driver_hwid=tap0901
 
-re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
-re6stnet_service_name=re6stnet
+declare -r re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
+declare -r re6stnet_service_name=re6stnet
 
-slapos_cron_config=/usr/bin/slapos-cron-config
-slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
+declare -r slapos_cron_config=/usr/bin/slapos-cron-config
+declare -r slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
 
-slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-slapos_run_entry=slapos-configure
-slapos_admin=slaproot
+declare -r slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+declare -r slapos_run_entry=slapos-configure
+declare -r slapos_admin=slaproot
 
 # ======================================================================
 # Routine: check_cygwin_service
@@ -422,7 +422,7 @@ function create_slapos_webrunner_instance()
             if [[ -n "${_re6stnet_ipv6}" ]] ; then
                 echo "Re6stnet address in this computer: ${_re6stnet_ipv6}"
                 netsh interface ipv6 show addr $slapos_ifname level=normal | \
-                    grep -q ${_re6stnet_ipv6} || \
+                    grep -q "${_re6stnet_ipv6}$$" || \
                     netsh interface ipv6 add addr $slapos_ifname ${_re6stnet_ipv6}
             fi
         fi
@@ -454,7 +454,7 @@ function create_slapos_webrunner_instance()
             #  'password_recovery_code': 'e2d01c14',
             #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
             #  'url': 'http://softinst39090.host.vifib.net/'}
-            _url=$(/opt/slapos/bin/slapos request $client_config_file \
+            _url=$(/opt/slapos/bin/slapos request ${client_configure_file} \
                 ${_title} slaposwebrunner --node computer_guid=${_guid} | \
                 grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")            
             [[ -n "${_url}" ]] && echo "SlapOS Web Runner URL: ${_url}" && break
