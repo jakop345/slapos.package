@@ -1,8 +1,6 @@
 #! /bin/bash
 source $(/usr/bin/dirname $0)/slapos-include.sh
-echo ""
 csih_inform "Start slapos-node script ..."
-echo ""
 
 declare computer_guid
 
@@ -78,7 +76,7 @@ while true ; do
         for _x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
             patch -d ${_x} -f --dry-run -p1 < ${_patch_file} > /dev/null && 
             csih_inform "Apply patch ${_patch_file} on ${_x}" &&
-            patch -d ${_x} -p1 < ${_patch_file})
+            patch -d ${_x} -p1 < ${_patch_file}
         done
     fi
     
