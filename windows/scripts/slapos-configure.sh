@@ -120,7 +120,7 @@ if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
         slapos_request_password $slapos_admin "Install sshd service need the password of $slapos_admin."
     fi
     echo Run ssh-host-config ...
-    /usr/bin/ssh-host-config --yes --cygwin ntsec \
+    /usr/bin/ssh-host-config --yes --cygwin ntsec --port 22002 \
         --user $slapos_admin --pwd ${csih_PRIVILEGED_PASSWORD} ||
     csih_error "Failed to run ssh-host-config"
 else
