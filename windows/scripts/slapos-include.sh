@@ -413,12 +413,13 @@ function create_slapos_webrunner_instance()
             sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
         [[ "${_guid}" == COMP-+([0-9]) ]] ||
         csih_error "Invalid computer id '${_guid}' specified."
+        echo Got computer guid: ${_guid}
 
         _title="SlapOS-Node-Runner-In-${_guid}"
         if [[ -r $re6stnet_configure_file ]] ; then
             _re6stnet_ipv6=$(grep "Your subnet" $re6stnet_configure_file| \
                 sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
-            if [[ ! -z "${_re6stnet_ipv6}" ]] ; then
+            if [[ -n "${_re6stnet_ipv6}" ]] ; then
                 echo "Re6stnet address in this computer: ${_re6stnet_ipv6}"
                 netsh interface ipv6 show addr $slapos_ifname level=normal | \
                     grep -q ${_re6stnet_ipv6} || \
@@ -446,22 +447,18 @@ function create_slapos_webrunner_instance()
             fi
             /opt/slapos/bin/slapos node instance --verbose
             /opt/slapos/bin/slapos node report --verbose
-            /opt/slapos/bin/slapos request $client_config_file ${_title} \
-                slaposwebrunner --node computer_guid=${_guid} && break
-            sleep 3
+
+            # Connection parameters of instance are:
+            #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
+            #  'cloud9-url': 'http://localhost:9999',
+            #  'password_recovery_code': 'e2d01c14',
+            #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
+            #  'url': 'http://softinst39090.host.vifib.net/'}
+            _url=$(/opt/slapos/bin/slapos request $client_config_file \
+                ${_title} slaposwebrunner --node computer_guid=${_guid} | \
+                grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")            
+            [[ -n "${_url}" ]] && echo "SlapOS Web Runner URL: ${_url}" && break
         done
-        # Connection parameters of instance are:
-        #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
-        #  'cloud9-url': 'http://localhost:9999',
-        #  'password_recovery_code': 'e2d01c14',
-        #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
-        #  'url': 'http://softinst39090.host.vifib.net/'}
-        _url=$(/opt/slapos/bin/slapos request $client_config_file \
-            ${_title} slaposwebrunner --node computer_guid=${_guid} | \
-            grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
-        echo "SlapOS Web Runner URL: ${_url}"
-        [[ -z "${_url}" ]] && \
-            csih_error "Failed to create instance of SlapOS Web Runner."
 
         cat <<EOF > $slaprunner_startup_file
 <html>
