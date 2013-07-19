@@ -58,15 +58,13 @@ function check_cygwin_service()
     ret=0
     name=$1
 
-    echo Checking cygwin service $name ...
+    csih_inform "Checking cygwin service $name ..."
 
     if [[ ! -e /usr/bin/cygrunsrv.exe ]] ; then
-        echo "Error: Download the cygrunsrv package to start the $name daemon as a service."
-        exit 1
+        csih_error "Download cygrunsrv package to start the $name daemon as a service."
     fi
     if ! cygrunsrv --query $name > /dev/null 2>&1 ; then
-        echo "Error: No cygwin service $name installed, please run Configure SlapOS to install it."
-        return 1
+        csih_error "No cygwin service $name installed, please run Configure SlapOS to install it."
     fi
 
     account=$(cygrunsrv -VQ $name | sed -n -e 's/^Account[ :]*//p')
@@ -74,7 +72,7 @@ function check_cygwin_service()
     [[ "$state" == "Running" ]] || cygrunsrv --start $name
     state=$(cygrunsrv --query $name | sed -n -e 's/^Current State[ :]*//p')
     cygrunsrv --query $name --verbose
-    echo Check cygwin service $name OVER.
+    csih_inform "Check cygwin service $name OVER."
     [[ "$state" == "Running" ]] || ret=1
     return "${ret}"
 }  # === check_cygwin_service() === #
@@ -85,13 +83,12 @@ function check_cygwin_service()
 # ======================================================================
 function check_network_configure()
 {
-    echo Checking slapos network ...
+    csih_inform "Checking slapos network ..."
     if ! netsh interface ipv6 show interface | grep -q "\\b$slapos_ifname\\b" ; then
-        echo "Error: No connection name $slapos_ifname found, please "
-        echo "run Configure SlapOS to install it."
-        return 1
+        csih_error_multi "Error: No connection name $slapos_ifname found, please " \
+            "run Configure SlapOS to install it."
     fi
-    echo Check slapos network Over.
+    csih_inform "Check slapos network Over."
 }  # === check_network_configure() === #
 
 # ======================================================================
@@ -100,21 +97,18 @@ function check_network_configure()
 # ======================================================================
 function check_node_configure()
 {
-    echo Checking slapos node configure ...
-    [[ ! -r $node_certificate_file ]] && \
-        ( echo "Computer certificate file $node_certificate_file" ;
-          echo "doesn't exists, or you haven't right to visit." ) && \
-        return 1
+    csih_inform "Checking slapos node configure ..."
+    [[ ! -r $node_certificate_file ]] && 
+    csih_error_multi"Computer certificate file $node_certificate_file" \
+        "doesn't exists, or you haven't right to visit."
     openssl x509 -noout -in $node_certificate_file || return 1
     openssl rsa -noout -in $node_key_file -check || return 1
     computer_guid=$(grep "CN=COMP" $node_certificate_file | \
         sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
-    [[ ! "$computer_guid" == COMP-+([0-9]) ]] && \
-        ( echo "Invalid computer id '$computer_guid' specified." ;
-          echo "It should look like 'COMP-XXXX'" ) && \
-        return 1
-
-    echo Check slapos node configure Over.
+    [[ ! "$computer_guid" == COMP-+([0-9]) ]] && 
+    csih_error_multi "Invalid computer id '$computer_guid' specified." \
+        "It should look like 'COMP-XXXX'"
+    csih_inform "Check slapos node configure Over."
 }  # === check_node_configure() === #
 
 # ======================================================================
@@ -123,8 +117,10 @@ function check_node_configure()
 # ======================================================================
 function check_client_configure()
 {
-    echo Checking slapos client confiure ...
-    echo Check slapos client configure Over.
+    csih_inform "Checking slapos client confiure ..."
+    [[ -f ${client_configure_file} ]] ||
+    csih_error "Missing client configure file: ${client_configure_file}"
+    csih_inform "Check slapos client configure Over."
 }  # === check_client_configure() === #
 
 # ======================================================================
@@ -133,8 +129,8 @@ function check_client_configure()
 # ======================================================================
 function check_cron_configure()
 {
-    echo Checking slapos cron confiure ...
-    echo Check slapos cron configure Over.
+    csih_inform "Checking slapos cron confiure ..."
+    csih_inform "Check slapos cron configure Over."
 }  # === check_cron_configure() === #
 
 # ======================================================================
@@ -143,12 +139,10 @@ function check_cron_configure()
 # ======================================================================
 function check_re6stnet_configure()
 {
-    echo Checking slapos re6stnet confiure ...
-    ! which re6stnet > /dev/null 2>&1 &&
-        echo "No re6stnet installed, please run Configure SlapOS first." &&
-        return 1
-
-    echo Check slapos re6stnet configure Over.
+    csih_inform "Checking slapos re6stnet confiure ..."
+    which re6stnet > /dev/null 2>&1 ||
+    csih_error "No re6stnet installed, please run Configure SlapOS first."
+    csih_inform "Check slapos re6stnet configure Over."
 }  # === check_re6stnet_configure() === #
 
 # ======================================================================
