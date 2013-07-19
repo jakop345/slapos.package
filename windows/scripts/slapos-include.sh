@@ -422,7 +422,7 @@ function create_slapos_webrunner_instance()
             if [[ -n "${_re6stnet_ipv6}" ]] ; then
                 echo "Re6stnet address in this computer: ${_re6stnet_ipv6}"
                 netsh interface ipv6 show addr $slapos_ifname level=normal | \
-                    grep -q "${_re6stnet_ipv6}$$" || \
+                    grep -q "${_re6stnet_ipv6}\$" || \
                     netsh interface ipv6 add addr $slapos_ifname ${_re6stnet_ipv6}
             fi
         fi
