@@ -102,7 +102,7 @@ Then waiting for configure script finished. Be sure the configure scrip report s
 </section>
 
 <section><title>SlapOS Node</title>
-<para>It's used to format slapos node, release software and create instance, you an run it at any time.</para>
+<para>It's used to create instance of slapos webrunner, format slapos node, release software and create instance, you an run it at any time.</para>
 <para>Click Start -> SlapOS -> SlapOS Node, if the current user isn't Administrator, Right click SlapOS Node, then Run As Administrator.</para>
 <para>Be sure the scrip reports successfully, otherwise fix the problem and run it again.</para>
 </section>

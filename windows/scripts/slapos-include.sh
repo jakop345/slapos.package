@@ -98,14 +98,14 @@ function check_network_configure()
 function check_node_configure()
 {
     csih_inform "Checking slapos node configure ..."
-    [[ ! -r $node_certificate_file ]] && 
+    [[ ! -r $node_certificate_file ]] &&
     csih_error_multi"Computer certificate file $node_certificate_file" \
         "doesn't exists, or you haven't right to visit."
     openssl x509 -noout -in $node_certificate_file || return 1
     openssl rsa -noout -in $node_key_file -check || return 1
     computer_guid=$(grep "CN=COMP" $node_certificate_file | \
         sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
-    [[ ! "$computer_guid" == COMP-+([0-9]) ]] && 
+    [[ ! "$computer_guid" == COMP-+([0-9]) ]] &&
     csih_error_multi "Invalid computer id '$computer_guid' specified." \
         "It should look like 'COMP-XXXX'"
     csih_inform "Check slapos node configure Over."
@@ -242,7 +242,7 @@ slapos_check_and_create_privileged_user()
 
   csih_PRIVILEGED_USERNAME="${username}"
 
-  if ! csih_privileged_account_exists "$csih_PRIVILEGED_USERNAME" 
+  if ! csih_privileged_account_exists "$csih_PRIVILEGED_USERNAME"
   then
       username_in_sam=no
       dos_var_empty=$(/usr/bin/cygpath -w ${LOCALSTATEDIR}/empty)
@@ -273,7 +273,7 @@ slapos_check_and_create_privileged_user()
           fi
           /usr/bin/rm -f "${tmpfile1}"
       done
-          
+
       csih_PRIVILEGED_PASSWORD="${_password}"
       csih_inform "User '${username}' has been created with password '${_password}'."
       csih_inform "If you change the password, please remember also to change the"
@@ -323,7 +323,7 @@ slapos_check_and_create_privileged_user()
               ret=1
           fi
       fi
-  
+
       if ! csih_check_program_or_warn /usr/bin/editrights editrights
       then
           csih_warning "The 'editrights' program cannot be found or is not executable."
@@ -345,7 +345,7 @@ slapos_check_and_create_privileged_user()
   fi # ! username_in_sam
 
   # we just created the user, so of course it's in the local SAM,
-  # and mkpasswd -l is appropriate 
+  # and mkpasswd -l is appropriate
   pwd_entry="$(/usr/bin/mkpasswd -l -u "${username}" | /usr/bin/sed -n -e '/^'${username}'/s?\(^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*?\1'${LOCALSTATEDIR}'/empty:/bin/false?p')"
   /usr/bin/grep -Eiq "^${username}:" "${SYSCONFDIR}/passwd" && username_in_passwd=yes &&
   /usr/bin/grep -Fiq "${pwd_entry}" "${SYSCONFDIR}/passwd" && entry_in_passwd=yes
@@ -381,80 +381,39 @@ function create_template_configure_file()
 }  # === create_template_configure_file() === #
 
 # ======================================================================
-# Routine: create_slapos_webrunner_instance
-# Create one instance of slapos webrunner in local computer
+# Routine: get_slapos_webrunner_instance
+# Get instance connection information and create slaprunner startup file
 # ======================================================================
-function create_slapos_webrunner_instance()
+function get_slapos_webrunner_instance()
 {
-    local _title
-    local _guid
+    local _guid=$1
+    local _title=$2
     local _feature_code="#-*- SlapOS Web Runner JavaScript Boot Code -*-#"
-    local _re6stnet_ipv6
-    local _patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
     local _url
+    local _ret=0
 
-    echo Checking SlapOS Webruner ...    
-    if grep -q -F "${_feature_code}" ${slaprunner_startup_file} ; then
+    csih_inform "Trying to get connection information of SlapOS WebRunner instance ..."
+    /opt/slapos/bin/slapos request ${client_configure_file} \
+        ${_title} slaposwebrunner --node computer_guid=${_guid} || return 1
 
-        echo "Find feature code ${_feature_code} in the ${slaprunner_startup_file}"
-        echo "Check SlapOS Webrunner OK."
+    # Connection parameters of instance are:
+    #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
+    #  'cloud9-url': 'http://localhost:9999',
+    #  'password_recovery_code': 'e2d01c14',
+    #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
+    #  'url': 'http://softinst39090.host.vifib.net/'}
+    _url=$(/opt/slapos/bin/slapos request ${client_configure_file} \
+        ${_title} slaposwebrunner --node computer_guid=${_guid} | \
+        grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
 
-    else
-
-        echo Installing SlapOS Webrunner ...
-
-        _guid=$(grep "CN=COMP" $node_certificate_file | \
-            sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
-        [[ "${_guid}" == COMP-+([0-9]) ]] ||
-        csih_error "Invalid computer id '${_guid}' specified."
-        echo Got computer guid: ${_guid}
-
-        _title="SlapOS-Node-Runner-In-${_guid}"
-        if [[ -r $re6stnet_configure_file ]] ; then
-            _re6stnet_ipv6=$(grep "Your subnet" $re6stnet_configure_file| \
-                sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
-            if [[ -n "${_re6stnet_ipv6}" ]] ; then
-                echo "Re6stnet address in this computer: ${_re6stnet_ipv6}"
-                netsh interface ipv6 show addr $slapos_ifname level=normal | \
-                    grep -q "${_re6stnet_ipv6}\$" || \
-                    netsh interface ipv6 add addr $slapos_ifname ${_re6stnet_ipv6}
-            fi
-        fi
-
-        /opt/slapos/bin/slapos node format -cv --now || \
-            csih_error "Failed to run slapos format."
-
-        echo "Supply slapwebrunner in the computer ${_guid}"
-        /opt/slapos/bin/slapos supply slaposwebrunner ${_guid}
-
-        echo "Request an instance ${_title} ..."
-        while true ; do
-            /opt/slapos/bin/slapos node software --verbose
-            # Apply patches to slapos.cookbook for inotifix
-            if [[ -r ${_patch_file} ]] ; then
-                for x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
-                    echo Apply patch ${_patch_file} at $x
-                    cd $x
-                    patch -f --dry-run -p1 < ${_patch_file} > /dev/null && \
-                        patch -p1 < ${_patch_file}
-                done
-            fi
-            /opt/slapos/bin/slapos node instance --verbose
-            /opt/slapos/bin/slapos node report --verbose
-
-            # Connection parameters of instance are:
-            #  {'backend_url': 'http://[2001:67c:1254:45::c5d5]:50000',
-            #  'cloud9-url': 'http://localhost:9999',
-            #  'password_recovery_code': 'e2d01c14',
-            #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
-            #  'url': 'http://softinst39090.host.vifib.net/'}
-            _url=$(/opt/slapos/bin/slapos request ${client_configure_file} \
-                ${_title} slaposwebrunner --node computer_guid=${_guid} | \
-                grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")            
-            [[ -n "${_url}" ]] && echo "SlapOS Web Runner URL: ${_url}" && break
-        done
-
-        cat <<EOF > $slaprunner_startup_file
+    if [[ -n "${_url}" ]] ; then
+        csih_inform "SlapOS WebRunner URL: ${_url}"
+        if grep -q -F "${_feature_code}" ${slaprunner_startup_file} ; then
+            csih_inform "Find feature code ${_feature_code} in the ${slaprunner_startup_file}"
+            echo "Check SlapOS Webrunner OK."
+        else
+            csih_inform "Generate SlapOS WebRunner startup file ${slaprunner_startup_file}"
+            cat <<EOF > ${slaprunner_startup_file}
 <html>
 <head><title>SlapOS Web Runner</title>
 <script LANGUAGE="JavaScript">
@@ -469,8 +428,10 @@ function openwin() {
 <!-- $feature_code -->
 </html>
 EOF
-        echo SlapOS Webrunner boot file $slaprunner_startup_file generated.
-        echo Install Web Runner OK.
-        echo
+        fi
+    else
+        csih_error_multi "Request return true, but I can't find connection information," \
+            "something is wrong with slapos webrunner software."
     fi
-}  # === create_slapos_webrunner_instance() === #
+    return ${_ret}
+}  # === get_slapos_webrunner_instance() === #
