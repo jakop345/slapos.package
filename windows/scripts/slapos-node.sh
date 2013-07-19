@@ -81,10 +81,10 @@ while true ; do
     fi
     
     csih_inform "Creating instance ..."
-    /opt/slapos/bin/slapos node instance --verbose || continue
+    /opt/slapos/bin/slapos node instance --verbose
 
     csih_inform "Sending report ..."
-    /opt/slapos/bin/slapos node report --verbose || continue
+    /opt/slapos/bin/slapos node report --verbose
 
     get_slapos_webrunner_instance ${computer_guid} ${_title} && break
 done
