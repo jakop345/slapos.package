@@ -394,6 +394,13 @@ echo
 echo Starting configure section taps ...
 echo
 if check_re6stnet_needed ; then
+    csih_inform "Disable IPv6 6to4 interface ... "
+    netsh interface ipv6 6to4 set state disable && csih_inform "OK."
+    csih_inform "Disable IPv6 isatap interface ... "
+    netsh interface ipv6 isatap set state disable && csih_inform "OK."
+    csih_inform "Disable IPv6 teredo interface ... "
+    netsh interface teredo set state disable && csih_inform "OK."
+
     client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
     [[ -z "$client_count" ]] && client_count=10
     echo "Re6stnet client-count: $client_count"
