@@ -22,41 +22,92 @@
 #
 #     * startup: add this script as startup item
 #
-# Usage:
-#
-#    ./slapos-configure [--install | --query | --overwrite | --uninstall]
-#                       [ * | re6stnet | taps | config | cron ]
-#
-#    The action option:
-#
-#        --install      Install only when the item hasn't been installed
-#        --query        Interactive to install all the item
-#        --overwite     Overwrite the item even it has been installed
-#        --uninstall    Remove the configure item
-#
-#    Default is --install
-#
-#    The configure item option:
-#
-#        *              All the configure item
-#        re6stnet       Install re6stent and dependencies
-#        taps           Install OpenVPN Tap-Windows Driver for re6stnet
-#        config         Generate slapos node and client configure files
-#        cron           Generate cron file and start cron job
-#
+function show_usage()
+{
+    echo "" 
+    echo "Usage:"
+    echo ""
+    echo "    ./slapos-configure [options] [action] [configure item]"
+    echo ""
+    echo "    Availabe options:"
+    echo ""
+    echo "        -U, --user=XXX     slapos administrator, default is slaproot"
+    echo "        -P, --password=XXX password of administrator"
+    echo ""
+    echo "    The action option:"
+    echo ""
+    echo "        --install      Install only when the item hasn't been installed"
+    echo "        --query        Interactive to install all the item"
+    echo "        --overwite     Overwrite the item even it has been installed"
+    echo "        --uninstall    Remove the configure item"
+    echo ""
+    echo "    Default is --install"
+    echo ""
+    echo "    The configure item option:"
+    echo ""
+    echo "        *              All the configure item"
+    echo "        re6stnet       Install re6stent and dependencies"
+    echo "        taps           Install OpenVPN Tap-Windows Driver for re6stnet"
+    echo "        config         Generate slapos node and client configure files"
+    echo "        cron           Generate cron file and start cron job"
+    echo ""
+}
+
 source $(/usr/bin/dirname $0)/slapos-include.sh
+csih_inform "Start slapos node configure ..."
+echo ""
 
-echo
-echo Start slapos node configure ...
-echo
+# -----------------------------------------------------------
+# Local variable
+# -----------------------------------------------------------
+declare _administrator=${slapos_user}
+declare _password=
 
+# -----------------------------------------------------------
+# Command line options
+# -----------------------------------------------------------
+while test $# -gt 0; do
+    # Normalize the prefix.
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in    
+    --password=*)
+    _password=$optarg
+    ;;
+    -P)
+    _password=$2
+    shift
+    ;;
+    --user=*)
+    _administrator=$optarg
+    ;;
+    -P)
+    _administrator=$2
+    shift
+    ;;
+    *)
+    show_usage
+    exit 1
+    ;;
+    esac
+
+    # Next please.
+    shift
+done
+
+# -----------------------------------------------------------
+# Check and configure cygwin environments
+# -----------------------------------------------------------
 if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
     for profile in ~/.bash_profile ~/.profile ; do
-        grep -q "export PATH=/opt/slapos/bin:" $profile ||
+        ! grep -q "export PATH=/opt/slapos/bin:" $profile &&
+        csih_inform "add /opt/slapos/bin to PATH" &&
         echo "export PATH=/opt/slapos/bin:\${PATH}" >> $profile
     done
 fi
-
 # cygrunsrv
 # ssh-host-config
 # syslog-ng-config
@@ -83,13 +134,13 @@ mkdir -p /etc/re6stnet
 if csih_is_xp ; then
     echo "Set start property of seclogon to auto"
     sc config seclogon start= auto || 
-    csih_warning "Warning: failed to set seclogon to auto start."
+    csih_warning "failed to set seclogon to auto start."
 # In the later, it's RunAs service, and will start by default
 fi
 
-# echo Checking slapos account $slapos_admin ...
-slapos_check_and_create_privileged_user $slapos_admin ||
-csih_error "Failed to create account $slapos_admin."
+# echo Checking slapos account ${_administrator} ...
+slapos_check_and_create_privileged_user ${_administrator} ${_password} ||
+csih_error "failed to create account ${_administrator}."
 
 # -----------------------------------------------------------
 # Configure cygwin services: cygserver syslog-ng sshd
@@ -117,11 +168,11 @@ check_cygwin_service syslog-ng
 
 if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
     if csih_is_xp && [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
-        slapos_request_password $slapos_admin "Install sshd service need the password of $slapos_admin."
+        slapos_request_password ${_administrator} "Install sshd service need the password of ${_administrator}."
     fi
     echo Run ssh-host-config ...
     /usr/bin/ssh-host-config --yes --cygwin ntsec --port 22002 \
-        --user $slapos_admin --pwd ${csih_PRIVILEGED_PASSWORD} ||
+        --user ${_administrator} --pwd ${csih_PRIVILEGED_PASSWORD} ||
     csih_error "Failed to run ssh-host-config"
 else
     echo The sshd service has been installed.
@@ -134,11 +185,11 @@ if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
     csih_error "Couldn't find slapos cron config script: $slapos_cron_config"
 
     if [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
-        slapos_request_password $slapos_admin "Install cron service need the password of $slapos_admin."
+        slapos_request_password ${_administrator} "Install cron service need the password of ${_administrator}."
     fi
 
     echo Run slapos-cron-config ...
-    $slapos_cron_config $slapos_admin ${csih_PRIVILEGED_PASSWORD} ||
+    $slapos_cron_config ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
     csih_error "Failed to run $slapos_cron_config"
 else
     echo The cron service has been installed.
@@ -430,11 +481,11 @@ if check_re6stnet_needed ; then
     csih_error "Failed to configure re6stnet."
     if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
         if [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
-            slapos_request_password $slapos_admin "Install re6stnet service need the password of $slapos_admin."
+            slapos_request_password ${_administrator} "Install re6stnet service need the password of ${_administrator}."
         fi
         cygrunsrv -I $re6stnet_service_name -c $(dirname $re6stnet_configure_file) \
             -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" \
-            -u $slapos_admin -w ${csih_PRIVILEGED_PASSWORD} ||
+            -u ${_administrator} -w ${csih_PRIVILEGED_PASSWORD} ||
         csih_error "Failed to install $re6stnet_service_name service."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
@@ -462,7 +513,7 @@ echo
 echo
 echo Starting configure section cron ...
 echo
-cron_user=$slapos_admin
+cron_user=${_administrator}
 slapos_crontab_file="/var/cron/tabs/$cron_user"
 if [[ ! -f $slapos_crontab_file ]] ; then
     cat <<EOF  > $slapos_crontab_file
@@ -488,11 +539,11 @@ chmod 644 $slapos_crontab_file
 ls -l $slapos_crontab_file
 
 echo
-echo Begin of crontab of $slapos_admin:
+echo Begin of crontab of ${_administrator}:
 echo ------------------------------------------------------------
 cat $slapos_crontab_file || csih_error "No crob tab found."
 echo ------------------------------------------------------------
-echo End of crontab of $slapos_admin.
+echo End of crontab of ${_administrator}.
 
 echo 
 echo Configure section cron OK.

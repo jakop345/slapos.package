@@ -46,7 +46,7 @@ declare -r slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
 
 declare -r slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 declare -r slapos_run_entry=slapos-configure
-declare -r slapos_admin=slaproot
+declare -r slapos_user=slaproot
 
 # ======================================================================
 # Routine: check_cygwin_service
