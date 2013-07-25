@@ -94,7 +94,7 @@ for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
     csih_inform "download cygwin script ${_cmdname} OK"
 done
 
-if csih_is_vista ; then
+if [[ $(uname) == CYGWIN_NT-*-WOW64 ]] ; then
     wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
     csih_error "download ipwin_x64.exe failed"
     csih_inform "download ipwin_x64.exe OK"
@@ -214,6 +214,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = ${interface_guid}%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = ${ipv4_local_network}%" \
         -e "s%^computer_id.*$%computer_id = ${computer_guid}%" \
+        -e "s%^user_base_name =.*$%user_base_name = slapguider%" \
         ${node_configure_file}
 csih_inform "type ${node_configure_file}:"
 csih_inform "************************************************************"
