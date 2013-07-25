@@ -242,7 +242,7 @@ csih_error "Run slapos node format failed. "
 echo ""
 
 # -----------------------------------------------------------
-# Request an instance of slapos webrunner
+# Request an instance of slapos installer software
 # -----------------------------------------------------------
 csih_inform "Supply slapos_installer_software in the ${computer_guid}"
 
