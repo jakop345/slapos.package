@@ -157,7 +157,7 @@ echo Starting configure slapos network ...
 echo
 if ! netsh interface ipv6 show interface | grep -q "\\b$slapos_ifname\\b" ; then
     echo Installing slapos network adapter ...
-    ipwin install $WINDIR\\inf\\netloop.inf *msloop re6stnet-lo
+    ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname}
 fi
 ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev $slapos_ifname
 # reset_connection $slapos_ifname
