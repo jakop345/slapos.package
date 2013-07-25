@@ -158,7 +158,7 @@ python -S bootstrap.py || csih_error "run bootstrap.py failed"
 csih_inform  "run bootstrap.py OK"
 
 csih_inform "start bin/buildout"
-bin/buildout -v -N || csih_error "bin/buildout failed"
+(cd /opt/slapos ; bin/buildout -v -N || csih_error "bin/buildout failed")
 
 _filename=~/slapos-core-format.patch
 wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
