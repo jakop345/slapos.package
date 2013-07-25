@@ -24,7 +24,7 @@
 #
 function show_usage()
 {
-    echo "" 
+    echo ""
     echo "Usage:"
     echo ""
     echo "    ./slapos-configure [options] [action] [configure item]"
@@ -33,6 +33,11 @@ function show_usage()
     echo ""
     echo "        -U, --user=XXX     slapos administrator, default is slaproot"
     echo "        -P, --password=XXX password of administrator"
+    echo ""
+    echo "        --computer-certificate=FILENAME"
+    echo "        --computer-key=FILENAME"
+    echo "        --client-certificate=FILENAME"
+    echo "        --client-key=FILENAME"
     echo ""
     echo "    The action option:"
     echo ""
@@ -62,6 +67,10 @@ echo ""
 # -----------------------------------------------------------
 declare _administrator=${slapos_user}
 declare _password=
+declare _computer_certificate=
+declare _computer_key=
+declare _client_certificate=
+declare _client_key=
 
 # -----------------------------------------------------------
 # Command line options
@@ -73,7 +82,7 @@ while test $# -gt 0; do
     *) optarg= ;;
     esac
 
-    case "$1" in    
+    case "$1" in
     --password=*)
     _password=$optarg
     ;;
@@ -87,6 +96,18 @@ while test $# -gt 0; do
     -P)
     _administrator=$2
     shift
+    ;;
+    --computer-certificate=*)
+    _computer_certificate=$optarg
+    ;;
+    --computer-key=*)
+    _computer_key=$optarg
+    ;;
+    --client-certificate=*)
+    _client_certificate=$optarg
+    ;;
+    --client-key=*)
+    _client_key=$optarg
     ;;
     *)
     show_usage
@@ -108,19 +129,20 @@ if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
         echo "export PATH=/opt/slapos/bin:\${PATH}" >> $profile
     done
 fi
-# cygrunsrv
-# ssh-host-config
-# syslog-ng-config
-# openssl
-# export WINDIR
-# ipwin
-# slapos_cron_config
+
+csih_check_program_or_error /usr/bin/cygrunsrv cygserver
+csih_check_program_or_error /usr/bin/ssh-host-config ssh
+csih_check_program_or_error /usr/bin/syslog-ng-config syslog-ng
+csih_check_program_or_error /usr/bin/openssl openssl
+csih_check_program_or_error /usr/bin/ipwin slapos-patches
+csih_check_program_or_error /usr/bin/slapos_cron_config slapos-patches
+[[ -z "$WINDIR" ]] && csih_error "missing environment variable WINDIR"
 
 # -----------------------------------------------------------
 # Create paths
 # -----------------------------------------------------------
 mkdir -p /etc/opt/slapos/ssl/partition_pki
-mkdir -p $slapos_client_home
+mkdir -p ${slapos_client_home}
 mkdir -p /opt/slapos/log
 mkdir -p /opt/download-cache
 mkdir -p /opt/downloads
@@ -133,7 +155,7 @@ mkdir -p /etc/re6stnet
 # Start seclogon service in the Windows XP
 if csih_is_xp ; then
     echo "Set start property of seclogon to auto"
-    sc config seclogon start= auto || 
+    sc config seclogon start= auto ||
     csih_warning "failed to set seclogon to auto start."
 # In the later, it's RunAs service, and will start by default
 fi
@@ -179,18 +201,18 @@ else
 fi
 check_cygwin_service sshd
 
-# Use slapos-cron-config to configure slapos cron service. 
+# Use slapos-cron-config to configure slapos cron service.
 if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
-    [[ -x $slapos_cron_config ]] ||
-    csih_error "Couldn't find slapos cron config script: $slapos_cron_config"
+    [[ -x ${slapos_cron_config} ]] ||
+    csih_error "Couldn't find slapos cron config script: ${slapos_cron_config}"
 
     if [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
         slapos_request_password ${_administrator} "Install cron service need the password of ${_administrator}."
     fi
 
     echo Run slapos-cron-config ...
-    $slapos_cron_config ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
-    csih_error "Failed to run $slapos_cron_config"
+    ${slapos_cron_config} ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
+    csih_error "Failed to run ${slapos_cron_config}"
 else
     echo The cron service has been installed.
 fi
@@ -206,12 +228,12 @@ echo
 echo
 echo Starting configure slapos network ...
 echo
-if ! netsh interface ipv6 show interface | grep -q "\\b$slapos_ifname\\b" ; then
+if ! netsh interface ipv6 show interface | grep -q "\\b${slapos_ifname}\\b" ; then
     echo Installing slapos network adapter ...
     ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname}
 fi
-ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev $slapos_ifname
-# reset_connection $slapos_ifname
+ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname}
+# reset_connection ${slapos_ifname}
 echo
 echo Configure slapos network OK.
 echo
@@ -235,11 +257,11 @@ echo
 echo
 echo Starting configure section config ...
 echo
-[[ -r $node_template_file && -r $client_template_file ]] || \
+[[ -r ${node_template_file} && -r ${client_template_file} ]] || \
     create_template_configure_file || \
     csih_error "Failed to create template configure file."
 
-sed -i -e "/^alias/,\$d" $client_template_file
+sed -i -e "/^alias/,\$d" ${client_template_file}
 echo "alias =
   apache_frontend http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/apache-frontend/software.cfg
   erp5 http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-0.143:/software/erp5/software.cfg
@@ -248,59 +270,63 @@ echo "alias =
   slaposwebrunner http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slaprunner-lite/software.cfg
   wordpress http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/wordpress/software.cfg
   netdrive_reporter http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/netdrive-reporter/software.cfg" \
-  >> $client_template_file
+  >> ${client_template_file}
 
-if [[ ! -f $node_certificate_file ]] ; then
-    read -p "Where is computer certificate file $(cygpath -w /computer.crt): " filename
-    [[ -z "$filename" ]] && filename="/computer.crt"
-    [[ ! -r "$filename" ]] && \
-        csih_error "Computer certificate file $filename doesn't exists."
-    echo "Copy certificate from $filename to $node_certificate_file"
-    filename=$(cygpath -u $filename)
-    cp $filename $node_certificate_file
+if [[ ! -f ${node_certificate_file} ]] ; then
+    _filename=${_computer_certificate}
+    [[ -z "${_filename}" ]] &&
+    read -p "Where is computer certificate file $(cygpath -w /computer.crt): " _filename
+    [[ -z "${_filename}" ]] && _filename="/computer.crt"
+    [[ ! -r "${_filename}" ]] && \
+        csih_error "Computer certificate file ${_filename} doesn't exists."
+    echo "Copy certificate from ${_filename} to ${node_certificate_file}"
+    _filename=$(cygpath -u ${_filename})
+    cp ${_filename} ${node_certificate_file}
 else
-    echo "Found computer certificate file: $node_certificate_file"
+    echo "Found computer certificate file: ${node_certificate_file}"
 fi
-openssl x509 -noout -in $node_certificate_file || \
-    csih_error "Invalid computer certificate: $node_certificate_file."
+openssl x509 -noout -in ${node_certificate_file} || \
+    csih_error "Invalid computer certificate: ${node_certificate_file}."
 
-if [[ ! -f $node_key_file ]] ; then
-    read -p "Where is computer key file $(cygpath -w /computer.key): " filename
-    [[ -z "$filename" ]] && filename="/computer.key"
-    [[ ! -f "$filename" ]] && \
-        csih_error "Key file $filename doesn't exists."
-    echo "Copy key from $filename to $node_key_file"
-    filename=$(cygpath -u $filename)
-    cp $filename $node_key_file
+if [[ ! -f ${node_key_file} ]] ; then
+    _filename=${_computer_key}
+    [[ -z "${_filename}" ]] &&
+    read -p "Where is computer key file $(cygpath -w /computer.key): " _filename
+    [[ -z "${_filename}" ]] && _filename="/computer.key"
+    [[ ! -f "${_filename}" ]] && \
+        csih_error "Key file ${_filename} doesn't exists."
+    echo "Copy key from ${_filename} to ${node_key_file}"
+    _filename=$(cygpath -u ${_filename})
+    cp ${_filename} ${node_key_file}
 else
-    echo "Found computer key file: $node_key_file"
+    echo "Found computer key file: ${node_key_file}"
 fi
-openssl rsa -noout -in $node_key_file -check ||
-csih_error "Invalid node key: $node_key_file."
+openssl rsa -noout -in ${node_key_file} -check ||
+csih_error "Invalid node key: ${node_key_file}."
 
-if [[ ! -f $node_configure_file ]] ; then
-    echo "Copy computer configure file from $node_template_file to $node_configure_file"
-    cp $node_template_file $node_configure_file
+if [[ ! -f ${node_configure_file} ]] ; then
+    echo "Copy computer configure file from ${node_template_file} to ${node_configure_file}"
+    cp ${node_template_file} ${node_configure_file}
 fi
 
-interface_guid=$(ipwin guid *msloop $slapos_ifname) ||
-csih_error "Failed to get guid of interface: $slapos_ifname."
+interface_guid=$(ipwin guid *msloop ${slapos_ifname}) ||
+csih_error "Failed to get guid of interface: ${slapos_ifname}."
 [[ "$interface_guid" == {*-*-*-*} ]] ||
 csih_error "Invalid interface guid $interface_guid specified."
 
-computer_guid=$(grep "CN=COMP" $node_certificate_file | \
+computer_guid=$(grep "CN=COMP" ${node_certificate_file} | \
     sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
 [[ "$computer_guid" == COMP-+([0-9]) ]] ||
 csih_error "Invalid computer id '$computer_guid' specified."
 
 echo "Computer configuration information:"
-echo "  interface name:     $slapos_ifname"
+echo "  interface name:     ${slapos_ifname}"
 echo "  GUID:               $interface_guid"
 echo "  ipv4_local_network: $ipv4_local_network"
 echo "  computer_id:        $computer_guid"
 echo
 echo "  If ipv4_local_network confilcts with your local network, change it"
-echo "  in the file: $node_configure_file "
+echo "  in the file: ${node_configure_file} "
 echo "  Or change it in the $(dirname $0)/slapos-include.sh"
 echo "  and run Configure SlapOS again."
 
@@ -308,43 +334,47 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = $ipv4_local_network%" \
         -e "s%^computer_id.*$%computer_id = $computer_guid%" \
-        $node_configure_file
+        ${node_configure_file}
 
-if [[ ! -f $client_certificate_file ]] ; then
-    read -p "Where is client certificate file $(cygpath -w /certificate): " filename
-    [[ -z "$filename" ]] && filename="/certificate"
-    [[ ! -f "$filename" ]] && \
-        csih_error "Client certificate file $filename doesn't exists."
-    echo "Copy client certificate from $filename to $client_certificate_file"
-    filename=$(cygpath -u $filename)
-    cp $filename $client_certificate_file
+if [[ ! -f ${client_certificate_file} ]] ; then
+    _filename=${_client_certificate}
+    [[ -z "${_filename}" ]] &&
+    read -p "Where is client certificate file $(cygpath -w /certificate): " _filename
+    [[ -z "${_filename}" ]] && _filename="/certificate"
+    [[ ! -f "${_filename}" ]] && \
+        csih_error "Client certificate file ${_filename} doesn't exists."
+    echo "Copy client certificate from ${_filename} to ${client_certificate_file}"
+    _filename=$(cygpath -u ${_filename})
+    cp ${_filename} ${client_certificate_file}
 fi
-openssl x509 -noout -in $client_certificate_file || \
-    csih_error "Invalid client certificate: $client_certificate_file."
+openssl x509 -noout -in ${client_certificate_file} || \
+    csih_error "Invalid client certificate: ${client_certificate_file}."
 
-if [[ ! -f $client_key_file ]] ; then
-    read -p "Where is client key file $(cygpath -w /key): " filename
-    [[ -z "$filename" ]] && filename="/key"
-    [[ ! -f "$filename" ]] && \
-        csih_error "Key file $filename doesn't exists."
-    echo "Copy client key from $filename to $client_key_file"
-    filename=$(cygpath -u $filename)
-    cp $filename $client_key_file
+if [[ ! -f ${client_key_file} ]] ; then
+    _filename=${_client_key}
+    [[ -z "${_filename}" ]] &&
+    read -p "Where is client key file $(cygpath -w /key): " _filename
+    [[ -z "${_filename}" ]] && _filename="/key"
+    [[ ! -f "${_filename}" ]] && \
+        csih_error "Key file ${_filename} doesn't exists."
+    echo "Copy client key from ${_filename} to ${client_key_file}"
+    _filename=$(cygpath -u ${_filename})
+    cp ${_filename} ${client_key_file}
 fi
-openssl rsa -noout -in $client_key_file -check || \
-    csih_error "Invalid client key: $client_key_file."
+openssl rsa -noout -in ${client_key_file} -check || \
+    csih_error "Invalid client key: ${client_key_file}."
 
-if [[ ! -f $client_configure_file ]] ; then
-    echo "Copy client configure file from $client_template_file to $client_configure_file"
-    cp $client_template_file $client_configure_file
+if [[ ! -f ${client_configure_file} ]] ; then
+    echo "Copy client configure file from ${client_template_file} to ${client_configure_file}"
+    cp ${client_template_file} ${client_configure_file}
 fi
 
 echo "Client configuration information:"
-echo "   client certificate file: $client_certificate_file"
-echo "   client key file:         $client_key_file"
-sed -i -e "s%^cert_file.*$%cert_file = $client_certificate_file%" \
-       -e "s%^key_file.*$%key_file = $client_key_file%" \
-       $client_configure_file
+echo "   client certificate file: ${client_certificate_file}"
+echo "   client key file:         ${client_key_file}"
+sed -i -e "s%^cert_file.*$%cert_file = ${client_certificate_file}%" \
+       -e "s%^key_file.*$%key_file = ${client_key_file}%" \
+       ${client_configure_file}
 echo
 echo Configure section config OK.
 echo
@@ -358,11 +388,11 @@ echo
 
 echo Checking miniupnpc ...
 if [[ ! -d /opt/miniupnpc ]] ; then
-    package=/opt/downloads/miniupnpc.tar.gz
-    [[ -r $package ]] || csih_error "No package found: $package"
+    _filename=/opt/downloads/miniupnpc.tar.gz
+    [[ -r ${_filename} ]] || csih_error "No package found: ${_filename}"
     echo "Installing miniupnpc ..."
     cd /opt
-    tar xzf $package --no-same-owner
+    tar xzf ${_filename} --no-same-owner
     mv $(ls -d miniupnpc-*) miniupnpc
     cd miniupnpc
     make
@@ -374,11 +404,11 @@ fi
 
 echo Checking pyOpenSSL ...
 if [[ ! -d /opt/pyOpenSSL ]] ; then
-    package=/opt/downloads/pyOpenSSL.tar.gz
-    [[ -r $package ]] || csih_error "No package found: $package"
+    _filename=/opt/downloads/pyOpenSSL.tar.gz
+    [[ -r ${_filename} ]] || csih_error "No package found: ${_filename}"
     echo "Installing pyOpenSSL ..."
     cd /opt
-    tar xzf $package --no-same-owner
+    tar xzf ${_filename} --no-same-owner
     mv $(ls -d pyOpenSSL-*) pyOpenSSL
     cd pyOpenSSL
     python setup.py install ||  csih_error "Failed ot install pyOpenSSL."
@@ -390,10 +420,10 @@ fi
 echo Checking re6stnet ...
 if [[ ! -d /opt/re6stnet ]] ; then
     echo "Installing re6stnet ..."
-    package=/opt/downloads/re6stnet.tar.gz
+    _filename=/opt/downloads/re6stnet.tar.gz
     cd /opt
-    if [[ -r $package ]] ; then
-        tar xzf $package --no-same-owner
+    if [[ -r ${_filename} ]] ; then
+        tar xzf ${_filename} --no-same-owner
         mv $(ls -d re6stnet-*) re6stnet
     else
         echo "Clone re6stnet from http://git.erp5.org/repos/re6stnet.git"
@@ -408,26 +438,26 @@ else
 fi
 
 echo Checking re6stnet configuration ...
-if [[ ! -r $re6stnet_configure_file ]] ; then
+if [[ ! -r ${re6stnet_configure_file} ]] ; then
     echo "Registering to http://re6stnet.nexedi.com ..."
-    cd $(dirname $re6stnet_configure_file)
+    cd $(dirname ${re6stnet_configure_file})
     # Your subnet: 2001:67c:1254:e:19::/80 (CN=917529/32)
     subnet=$(re6st-conf --registry http://re6stnet.nexedi.com/ --anonymous | \
         grep "^Your subnet:") || \
         csih_error "Register to nexedi re6stnet failed"
     [[ -r re6stnet.conf ]] || \
-        csih_error "No $re6stnet_configure_file found."
+        csih_error "No ${re6stnet_configure_file} found."
     echo Register re6stnet OK.
 
     echo "Write information to re6stnet.conf:"
     echo "  # $subnet"
     echo "  table 0"
     echo "  ovpnlog"
-    echo "  main-interface $slapos_ifname"
-    echo "  interface $slapos_ifname"
+    echo "  main-interface ${slapos_ifname}"
+    echo "  interface ${slapos_ifname}"
     echo -e "# $subnet\ntable 0\novpnlog" \
-        "\nmain-interface $slapos_ifname\ninterface $slapos_ifname" \
-        >> $re6stnet_configure_file
+        "\nmain-interface ${slapos_ifname}\ninterface ${slapos_ifname}" \
+        >> ${re6stnet_configure_file}
 fi
 
 echo
@@ -452,22 +482,22 @@ if check_re6stnet_needed ; then
     csih_inform "Disable IPv6 teredo interface ... "
     netsh interface teredo set state disable && csih_inform "OK."
 
-    client_count=$(sed -n -e "s/^client-count *//p" $re6stnet_configure_file)
-    [[ -z "$client_count" ]] && client_count=10
-    echo "Re6stnet client-count: $client_count"
-    re6stnet_name_list="re6stnet-tcp re6stnet-udp"
-    for (( i=1; i<=client_count; i=i+1 )) ; do
-        re6stnet_name_list="$re6stnet_name_list re6stnet$i"
+    _count=$(sed -n -e "s/^client-count *//p" ${re6stnet_configure_file})
+    [[ -z "${_count}" ]] && _count=10
+    echo "Re6stnet client-count: ${_count}"
+    _name_list="re6stnet-tcp re6stnet-udp"
+    for (( i=1; i<=${_count}; i=i+1 )) ; do
+        _name_list="${_name_list} re6stnet$i"
     done
-    filename=$(cygpath -w $openvpn_tap_driver_inf)
-    for name in $re6stnet_name_list ; do
+    _filename=$(cygpath -w ${openvpn_tap_driver_inf})
+    for name in ${_name_list} ; do
         echo "Checking interface $name ..."
         if ! netsh interface ipv6 show interface | grep -q "\\b$name\\b" ; then
-            [[ -r $openvpn_tap_driver_inf ]] ||
-            csih_error "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: $filename"
+            [[ -r ${openvpn_tap_driver_inf} ]] ||
+            csih_error "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: ${_filename}"
 
             echo "Installing  interface $name ..."
-            # ipwin install \"$filename\" $openvpn_tap_driver_hwid $name; ||
+            # ipwin install \"${_filename}\" $openvpn_tap_driver_hwid $name; ||
             ip vpntap add dev $name ||
             csih_error "Failed to install OpenVPN Tap-Windows Driver."
             echo "Interface $name installed."
@@ -479,25 +509,25 @@ if check_re6stnet_needed ; then
     # Run re6stnet if no native ipv6
     check_re6stnet_configure ||
     csih_error "Failed to configure re6stnet."
-    if ! cygrunsrv --query $re6stnet_service_name >/dev/null 2>&1 ; then
+    if ! cygrunsrv --query ${re6stnet_service_name} >/dev/null 2>&1 ; then
         if [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
             slapos_request_password ${_administrator} "Install re6stnet service need the password of ${_administrator}."
         fi
-        cygrunsrv -I $re6stnet_service_name -c $(dirname $re6stnet_configure_file) \
+        cygrunsrv -I ${re6stnet_service_name} -c $(dirname ${re6stnet_configure_file}) \
             -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" \
             -u ${_administrator} -w ${csih_PRIVILEGED_PASSWORD} ||
-        csih_error "Failed to install $re6stnet_service_name service."
+        csih_error "Failed to install ${re6stnet_service_name} service."
     fi
     echo "You can check log files in the /var/log/re6stnet/*.log"
-    if ! check_cygwin_service $re6stnet_service_name ; then
-        csih_inform "Service $re6stnet_service_name is not running. One possible case"
+    if ! check_cygwin_service ${re6stnet_service_name} ; then
+        csih_inform "Service ${re6stnet_service_name} is not running. One possible case"
         csih_inform "is that re6stnet service is shutdown in unusual ways, in this case"
         csih_inform "you can fix it by removing '/var/lib/re6stnet'."
         if csih_request "Do you want to let me remove it for you?" ; then
             rm -rf /var/lib/re6stnet
         fi
-        check_cygwin_service $re6stnet_service_name ||
-        csih_error "Failed to start $re6stnet_service_name service."
+        check_cygwin_service ${re6stnet_service_name} ||
+        csih_error "Failed to start ${re6stnet_service_name} service."
     fi
 else
     echo "Native IPv6 found, no taps required."
@@ -513,10 +543,10 @@ echo
 echo
 echo Starting configure section cron ...
 echo
-cron_user=${_administrator}
-slapos_crontab_file="/var/cron/tabs/$cron_user"
-if [[ ! -f $slapos_crontab_file ]] ; then
-    cat <<EOF  > $slapos_crontab_file
+_cron_user=${_administrator}
+_crontab_file="/var/cron/tabs/${_cron_user}"
+if [[ ! -f ${_crontab_file} ]] ; then
+    cat <<EOF  > ${_crontab_file}
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
@@ -532,20 +562,20 @@ MAILTO=""
 0 * * * * /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
 EOF
 fi
-echo Change owner of $slapos_crontab_file to $cron_user
-chown $cron_user $slapos_crontab_file
-echo Change mode of $slapos_crontab_file to 644
-chmod 644 $slapos_crontab_file
-ls -l $slapos_crontab_file
+echo Change owner of ${_crontab_file} to ${_cron_user}
+chown ${_cron_user} ${_crontab_file}
+echo Change mode of ${_crontab_file} to 644
+chmod 644 ${_crontab_file}
+ls -l ${_crontab_file}
 
 echo
 echo Begin of crontab of ${_administrator}:
 echo ------------------------------------------------------------
-cat $slapos_crontab_file || csih_error "No crob tab found."
+cat ${_crontab_file} || csih_error "No crob tab found."
 echo ------------------------------------------------------------
 echo End of crontab of ${_administrator}.
 
-echo 
+echo
 echo Configure section cron OK.
 echo
 
