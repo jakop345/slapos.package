@@ -208,8 +208,6 @@ autoreconf &&
 ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root &&
 make) || csih_error "make openvpn failed"
 
-(cd /opt/git/slapos.package/windows/docs && wget http://dashingsoft.com/products/slapos/using-slapos-in-windows.html)
-
 wget --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O /opt/downloads/pyOpenSSL-0.13.tar.gz
 wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O /opt/downloads/miniupnpc-1.8.tar.gz
 
