@@ -116,7 +116,7 @@ if ! netsh interface ipv6 show interface | grep -q "\\b${slapos_ifname}\\b" ; th
     ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname} ||
     csih_error "install network interface ${slapos_ifname} failed"
 fi
-ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev $slapos_ifname ||
+ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname} ||
 csih_error "add ipv4 address failed"
 
 csih_inform "Configure slapos network OK"
@@ -129,6 +129,7 @@ csih_inform "Starting configure IPv6 protocol ..."
 netsh interface ipv6 show interface > /dev/null || \
     netsh interface ipv6 install || \
     csih_error "install IPv6 protocol failed"
+
 csih_inform "Configure IPv6 protocol OK"
 echo ""
 
@@ -231,6 +232,7 @@ csih_inform "************************************************************"
 
 csih_inform "Configure slapos client and node OK"
 echo ""
+
 # -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
