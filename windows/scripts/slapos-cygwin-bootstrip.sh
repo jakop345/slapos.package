@@ -99,25 +99,22 @@ else
 fi
 
 for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
-    [[ -x /usr/bin/${_cmdname} ]] && continue
-    wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
+    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
     csih_error "download ${_cmdname} failed"
     csih_inform "download cygwin script ${_cmdname} OK"
     chmod +x /usr/bin/${_cmdname} || csih_error "chmod /usr/bin/${_cmdname} failed"
 done
 
-if [[ ! -x /usr/bin/ipwin.exe ]] ; then
-    if check_os_is_wow64 ; then
-        wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
-        csih_error "download ipwin_x64.exe failed"
-        csih_inform "download ipwin_x64.exe OK"
-    else
-        wget http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
-        csih_error "download ipwin_x86.exe failed"
-        csih_inform "download ipwin_x86.exe OK"
-    fi
-    chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
+if check_os_is_wow64 ; then
+    wget -c http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
+    csih_error "download ipwin_x64.exe failed"
+    csih_inform "download ipwin_x64.exe OK"
+else
+    wget -c http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
+    csih_error "download ipwin_x86.exe failed"
+    csih_inform "download ipwin_x86.exe OK"
 fi
+chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 
 csih_inform "Patch cygwin packages for building slapos OK"
 echo ""
@@ -182,8 +179,7 @@ csih_inform "start bin/buildout"
 (cd /opt/slapos ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
 _filename=~/slapos-core-format.patch
-[[ -f ${_filename} ]] ||
-wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
+wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "download ${_filename} OK"
 
@@ -232,10 +228,10 @@ csih_error "get guid of interface ${slapos_ifname} failed"
 csih_error "invalid interface guid ${interface_guid} specified."
 csih_inform "the guid of interface ${slapos_ifname} is ${interface_guid}"
 
-wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O ${node_configure_file} ||
+wget -c http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O ${node_configure_file} ||
 csih_error "download ${node_configure_file} failed"
 csih_inform "download ${node_configure_file} OK"
-wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O ${client_configure_file} ||
+wget -c http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O ${client_configure_file} ||
 csih_error "download ${node_configure_file} failed"
 csih_inform "download ${node_configure_file} OK"
 
