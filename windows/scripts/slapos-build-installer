@@ -2,15 +2,20 @@
 #
 # This script is used to build slapos installer of windows.
 #
-# Usage:
-#
-#   ./slapos-build-installer
-#
 function check_os_is_wow64()
 {
   [[ $(uname) == CYGWIN_NT-*-WOW64 ]]
 }
 readonly -f check_os_is_wow64
+
+function show_usage()
+{
+    echo "Usage:"
+    echo ""
+    echo "  ./slapos-build-installer"
+    echo ""
+}
+readonly -f show_usage
 
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
@@ -24,7 +29,7 @@ echo ""
 # ======================================================================
 # Constants
 # ======================================================================
-declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\..)
+declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
 declare -r ISCC=/opt/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
@@ -92,19 +97,24 @@ else
 fi
 
 for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
+    [[ -x /usr/bin/${_cmdname} ]] && continue
     wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
     csih_error "download ${_cmdname} failed"
     csih_inform "download cygwin script ${_cmdname} OK"
+    chmod +x /usr/bin/${_cmdname} || csih_error "chmod /usr/bin/${_cmdname} failed"
 done
 
-if check_os_is_wow64 ; then
-    wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x64.exe failed"
-    csih_inform "download ipwin_x64.exe OK"
-else
-    wget http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x86.exe failed"
-    csih_inform "download ipwin_x86.exe OK"
+if [[ ! -x /usr/bin/ipwin.exe ]] ; then
+    if check_os_is_wow64 ; then
+        wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
+        csih_error "download ipwin_x64.exe failed"
+        csih_inform "download ipwin_x64.exe OK"
+    else
+        wget http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
+        csih_error "download ipwin_x86.exe failed"
+        csih_inform "download ipwin_x86.exe OK"
+    fi
+    chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 fi
 
 csih_inform "Patch cygwin packages for building slapos OK"
@@ -114,11 +124,26 @@ echo ""
 # Make directories
 # -----------------------------------------------------------
 _optdir=${cygwin_home}/opt
-csih_inform "mkdir ${_optdir}/log"
-mkdir -p ${_optdir}/log
+csih_inform "mkdir ${_optdir}"
+mkdir -p ${_optdir}
 
-csih_inform "link ${_optdir} to /opt"
-ln -s ${_optdir} /opt || csih_error "create link failed"
+[[ -d /opt ]] && [[ ! -h /opt ]] &&
+csih_error_multi "/opt isn't a symbol link" \
+    "in order to build the installer by this script, " \
+    "/opt should be link to ${_optdir}"
+
+[[ -h /opt ]] &&
+! ls -ld /opt | grep -q "\-> ${_optdir}" &&
+csih_error_multi "in order to build the installer by this script, " \
+    "/opt should be link to ${_optdir}" \
+    "now /opt link to another directory"
+
+[[ ! -d /opt ]] &&
+csih_inform "link ${_optdir} to /opt" &&
+(ln -s ${_optdir} /opt || csih_error "create link failed")
+
+csih_inform "mkdir /opt/slapos/log"
+mkdir -p /opt/slapos/log
 
 csih_inform "mkdir /opt/download-cache"
 mkdir -p /opt/download-cache
@@ -134,33 +159,40 @@ mkdir -p /opt/downloads
 # -----------------------------------------------------------
 csih_inform "Starting run buildout of slapos node ..."
 
+[[ -f /opt/slapos/buildout.cfg ]] ||
 (cd /opt/slapos && echo "[buildout]
 extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
-" > buildout.cfg &&
-csih_inform "buildout.cfg generated")
+" > buildout.cfg) &&
+csih_inform "buildout.cfg generated"
 
-python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ||
+[[ -f /opt/slapos/bootstrap.py ]] ||
+(cd /opt/slapos &&
+python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ) ||
 csih_error "download bootstrap.py failed"
 csih_inform "download bootstrap.py OK"
 
-python -S bootstrap.py || csih_error "run bootstrap.py failed"
+[[ -f /opt/slapos/bin/buildout ]] ||
+(cd /opt/slapos && python -S bootstrap.py) ||
+csih_error "run bootstrap.py failed"
 csih_inform  "run bootstrap.py OK"
 
 csih_inform "start bin/buildout"
-(cd /opt/slapos ; bin/buildout -v -N || csih_error "bin/buildout failed")
+(cd /opt/slapos ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
 _filename=~/slapos-core-format.patch
+[[ -f ${_filename} ]] ||
 wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "download ${_filename} OK"
 
-((cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) || csih_error "no slapos.core egg found") &&
+csih_inform "applay patch ${_filename}"
+(cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) &&
 csih_inform "patch at $(pwd)" &&
 patch -f --dry-run -p1 < ${_filename} > /dev/null &&
 patch -p1 < ${_filename} &&
-csih_inform "apply patch ${_filename}")
+csih_inform "apply patch ${_filename} OK")
 
 csih_inform "Run buildout of slapos node OK"
 echo ""
@@ -170,7 +202,7 @@ echo ""
 # -----------------------------------------------------------
 csih_inform "Preparing the sources used to build installer ..."
 
-(rm -rf /opt/slapos/slapos.tar.gz; cd /opt/slapos ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz slapos/) ||
+(rm -rf /opt/slapos/slapos.tar.gz; cd /opt ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz slapos/) ||
 csih_error "create slapos.tar.gz failed"
 csih_inform "tar package /opt/slapos/slapos.tar.gz generated"
 
@@ -184,7 +216,7 @@ wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.c
 csih_error "download ${_filename} failed"
 csih_inform "download ${_filename} OK"
 
-(cd /opt/git/slapos.package ; git pull) || 
+(cd /opt/git/slapos.package ; git pull) ||
 (cd /opt/git ; git clone -b cygwin http://git.erp5.org/repos/slapos.package.git) ||
 csih_error "clone http://git.erp5.org/repos/slapos.package.git failed"
 csih_inform "clone/pull http://git.erp5.org/repos/slapos.package.git OK"
@@ -209,44 +241,95 @@ autoreconf &&
 ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root &&
 make) || csih_error "make openvpn failed"
 
-wget --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O /opt/downloads/pyOpenSSL-0.13.tar.gz
-wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O /opt/downloads/miniupnpc-1.8.tar.gz
+_filename=/opt/downloads/pyOpenSSL-0.13.tar.gz
+[[ -f ${_filename} ]] ||
+wget --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
+csih_error "download ${_filename} failed"
+csih_inform "Got ${_filename}"
 
-(cd /opt/git/re6stnet ; git pull) || (cd /opt/git ; git clone -b cygwin http://git.erp5.org/repos/re6stnet.git)
-(cd /opt/git/re6stnet ; python setup.py sdist)
+_filename=/opt/downloads/miniupnpc-1.8.tar.gz
+[[ -f ${_filename} ]] ||
+wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O ${_filename} ||
+csih_error "download ${_filename} failed"
+csih_inform "Got ${_filename}"
+
+csih_inform "updating re6stnet.git ..."
+(cd /opt/git/re6stnet ; git pull) ||
+(cd /opt/git ; git clone -b cygwin http://git.erp5.org/repos/re6stnet.git) ||
+csih_error "clone/pull re6stnet.git failed"
+
+csih_inform "creating re6stnet source package ..."
+(cd /opt/git/re6stnet ; python setup.py sdist) ||
+csih_error "create re6stnet source package failed"
 
 _filename=~/images.tar.gz
-wget http://www.dashingsoft.com/products/slapos/images.tar.gz -O ${_filename}
-(cd /opt ; tar xzf ${_filename} --no-same-owner)
+[[ -f ${_filename} ]] ||
+wget http://www.dashingsoft.com/products/slapos/images.tar.gz -O ${_filename} ||
+csih_error "download ${_filename} failed"
+csih_inform "Got ${_filename}"
+
+csih_inform "extracting ${_filename} ..."
+(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
+csih_error "extract ${_filename} failed"
 
 _filename=~/openvpn-driver.tar.gz
 if check_os_is_wow64 ; then
-    wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz -O ${_filename}
+    _url=http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz    
 else
-    wget http://www.dashingsoft.com/products/slapos/openvpn-driver-X86.tar.gz -O ${_filename}
+    _url=http://www.dashingsoft.com/products/slapos/openvpn-driver-X86.tar.gz
 fi
-(cd /opt ; tar xzf ${_filename} --no-same-owner)
+[[ -f ${_filename} ]] ||
+wget ${_url} -O ${_filename} ||
+csih_error_multi "download ${_filename} failed" "  from ${_url}"
+csih_inform "Got ${_filename}"
+csih_inform "  from ${_url}"
 
-wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O /opt/slapos/slapos.cfg.example
-wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O /opt/slapos/slapos-client.cfg.example
+csih_inform "extracting ${_filename} ..."
+(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
+csih_error "extract ${_filename} failed"
 
+_filename=/opt/slapos/slapos.cfg.example
+[[ -f ${_filename} ]] ||
+wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O ||
+csih_error "download ${_filename} failed"
+csih_inform "Got ${_filename}"
+
+_filename= /opt/slapos/slapos-client.cfg.example
+[[ -f ${_filename} ]] ||
+wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O ||
+csih_error "download ${_filename} failed"
+csih_inform "Got ${_filename}"
+
+csih_inform "Prepare the sources OK"
+echo ""
 # -----------------------------------------------------------
 # Generate installer
 # -----------------------------------------------------------
-[[ -x "$ISCC" ]] || csih_error "missing $ISCC"
-
 _issfile=~/slapos.iss
-_installer_name=slapos-windows-all-in-one.exe
+_installer_name=slapos-windows-all-in-one
 _output_dir=$(cygpath -w ~/)
 _source_dir=$(cygpath -a -w $(cygpath -w /)\\..)
-cp /opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss ${_issfile}
-sed -i -e "s/^DefaultDirName=.*/DefaultDirName=?/" \
-       -e "s/^OutputBaseFilename=.*/OutputBaseFilename=$(basename ${_installer_name})/" \
+_srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
+_install_path=$(cygpath -w /opt/slapos-node)
+csih_inform "Starting generate Windows installer ..."
+ 
+[[ -x "$ISCC" ]] || csih_error "missing $ISCC"
+csih_inform "copy ${_srcfile} to ${_issfile}"
+cp ${_srcfile}  ${_issfile} || csih_error "copy failed"
+
+csih_inform "patch ${_issfile} ...}"
+sed -i -e "s/^DefaultDirName=.*/DefaultDirName=${_install_path}/" \
+       -e "s/^OutputBaseFilename=.*/OutputBaseFilename=${_installer_name}/" \
        -e "s/^OutputDir=.*/OutputDir=${_output_dir}/" \
        -e "s/^SourceDir=.*/SourceDir=${_source_dir}/" \
-    ${_issfile}
+    ${_issfile} || csih_error "patch failed"
 
-$ISCC /Q $(cygpath -w ${_issfile})
+csih_inform "run issc to build ${_issfile} ..."
+$ISCC /Q $(cygpath -w ${_issfile}) ||
+csih_error "issc failed"
+
+csih_inform "Generate Windows installer OK"
+echo ""
 
 echo ""
 csih_inform "Build Slapos Windows installer successfully."

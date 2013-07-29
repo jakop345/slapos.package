@@ -174,7 +174,7 @@ csih_error "download bootstrap.py failed"
 csih_inform "download bootstrap.py OK"
 
 [[ -f /opt/slapos/bin/buildout ]] ||
-(cd /opt/slapos && python -S bootstrap.py) || 
+(cd /opt/slapos && python -S bootstrap.py) ||
 csih_error "run bootstrap.py failed"
 csih_inform  "run bootstrap.py OK"
 
