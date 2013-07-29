@@ -164,22 +164,22 @@ mkdir -p /opt/download-cache
 extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
 prefix = ${buildout:directory}
-" > buildout.cfg &&
-csih_inform "buildout.cfg generated")
+" > buildout.cfg) &&
+csih_inform "buildout.cfg generated"
 
 [[ -f /opt/slapos/bootstrap.py ]] ||
-(cd /opt/slapos ;
-python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ||
+(cd /opt/slapos &&
+python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ) ||
 csih_error "download bootstrap.py failed"
-csih_inform "download bootstrap.py OK")
+csih_inform "download bootstrap.py OK"
 
 [[ -f /opt/slapos/bin/buildout ]] ||
-(cd /opt/slapos ;
-python -S bootstrap.py || csih_error "run bootstrap.py failed"
-csih_inform  "run bootstrap.py OK")
+(cd /opt/slapos && python -S bootstrap.py) || 
+csih_error "run bootstrap.py failed"
+csih_inform  "run bootstrap.py OK"
 
 csih_inform "start bin/buildout"
-(cd /opt/slapos ; bin/buildout -v -N || csih_error "bin/buildout failed")
+(cd /opt/slapos ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
 _filename=~/slapos-core-format.patch
 [[ -f ${_filename} ]] ||
