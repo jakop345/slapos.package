@@ -30,7 +30,7 @@ echo ""
 # Constants
 # ======================================================================
 declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
-declare -r ISCC=/opt/inno-setup/ISCC.exe
+declare -r ISCC=/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
 # Command line options
@@ -297,7 +297,7 @@ echo ""
 # -----------------------------------------------------------
 _issfile=~/slapos.iss
 _installer_name=slapos-windows-all-in-one
-_output_dir=$(cygpath -a -w ~ | sed -e 's%\\%\\\\%g')
+_output_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _source_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
 _install_path=$(cygpath -w /opt/slapos-node | sed -e 's%\\%\\\\%g')
