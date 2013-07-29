@@ -1,26 +1,36 @@
 #! /bin/bash
 #
-# This script is used to build a bootstrip slapos in the cywin.
-#
-# Usage:
-#
-#   ./slapos-cygwin-bootstrip.sh
-#
-# Before run this script, type the following command in the windows
-# command console to install cygwin:
-#
-#   setup_cygwin.bat C:\slapos-bootstrip network
-#
-# Then sign up slapos.org, got the following certificate files:
-#
-#   certificate
-#   key
-#
-#   computer.key
-#   computer.crt
-#
-# save them in your home path.
-#
+function check_os_is_wow64()
+{
+  [[ $(uname) == CYGWIN_NT-*-WOW64 ]]
+}
+readonly -f check_os_is_wow64
+
+function show_usage()
+{
+    echo "This script is used to build a bootstrip slapos in the cywin."
+    echo ""
+    echo "Usage:"
+    echo ""
+    echo "  ./slapos-cygwin-bootstrip.sh"
+    echo ""
+    echo "Before run this script, type the following command in the windows"
+    echo "command console to install cygwin:"
+    echo ""
+    echo "  setup_cygwin.bat C:\slapos-bootstrip network"
+    echo ""
+    echo "Then sign up slapos.org, got the following certificate files:"
+    echo ""
+    echo "  certificate"
+    echo "  key"
+    echo "  computer.key"
+    echo "  computer.crt"
+    echo ""
+    echo "save them in your home path."
+    echo ""
+}
+readonly -f show_usage
+
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
     echo "Error: Missing csih package."
@@ -97,7 +107,7 @@ for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
 done
 
 if [[ ! -x /usr/bin/ipwin.exe ]] ; then
-    if [[ $(uname) == CYGWIN_NT-*-WOW64 ]] ; then
+    if check_os_is_wow64 ; then
         wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
         csih_error "download ipwin_x64.exe failed"
         csih_inform "download ipwin_x64.exe OK"
