@@ -25,6 +25,7 @@ echo ""
 # Constants
 # ======================================================================
 declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\..)
+declare -r ISCC=/opt/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
 # Command line options
@@ -232,10 +233,12 @@ wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.c
 # -----------------------------------------------------------
 # Generate installer
 # -----------------------------------------------------------
+[[ -x "$ISCC" ]] || csih_error "missing $ISCC"
+
 _issfile=~/slapos.iss
 _installer_name=slapos-windows-all-in-one.exe
-_output_dir=
-_source_dir=
+_output_dir=$(cygpath -w ~/)
+_source_dir=$(cygpath -a -w $(cygpath -w /)\\..)
 cp /opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss ${_issfile}
 sed -i -e "s/^DefaultDirName=.*/DefaultDirName=?/" \
        -e "s/^OutputBaseFilename=.*/OutputBaseFilename=$(basename ${_installer_name})/" \
@@ -243,7 +246,7 @@ sed -i -e "s/^DefaultDirName=.*/DefaultDirName=?/" \
        -e "s/^SourceDir=.*/SourceDir=${_source_dir}/" \
     ${_issfile}
 
-$ISSC /Q /O ${_output_dir} /F ${_installer_name} ${_issfile}
+$ISCC /Q $(cygpath -w ${_issfile})
 
 echo ""
 csih_inform "Build Slapos Windows installer successfully."

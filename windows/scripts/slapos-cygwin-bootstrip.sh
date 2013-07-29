@@ -89,22 +89,25 @@ else
 fi
 
 for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
+    [[ -x /usr/bin/${_cmdname} ]] && continue
     wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
     csih_error "download ${_cmdname} failed"
     csih_inform "download cygwin script ${_cmdname} OK"
     chmod +x /usr/bin/${_cmdname} || csih_error "chmod /usr/bin/${_cmdname} failed"
 done
 
-if [[ $(uname) == CYGWIN_NT-*-WOW64 ]] ; then
-    wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x64.exe failed"
-    csih_inform "download ipwin_x64.exe OK"
-else
-    wget http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x86.exe failed"
-    csih_inform "download ipwin_x86.exe OK"
+if [[ ! -x /usr/bin/ipwin.exe ]] ; then
+    if [[ $(uname) == CYGWIN_NT-*-WOW64 ]] ; then
+        wget http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
+        csih_error "download ipwin_x64.exe failed"
+        csih_inform "download ipwin_x64.exe OK"
+    else
+        wget http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
+        csih_error "download ipwin_x86.exe failed"
+        csih_inform "download ipwin_x86.exe OK"
+    fi
+    chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 fi
-chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 
 csih_inform "Patch cygwin packages for building slapos OK"
 echo ""
@@ -146,6 +149,7 @@ mkdir -p /opt/slapos/log
 csih_inform "mkdir /opt/download-cache"
 mkdir -p /opt/download-cache
 
+[[ -f /opt/slapos/buildout.cfg ]] ||
 (cd /opt/slapos && echo "[buildout]
 extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
 download-cache = /opt/download-cache
@@ -153,11 +157,13 @@ prefix = ${buildout:directory}
 " > buildout.cfg &&
 csih_inform "buildout.cfg generated")
 
-(cd /opt/slapos ; 
+[[ -f /opt/slapos/bootstrap.py ]] ||
+(cd /opt/slapos ;
 python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ||
 csih_error "download bootstrap.py failed"
 csih_inform "download bootstrap.py OK")
 
+[[ -f /opt/slapos/bin/buildout ]] ||
 (cd /opt/slapos ;
 python -S bootstrap.py || csih_error "run bootstrap.py failed"
 csih_inform  "run bootstrap.py OK")
@@ -166,15 +172,17 @@ csih_inform "start bin/buildout"
 (cd /opt/slapos ; bin/buildout -v -N || csih_error "bin/buildout failed")
 
 _filename=~/slapos-core-format.patch
+[[ -f ${_filename} ]] ||
 wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "download ${_filename} OK"
 
-((cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) || csih_error "no slapos.core egg found") &&
+csih_inform "applay patch ${_filename}"
+(cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) &&
 csih_inform "patch at $(pwd)" &&
 patch -f --dry-run -p1 < ${_filename} > /dev/null &&
 patch -p1 < ${_filename} &&
-csih_inform "apply patch ${_filename}")
+csih_inform "apply patch ${_filename} OK")
 
 csih_inform "Run buildout of slapos node OK"
 echo ""
@@ -192,6 +200,13 @@ csih_inform "mkdir /etc/opt/slapos/ssl/partition_pki"
 mkdir -p /etc/opt/slapos/ssl/partition_pki
 csih_inform "mkdir ${slapos_client_home}"
 mkdir -p ${slapos_client_home}
+
+(cp ~/certificate ${client_certificate_file} &&
+cp ~/key ${client_key_file} &&
+cp ~/computer.crt ${node_certificate_file} &&
+cp ~/computer.key ${node_key_file} &&
+csih_inform "copy certificate/key files OK") ||
+csih_error "copy certificate/key files failed"
 
 computer_guid=$(grep "CN=COMP" ${node_certificate_file} | \
     sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
@@ -242,6 +257,7 @@ echo ""
 # -----------------------------------------------------------
 csih_inform "Formating SlapOS Node ..."
 
+netsh interface ipv6 add addr ${slapos_ifname} ${ipv6_local_address}
 /opt/slapos/bin/slapos node format -cv --now ||
 csih_error "Run slapos node format failed. "
 
