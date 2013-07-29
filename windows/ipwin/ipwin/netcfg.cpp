@@ -1022,7 +1022,7 @@ HRESULT SlaposNetCfgWinRemoveNetworkInterface(IN LPCWSTR pHwid,
           // int length = StringFromGUID2(*pGUID, wszGuid, RT_ELEMENTS(wszGuid));
           // if (!length)
           //   SetErrBreak(("Failed to create a Guid string"));
-          
+
           swprintf (strRegLocation,
                     L"SYSTEM\\CurrentControlSet\\Control\\Network\\"
                     L"{4D36E972-E325-11CE-BFC1-08002BE10318}\\%s",
@@ -1212,7 +1212,7 @@ HRESULT SlaposNetCfgGetNetworkInterfaceGuid(IN LPCWSTR pHwid,
                                             OUT BSTR *pErrMsg
                                             )
 {
-  HRESULT hrc = S_OK;
+  HRESULT hrc = E_FAIL;
 
   IP_ADAPTER_ADDRESSES *pAdaptAddr = NULL;
   IP_ADAPTER_ADDRESSES *pTmpAdaptAddr = NULL;
@@ -1249,6 +1249,85 @@ HRESULT SlaposNetCfgGetNetworkInterfaceGuid(IN LPCWSTR pHwid,
       if (wcscmp(pConnectionName, pTmpAdaptAddr -> FriendlyName) == 0) {
         memcpy(pGUID, pTmpAdaptAddr -> AdapterName, strlen(pTmpAdaptAddr -> AdapterName));
         // memcpy(pGUID, &(pTmpAdaptAddr -> NetworkGuid), sizeof(pTmpAdaptAddr -> NetworkGuid));
+        hrc = S_OK;
+        break;
+      }
+      pTmpAdaptAddr = pTmpAdaptAddr->Next;
+    }
+  }
+  FREE(pAdaptAddr);
+
+  return hrc;
+}
+
+HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
+                                             OUT BSTR *pName,
+                                             OUT BSTR *pErrMsg
+                                             )
+{
+  HRESULT hrc = E_FAIL;
+
+  IP_ADAPTER_ADDRESSES *pAdaptAddr = NULL;
+  IP_ADAPTER_ADDRESSES *pTmpAdaptAddr = NULL;
+  DWORD dwRet = 0;
+  DWORD dwSize = 0x10000;
+  CHAR guid[256] = {0};
+
+  if (WideCharToMultiByte(CP_ACP,
+                          0,
+                          pGUID,
+                          -1,
+                          guid,
+                          256,
+                          NULL,
+                          NULL
+                          ) == 0) {
+    sprintf((char*)pErrMsg, "%s", "WideCharToMultiByte error");
+    return E_FAIL;
+  }
+
+  dwRet = GetAdaptersAddresses(AF_UNSPEC,
+                               GAA_FLAG_SKIP_UNICAST            \
+                               | GAA_FLAG_SKIP_ANYCAST          \
+                               | GAA_FLAG_SKIP_MULTICAST        \
+                               | GAA_FLAG_SKIP_DNS_SERVER,
+                               NULL,
+                               pAdaptAddr,
+                               &dwSize
+                               );
+  if (ERROR_BUFFER_OVERFLOW == dwRet) {
+    FREE(pAdaptAddr);
+    if (NULL == (pAdaptAddr = (IP_ADAPTER_ADDRESSES*)MALLOC(dwSize)))
+      return E_FAIL;
+    dwRet = GetAdaptersAddresses(AF_UNSPEC,
+                                 GAA_FLAG_SKIP_UNICAST            \
+                                 | GAA_FLAG_SKIP_ANYCAST          \
+                                 | GAA_FLAG_SKIP_MULTICAST        \
+                                 | GAA_FLAG_SKIP_DNS_SERVER,
+                                 NULL,
+                                 pAdaptAddr,
+                                 &dwSize
+                                 );
+  }
+
+  if (NO_ERROR == dwRet) {
+    pTmpAdaptAddr = pAdaptAddr;
+    while (pTmpAdaptAddr) {
+      if ((strcmp(pTmpAdaptAddr -> AdapterName, guid) == 0) &&
+          pTmpAdaptAddr -> FriendlyName) {
+        hrc = S_OK;
+        if (WideCharToMultiByte(CP_ACP,
+                                0,
+                                pTmpAdaptAddr -> FriendlyName,
+                                -1,
+                                (char*)pName,
+                                256,
+                                NULL,
+                                NULL
+                                ) == 0) {
+          sprintf((char*)pErrMsg, "%s", "WideCharToMultiByte error");
+          hrc = ERROR_BUFFER_OVERFLOW;
+        }
         break;
       }
       pTmpAdaptAddr = pTmpAdaptAddr->Next;

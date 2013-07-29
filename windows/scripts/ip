@@ -300,15 +300,14 @@ function prefix_to_netmask()
 #
 function format_interface_name()
 {
-    if [[ "$1" == "" ]]; then
-        return 1
-    fi
-
+    [[ -z "$1" ]] && return 1
+    [[ -x /usr/bin/ipwin.exe ]] || return 1
+    
     local guid="$1"
-    if ! [[ "${guid:0:1}" == "{" ]] ; then
-        echo $1
+    if [[ ${guid} == {*} ]] ; then
+        echo $(ipwin name ${guid})
     else
-        echo "re6stnet-lo"
+        echo ${guid}
     fi
 }
 

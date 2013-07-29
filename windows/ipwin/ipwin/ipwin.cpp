@@ -7,6 +7,10 @@
  *
  *     ipwin guid *MSLOOP re6stnet-lo
  *
+ * Get connection name by interface guid:
+ *
+ *     ipwin name {610B0F3F-06A7-47EF-A38D-EF55503C481F}
+ *
  * Install network adapter and rename connection
  *
  *     ipwin install "OemWin2k.inf" tap0901 re6stnet-tcp
@@ -48,26 +52,62 @@ HRESULT SlaposNetCfgGetNetworkInterfaceGuid(IN LPCWSTR pHwid,
                                             OUT BSTR *pGUID,
                                             OUT BSTR *pErrMsg
                                             );
+HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
+                                             OUT BSTR *pName,
+                                             OUT BSTR *pErrMsg
+                                             );
 void Usage()
 {
-  printf("Usage: ipwin [command] [options] \n\n\
-Get guid of interface:\n\
-  ipwin guid HWID CONNECTION-NAME\n\n\
-For example,\n\
-  ipwin guid *MSLOOP re6stnet-lo\n\
+  printf("Usage: ipwin [command] [options] \n\
 \n\
-Install network adapter and rename connection:\n\
-  ipwin install INF-FILE HWID CONNECTION-NAME\n\n\
-For example,\n\
+Available command:\n\
+  install        Install network adapter\n\
+  remove         Remove network adapter\n\
+  guid           Get GUID of interface by name\n\
+  name           Get name by GUID\n\
+  codepage       Get Windows CodePage\n\
+\n\
+*install\n\
+\n\
+  Install network adapter and rename connection:\n\
+\n\
+  ipwin install INF-FILE HWID CONNECTION-NAME\n\
+\n\
+  For example,\n\
   ipwin install \"OemWin2k.inf\" tap0901 re6stnet-tcp\n\
 \n\
   ipwin install \"netloop.inf\" *MSLOOP re6stnet-lo\n\
 \n\
-Remove network adapter:\n\
-  ipwin remove HWID CONNECTIION-NAME\n\n\
-For example,\n\
+*remove\n\
+\n\
+  Remove network adapter:\n\
+  ipwin remove HWID CONNECTIION-NAME\n\
+\n\
+  For example,\n\
   ipwin remove tap0901 re6stnet-tcp\n\
-\n\n\
+\n\
+*guid\n\
+\n\
+  Get guid of interface:\n\
+  ipwin guid HWID CONNECTION-NAME\n\
+\n\
+  For example,\n\
+  ipwin guid *MSLOOP re6stnet-lo\n\
+\n\
+*name\n\
+\n\
+  Get connection name by GUID:\n\
+  ipwin name GUID\n\
+\n\
+  For example,\n\
+  ipwin name {610B0F3F-06A7-47EF-A38D-EF55503C481F}\n\
+\n\
+*codepage\n\
+\n\
+  Get codepage of Windows:\n\
+  ipwin codepage\n\
+\n\
+\n\
 Exit status:\n\
   0  if OK,\n\
   other value if problems\n\
@@ -273,6 +313,16 @@ int _tmain(int argc, TCHAR * argv[])
     }
     else {
       hr = SlaposNetCfgGetNetworkInterfaceGuid(argv[2], argv[3], pGUID, pErrMsg);
+      printf("%s", hr == S_OK ? pGUID : pErrMsg);
+    }
+  }
+  else if (wcscmp(argv[1], L"name") == 0) {
+    if (argc != 3) {
+      Usage();
+      hr = E_FAIL;
+    }
+    else {
+      hr = SlaposNetCfgGetNetworkConnectionName(argv[2], pGUID, pErrMsg);
       printf("%s", hr == S_OK ? pGUID : pErrMsg);
     }
   }
