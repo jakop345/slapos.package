@@ -284,37 +284,47 @@ csih_inform "extracting ${_filename} ..."
 (cd /opt ; tar xzf ${_filename} --no-same-owner) ||
 csih_error "extract ${_filename} failed"
 
+_filename=/opt/git/slapos.package/windows/ipwin/ipwin/ipwin.exe
+[[ ! -f ${_filename} ]] &&
+cp /usr/bin/ipwin.exe ${_filename} &&
+csih_inform "copy ipwin.exe"
+
 csih_inform "Prepare the sources OK"
 echo ""
+
 # -----------------------------------------------------------
 # Generate installer
 # -----------------------------------------------------------
 _issfile=~/slapos.iss
 _installer_name=slapos-windows-all-in-one
-_output_dir=$(cygpath -w ~/)
-_source_dir=$(cygpath -a -w $(cygpath -w /)\\..)
+_output_dir=$(cygpath -a -w ~ | sed -e 's%\\%\\\\%g')
+_source_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
-_install_path=$(cygpath -w /opt/slapos-node)
+_install_path=$(cygpath -w /opt/slapos-node | sed -e 's%\\%\\\\%g')
+
 csih_inform "Starting generate Windows installer ..."
 
 [[ -x "$ISCC" ]] || csih_error "missing $ISCC"
 csih_inform "copy ${_srcfile} to ${_issfile}"
 cp ${_srcfile}  ${_issfile} || csih_error "copy failed"
 
-csih_inform "patch ${_issfile} ...}"
-sed -i -e "s/^DefaultDirName=.*/DefaultDirName=${_install_path}/" \
-       -e "s/^OutputBaseFilename=.*/OutputBaseFilename=${_installer_name}/" \
-       -e "s/^OutputDir=.*/OutputDir=${_output_dir}/" \
-       -e "s/^SourceDir=.*/SourceDir=${_source_dir}/" \
+csih_inform "patch ${_issfile} ..."
+sed -i -e "s%^DefaultDirName=.*%DefaultDirName=${_install_path}%" \
+       -e "s%^OutputBaseFilename=.*%OutputBaseFilename=${_installer_name}%" \
+       -e "s%^OutputDir=.*%OutputDir=${_output_dir}%" \
+       -e "s%^SourceDir=.*%SourceDir=${_source_dir}%" \
     ${_issfile} || csih_error "patch failed"
 
 csih_inform "run issc to build ${_issfile} ..."
-$ISCC /Q $(cygpath -w ${_issfile}) ||
+$ISCC $(cygpath -w ${_issfile}) ||
 csih_error "issc failed"
 
 csih_inform "Generate Windows installer OK"
 echo ""
 
+# -----------------------------------------------------------
+# Finish
+# -----------------------------------------------------------
 echo ""
 csih_inform "Build Slapos Windows installer successfully."
 echo ""
