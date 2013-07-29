@@ -92,6 +92,7 @@ for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
     wget http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
     csih_error "download ${_cmdname} failed"
     csih_inform "download cygwin script ${_cmdname} OK"
+    chmod +x /usr/bin/${_cmdname} || csih_error "chmod /usr/bin/${_cmdname} failed"
 done
 
 if [[ $(uname) == CYGWIN_NT-*-WOW64 ]] ; then
@@ -103,6 +104,7 @@ else
     csih_error "download ipwin_x86.exe failed"
     csih_inform "download ipwin_x86.exe OK"
 fi
+chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 
 csih_inform "Patch cygwin packages for building slapos OK"
 echo ""
@@ -151,12 +153,14 @@ prefix = ${buildout:directory}
 " > buildout.cfg &&
 csih_inform "buildout.cfg generated")
 
+(cd /opt/slapos ; 
 python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ||
 csih_error "download bootstrap.py failed"
-csih_inform "download bootstrap.py OK"
+csih_inform "download bootstrap.py OK")
 
+(cd /opt/slapos ;
 python -S bootstrap.py || csih_error "run bootstrap.py failed"
-csih_inform  "run bootstrap.py OK"
+csih_inform  "run bootstrap.py OK")
 
 csih_inform "start bin/buildout"
 (cd /opt/slapos ; bin/buildout -v -N || csih_error "bin/buildout failed")
