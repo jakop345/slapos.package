@@ -76,7 +76,7 @@ _filename=$(cygpath -a -w $(cygpath -w /)\\..\\setup.exe)
 csih_inform "check ${_filename}"
 [[ -f $(cygpath -u ${_filename}) ]] || csih_error "missing ${_filename}"
 csih_inform "copy ${_filename} to /usr/bin"
-cp $(cygpath -u ${_filename} /usr/bin
+cp $(cygpath -u ${_filename}) /usr/bin
 
 _filename=/usr/bin/cygport
 if [[ -f ${_filename} ]] ; then
