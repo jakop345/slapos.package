@@ -31,7 +31,7 @@ function show_usage()
     echo ""
     echo "    Availabe options:"
     echo ""
-    echo "        -P, --password=XXX password of administrator"
+    echo "        -P, --password=XXX password of slapos administrator"
     echo ""
     echo "        --computer-certificate=FILENAME"
     echo "        --computer-key=FILENAME"

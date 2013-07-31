@@ -300,7 +300,7 @@ _installer_name=slapos-windows-all-in-one
 _output_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _source_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
-_install_path=$(cygpath -w /opt/slapos-node | sed -e 's%\\%\\\\%g')
+_install_path=$(cygpath -w /slapos-node | sed -e 's%\\%\\\\%g')
 
 csih_inform "Starting generate Windows installer ..."
 
