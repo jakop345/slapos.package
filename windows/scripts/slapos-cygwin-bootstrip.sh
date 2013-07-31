@@ -64,6 +64,7 @@ declare -r ipv6_local_address=2001:67c:1254:e:32::1
 declare -r slapos_user_basename=slapboot-user
 
 declare -r slapos_installer_software=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg
+declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
 
 # -----------------------------------------------------------
 # Patch cygwin packages for building slapos
@@ -213,9 +214,11 @@ csih_inform "Starting configure slapos client and node ..."
 for _name in certificate key computer.key computer.crt ; do
     [[ -f ~/${_name} ]] || csih_error "missing file ~/${_name}"
 done
-for _name in /test-computer.key /test-computer.crt ; do
-    [[ -f ${_name} ]] || csih_error "missing file ${_name}"
+for _name in test-computer.key test-computer.crt ; do
+    [[ -f ${cygwin_home}/${_name} ]] || csih_error "missing file ${cygwin_home}/${_name}"
 done
+cp ~/certificate ${cygwin_home} && csih_inform "copy ~/certificate to ${cygwin_home}"
+cp ~/key ${cygwin_home} && csih_inform "copy ~/key to ${cygwin_home}"
 
 csih_inform "mkdir /etc/opt/slapos/ssl/partition_pki"
 mkdir -p /etc/opt/slapos/ssl/partition_pki

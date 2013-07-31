@@ -30,7 +30,7 @@ echo ""
 # Constants
 # ======================================================================
 declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
-declare -r ISCC=/inno-setup/ISCC.exe
+declare -r ISCC=${cygwin_home}/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
 # Command line options
