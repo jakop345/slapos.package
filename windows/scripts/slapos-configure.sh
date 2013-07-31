@@ -131,7 +131,7 @@ csih_check_program_or_error /usr/bin/ssh-host-config ssh
 csih_check_program_or_error /usr/bin/syslog-ng-config syslog-ng
 csih_check_program_or_error /usr/bin/openssl openssl
 csih_check_program_or_error /usr/bin/ipwin slapos-patches
-csih_check_program_or_error /usr/bin/slapos_cron_config slapos-patches
+csih_check_program_or_error /usr/bin/slapos-cron-config slapos-patches
 [[ -z "$WINDIR" ]] && csih_error "missing environment variable WINDIR"
 
 # -----------------------------------------------------------
