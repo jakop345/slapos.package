@@ -313,6 +313,7 @@ sed -i -e "s%^DefaultDirName=.*%DefaultDirName=${_install_path}%" \
        -e "s%^OutputBaseFilename=.*%OutputBaseFilename=${_installer_name}%" \
        -e "s%^OutputDir=.*%OutputDir=${_output_dir}%" \
        -e "s%^SourceDir=.*%SourceDir=${_source_dir}%" \
+       -e "s%/etc/slapos/scripts/post-install.sh%/etc/slapos/scripts/post-install.sh slaptest-%" \
     ${_issfile} || csih_error "patch failed"
 
 csih_inform "run issc to build ${_issfile} ..."
