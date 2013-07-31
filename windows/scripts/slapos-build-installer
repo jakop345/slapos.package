@@ -330,5 +330,4 @@ echo ""
 csih_inform "Build Slapos Windows installer successfully."
 echo ""
 
-read -n 1 -t 60 -p "Press any key to exit..."
 exit 0
