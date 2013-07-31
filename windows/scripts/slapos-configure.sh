@@ -31,7 +31,6 @@ function show_usage()
     echo ""
     echo "    Availabe options:"
     echo ""
-    echo "        -U, --user=XXX     slapos administrator, default is slaproot"
     echo "        -P, --password=XXX password of administrator"
     echo ""
     echo "        --computer-certificate=FILENAME"
@@ -65,7 +64,7 @@ echo ""
 # -----------------------------------------------------------
 # Local variable
 # -----------------------------------------------------------
-declare _administrator=${slapos_user}
+declare _administrator=${slapos_administrator}
 declare _password=
 declare _computer_certificate=
 declare _computer_key=
@@ -89,9 +88,6 @@ while test $# -gt 0; do
     -P)
     _password=$2
     shift
-    ;;
-    --user=*)
-    _administrator=$optarg
     ;;
     -P)
     _administrator=$2
@@ -168,25 +164,25 @@ csih_error "failed to create account ${_administrator}."
 # Configure cygwin services: cygserver syslog-ng sshd
 # -----------------------------------------------------------
 csih_inform "Starting configure cygwin services ..."
-if ! cygrunsrv --query cygserver > /dev/null 2>&1 ; then
+if ! cygrunsrv --query ${cygserver_service_name} > /dev/null 2>&1 ; then
     csih_inform "run cygserver-config ..."
     /usr/bin/cygserver-config --yes || \
         csih_error "failed to run cygserver-config"
 else
     csih_inform "the cygserver service has been installed"
 fi
-check_cygwin_service cygserver
+check_cygwin_service ${cygserver_service_name}
 
-if ! cygrunsrv --query syslog-ng > /dev/null 2>&1 ; then
+if ! cygrunsrv --query ${syslog_service_name} > /dev/null 2>&1 ; then
     csih_inform "run syslog-ng-config ..."
     /usr/bin/syslog-ng-config --yes || \
         csih_error "failed to run syslog-ng-config"
 else
     csih_inform "the syslog-ng service has been installed"
 fi
-check_cygwin_service syslog-ng
+check_cygwin_service ${syslog_service_name}
 
-if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
+if ! cygrunsrv --query ${sshd_service_name} > /dev/null 2>&1 ; then
     if csih_is_xp && [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
         slapos_request_password ${_administrator} "Install sshd service need the password of ${_administrator}."
     fi
@@ -197,10 +193,10 @@ if ! cygrunsrv --query sshd > /dev/null 2>&1 ; then
 else
     csih_inform "the sshd service has been installed"
 fi
-check_cygwin_service sshd
+check_cygwin_service ${sshd_service_name}
 
 # Use slapos-cron-config to configure slapos cron service.
-if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
+if ! cygrunsrv --query ${cron_service_name} > /dev/null 2>&1 ; then
     [[ -x ${slapos_cron_config} ]] ||
     csih_error "Couldn't find slapos cron config script: ${slapos_cron_config}"
 
@@ -214,7 +210,7 @@ if ! cygrunsrv --query cron > /dev/null 2>&1 ; then
 else
     csih_inform "the cron service has been installed"
 fi
-check_cygwin_service cron
+check_cygwin_service ${cron_service_name}
 
 csih_inform "Configure cygwin services OK"
 echo ""
@@ -314,9 +310,10 @@ csih_error "Invalid computer id '$computer_guid' specified."
 
 csih_inform "Computer configuration information:"
 csih_inform "  interface name:     ${slapos_ifname}"
-csih_inform "  GUID:               $interface_guid"
-csih_inform "  ipv4_local_network: $ipv4_local_network"
-csih_inform "  computer_id:        $computer_guid"
+csih_inform "  GUID:               ${interface_guid}"
+csih_inform "  ipv4_local_network: ${ipv4_local_network}"
+csih_inform "  computer_id:        ${computer_guid}"
+csih_inform "  user_base_name:     ${slapos_user_basename}"
 csih_inform
 csih_inform "  If ipv4_local_network confilcts with your local network, change it"
 csih_inform "  in the file: ${node_configure_file} "
@@ -327,6 +324,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = $ipv4_local_network%" \
         -e "s%^computer_id.*$%computer_id = $computer_guid%" \
+        -e "s%^user_base_name =.*$%user_base_name = ${slapos_user_basename}%" \
         ${node_configure_file}
 
 if [[ ! -f ${client_certificate_file} ]] ; then

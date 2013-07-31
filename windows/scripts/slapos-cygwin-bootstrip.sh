@@ -52,9 +52,10 @@ declare -r node_certificate_file=/etc/opt/slapos/ssl/computer.crt
 declare -r node_key_file=/etc/opt/slapos/ssl/computer.key
 declare -r node_configure_file=/etc/opt/slapos/slapos.cfg
 
-declare -r slapos_ifname=re6stnet-boot
+declare -r slapos_ifname=slapboot-re6stnet-lo
 declare -r ipv4_local_network=10.202.29.0/24
 declare -r ipv6_local_address=2001:67c:1254:e:32::1
+declare -r slapos_user_basename=slapboot-user
 
 declare -r slapos_installer_software=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg
 
@@ -245,7 +246,7 @@ sed -i  -e "s%^\\s*interface_name.*$%interface_name = ${interface_guid}%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
         -e "s%^ipv4_local_network.*$%ipv4_local_network = ${ipv4_local_network}%" \
         -e "s%^computer_id.*$%computer_id = ${computer_guid}%" \
-        -e "s%^user_base_name =.*$%user_base_name = slapguider%" \
+        -e "s%^user_base_name =.*$%user_base_name = ${slapos_user_basename}%" \
         ${node_configure_file}
 csih_inform "type ${node_configure_file}:"
 csih_inform "************************************************************"

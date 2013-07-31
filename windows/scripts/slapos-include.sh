@@ -1,7 +1,7 @@
 #! /bin/bash
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
-    echo "Error: Download the csih package at first, I need this file:"
+    echo "Download the csih package at first, to run this script requires"
     echo "  /usr/share/csih/cygwin-service-installation-helper.sh"
     exit 1
 fi
@@ -20,6 +20,8 @@ fi
 # ======================================================================
 # Constants
 # ======================================================================
+declare -r slapos_prefix=
+
 declare -r slapos_client_home=~/.slapos
 declare -r client_configure_file=$slapos_client_home/slapos.cfg
 declare -r client_certificate_file=$slapos_client_home/certificate
@@ -31,7 +33,6 @@ declare -r node_key_file=/etc/opt/slapos/ssl/computer.key
 declare -r node_configure_file=/etc/opt/slapos/slapos.cfg
 declare -r node_template_file=/etc/slapos/slapos.cfg.example
 
-declare -r slapos_ifname=re6stnet-lo
 # Change it if it confilcts with your local network
 declare -r ipv4_local_network=10.201.67.0/24
 
@@ -39,14 +40,20 @@ declare -r openvpn_tap_driver_inf=/etc/slapos/driver/OemWin2k.inf
 declare -r openvpn_tap_driver_hwid=tap0901
 
 declare -r re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
-declare -r re6stnet_service_name=re6stnet
-
 declare -r slapos_cron_config=/usr/bin/slapos-cron-config
 declare -r slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
-
 declare -r slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-declare -r slapos_run_entry=slapos-configure
-declare -r slapos_user=slaproot
+
+declare -r slapos_run_entry=${slapos_prefix:slapos}-configure
+declare -r slapos_administrator=${slapos_prefix:slap}root
+declare -r slapos_user_basename=${slapos_prefix:slap}user
+declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
+declare -r re6stnet_service_name=${slapos_prefix}re6stnet
+declare -r cron_service_name=${slapos_prefix}cron
+declare -r sshd_service_name=${slapos_prefix}sshd
+declare -r syslog_service_name=${slapos_prefix}syslog-ng
+declare -r cygserver_service_name=${slapos_prefix}cygserver
+
 
 # ======================================================================
 # Routine: check_cygwin_service

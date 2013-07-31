@@ -240,7 +240,7 @@ check_passwd_and_group() {
 
 # ======================================================================
 # Routine: check_user
-# Check to see that the specified user exists once in /etc/passwd 
+# Check to see that the specified user exists once in /etc/passwd
 # ======================================================================
 check_user() {
  count=$(grep -ic "^$1:" /etc/passwd)
@@ -269,7 +269,7 @@ check_dir_perms() {
 	echo "Your computer is missing $1".
 	echo
 	return 1
-    fi	
+    fi
 
     if ls -ld "$1" | grep -q ^"$2"; then
 	true
@@ -396,8 +396,8 @@ check_cron_table() {
 	echo
 	[ "$couldbeFAT" = 1 ] &&
 	echo "This rule does not apply on FAT/FAT32 file systems."
-	echo "This rule does not apply if the daemon runs with nontsec."   
-	echo 
+	echo "This rule does not apply if the daemon runs with nontsec."
+	echo
 	echo "You can change the group membership setting with:"
 	echo "	 chgrp $ADMINSGID $cron_table"
 	echo "Please change your cron table's group membership."
@@ -474,7 +474,7 @@ get_temp_dir() {
     echo "ERROR: Cannot find a temporary directory."
     TEMP_DIR=/tmp
 } # === End of get_temp_dir() === #
-	
+
 # ======================================================================
 # Routine: cron_diagnose
 # Checks the environment.
@@ -511,9 +511,9 @@ cron_diagnose() {
     check_dir_perms /var d..x..x..x || ret=1
 
     # There is no reason to have t on /var/cron,
-    # but it used to be set that way.  
+    # but it used to be set that way.
     check_dir_perms /var/cron d..x..x..[xt] || ret=1
- 
+
     check_dir_perms /var/cron/tabs drwxrwxrwt || ret=1
 
     # Check write access to /var/run, to create cron_pid
@@ -525,7 +525,7 @@ cron_diagnose() {
     # Check x access to /usr/sbin/cron
     check_access /usr/sbin/cron ..x || ret=1
 
-    if [ ! -f "/usr/sbin/sendmail" ]; then	
+    if [ ! -f "/usr/sbin/sendmail" ]; then
 	echo "WARNING: /usr/sbin/sendmail does not point to an executable mailer";
 	echo "     such as ssmtp or exim, or /usr/bin/cronlog."
 	echo "     If the cron job produces any output on stdout or stderr,"
@@ -559,7 +559,7 @@ create_user() {
     echo
     echo "Attempting to find or create a privileged user."
 
-    for username in slaproot cyg_server cron_server sshd_server
+    for username in ${slapos_administrator} cyg_server cron_server sshd_server
     do
       if net user "${username}" 1> /dev/null 2>&1; then
 	  [ -z "${first_account}" ] && first_account="${username}"
@@ -690,15 +690,15 @@ install_service() {
 	echo "WARNING: Download the cygrunsrv package to start the cron daemon as a service."
 	servtest=no
     else
-	cygrunsrv -Q cron > /dev/null 2>&1
+	cygrunsrv -Q ${cron_service_name} > /dev/null 2>&1
 	servtest=$?
     fi
-    
+
     if [ "${servtest}" = "0" ]; then
-	cronusername="$(cygrunsrv -VQ cron | sed -n -e 's/^Account[ :]*//p')"
+	cronusername="$(cygrunsrv -VQ ${cron_service_name} | sed -n -e 's/^Account[ :]*//p')"
 	echo "Cron is already installed as a service under account ${cronusername}."
 	if request "Do you want to remove or reinstall it?"; then
-	    if cygrunsrv -R cron; then
+	    if cygrunsrv -R ${cron_service_name}; then
 		echo "OK. The cron service was removed."
 		echo
 	    fi
@@ -714,9 +714,9 @@ install_service() {
 	true
     else
 
-	    getcygenv " "	
+	    getcygenv " "
 
-	    echo 
+	    echo
             echo "You must decide under what account the cron daemon will run."
             echo "If you are the only user on this machine, the daemon can run as yourself."
             echo "   This gives access to all network drives but only allows you as user."
@@ -741,7 +741,7 @@ install_service() {
 		else
 		    echo "WARNING: Make sure you have the privilege to logon as a service."
 		fi
-	    else 
+	    else
 		echo
 		username="$1"
                 _password="$2"
@@ -755,8 +755,8 @@ install_service() {
 		fi
 	    fi
 	    echo
-	
-	    if [ -n "${username}" ]; then		
+
+	    if [ -n "${username}" ]; then
 		check_user "${username}"
 
 		if [ -z "${_password}" ]
@@ -765,7 +765,7 @@ install_service() {
 		    _password="${value}"
 		fi
 
-		if cygrunsrv -I cron -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
+		if cygrunsrv -I ${cron_service_name} -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
 		    -a "-n" -d "Cron daemon" -u "$username" -w "$_password"
 		    then
 		    service="service"
@@ -773,7 +773,7 @@ install_service() {
 		    service="off"
 		fi
 	    else
-		if cygrunsrv -I cron -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
+		if cygrunsrv -I ${cron_service_name} -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
 		    -a "-n" -d "Cron daemon"
 		    then
 		    service="service"
@@ -815,7 +815,7 @@ install_service() {
                 echo "         To avoid that, launch cron as a service (using cygrunsrv)."
 		/usr/sbin/cron
 	    else
-		cygrunsrv -S cron
+		cygrunsrv -S ${cron_service_name}
 	    fi
 	    [ $? -eq 0 ] && echo "OK. The cron daemon is now running."
 	elif [ "${service}" = "job" ]; then
@@ -835,17 +835,17 @@ install_service() {
     fi
     echo "for information about the problem cron is having."
     echo
-    
+
     ls -l /usr/sbin/sendmail | fgrep -q cronlog &&
-        echo -e "Examine also any cron.log file in the HOME directory\n(or the file specified in MAILTO) and cron related files in /tmp.\n" 
+        echo -e "Examine also any cron.log file in the HOME directory\n(or the file specified in MAILTO) and cron related files in /tmp.\n"
 
     echo "If you cannot fix the problem, then report it to cygwin@cygwin.com."
     echo "Please run the script /usr/bin/cronbug and ATTACH its output"
-    echo "(the file cronbug.txt) to your e-mail."	
+    echo "(the file cronbug.txt) to your e-mail."
     echo
     echo "WARNING: PATH may be set differently under cron than in interactive shells."
     echo "         Names such as \"find\" and \"date\" may refer to Windows programs."
-    echo 
+    echo
 
 } # === End of install_service() === #
 
@@ -858,7 +858,7 @@ PATH=/usr/bin:$PATH
 USER="$(id -un)"
 get_temp_dir
 
-# Take care of obsolete cron_diagnose.sh 
+# Take care of obsolete cron_diagnose.sh
 if expr "$0" : '.*cron_diagnose.sh' > /dev/null; then
     echo -e "\nINFO: cron_diagnose.sh is now included in cron-config.\n"
 fi
@@ -867,7 +867,8 @@ sanity_check || exit 1
 
 get_NT || exit 1
 
+slapos_administrator=${1:slaproot}
+cron_service_name=${2:cron}
 install_service $*
 
 exit $?
-

@@ -15,18 +15,46 @@
 #
 #    * Remove instance root /srv/slapgrid
 #
+# Required:
+#   grep gawk TASKKILL
+#
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+
+function slapos_kill_process()
+{
+    name=$1
+    echo "Try to kill all $name ..."
+    for pid in $(ps | grep "$name" | gawk '{print $4}') ; do
+        echo "Kill pid $pid"
+        TASKKILL /F /T /PID $pid
+    done
+}
+read -f slapos_kill_process
+
+#
+# Declare variables
+#
+declare -r slapos_prefix=
+declare -r slapos_administrator=${slapos_prefix:slap}root
+declare -r slapos_user_basename=${slapos_prefix:slap}user
+declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
+declare -r re6stnet_service_name=${slapos_prefix}re6stnet
+declare -r cron_service_name=${slapos_prefix}cron
+declare -r ssh_service_name=${slapos_prefix}ssh
+declare -r syslog_service_name=${slapos_prefix}syslog-ng
+declare -r cygserver_service_name=${slapos_prefix}cygserver
 
 #
 # Remove services installed by cygwin,
 #
-echo Try to stop re6stnet service ...
-if ! net stop re6stnet ; then
-    echo Try to kill openvpn process ...
-    ps -ef | grep -q "/usr/bin/openvpn" && TASKKILL /IM openvpn.exe /F && echo OK.
-fi
-for name in $(cygrunsrv --list) ; do
-    echo Removing cygservice $name
+echo "Try to stop service ${re6stnet_service_name} ..."
+net stop ${re6stnet_service_name} ||
+slapos_kill_process /usr/bin/openvpn
+
+for name in ${re6stnet_service_name} ${cron_service_name} \
+    ${ssh_service_name} ${syslog_service_name} \
+    ${cygserver_service_name} ; do
+    echo "Removing ervice $name"
     cygrunsrv -R $name && echo OK.
 done
 
@@ -34,35 +62,27 @@ done
 # Stop slapos
 #
 if [[ -x /opt/slapos/bin/slapos ]] ; then
-    echo Stoping slapos node ...
+    echo "Stoping slapos node ..."
     /opt/slapos/bin/slapos node stop all && echo OK.
 fi
-echo Try to kill python2.7 process ...
-ps -ef | grep -q "/usr/bin/python2.7" && TASKKILL /IM python2.7.exe /F && echo OK.
+slapos_kill_process /usr/bin/python2.7
 
 #
-# Remove virtual netcard installed by re6stnet
+# Remove virtual netcard installed by slapos
 #
-for ifname in $(netsh interface ipv6 show interface | gawk '{ print $5 }') ; do
-    if [[ "$ifname" == "re6stnet-lo" ]] ; then
-        echo Removing network connection: $ifname
-        ipwin remove *msloop re6stnet-lo && echo OK.
-    elif [[ "$ifname" == re6stnet* ]] ; then
-        echo Removing network connection: $ifname
-        ipwin remove tap0901 $ifname && echo OK.
-    fi
-done
+echo "Removing network connection ${slapos_ifname}"
+ipwin remove *msloop ${slapos_ifname} && echo OK.
 
 #
-# Remove users installed by slapos node
+# Remove users installed by slapos
 #
-for name in $(net user) ; do
-    if [[ "x$name" == x\*slapuser* ]] ; then
-        echo Removing user: $name
-        net user $name /delete && echo OK.
-    elif echo "$name" | grep -q -E "(sshd)|(cyg_server)|(slaproot)" ; then
-        echo Removing user: $name
-        net user $name /delete && echo OK.
+for _name in $(NET USER) ; do
+    if [[ "${_name}" == ${slapos_user_basename}* ]] ; then
+        echo "Removing user: ${_name}"
+        NET USER ${_name} /DELETE && echo OK.
+    elif echo "${_name}" | grep -q -E "(sshd)|(cyg_server)|(${slapos_administrator})" ; then
+        echo "Removing user: ${_name}"
+        NET USER ${_name} /DELETE && echo OK.
     fi
 done
 echo "Creating /etc/passwd ..."
@@ -71,10 +91,10 @@ mkpasswd -l > /etc/passwd && echo OK.
 #
 # Remove local group installed by slapos node
 #
-for name in $(net localgroup | sed -n -e "s/^*//p" | sed -e "s/\\s//g") ; do
-    if [[ "$name" == grp_slapuser* ]] ; then
-        echo Removing localgroup: $name
-        net localgroup $name /delete && echo OK.
+for _name in $(NET LOCALGROUP | sed -n -e "s/^*//p" | sed -e "s/\\s//g") ; do
+    if [[ "${_name}" == grp_${slapos_user_basename}* ]] ; then
+        echo "Removing localgroup: ${_name}"
+        NET LOCALGROUP ${_name} /DELETE && echo OK.
     fi
 done
 echo "Creating /etc/group ..."
@@ -91,16 +111,9 @@ rm -rf ~/.slapos && echo OK.
 #
 # Remove crontab
 # 
-echo Removing /var/cron/tabs/slaproot
-rm -rf /var/cron/tabs/slaproot && echo OK.
-
-#
-# Remove slapos-configure from windows startup item
-#
-slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
-slapos_run_entry=slapos-configure
-echo Removing startup item "$slapos_run_key\\$slapos_run_entry"
-regtool -q unset "$slapos_run_key\\$slapos_run_entry" && echo OK.
+_filename=/var/cron/tabs/${slapos_administrator}
+echo "Removing ${_filename}"
+rm -rf ${_filename} && echo OK.
 
 #
 # Remove default instance root, because it belong to slapuser, and
