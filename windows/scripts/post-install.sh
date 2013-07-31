@@ -166,7 +166,7 @@ fi
 # Set prefix for slapos
 if [[ -n ${slapos_prefix} ]] ; then
     echo "Set slapos prefix as ${slapos_prefix}"
-    sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}" \
+    sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}%" \
         /etc/slapos/scripts/pre-uninstall.sh /etc/slapos/scripts/slapos-include.sh
 fi
 
