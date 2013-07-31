@@ -28,6 +28,12 @@ function show_usage()
     echo ""
     echo "save them in your home path."
     echo ""
+    echo "Register another computer for test node, save them in the root path"
+    echo ""
+    echo "  test-computer.key"
+    echo "  test-computer.crt"
+    echo ""
+    echo ""
 }
 readonly -f show_usage
 
@@ -206,6 +212,9 @@ csih_inform "Starting configure slapos client and node ..."
 
 for _name in certificate key computer.key computer.crt ; do
     [[ -f ~/${_name} ]] || csih_error "missing file ~/${_name}"
+done
+for _name in /test-computer.key /test-computer.crt ; do
+    [[ -f ${_name} ]] || csih_error "missing file ${_name}"
 done
 
 csih_inform "mkdir /etc/opt/slapos/ssl/partition_pki"
