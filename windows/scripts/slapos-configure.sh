@@ -168,6 +168,9 @@ if ! cygrunsrv --query ${cygserver_service_name} > /dev/null 2>&1 ; then
     csih_inform "run cygserver-config ..."
     /usr/bin/cygserver-config --yes || \
         csih_error "failed to run cygserver-config"
+    [[ ${cygserver_service_name} == cygserver ]] ||
+    cygrunsrv -I ${cygserver_service_name} -d "CYGWIN ${cygserver_service_name}" -p /usr/sbin/cygserver ||
+    csih_error "failed to install service ${cygserver_service_name}"
 else
     csih_inform "the cygserver service has been installed"
 fi
@@ -177,19 +180,34 @@ if ! cygrunsrv --query ${syslog_service_name} > /dev/null 2>&1 ; then
     csih_inform "run syslog-ng-config ..."
     /usr/bin/syslog-ng-config --yes || \
         csih_error "failed to run syslog-ng-config"
+    [[ ${syslog_service_name} == "syslog-ng" ]] ||
+    cygrunsrv -I ${syslog_service_name} -d "CYGWIN ${syslog_service_name}" -p /usr/sbin/syslog-ng -a "-F" ||
+    csih_error "failed to install service ${syslog_service_name}"
+
 else
     csih_inform "the syslog-ng service has been installed"
 fi
 check_cygwin_service ${syslog_service_name}
 
 if ! cygrunsrv --query ${sshd_service_name} > /dev/null 2>&1 ; then
-    if csih_is_xp && [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
+    if csih_is_vista && [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
         slapos_request_password ${_administrator} "Install sshd service need the password of ${_administrator}."
     fi
     csih_inform "run ssh-host-config ..."
     /usr/bin/ssh-host-config --yes --cygwin ntsec --port 22002 \
         --user ${_administrator} --pwd ${csih_PRIVILEGED_PASSWORD} ||
     csih_error "Failed to run ssh-host-config"
+    if csih_is_vista ; then
+        [[ ${sshd_service_name} == "sshd" ]] ||
+        cygrunsrv -I ${sshd_service_name} -d "CYGWIN ${sshd_service_name}" -p /usr/sbin/sshd \
+            -a "-D" -y tcpip -e "CYGWIN=ntsec" -u "${_administrator}" -w "${csih_PRIVILEGED_PASSWORD}" ||
+        csih_error "failed to install service ${sshd_service_name}"
+    else
+        [[ ${sshd_service_name} == "sshd" ]] ||
+        cygrunsrv -I ${sshd_service_name} -d "CYGWIN ${sshd_service_name}" -p /usr/sbin/sshd \
+            -a "-D" -y tcpip -e "CYGWIN=ntsec" ||
+        csih_error "failed to install service ${sshd_service_name}"
+    fi
 else
     csih_inform "the sshd service has been installed"
 fi
@@ -205,7 +223,7 @@ if ! cygrunsrv --query ${cron_service_name} > /dev/null 2>&1 ; then
     fi
 
     csih_inform "run slapos-cron-config ..."
-    ${slapos_cron_config} ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
+    ${slapos_cron_config} ${cron_service_name} ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
     csih_error "Failed to run ${slapos_cron_config}"
 else
     csih_inform "the cron service has been installed"
