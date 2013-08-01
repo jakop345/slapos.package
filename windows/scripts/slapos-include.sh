@@ -233,8 +233,7 @@ slapos_check_and_create_privileged_user()
   local username="${1-slaproot}"
   local admingroup
   local dos_var_empty
-  local _password
-  local password_value="$2"
+  local _password="$2"
   local passwd_has_expiry_flags
   local ret=0
   local username_in_admingroup
@@ -255,9 +254,8 @@ slapos_check_and_create_privileged_user()
       dos_var_empty=$(/usr/bin/cygpath -w ${LOCALSTATEDIR}/empty)
       while [ "${username_in_sam}" != "yes" ]
       do
-          if [ -z "${password_value}" ]
+          if [ -z "${_password}" ]
           then
-              _password="${password_value}"
               csih_inform "Please enter a password for new user ${username}.  Please be sure"
               csih_inform "that this password matches the password rules given on your system."
               csih_inform "Entering no password will exit the configuration."
@@ -304,7 +302,7 @@ slapos_check_and_create_privileged_user()
   else
       # ${username} already exists. Use it, and make no changes.
       # use passed-in value as first guess
-      csih_PRIVILEGED_PASSWORD="${password_value}"
+      csih_PRIVILEGED_PASSWORD="${_password}"
   fi
 
   # username did NOT previously exist, but has been successfully created.
