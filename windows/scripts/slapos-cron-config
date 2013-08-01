@@ -766,7 +766,7 @@ install_service() {
 		fi
 
 		if cygrunsrv -I ${cron_service_name} -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
-		    -a "-n" -d "Cron daemon" -u "$username" -w "$_password"
+		    -a "-n" -d "CYGWIN ${cron_service_name}" -u "$username" -w "$_password"
 		    then
 		    service="service"
 		else
@@ -774,7 +774,7 @@ install_service() {
 		fi
 	    else
 		if cygrunsrv -I ${cron_service_name} -p /usr/sbin/cron -e CYGWIN="${cygenv}" \
-		    -a "-n" -d "Cron daemon"
+		    -a "-n" -d "CYGWIN ${cron_service_name}"
 		    then
 		    service="service"
 		else
@@ -821,7 +821,7 @@ install_service() {
 	elif [ "${service}" = "job" ]; then
 	    echo "OK. Type '/usr/sbin/cron' to start the cron daemon job."
 	else
-	    echo "OK. Type 'cygrunsrv -S cron' to start the cron daemon service."
+	    echo "OK. Type 'cygrunsrv -S ${cron_service_name}' to start the cron daemon service."
 	    echo "    It will restart automatically at each reboot."
 	fi
     fi
