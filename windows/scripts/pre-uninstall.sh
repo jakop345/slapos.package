@@ -29,7 +29,7 @@ function slapos_kill_process()
         TASKKILL /F /T /PID $pid
     done
 }
-read -f slapos_kill_process
+readonly -f slapos_kill_process
 
 #
 # Declare variables
