@@ -3,12 +3,12 @@ export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 
 function show_error_exit()
 {
-    echo Error: ${1-Error: build slapos failed.}
+    echo Error: ${1:-"build slapos failed."}
     read -n 1 -p "Press any key to exit..."
     exit 1
 }
 
-slapos_home=${1-/opt/slapos}
+slapos_home=${1:-/opt/slapos}
 slapos_cache=/opt/download-cache
 slapos_url=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
 slapos_cfg=$slapos_home/buildout.cfg

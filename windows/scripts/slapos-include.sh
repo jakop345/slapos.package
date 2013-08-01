@@ -44,9 +44,9 @@ declare -r slapos_cron_config=/usr/bin/slapos-cron-config
 declare -r slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
 declare -r slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 
-declare -r slapos_run_entry=${slapos_prefix:slapos}-configure
-declare -r slapos_administrator=${slapos_prefix:slap}root
-declare -r slapos_user_basename=${slapos_prefix:slap}user
+declare -r slapos_run_entry=${slapos_prefix:-slapos}-configure
+declare -r slapos_administrator=${slapos_prefix:-slap}root
+declare -r slapos_user_basename=${slapos_prefix:-slap}user
 declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
 declare -r re6stnet_service_name=${slapos_prefix}re6stnet
 declare -r cron_service_name=${slapos_prefix}cron
@@ -183,7 +183,7 @@ function reset_slapos_connection()
 # ======================================================================
 function show_error_exit()
 {
-    echo ${1-Error: configure SlapOS failed.}
+    echo ${1:-"Error: configure SlapOS failed."}
     read -n 1 -p "Press any key to exit..."
     exit 1
 }  # === show_error_exit() === #

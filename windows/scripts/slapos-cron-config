@@ -867,8 +867,8 @@ sanity_check || exit 1
 
 get_NT || exit 1
 
-cron_service_name=${1:cron}
-slapos_administrator=${2:slaproot}
+cron_service_name=${1:-cron}
+slapos_administrator=${2:-slaproot}
 _password=$3
 install_service ${slapos_administrator} ${_password}
 
