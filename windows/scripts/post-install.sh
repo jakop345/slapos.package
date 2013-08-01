@@ -18,14 +18,14 @@
 #
 function show_error_exit()
 {
-    echo Error: ${1-Run post-install script failed.}
+    echo Error: ${1:-"Run post-install script failed."}
     read -n 1 -p "Press any key to exit..."
     exit 1
 }
 readonly -f show_error_exit
 
-declare -r cyghome=$(cygpath -w /)
 declare -r slapos_prefix=$1
+declare -r _cygroot=$(cygpath -w /)
 
 _filename=/etc/passwd
 echo "Checking ${_filename} ..."
@@ -81,8 +81,8 @@ if [[ ! -x ${_filename} ]] ; then
     cat <<EOF > ${_filename}
 @echo off
 
-${cyghome:0:2}
-chdir ${cyghome}\\bin
+${_cygroot:0:2}
+chdir ${_cygroot}\\bin
 
 start mintty.exe -i /Cygwin-Terminal.ico -
 EOF
@@ -97,19 +97,20 @@ echo Checking  ${_filename} ...
 if [[ ! -f ${_filename} ]] ; then
     cat <<EOF > ${_filename}
 @echo off
-${cyghome}\bin\find /opt/slapos -name "*.dll" > ${cyghome}\myfile.list
-IF EXIST ${cyghome}\opt\slapgrid. ${cyghome}\bin\find /opt/slapgrid -name "*.dll" >> ${cyghome}\myfile.list
-TASKKILL /F /IM openvpn.exe
-NET STOP re6stnet
-NET STOP cygserver
-NET STOP syslog-ng
-NET STOP cron
-NET STOP sshd
-TASKKILL /F /IM python2.7.exe
-${cyghome:0:2}
-chdir ${cyghome}
-path .\bin;%path%
+${_cygroot:0:2}
+CHDIR ${_cygroot}
+${_cygroot}\bin\find /opt/slapos -name "*.dll" > ${_cygroot}\myfile.list
+IF EXIST ${_cygroot}\opt\slapgrid. ${_cygroot}\bin\find /opt/slapgrid -name "*.dll" >> ${_cygroot}\myfile.list
+bin\bash --login -c "for pid in \$(ps | grep '/usr/bin/openvpn' | gawk '{print $4}') ; do TASKKILL /F /T /PID \$pid ; done"
+NET STOP ${slapos_prefix}re6stnet
+NET STOP ${slapos_prefix}cygserver
+NET STOP ${slapos_prefix}syslog-ng
+NET STOP ${slapos_prefix}cron
+NET STOP ${slapos_prefix}sshd
+bin\bash --login -c "for pid in \$(ps | grep '/usr/bin/python2.7' | gawk '{print \$4}') ; do TASKKILL /F /T /PID \$pid ; done"
+PATH .\bin;%PATH%
 dash /bin/rebaseall -T /myfile.list -v
+EXIT 0
 EOF
     chmod +x ${_filename}
     echo "${_filename} has been generated."

@@ -56,6 +56,7 @@ function show_usage()
     echo "        cron           Generate cron file and start cron job"
     echo ""
 }
+readonly -f show_usage
 
 source $(/usr/bin/dirname $0)/slapos-include.sh
 csih_inform "Start slapos node configure ..."
