@@ -527,7 +527,7 @@ if check_re6stnet_needed ; then
             slapos_request_password ${_administrator} "Install re6stnet service need the password of ${_administrator}."
         fi
         cygrunsrv -I ${re6stnet_service_name} -c $(dirname ${re6stnet_configure_file}) \
-            -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN re6stnet" \
+            -p $(which re6stnet) -a "@re6stnet.conf" -d "CYGWIN ${re6stnet_service_name}" \
             -u ${_administrator} -w ${csih_PRIVILEGED_PASSWORD} ||
         csih_error "Failed to install ${re6stnet_service_name} service."
     fi
