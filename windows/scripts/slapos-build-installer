@@ -300,7 +300,6 @@ _installer_name=slapos-windows-all-in-one
 _output_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _source_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
-_install_path=$(cygpath -w /slapos-node | sed -e 's%\\%\\\\%g')
 
 csih_inform "Starting generate Windows installer ..."
 
@@ -309,8 +308,7 @@ csih_inform "copy ${_srcfile} to ${_issfile}"
 cp ${_srcfile}  ${_issfile} || csih_error "copy failed"
 
 csih_inform "patch ${_issfile} ..."
-sed -i -e "s%^DefaultDirName=.*%DefaultDirName=${_install_path}%" \
-       -e "s%^OutputBaseFilename=.*%OutputBaseFilename=${_installer_name}%" \
+sed -i -e "s%^OutputBaseFilename=.*%OutputBaseFilename=${_installer_name}%" \
        -e "s%^OutputDir=.*%OutputDir=${_output_dir}%" \
        -e "s%^SourceDir=.*%SourceDir=${_source_dir}%" \
        -e "s%/etc/slapos/scripts/post-install.sh%/etc/slapos/scripts/post-install.sh slaptest-%" \

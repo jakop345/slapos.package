@@ -37,6 +37,7 @@ function show_usage()
     echo "        --computer-key=FILENAME"
     echo "        --client-certificate=FILENAME"
     echo "        --client-key=FILENAME"
+    echo "        --ipv4-local-network=x.x.x.x/n"
     echo ""
     echo "    The action option:"
     echo ""
@@ -71,6 +72,7 @@ declare _computer_certificate=
 declare _computer_key=
 declare _client_certificate=
 declare _client_key=
+declare _ipv4_local_network=${ipv4_local_network}
 
 # -----------------------------------------------------------
 # Command line options
@@ -105,6 +107,11 @@ while test $# -gt 0; do
     ;;
     --client-key=*)
     _client_key=$optarg
+    ;;
+    --ipv4-local-network=*)
+    [[ x$optarg == x*.*.*.*/* ]] ||
+    csih_error "invalid --ipv4-local-network=$optarg, no match x.x.x.x/x"
+    _ipv4_local_network=$optarg
     ;;
     *)
     show_usage
@@ -243,7 +250,7 @@ if ! netsh interface ipv6 show interface | grep -q "\\b${slapos_ifname}\\b" ; th
     ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname} ||
     csih_error "install network interface ${slapos_ifname} failed"
 fi
-ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname} ||
+ip -4 addr add $(echo ${_ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname} ||
 csih_error "add ipv4 address failed"
 
 csih_inform "Configure slapos network OK"
@@ -330,7 +337,7 @@ csih_error "Invalid computer id '$computer_guid' specified."
 csih_inform "Computer configuration information:"
 csih_inform "  interface name:     ${slapos_ifname}"
 csih_inform "  GUID:               ${interface_guid}"
-csih_inform "  ipv4_local_network: ${ipv4_local_network}"
+csih_inform "  ipv4_local_network: ${_ipv4_local_network}"
 csih_inform "  computer_id:        ${computer_guid}"
 csih_inform "  user_base_name:     ${slapos_user_basename}"
 csih_inform
@@ -339,10 +346,10 @@ csih_inform "  in the file: ${node_configure_file} "
 csih_inform "  Or change it in the $(dirname $0)/slapos-include.sh"
 csih_inform "  and run Configure SlapOS again."
 
-sed -i  -e "s%^\\s*interface_name.*$%interface_name = $interface_guid%" \
+sed -i  -e "s%^\\s*interface_name.*$%interface_name = ${interface_guid}%" \
         -e "s%^#\?\\s*ipv6_interface.*$%# ipv6_interface =%g" \
-        -e "s%^ipv4_local_network.*$%ipv4_local_network = $ipv4_local_network%" \
-        -e "s%^computer_id.*$%computer_id = $computer_guid%" \
+        -e "s%^ipv4_local_network.*$%ipv4_local_network = ${_ipv4_local_network}%" \
+        -e "s%^computer_id.*$%computer_id = ${computer_guid}%" \
         -e "s%^user_base_name =.*$%user_base_name = ${slapos_user_basename}%" \
         ${node_configure_file}
 

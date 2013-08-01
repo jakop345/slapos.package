@@ -178,6 +178,40 @@ function reset_slapos_connection()
 }  # === reset_slapos_connection() === #
 
 # ======================================================================
+# Routine: get_free_local_ipv4_network
+# Get a free local ipv4 network in 10.x.x.0/24, return 10.x.x
+# ======================================================================
+function get_free_local_ipv4_network()
+{
+    local addr=${1}
+    local -i i=10
+    local -i seg1=
+    local -i seg2=
+
+    [[ -n "${addr}" ]] &&
+    [[ ${addr} == 10.*.* ]] &&
+    ! IPCONFIG /ALL | grep -q ${addr} &&
+    echo ${addr} &&
+    return 0
+        
+    while (( i )) ; do
+        let seg1=($(date +%N) % 255) 2>&1 > /dev/null
+        let seg2=($(date +%N) % 255) 2>&1 > /dev/null
+        addr=${seg1}.${seg2}
+    
+        ! IPCONFIG /ALL | grep -q ${addr} &&
+        echo ${addr} &&
+        return 0
+    
+        let i--
+    done
+
+    # No found
+    return 1
+}  # === get_free_local_ipv4_network() === #
+readonly -f get_free_local_ipv4_network
+
+# ======================================================================
 # Routine: show_error_exit
 # Show error message and wait for user to press any key to exit
 # ======================================================================
