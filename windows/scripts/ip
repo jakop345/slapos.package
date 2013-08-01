@@ -659,11 +659,7 @@ elif [[ $object == "route" ]] ; then
         exit 1
     fi
 
-elif [[ $object == "tuntap" ]] ; then
-    echo $orig_cmd
-    exit 0
-
-elif [[ $object == "vpntap" ]] ; then
+elif [[ $object == "vpntap" || $object == "tuntap" ]] ; then
 
     while [[ "$1" != "" ]] ; do
         case $1 in

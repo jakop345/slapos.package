@@ -52,7 +52,6 @@ function show_usage()
     echo ""
     echo "        *              All the configure item"
     echo "        re6stnet       Install re6stent and dependencies"
-    echo "        taps           Install OpenVPN Tap-Windows Driver for re6stnet"
     echo "        config         Generate slapos node and client configure files"
     echo "        cron           Generate cron file and start cron job"
     echo ""
@@ -475,18 +474,6 @@ if [[ ! -r ${re6stnet_configure_file} ]] ; then
         >> ${re6stnet_configure_file}
 fi
 
-csih_inform "Configure section re6stnet OK"
-echo ""
-
-# -----------------------------------------------------------
-# taps: Install openvpn tap-windows drivers used by re6stnet
-# -----------------------------------------------------------
-#
-# Adding tap-windows driver will break others, so we add all drivers
-# here. Get re6stnet client count, then remove extra drivers and add
-# required drivers.
-csih_inform "Starting configure section taps ..."
-
 if check_re6stnet_needed ; then
     csih_inform "Disable IPv6 6to4 interface ... "
     netsh interface ipv6 6to4 set state disable && csih_inform "OK."
@@ -495,29 +482,29 @@ if check_re6stnet_needed ; then
     csih_inform "Disable IPv6 teredo interface ... "
     netsh interface teredo set state disable && csih_inform "OK."
 
-    _count=$(sed -n -e "s/^client-count *//p" ${re6stnet_configure_file})
-    [[ -z "${_count}" ]] && _count=10
-    csih_inform "re6stnet client-count: ${_count}"
-    _name_list="re6stnet-tcp re6stnet-udp"
-    for (( i=1; i<=${_count}; i=i+1 )) ; do
-        _name_list="${_name_list} re6stnet$i"
-    done
-    _filename=$(cygpath -w ${openvpn_tap_driver_inf})
-    for _name in ${_name_list} ; do
-        csih_inform "checking interface ${_name} ..."
-        if ! netsh interface ipv6 show interface | grep -q "\\b${_name}\\b" ; then
-            [[ -r ${openvpn_tap_driver_inf} ]] ||
-            csih_error "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: ${_filename}"
+    # _count=$(sed -n -e "s/^client-count *//p" ${re6stnet_configure_file})
+    # [[ -z "${_count}" ]] && _count=10
+    # csih_inform "re6stnet client-count: ${_count}"
+    # _name_list="re6stnet-tcp re6stnet-udp"
+    # for (( i=1; i<=${_count}; i=i+1 )) ; do
+    #     _name_list="${_name_list} re6stnet$i"
+    # done
+    # _filename=$(cygpath -w ${openvpn_tap_driver_inf})
+    # for _name in ${_name_list} ; do
+    #     csih_inform "checking interface ${_name} ..."
+    #     if ! netsh interface ipv6 show interface | grep -q "\\b${_name}\\b" ; then
+    #         [[ -r ${openvpn_tap_driver_inf} ]] ||
+    #         csih_error "Failed to install OpenVPN Tap-Windows Driver, missing driver inf file: ${_filename}"
 
-            csih_inform "installing  interface ${_name} ..."
-            # ipwin install \"${_filename}\" $openvpn_tap_driver_hwid ${_name}; ||
-            ip vpntap add dev ${_name} ||
-            csih_error "Failed to install OpenVPN Tap-Windows Driver."
-            csih_inform "interface ${_name} installed."
-        else
-            csih_inform "${_name} has been installed."
-        fi
-    done
+    #         csih_inform "installing  interface ${_name} ..."
+    #         # ipwin install \"${_filename}\" $openvpn_tap_driver_hwid ${_name}; ||
+    #         ip vpntap add dev ${_name} ||
+    #         csih_error "Failed to install OpenVPN Tap-Windows Driver."
+    #         csih_inform "interface ${_name} installed."
+    #     else
+    #         csih_inform "${_name} has been installed."
+    #     fi
+    # done
 
     # Run re6stnet if no native ipv6
     check_re6stnet_configure ||
@@ -546,11 +533,11 @@ else
     csih_request "native IPv6 found, no taps required."
 fi
 
-csih_inform "Configure section taps OK"
+csih_inform "Configure section re6stnet OK"
 echo ""
 
 # -----------------------------------------------------------
-# tab: Install cron service and create crontab
+# cron: Install cron service and create crontab
 # -----------------------------------------------------------
 csih_inform "Starting configure section cron ..."
 
