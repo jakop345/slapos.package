@@ -571,7 +571,7 @@ create_user() {
 	username="${first_account}"
     else
 	echo "No privileged account could be found."
-	username="slaproot"
+	username="${slapos_administrator}"
     fi
     echo "This script plans to use the name ${username} for the new user,"
     echo "which will only be able to run as a service."
