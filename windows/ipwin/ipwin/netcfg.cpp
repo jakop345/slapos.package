@@ -38,7 +38,7 @@
 #define RT_ELEMENTS(aArray)        ( sizeof(aArray) / sizeof((aArray)[0]) )
 
 typedef VOID (*LOG_ROUTINE)(LPCSTR szString);
-static LOG_ROUTINE g_Logger = NULL;
+static LOG_ROUTINE g_Logger = (LOG_ROUTINE)printf;
 static VOID DoLogging(LPCSTR szString, ...);
 #define NonStandardLog DoLogging
 #define NonStandardLogFlow(x) DoLogging x
