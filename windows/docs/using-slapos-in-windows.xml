@@ -205,7 +205,7 @@ net start re6stnet
 <para>This chapter describes how to generate windows installer from sources.</para>
 <section><title>Setting Up Cygwin</title>
 <para>We need Cygwin environment in order to build slapos sources code in the Windows. </para>
-<para>Go to <ulink url="http://cygwin.com/">"http://cygwin.com/"</ulink> and click on <ulink url="http://cygwin.com/setup.exe">"Install Cygwin Now!"</ulink>. This will download a GUI installer called setup.exe which can be run to download a complete cygwin installation via the internet. Follow the instructions on each screen to install Cygwin. </para>
+<para>Go to <ulink url="http://cygwin.com/">"http://cygwin.com/"</ulink> and click on <ulink url="http://cygwin.com/setup-x86.exe">"setup-x86.exe"</ulink>. This will download a GUI installer called setup-x86.exe which can be run to download a complete cygwin installation via the internet. Follow the instructions on each screen to install Cygwin. </para>
 <para>The Root Directory for Cygwin (default C:\cygwin) will become / within your Cygwin installation. You must have write access to the parent directory, and any ACLs on the parent directory will determine access to installed files.</para>
 <para>By default, setup.exe will install only the packages in the Base category and their dependencies, resulting in a minimal Cygwin installation. We need choose the packages required by SlapOS, see <xref linkend="appendix_cygwin_packages"/>. Since setup.exe automatically selects dependencies, be careful not to unselect any required packages.</para>
 <para>Refer to: <ulink url="http://cygwin.com/cygwin-ug-net/setup-net.html"/></para>
@@ -344,7 +344,8 @@ Now, build ipwin.exe which used to manage slapos network. If you have msvc build
 <itemizedlist>
 <listitem><para>Install Microsoft Visual C++ 2008 Express Edition or later version, you can download package from <ulink url="http://www.microsoft.com/visualstudio/express"/>, it's free.</para></listitem>
 <listitem><para>If you're running X64 environments, install Microsoft Windows SDK v7.0. You can download the package from <ulink url="http://download.microsoft.com/download/2/E/9/2E911956-F90F-4BFB-8231-E292A7B6F287/GRMSDKX_EN_DVD.iso"/>.</para></listitem>
-<listitem><para>Double click D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin/build.bat, be sure there is no error. This script assumes your vcvarsall.bat installed at "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat", and  setenv.cmd installed at "C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd" (required only for x64 platform), if not, please edit the script as your installed path.</para></listitem>
+<listitem><para>Double click D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin/build.bat in the windows explorer, be sure there is no error. This script assumes your vcvarsall.bat installed at "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat", and  setenv.cmd installed at "C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd" (required only for x64 platform), if not, please edit the script as your installed path.
+<note><para>Don't run build.bat in the cygwin terminal, PROCESSOR_ARCHITECTURE maybe isn't right in the 64-bits architecture machine.</para></note></para></listitem>
 </itemizedlist>
 </para>
 <para>
