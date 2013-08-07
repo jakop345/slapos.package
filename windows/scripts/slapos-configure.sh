@@ -530,7 +530,7 @@ if check_re6stnet_needed ; then
         csih_error "Failed to start ${re6stnet_service_name} service."
     fi
 else
-    csih_request "native IPv6 found, no taps required."
+    csih_inform "native IPv6 found, no taps required."
 fi
 
 csih_inform "Configure section re6stnet OK"
