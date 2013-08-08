@@ -280,9 +280,6 @@ Then restart cygwin command box.
 <section><title>Building SlapOS</title>
 <para>Double click the desktop icon "Cygwin" to enter cygwin command box, the following commands are typed in this box.
 <programlisting>
-mkdir -p /cygdrive/d/slapos/opt
-cd /
-ln -s /cygdrive/d/slapos/opt
 mkdir -p /opt/slapos/log
 mkdir -p /opt/download-cache
 cd /opt/slapos

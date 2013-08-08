@@ -22,47 +22,47 @@ Name: "{app}\cygwin\etc\slapos\patches"
 Name: "{app}\cygwin\etc\slapos\images"
 
 [Files]
-Source: "opt\patches\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
-Source: "opt\patches\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "cygwin\opt\patches\slapos-core-format.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
+Source: "cygwin\opt\patches\slapos-cookbook-inotifyx.patch"; DestDir: "{app}\cygwin\etc\slapos\patches";
 
-Source: "opt\images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
-Source: "opt\images\terminal.ico"; DestDir: "{app}\cygwin\etc\slapos\images"; DestName: "terminal.ico";
-Source: "opt\images\configure.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
-Source: "opt\images\node.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
-Source: "opt\images\updater.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
-Source: "opt\images\manager.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\opt\images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\opt\images\terminal.ico"; DestDir: "{app}\cygwin\etc\slapos\images"; DestName: "terminal.ico";
+Source: "cygwin\opt\images\configure.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\opt\images\node.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\opt\images\updater.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
+Source: "cygwin\opt\images\manager.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 
 Source: "setup.exe"; DestDir: "{app}";
-Source: "opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
+Source: "cygwin\opt\git\slapos.package\windows\scripts\setup-cygwin.bat"; DestDir: "{app}";
 
-Source: "opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\slapos-cron-config"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-cron-config"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
-Source: "opt\git\slapos.package\windows\ipwin\ipwin\ipwin.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\ipwin\ipwin\ipwin.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
-Source: "opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
-Source: "opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver"; Permissions: everyone-readexec;
 
-Source: "opt\git\slapos.package\windows\scripts\slapos-include.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\slapos-configure.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\slap-runner.html"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\scripts\pre-uninstall.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-include.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-node.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\post-install.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\build-slapos.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-configure.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\slap-runner.html"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\pre-uninstall.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
 
-Source: "opt\git\slapos.package\windows\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html"; Permissions: everyone-readexec;
-Source: "opt\git\slapos.package\windows\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\docs\using-slapos-in-windows.html"; DestDir: "{app}"; DestName: "user-guide.html"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\docs\README.cygwin"; DestDir: "{app}"; DestName: "readme.txt"; Permissions: everyone-readexec;
 
 [Icons]
 Name: "{commondesktop}\SlapOS"; Filename: "https://www.slapos.org/"; IconFilename: "{app}\cygwin\etc\slapos\images\slapos.ico";
