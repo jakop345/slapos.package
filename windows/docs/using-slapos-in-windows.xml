@@ -280,6 +280,10 @@ Then restart cygwin command box.
 <section><title>Building SlapOS</title>
 <para>Double click the desktop icon "Cygwin" to enter cygwin command box, the following commands are typed in this box.
 <programlisting>
+mkdir -p /opt/git
+cd /opt/git
+(cd slapos.package ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
+cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
 mkdir -p /opt/slapos/log
 mkdir -p /opt/download-cache
 cd /opt/slapos
@@ -300,8 +304,10 @@ patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &l
 </programlisting>
 It seems netifaces.dll need to rebase,
 <programlisting>
-cp /etc/postinstall/autorebase.bat.done /autorebase.bat
-echo Pause >> /autorebase.bat
+echo "PATH .\bin;%PATH%" &gt; /autorebase.bat
+echo "dash /bin/rebaseall -v" &gt;&gt; /autorebase.bat
+echo "EXIT 0" &gt;&gt; /autorebase.bat
+echo "Pause" &gt;&gt; /autorebase.bat
 exit
 </programlisting>
 After exit cygwin, double click autorebase.bat in the Windows explorer. If the current user isn't Administrator, then right click it, click Run As Administrator.
@@ -311,11 +317,8 @@ After exit cygwin, double click autorebase.bat in the Windows explorer. If the c
 <section><title>Preparing the sources files for installer</title>
 <para>Let's we start cygwin box, then clone slapos.package.git
 <programlisting>
-mkdir -p /opt/git
-cd /opt/git
-(cd slapos.package ; git pull) || git clone -b cygwin http://git.erp5.org/repos/slapos.package.git
-cp /opt/git/slapos.package/windows/scripts/* /usr/local/bin
 cd /opt
+rm -rf slapos/slapos.tar.gz
 tar czf slapos.tar.gz slapos/
 mv slapos.tar.gz slapos/
 </programlisting>
@@ -341,7 +344,7 @@ Now, build ipwin.exe which used to manage slapos network. If you have msvc build
 <itemizedlist>
 <listitem><para>Install Microsoft Visual C++ 2008 Express Edition or later version, you can download package from <ulink url="http://www.microsoft.com/visualstudio/express"/>, it's free.</para></listitem>
 <listitem><para>If you're running X64 environments, install Microsoft Windows SDK v7.0. You can download the package from <ulink url="http://download.microsoft.com/download/2/E/9/2E911956-F90F-4BFB-8231-E292A7B6F287/GRMSDKX_EN_DVD.iso"/>.</para></listitem>
-<listitem><para>Double click D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin/build.bat in the windows explorer, be sure there is no error. This script assumes your vcvarsall.bat installed at "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat", and  setenv.cmd installed at "C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd" (required only for x64 platform), if not, please edit the script as your installed path.
+<listitem><para>Double click D:/slapos/cygwin/opt/git/slapos.packages/windows/ipwin/ipwin/build.bat in the windows explorer, be sure there is no error. This script assumes your vcvarsall.bat installed at "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat", and  setenv.cmd installed at "C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd" (required only for x64 platform), if not, please edit the script as your installed path.
 <note><para>Don't run build.bat in the cygwin terminal, PROCESSOR_ARCHITECTURE maybe isn't right in the 64-bits architecture machine.</para></note></para></listitem>
 </itemizedlist>
 </para>
