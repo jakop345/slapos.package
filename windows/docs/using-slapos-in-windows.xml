@@ -126,7 +126,7 @@ Then waiting for configure script finished. Be sure the configure scrip report s
 <section><title>Command Console</title>
 <para>It will open a terminal, here you can run most of slapos command, for examples,
 <programlisting>
-slapos node foramt -cv --now
+slapos node format -cv --now
 slapos supply slaprunner COMP-1658
 slapos request "Jondy Web Runner In Windows 7" slaposwebrunner --node computer_guid=COMP-1658
 slapos node software
