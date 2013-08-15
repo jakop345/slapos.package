@@ -49,8 +49,8 @@ fi
 csih_get_system_and_admins_ids
 if [[ ! " $(id -G) " == *\ $csih_ADMINSUID\ * ]] ; then
     echo
-    echo "Note that creating a new user requires that the current account have"
-    echo "Administrator privileges.  You haven't right to run this script. "
+    echo "Note that creating a new user requires that the current account has"
+    echo "Administrator privileges.  You don't have the rights to run this script. "
     echo "Please login as Administrator, or right-click this script"
     echo "then click Run as administrator."
     echo
@@ -96,7 +96,7 @@ function create_unprivileged_user()
           "/homedir:${dos_var_empty}" /active:no > /dev/null 2>&1 && unpriv_user_in_sam=yes
         if [ "${unpriv_user_in_sam}" != "yes" ]
         then
-          csih_warning "Creating the user '${unpriv_user}' failed!"
+          csih_warning "Creation of user '${unpriv_user}' failed!"
         fi
     fi
     if [ "${unpriv_user_in_sam}" = "yes" ]
@@ -177,7 +177,7 @@ while getopts "Dd:g:G:p:s:r" opt ; do
         r)
             ;;
         *)
-            echo Error when add user in the Cygwin
+            echo Error while adding user in Cygwin
             exit 1
             ;;
     esac
@@ -201,5 +201,5 @@ for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
 done
 
 # net user "${USER_NAME}" /delete ||
-# (echo "Faild to delete user ${USER_NAME}" ; exit 1)
+# (echo "Failed to delete user ${USER_NAME}" ; exit 1)
 # sed -i -e "/^${USER_NAME}/d" /etc/passwd

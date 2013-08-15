@@ -10,7 +10,7 @@ fi
 csih_get_system_and_admins_ids
 if [[ ! " $(id -G) " == *\ $csih_ADMINSUID\ * ]] ; then
     echo
-    echo "You haven't right to run this script. "
+    echo "You don't have the rights to run this script. "
     echo "Please login as Administrator to run it, or right-click this script"
     echo "then click Run as administrator."
     echo
@@ -124,7 +124,7 @@ function check_node_configure()
 # ======================================================================
 function check_client_configure()
 {
-    csih_inform "Checking slapos client confiure ..."
+    csih_inform "Checking slapos client configure ..."
     [[ -f ${client_configure_file} ]] ||
     csih_error "Missing client configure file: ${client_configure_file}"
     csih_inform "Check slapos client configure Over."
@@ -136,7 +136,7 @@ function check_client_configure()
 # ======================================================================
 function check_cron_configure()
 {
-    csih_inform "Checking slapos cron confiure ..."
+    csih_inform "Checking slapos cron configure ..."
     csih_inform "Check slapos cron configure Over."
 }  # === check_cron_configure() === #
 
@@ -146,7 +146,7 @@ function check_cron_configure()
 # ======================================================================
 function check_re6stnet_configure()
 {
-    csih_inform "Checking slapos re6stnet confiure ..."
+    csih_inform "Checking slapos re6stnet configure ..."
     which re6stnet > /dev/null 2>&1 ||
     csih_error "No re6stnet installed, please run Configure SlapOS first."
     csih_inform "Check slapos re6stnet configure Over."
@@ -158,7 +158,7 @@ function check_re6stnet_configure()
 # ======================================================================
 function check_re6stnet_needed()
 {
-    # This doesn't work in the cygwin now, need hack ip script
+    # This doesn't work in cygwin now, need hack ip script
     # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
     if netsh interface ipv6 show route | grep -q " ::/0 " ; then
         return 1
@@ -298,15 +298,15 @@ slapos_check_and_create_privileged_user()
               if [ -z "${_password}" ]
               then
                   csih_error_multi "Exiting configuration.  No user ${username} has been created," \
-                      "and no services have been installed."
+                      "and no service has been installed."
               fi
           fi
           tmpfile1=$(csih_mktemp) || csih_error "Could not create temp file"
-          csih_call_winsys32 net user "${username}" "${_password}" /add /fullname:"SlapOS Administraoter" \
+          csih_call_winsys32 net user "${username}" "${_password}" /add /fullname:"SlapOS Administrator" \
               "/homedir:${dos_var_empty}" /yes > "${tmpfile1}" 2>&1 && username_in_sam=yes
           if [ "${username_in_sam}" != "yes" ]
           then
-              csih_warning "Creating the user '${username}' failed!  Reason:"
+              csih_warning "Creation of user '${username}' failed!  Reason:"
               /usr/bin/cat "${tmpfile1}"
               echo
           fi

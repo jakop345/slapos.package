@@ -101,7 +101,7 @@ static int kernel_pipe_handles[2];
  * forward- ing of IPv6 packets.  Also, identify if the node is
  * acting as a router.  Defaults to off.
  *
- * ==> In the Windows, MSDN says in the registry
+ * ==> In Windows, MSDN says in the registry
  *
  * HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
  *
@@ -156,7 +156,7 @@ kernel_setup(int setup)
         if (0 != cyginet_startup())
             return -1;
 
-        /* We don't disable ICMPv6 redirect in the Windows */
+        /* We don't disable ICMPv6 redirect in Windows */
         /*
         if ((rc = cyginet_set_icmp6_redirect_accept(0)) == -1) {
             fprintf(stderr, "Cannot disable ICMPv6 redirect.\n");
@@ -288,7 +288,7 @@ clear_kernel_socket_event()
  *
  * RTF_CLONING: generate new routes on use
  *
- *   Not implemented in the Windows.
+ *   Not implemented in Windows.
  *
  */
 int
@@ -564,7 +564,7 @@ kernel_routes(struct kernel_route *routes, int maxroutes)
 }
 
 /* Note: ifname returned by getifaddrs maybe includes a suffix number
-   in the Cygwin, it looks like:
+   in Cygwin, it looks like:
 
    {C05BAB6E-B82D-4C4D-AF07-EFF7C45C5DB0}_1
    {C05BAB6E-B82D-4C4D-AF07-EFF7C45C5DB0}_2
@@ -697,7 +697,7 @@ kernel_callback(int (*fn)(int, void*), void *closure)
 {
     if (kernel_socket < 0) kernel_setup_socket(1);
 
-    /* In the Windows, we can't get the exact changed route, but the
+    /* In Windows, we can't get the exact changed route, but the
        route table is really changed. */
     kdebugf("Kernel table changed.\n");
     cyginet_refresh_interface_table();

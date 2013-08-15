@@ -51,7 +51,7 @@ function show_usage()
     echo "    The configure item option:"
     echo ""
     echo "        *              All the configure item"
-    echo "        re6stnet       Install re6stent and dependencies"
+    echo "        re6stnet       Install re6stnet and dependencies"
     echo "        config         Generate slapos node and client configure files"
     echo "        cron           Generate cron file and start cron job"
     echo ""
@@ -155,7 +155,7 @@ mkdir -p /etc/re6stnet
 # -----------------------------------------------------------
 # Create account: slaproot
 # -----------------------------------------------------------
-# Start seclogon service in the Windows XP
+# Start seclogon service in Windows XP
 if csih_is_xp ; then
     csih_inform "Set start property of seclogon to auto"
     sc config seclogon start= auto ||
@@ -342,7 +342,7 @@ csih_inform "  user_base_name:     ${slapos_user_basename}"
 csih_inform
 csih_inform "  If ipv4_local_network confilcts with your local network, change it"
 csih_inform "  in the file: ${node_configure_file} "
-csih_inform "  Or change it in the $(dirname $0)/slapos-include.sh"
+csih_inform "  Or change it in $(dirname $0)/slapos-include.sh"
 csih_inform "  and run Configure SlapOS again."
 
 sed -i  -e "s%^\\s*interface_name.*$%interface_name = ${interface_guid}%" \
@@ -518,7 +518,7 @@ if check_re6stnet_needed ; then
             -u ${_administrator} -w ${csih_PRIVILEGED_PASSWORD} ||
         csih_error "Failed to install ${re6stnet_service_name} service."
     fi
-    csih_inform "you can check log files in the /var/log/re6stnet/*.log"
+    csih_inform "you can check log files in /var/log/re6stnet/*.log"
     if ! check_cygwin_service ${re6stnet_service_name} ; then
         csih_inform "Service ${re6stnet_service_name} is not running. One possible case"
         csih_inform "is that re6stnet service is shutdown in unusual ways, in this case"
@@ -596,7 +596,7 @@ echo ""
 # echo
 
 echo ""
-csih_inform "Configure SlapOS successfully"
+csih_inform "SlapOS has been successfully configured"
 echo ""
 
 read -n 1 -t 60 -p "Press any key to exit..."

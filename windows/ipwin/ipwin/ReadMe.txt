@@ -1,6 +1,6 @@
 ﻿How to build for x86:
 
-Open ipwin.vcproj in the Microsoft Visual Studio 2008, Press F7
+Open ipwin.vcproj in Microsoft Visual Studio 2008, Press F7
 
 How to build for x64:
 

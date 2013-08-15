@@ -429,7 +429,7 @@ HRESULT SlaposNetCfgWinRenameConnection (LPWSTR pGuid, PCWSTR NewName)
   lpHrRenameConnection RenameConnectionFunc = NULL;
   HRESULT status;
 
-  /* First try the IShellFolder interface, which was unimplemented
+  /* First try the IShellFolder interface, which was not implemented
    * for the network connections folder before XP. */
   status = rename_shellfolder (pGuid, NewName);
   if (status == E_NOTIMPL)

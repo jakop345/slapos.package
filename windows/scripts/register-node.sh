@@ -90,9 +90,9 @@ if [[ ! -d ~/.slapos ]] ; then
 fi
 
 if [[ ! ( -f ~/.slapos/certificate && -f ~/.slapos/key ) ]] ; then
-    echo "Error: missing certificate and key in the ~/.slapos  \
+    echo "Error: missing certificate and key in ~/.slapos  \
 
-If you haven't an account in the slapos.org, please login https://www.slapos.org and signup. Otherwise to be sure both of files are stored in the ~/.slapos 
+If you don't have an account in slapos.org, please login to https://www.slapos.org and signup. Otherwise check that both files are stored in ~/.slapos 
 "
     exit 1
 fi
@@ -105,7 +105,7 @@ master_url = https://slap.vifib.com/
 [slapconsole]
 # Put here retrieved certificate from vifib.
 # Beware: put certificate from YOUR account, not the one from your node.
-# You (as identified person from vifib) will request an instance, node your node.
+# You (as identified person from vifib) will request an instance, not your node.
 # Conclusion: node certificate != person certificate.
 cert_file = ~/.slapos/certificate
 key_file = ~/.slapos/key
@@ -126,18 +126,18 @@ bin/slapos node register $nodename
 # Check computer configure file: /etc/opt/slapos/slapos.cfg
 nodecfg=/etc/opt/slapos/slapos.cfg
 if [[ ! -f $nodecfg ]] ; then
-    echo Error: something is wrong when register node. Can not find the configure file $nodecfg.
+    echo Error: something is wrong when registering the node. Cannot find the configuration file $nodecfg.
     exit 1
 fi
 
 # check ipv6
 netsh interface ipv6 show interface > /dev/null || netsh interface ipv6 install
 
-# get GUID of the first physics netcard
+# get GUID of the first physical netcard
 guidname=get_all_physical_netcard
 
 if [[ "$guidname" == "" ]] ; then
-    echo Error: no any physical netcard found.
+    echo Error: no physical netcard found.
     exit 1
 fi
 
@@ -150,9 +150,9 @@ sed -i  -e "s/^\\s*interface_name.*$/interface_name = ${IPINTERFACE}/g" \
        $nodecfg
 
 # 
-# Add run item when windows startup
+# Add run item at windows startup
 echo Set slapos init script as Windows startup item.
 regtool -q set "$RUNKEY\\$SLAPOSNODEINIT" "\"$(cygpath -w /usr/bin/sh)\" --login -i /etc/slapos/scripts/init-slapos-node.sh"
-(( $? )) && echo Fail to set init script as startup item.
+(( $? )) && echo Failed to set init script as startup item.
 
 

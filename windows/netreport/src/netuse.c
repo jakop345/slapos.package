@@ -91,21 +91,21 @@ netuse_user_info(PyObject *self, PyObject *args)
       logonuser = userinfo;
       len = wchar2mchar(pBuf->wkui1_username, logonuser, size);
       if (len == -1) {
-        PyErr_SetString(PyExc_RuntimeError, "Unicode convertion error");
+        PyErr_SetString(PyExc_RuntimeError, "Unicode conversion error");
         return NULL;
       }
       size -= len;
       logondomain = logonuser + len;
       len = wchar2mchar(pBuf->wkui1_logon_domain, logondomain, size);
       if (len == -1) {
-        PyErr_SetString(PyExc_RuntimeError, "Unicode convertion error");
+        PyErr_SetString(PyExc_RuntimeError, "Unicode conversion error");
         return NULL;
       }
       size -= len;
       logonserver = logondomain + len;
       len = wchar2mchar(pBuf->wkui1_logon_server, logonserver, size);
       if (len == -1) {
-        PyErr_SetString(PyExc_RuntimeError, "Unicode convertion error");
+        PyErr_SetString(PyExc_RuntimeError, "Unicode conversion error");
         return NULL;
       }
     }
@@ -163,7 +163,7 @@ netuse_map_drive(PyObject *self, PyObject *args)
   drive[0] = get_free_drive_letter();
   if (!drive[0]) {
     PyErr_SetString(PyExc_RuntimeError,
-                    "Add net drive faild: no available drive letter."
+                    "Add net drive failed: no available drive letter."
                     );
     return NULL;
   }
@@ -403,7 +403,7 @@ PyMODINIT_FUNC initnetuse(void)
   PyObject* module;
   module = Py_InitModule3("netuse",
                           NetUseMethods,
-                          "Show information about net resource in the Windows."
+                          "Show information about net resource in Windows."
                           );
 
   if (module == NULL)

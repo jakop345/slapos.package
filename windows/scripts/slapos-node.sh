@@ -50,7 +50,7 @@ fi
 # -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
-csih_inform "Formating SlapOS Node ..."
+csih_inform "Formatting SlapOS Node ..."
 /opt/slapos/bin/slapos node format -cv --now ||
 csih_error "Run slapos node format failed. "
 

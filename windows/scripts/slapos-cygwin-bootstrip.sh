@@ -8,7 +8,7 @@ readonly -f check_os_is_wow64
 
 function show_usage()
 {
-    echo "This script is used to build a bootstrip slapos in the cywin."
+    echo "This script is used to build a bootstrip slapos in cywin."
     echo ""
     echo "Usage:"
     echo ""
@@ -277,7 +277,7 @@ echo ""
 # -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
-csih_inform "Formating SlapOS Node ..."
+csih_inform "Formatting SlapOS Node ..."
 
 netsh interface ipv6 add addr ${slapos_ifname} ${ipv6_local_address}
 /opt/slapos/bin/slapos node format -cv --now ||
