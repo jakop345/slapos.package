@@ -12,7 +12,7 @@
        <revnumber>0.4</revnumber>
        <date>2013-08-01</date>
        <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
-       <revremark>Add chapter Create SlapOS Windows Installer Bootstrip Node.</revremark>
+       <revremark>Add chapter Create SlapOS Windows Installer Bootstrap Node.</revremark>
      </revision>
 
      <revision>
@@ -486,19 +486,19 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 </section>
 </chapter>
 
-<chapter><title>Create SlapOS Windows Installer Bootstrip Node</title>
+<chapter><title>Create SlapOS Windows Installer Bootstrap Node</title>
 <para>This chapter descripts how to create a slapos node in the windows which used to test the windows installer self:
 <itemizedlist>
 <listitem><para>Install cygwin</para></listitem>
 <listitem><para>Prepare certificate, key, computer.key, computer.crt and test-computer.key, test-computer.crt</para></listitem>
-<listitem><para>Run slapos-cygwin-bootstrip.sh, got it from slapos.package.git/windows/scripts</para></listitem>
+<listitem><para>Run slapos-cygwin-bootstrap.sh, got it from slapos.package.git/windows/scripts</para></listitem>
 <listitem><para>Run command slapos node software/release until instance created</para></listitem>
 <listitem><para>Run command slapos remove to destroy this instance</para></listitem>
 </itemizedlist>
 </para>
 
-<section><title>Add SlapOS Bootstrip Node to Vifib Cluster</title>
-<para>Create an instance of SlapOS Test-Agent in slapos bootstrip node (computer.key/computer.crt), it will test the software: http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg, this software can build slapos windows installer, then run the installer to create a slapos test node.</para>
+<section><title>Add SlapOS Bootstrap Node to Vifib Cluster</title>
+<para>Create an instance of SlapOS Test-Agent in slapos bootstrap node (computer.key/computer.crt), it will test the software: http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg, this software can build slapos windows installer, then run the installer to create a slapos test node.</para>
 <para>Create another instance of SlapOS Test-Agent used to test the instances running in the slapos test node (test-computer.key/test-computer.crt). This test agent can include any software which can run in the slapos windows.</para>
 </section>
 </chapter>
