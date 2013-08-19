@@ -469,7 +469,7 @@ function openwin() {
 EOF
         fi
     else
-        csih_error_multi "Request return true, but I can't find connection information," \
+        csih_error_multi "Request returned true, but I can't find connection information," \
             "something is wrong with slapos webrunner software."
     fi
     return ${_ret}
