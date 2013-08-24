@@ -86,7 +86,7 @@ class NetDriveUsageReporter(object):
       self.report_interval = float(self.report_interval)
       self.initializeDatabase(self.data_file)
 
-    def initializeConnection(self):        
+    def initializeConnection(self):
         connection_dict = {}
         connection_dict['key_file'] = self.key_file
         connection_dict['cert_file'] = self.cert_file
@@ -117,12 +117,13 @@ class NetDriveUsageReporter(object):
         self.sendAllReport()
         self.initializeConnection()
         last_timestamp = datetime.now()
+        interval = 30.0 if self.report_interval > 60 else (self.report_interval / 2)
         try:
             while True:
                 current_timestamp = datetime.now()
                 d = current_timestamp - last_timestamp
                 if d.seconds < self.report_interval:
-                    sleep(self.report_interval)
+                    sleep(interval)
                     continue
                 self.insertUsageReport(last_timestamp.isoformat(), d.seconds)
                 self.sendReport()
