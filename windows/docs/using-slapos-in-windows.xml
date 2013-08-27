@@ -322,22 +322,12 @@ rm -rf slapos/slapos.tar.gz
 tar czf slapos.tar.gz slapos/
 mv slapos.tar.gz slapos/
 </programlisting>
-Then build babeld and openvpn for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
+Then build babeld for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
 cd /opt/git/slapos.package/windows/babeld
 # WINVER could be XP, VISTA, WIN7, WIN8
 WINVER=XP make
 cp babeld.exe /usr/bin
-
-cd /opt/git/slapos.package/windows/openvpn
-libtoolize
-aclocal -I m4
-autoheader
-automake --add-missing
-autoreconf
-ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root
-make
-cp src/openvpn/.libs/openvpn.exe /usr/bin
 </programlisting>
 <!-- Now downlaod openvpn 2.3 for your window version, and install it. We need OpenVPN Tap-Windows Drivers files. -->
 Now, build ipwin.exe which used to manage slapos network. If you have msvc build environments, build the solution "D:/slapos/opt/git/slapos.packages/windows/ipwin/ipwin.sln" as your perfer. If you have no idea about msvc, do as the following steps:
@@ -370,13 +360,19 @@ cd /opt/git
 (cd re6stnet ; git pull) || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 cd re6stnet
 python setup.py sdist
+
+cd /opt/git/re6stnet/re6st
+i686-pc-mingw32-gcc.exe ovpn-client.c -o ovpn-client-x86.exe
+i686-pc-mingw32-gcc.exe ovpn-server.c -o ovpn-server-x86.exe
+i686-w64-mingw32-gcc.exe ovpn-client.c -o ovpn-client-x64.exe
+i686-w64-mingw32-gcc.exe ovpn-server.c -o ovpn-server-x64.exe
 </programlisting>
-Get the icons and openvpn drivers, if you use 32-bit windows, uncomment the comment line to download openvpn-driver-i386.tar.gz other than openvpn-driver-x86_64.tar.gz:
+Get the icons and openvpn files, if you use 32-bit windows, uncomment the comment line to download openvpn-x86.tar.gz other than openvpn-x64.tar.gz:
 <programlisting>
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/images.tar.gz
-wget http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz -O openvpn-driver.tar.gz
-# wget http://www.dashingsoft.com/products/slapos/openvpn-driver-X86.tar.gz -O openvpn-driver.tar.gz
+wget http://www.dashingsoft.com/products/slapos/openvpn-x64.tar.gz -O openvpn-driver.tar.gz
+# wget http://www.dashingsoft.com/products/slapos/openvpn-x86.tar.gz -O openvpn-driver.tar.gz
 tar xzf images.tar.gz --no-same-owner
 tar xzf openvpn-driver.tar.gz --no-same-owner
 </programlisting>
