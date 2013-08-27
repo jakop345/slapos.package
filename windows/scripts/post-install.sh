@@ -101,12 +101,10 @@ ${_cygroot:0:2}
 CHDIR ${_cygroot}
 ${_cygroot}\bin\find /opt/slapos -name "*.dll" > ${_cygroot}\myfile.list
 IF EXIST ${_cygroot}\opt\slapgrid. ${_cygroot}\bin\find /opt/slapgrid -name "*.dll" >> ${_cygroot}\myfile.list
-bin\bash --login -c "for pid in \$(ps | grep '/usr/bin/openvpn' | gawk '{print $4}') ; do TASKKILL /F /T /PID \$pid ; done"
-NET STOP ${slapos_prefix}re6stnet
-NET STOP ${slapos_prefix}cygserver
-NET STOP ${slapos_prefix}syslog-ng
 NET STOP ${slapos_prefix}cron
-NET STOP ${slapos_prefix}sshd
+NET STOP ${slapos_prefix}re6stnet
+NET STOP ${slapos_prefix}syslog-ng
+NET STOP ${slapos_prefix}cygserver
 bin\bash --login -c "for pid in \$(ps | grep '/usr/bin/python2.7' | gawk '{print \$4}') ; do TASKKILL /F /T /PID \$pid ; done"
 PATH .\bin;%PATH%
 dash /bin/rebaseall -T /myfile.list -v
@@ -168,7 +166,7 @@ fi
 if [[ -n ${slapos_prefix} ]] ; then
     echo "Set slapos prefix as ${slapos_prefix}"
     sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}%" \
-        /etc/slapos/scripts/pre-uninstall.sh /etc/slapos/scripts/slapos-include.sh
+        /etc/slapos/scripts/slapos-include.sh
 else
     echo "Set slapos prefix to empty"
 fi
