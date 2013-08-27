@@ -88,7 +88,7 @@ for _name in $(NET USER) ; do
     if [[ "${_name}" == ${slapos_user_basename}* ]] ; then
         echo "Removing user: ${_name}"
         NET USER ${_name} /DELETE && echo OK.
-    elif echo "${_name}" | grep -q -E "(sshd)|(cyg_server)|(${slapos_administrator})" ; then
+    elif echo "${_name}" | grep -q -E "(cyg_server)|(${slapos_administrator})" ; then
         echo "Removing user: ${_name}"
         NET USER ${_name} /DELETE && echo OK.
     fi

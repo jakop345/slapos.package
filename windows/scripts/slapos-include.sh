@@ -50,7 +50,6 @@ declare -r slapos_user_basename=${slapos_prefix:-slap}user
 declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
 declare -r re6stnet_service_name=${slapos_prefix}re6stnet
 declare -r cron_service_name=${slapos_prefix}cron
-declare -r sshd_service_name=${slapos_prefix}sshd
 declare -r syslog_service_name=${slapos_prefix}syslog-ng
 declare -r cygserver_service_name=${slapos_prefix}cygserver
 

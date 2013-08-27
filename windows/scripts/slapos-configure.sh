@@ -12,7 +12,7 @@
 #
 #     * Create user slaproot who owns Administrator group rights
 #
-#     * Configure and start cygwin service: cygserver, syslog-ng, sshd
+#     * Configure and start cygwin service: cygserver, syslog-ng
 #
 #     * config: Create node and client configure file by parameters ca/key
 #
@@ -166,7 +166,7 @@ slapos_check_and_create_privileged_user ${_administrator} ${_password} ||
 csih_error "failed to create account ${_administrator}."
 
 # -----------------------------------------------------------
-# Configure cygwin services: cygserver syslog-ng sshd
+# Configure cygwin services: cygserver syslog-ng
 # -----------------------------------------------------------
 csih_inform "Starting configure cygwin services ..."
 if ! cygrunsrv --query ${cygserver_service_name} > /dev/null 2>&1 ; then

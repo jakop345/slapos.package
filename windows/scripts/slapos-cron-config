@@ -559,7 +559,7 @@ create_user() {
     echo
     echo "Attempting to find or create a privileged user."
 
-    for username in ${slapos_administrator} cyg_server cron_server sshd_server
+    for username in ${slapos_administrator} cyg_server cron_server
     do
       if net user "${username}" 1> /dev/null 2>&1; then
 	  [ -z "${first_account}" ] && first_account="${username}"
@@ -634,8 +634,6 @@ create_user() {
 	if [ "${username_in_admingroup}" != "yes" ]
 	    then
 	    echo "ERROR: Adding user ${username} to group ${_admingroup} failed!"
-	    echo "Please add ${username} to group ${_admingroup} before"
-	    echo "starting the sshd service!"
 	    echo
 	    ret=1
 	fi

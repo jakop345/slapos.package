@@ -61,7 +61,7 @@ fi
 # Routine: create_unprivileged_user
 #   Creates a new (unprivileged) user as specified by $1.
 #   Useful for running services that do not require elevated privileges,
-#     or running servers like sshd in "privilege separation" mode.
+#     or running servers like cron in "privilege separation" mode.
 #
 #   Exits on catastrophic error
 #   Returns 0 on total success
