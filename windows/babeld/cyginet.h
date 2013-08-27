@@ -92,7 +92,7 @@
   http://msdn.microsoft.com/en-us/library/aa921042.aspx
 
   TCP/IP (v4 and v6) Technical Reference, it shows ipv4 and ipv6 how
-  to work in the windows. (Recommended)
+  to work in windows. (Recommended)
   http://technet.microsoft.com/en-us/library/dd379473(v=ws.10).aspx
  */
 
@@ -103,7 +103,7 @@
 #define IN_LOOPBACK(a)      ((((long int) (a)) & 0xff000000) == 0x7f000000)
 #endif
 
-/* Missing defines in the Cygwin */
+/* Missing defines in Cygwin */
 #define RTM_ADD		0x1	/* Add Route */
 #define RTM_DELETE	0x2	/* Delete Route */
 #define RTM_CHANGE	0x3	/* Change Metrics or flags */

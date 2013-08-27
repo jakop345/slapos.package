@@ -148,8 +148,8 @@ get_NT() {
 # ======================================================================
 warning_for_etc_file() {
 	echo
-	echo "WARNING: The command above overwrites any existing /etc/$1."
-	echo "You may want to preserve /etc/$1 before generating a new,"
+	echo "WARNING: The above command overwrites any existing /etc/$1."
+	echo "You may want to preserve /etc/$1 before generating a new"
 	echo "one, and then compare your saved /etc/$1 file with the"
 	echo "newly-generated one in case you need to restore other"
 	echo "entries."
@@ -590,13 +590,13 @@ create_user() {
     else
         username_in_sam=
 	echo "User ${username} needs a password. It must match"
-	echo "the rules in force on your system."
+	echo "the rules enforced by your system."
 	getvalue "Please enter the password for ${username}:" -s
 	_password="${value}"
 	echo
 	net user "${username}" "${_password}" /add /fullname:"Privileged server" /yes > "$TEMP_FILE" 2>&1 && username_in_sam=yes
 	if [ "${username_in_sam}" != "yes" ]; then
-	    echo "ERROR: Creating the user '${username}' failed!  Reason:"
+	    echo "ERROR: Creation of user '${username}' failed!  Reason:"
 	    cat "$TEMP_FILE"
 	    rm -f "$TEMP_FILE"
 	    echo

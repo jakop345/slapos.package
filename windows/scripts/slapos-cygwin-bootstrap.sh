@@ -8,16 +8,16 @@ readonly -f check_os_is_wow64
 
 function show_usage()
 {
-    echo "This script is used to build a bootstrip slapos in the cywin."
+    echo "This script is used to build a bootstrap slapos in cywin."
     echo ""
     echo "Usage:"
     echo ""
-    echo "  ./slapos-cygwin-bootstrip.sh"
+    echo "  ./slapos-cygwin-bootstrap.sh"
     echo ""
     echo "Before run this script, type the following command in the windows"
     echo "command console to install cygwin:"
     echo ""
-    echo "  setup_cygwin.bat C:\slapos-bootstrip network"
+    echo "  setup_cygwin.bat C:\slapos-bootstrap network"
     echo ""
     echo "Then sign up slapos.org, got the following certificate files:"
     echo ""
@@ -43,7 +43,7 @@ if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
     exit 1
 fi
 
-csih_inform "Starting bootstrip slapos node ..."
+csih_inform "Starting bootstrap slapos node ..."
 echo ""
 
 # ======================================================================
@@ -277,7 +277,7 @@ echo ""
 # -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
-csih_inform "Formating SlapOS Node ..."
+csih_inform "Formatting SlapOS Node ..."
 
 netsh interface ipv6 add addr ${slapos_ifname} ${ipv6_local_address}
 /opt/slapos/bin/slapos node format -cv --now ||
@@ -319,7 +319,7 @@ while true ; do
 done
 
 echo ""
-csih_inform "Bootstrip slapos node successfully."
+csih_inform "Bootstrap slapos node successfully."
 echo ""
 
 read -n 1 -t 60 -p "Press any key to exit..."

@@ -172,7 +172,7 @@ static int
 get_interface_forwards(char * guid)
 {
   long value = 0;
-  /* Location in the Windows XP, not sure in Vista or Windows 7 */
+  /* Location in Windows XP, not sure in Vista or Windows 7 */
   char * key = "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters"
                "\\Interfaces\\%s";
   char * name = "Forwards";
@@ -449,7 +449,7 @@ libwinet_run_command(const char *command)
  *
  *   Gateway could be an address or interface name.
  *
- *   In the Windows 7, there is a little difference:
+ *   In Windows 7, there is a little difference:
  *
  *       Destination Prefix:     ::/0
  *       Source Prefix:          ::/0
@@ -510,7 +510,7 @@ libwinet_dump_ipv6_route_table(struct cyginet_route *routes,
       *p -- = 0;
 
     /* The first field of route entry
-       In the Windows XP, field name is "prefix",
+       In Windows XP, field name is "prefix",
        Windows 7, "Destination Prefix"
        */
     if ((strncmp(buffer, "Prefix", 6) == 0) ||
@@ -1091,7 +1091,7 @@ libwinet_edit_route_entry(const struct sockaddr *dest,
     memset(&Row2, 0, sizeof(MIB_IPFORWARD_ROW2));
 
     /* Row2.InterfaceLuid = 0; */
-    /* Maybe in the Vista, both of indexs are same. */
+    /* Maybe in Vista, both indexes are the same. */
     Row2.InterfaceIndex = dest->sa_family == AF_INET6 ?
       ifindex : libwinet_map_ifindex(AF_INET6, ifindex);
     Row2.DestinationPrefix.PrefixLength = plen;
@@ -1571,7 +1571,7 @@ cyginet_getifaddresses(char *ifname,
   return dwReturn;
 }
 
-/* In the windows, loopback interface index is alawys 1 */
+/* In windows, loopback interface index is alawys 1 */
 int
 cyginet_loopback_index(int family)
 {
@@ -1579,7 +1579,7 @@ cyginet_loopback_index(int family)
 }
 
 /*
- * There are 3 ways to dump route table in the Windows:
+ * There are 3 ways to dump route table in Windows:
  *
  * Before Windows Vista
  *
@@ -2675,7 +2675,7 @@ VOID PrintAllInterfaces()
 static void
 runTestCases()
 {
-  printf("\n\nTest getifaddrs works in the Cygwin:\n\n");
+  printf("\n\nTest getifaddrs works in Cygwin:\n\n");
   {
     struct ifaddrs * piftable, *pif;
     getifaddrs(&piftable);
@@ -2684,7 +2684,7 @@ runTestCases()
     freeifaddrs(piftable);
   }
 
-  printf("\n\nTest if_indexname works in the Cygwin:\n\n");
+  printf("\n\nTest if_indexname works in Cygwin:\n\n");
   {
     struct if_nameindex * ptr = (struct if_nameindex *)if_nameindex();
     if (ptr) {
@@ -2697,7 +2697,7 @@ runTestCases()
     }
   }
 
-  printf("\n\nTest if_indextoname works in the Cygwin:\n\n");
+  printf("\n\nTest if_indextoname works in Cygwin:\n\n");
   {
     CHAR ifname[256];
     if (if_indextoname(1, ifname))
@@ -2706,7 +2706,7 @@ runTestCases()
       printf("if_indextoname failed\n");
   }
 
-  printf("\n\nTest cyginet_ifname works in the Cygwin:\n\n");
+  printf("\n\nTest cyginet_ifname works in Cygwin:\n\n");
   {
     struct if_nameindex * ptr = (struct if_nameindex *)if_nameindex();
     if (ptr) {
@@ -2728,7 +2728,7 @@ runTestCases()
            );
   }
   */
-  printf("\n\nTest cyginet_guidname works in the Cygwin:\n\n");
+  printf("\n\nTest cyginet_guidname works in Cygwin:\n\n");
   {
     PLIBWINET_INTERFACE_MAP_TABLE p = g_interface_map_table;
     while (p) {

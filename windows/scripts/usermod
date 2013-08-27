@@ -59,7 +59,7 @@ while getopts "Dd:g:G:p:s:r" opt ; do
         r)
             ;;
         *)
-            echo Error when add user in the Cygwin
+            echo Error while adding user in Cygwin
             exit 1
             ;;
     esac

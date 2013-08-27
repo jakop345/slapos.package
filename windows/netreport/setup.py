@@ -39,7 +39,7 @@ def main():
     setup_args = dict(
         name='netdrive',
         version=VERSION,
-        description='A tool used to report the usage of net drive in the Windows',
+        description='A tool used to report the usage of net drive in Windows',
         long_description=get_description(),
         keywords=['netdrive',],
         py_modules=['netreport'],
