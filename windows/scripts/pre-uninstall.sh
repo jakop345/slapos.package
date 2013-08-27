@@ -70,6 +70,9 @@ _filename=/var/cron/tabs/${slapos_administrator}
 echo "Removing ${_filename}"
 rm -rf ${_filename} && echo OK.
 
+echo "Removing all Tap-Windows Drivers ..."
+which devcon >/dev/null 2>&1 && devcon remove tap0901 && echo OK.
+
 #
 # Remove default instance root and software root, because it belong to
 # slapuser, and would not be removed by the windows uninstaller.
