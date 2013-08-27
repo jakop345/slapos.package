@@ -18,7 +18,6 @@ check_re6stnet_configure
 # -----------------------------------------------------------
 check_cygwin_service ${cygserver_service_name}
 check_cygwin_service ${syslog_service_name}
-check_cygwin_service ${sshd_service_name}
 check_cygwin_service ${cron_service_name}
 check_re6stnet_needed && check_cygwin_service ${re6stnet_service_name}
 

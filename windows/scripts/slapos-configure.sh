@@ -134,12 +134,10 @@ if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
 fi
 
 csih_check_program_or_error /usr/bin/cygrunsrv cygserver
-csih_check_program_or_error /usr/bin/ssh-host-config ssh
 csih_check_program_or_error /usr/bin/syslog-ng-config syslog-ng
 csih_check_program_or_error /usr/bin/openssl openssl
 csih_check_program_or_error /usr/bin/ipwin slapos-patches
 csih_check_program_or_error /usr/bin/slapos-cron-config slapos-patches
-[[ -z "$WINDIR" ]] && csih_error "missing environment variable WINDIR"
 
 # -----------------------------------------------------------
 # Create paths
@@ -196,30 +194,6 @@ else
 fi
 check_cygwin_service ${syslog_service_name}
 
-if ! cygrunsrv --query ${sshd_service_name} > /dev/null 2>&1 ; then
-    if csih_is_vista && [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
-        slapos_request_password ${_administrator} "Install sshd service need the password of ${_administrator}."
-    fi
-    csih_inform "run ssh-host-config ..."
-    /usr/bin/ssh-host-config --yes --cygwin ntsec --port 22002 \
-        --user ${_administrator} --pwd ${csih_PRIVILEGED_PASSWORD} ||
-    csih_error "Failed to run ssh-host-config"
-    if csih_is_vista ; then
-        [[ ${sshd_service_name} == "sshd" ]] ||
-        cygrunsrv -I ${sshd_service_name} -d "CYGWIN ${sshd_service_name}" -p /usr/sbin/sshd \
-            -a "-D" -y tcpip -e "CYGWIN=ntsec" -u "${_administrator}" -w "${csih_PRIVILEGED_PASSWORD}" ||
-        csih_error "failed to install service ${sshd_service_name}"
-    else
-        [[ ${sshd_service_name} == "sshd" ]] ||
-        cygrunsrv -I ${sshd_service_name} -d "CYGWIN ${sshd_service_name}" -p /usr/sbin/sshd \
-            -a "-D" -y tcpip -e "CYGWIN=ntsec" ||
-        csih_error "failed to install service ${sshd_service_name}"
-    fi
-else
-    csih_inform "the sshd service has been installed"
-fi
-check_cygwin_service ${sshd_service_name}
-
 # Use slapos-cron-config to configure slapos cron service.
 if ! cygrunsrv --query ${cron_service_name} > /dev/null 2>&1 ; then
     [[ -x ${slapos_cron_config} ]] ||
@@ -246,7 +220,7 @@ echo ""
 csih_inform "Starting configure slapos network ..."
 if ! netsh interface ipv6 show interface | grep -q "\\b${slapos_ifname}\\b" ; then
     csih_inform "Installing network interface ${slapos_ifname} ..."
-    ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname} ||
+    ipwin install netloop.inf *msloop ${slapos_ifname} ||
     csih_error "install network interface ${slapos_ifname} failed"
 fi
 ip -4 addr add $(echo ${_ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname} ||
