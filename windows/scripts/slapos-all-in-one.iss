@@ -51,13 +51,13 @@ Source: "cygwin\opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\
 Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-cron-config"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 
 Source: "cygwin\opt\git\slapos.package\windows\ipwin\ipwin\ipwin.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-
 Source: "cygwin\opt\git\slapos.package\windows\babeld\babeld.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "cygwin\opt\git\slapos.package\windows\openvpn\src\openvpn\.libs\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-
 Source: "cygwin\opt\openvpn\bin\devcon.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "cygwin\opt\openvpn\bin\addtap.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
-Source: "cygwin\opt\openvpn\bin\deltapall.bat"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\openvpn.exe"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\liblzo2-2.dll"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\libeay32.dll"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\libpkcs11-helper-1.dll"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\openvpn\bin\ssleay32.dll"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\openvpn\driver\*"; DestDir: "{app}\cygwin\etc\slapos\driver"; Permissions: everyone-readexec;
 
 Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-include.sh"; DestDir: "{app}\cygwin\etc\slapos\scripts"; Permissions: everyone-readexec;
