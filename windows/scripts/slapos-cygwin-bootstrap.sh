@@ -136,7 +136,7 @@ echo ""
 csih_inform "Starting configure slapos network ..."
 if ! netsh interface ipv6 show interface | grep -q "\\b${slapos_ifname}\\b" ; then
     csih_inform "Installing network interface ${slapos_ifname} ..."
-    ipwin install $WINDIR\\inf\\netloop.inf *msloop ${slapos_ifname} ||
+    ipwin install netloop.inf *msloop ${slapos_ifname} ||
     csih_error "install network interface ${slapos_ifname} failed"
 fi
 ip -4 addr add $(echo ${ipv4_local_network} | sed -e "s%\.0/%.1/%g") dev ${slapos_ifname} ||
