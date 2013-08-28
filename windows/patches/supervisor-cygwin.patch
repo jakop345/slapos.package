@@ -1,0 +1,24 @@
+diff --git a/options.py~ b/options.py
+old mode 100644
+new mode 100755
+index 3ccab60..e220c10
+--- a/options.py~
++++ b/options.py
+@@ -1197,7 +1197,7 @@ class ServerOptions(Options):
+             return
+ 
+         if current_uid != 0:
+-            return "Can't drop privilege as nonroot user"
++            pass # return "Can't drop privilege as nonroot user"
+ 
+         gid = pwrec[3]
+         if hasattr(os, 'setgroups'):
+@@ -1219,7 +1219,7 @@ class ServerOptions(Options):
+             os.setgid(gid)
+         except OSError:
+             return 'Could not set group id of effective user'
+-        os.setuid(uid)
++        os.setreuid(-1, uid)
+ 
+     def waitpid(self):
+         # need pthread_sigmask here to avoid concurrent sigchild, but

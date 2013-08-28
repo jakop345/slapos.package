@@ -38,6 +38,9 @@
 #   -s
 #     Shell used by user
 #
+#  This script will set password for each new user, the password is
+#  same as the account, and will be saved in the registry.
+#
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
     echo "Error: Download the csih package at first, I need this file:"
@@ -92,8 +95,8 @@ function create_unprivileged_user()
     if [ "${unpriv_user_in_sam}" != "yes" ]
     then
         dos_var_empty=$(/usr/bin/cygpath -w ${2-${LOCALSTATEDIR}/empty})
-        csih_call_winsys32 net user "${unpriv_user}" /add /fullname:"${unpriv_user} nexedi slapos" \
-          "/homedir:${dos_var_empty}" /active:no > /dev/null 2>&1 && unpriv_user_in_sam=yes
+        csih_call_winsys32 net user "${unpriv_user}" "${unpriv_user}" /add \
+            /fullname:"${unpriv_user} Nexedi Slapos" > /dev/null 2>&1 && unpriv_user_in_sam=yes
         if [ "${unpriv_user_in_sam}" != "yes" ]
         then
           csih_warning "Creation of user '${unpriv_user}' failed!"
@@ -193,6 +196,9 @@ fi
 
 create_unprivileged_user ${USER_NAME} $USER_HOME ||
 (echo "Failed to create user ${USER_NAME}" ; exit 1)
+
+regpwd ${USER_NAME} ${USER_NAME} || 
+(echo "Save ${USER_NAME}'s password failed" ; exit 1)
 
 for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
     [[ -z "$grpname" ]] && continue
