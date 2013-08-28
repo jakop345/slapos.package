@@ -437,13 +437,15 @@ if [[ ! -r ${re6stnet_configure_file} ]] ; then
         csih_error "No ${re6stnet_configure_file} found."
     csih_inform "register re6stnet OK"
 
+    _log_path = $(cygpath -m /var/log/re6stnet)
     csih_inform "Write information to re6stnet.conf:"
     csih_inform "  # $subnet"
     csih_inform "  table 0"
+    csih_inform "  log ${_log_path}"
     csih_inform "  ovpnlog"
     csih_inform "  main-interface ${slapos_ifname}"
     csih_inform "  interface ${slapos_ifname}"
-    echo -e "# $subnet\ntable 0\novpnlog" \
+    echo -e "# $subnet\ntable 0\nlog ${_log_path}\novpnlog" \
         "\nmain-interface ${slapos_ifname}\ninterface ${slapos_ifname}" \
         >> ${re6stnet_configure_file}
 fi
