@@ -50,10 +50,17 @@ fi
 slapos_kill_process /usr/bin/python2.7
 
 #
+# Remove route entries added by re6stnet
+#
+
+#
 # Remove virtual netcard installed by slapos
 #
 echo "Removing network connection ${slapos_ifname}"
 ipwin remove *msloop ${slapos_ifname} && echo OK.
+
+echo "Removing all Tap-Windows Drivers ..."
+which devcon >/dev/null 2>&1 && devcon remove tap0901 && echo OK.
 
 #
 # Remove configure files
@@ -69,9 +76,6 @@ rm -rf ~/.slapos && echo OK.
 _filename=/var/cron/tabs/${slapos_administrator}
 echo "Removing ${_filename}"
 rm -rf ${_filename} && echo OK.
-
-echo "Removing all Tap-Windows Drivers ..."
-which devcon >/dev/null 2>&1 && devcon remove tap0901 && echo OK.
 
 #
 # Remove default instance root and software root, because it belong to

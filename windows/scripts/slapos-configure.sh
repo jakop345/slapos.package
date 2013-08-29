@@ -136,8 +136,13 @@ fi
 csih_check_program_or_error /usr/bin/cygrunsrv cygserver
 csih_check_program_or_error /usr/bin/syslog-ng-config syslog-ng
 csih_check_program_or_error /usr/bin/openssl openssl
-csih_check_program_or_error /usr/bin/ipwin slapos-patches
-csih_check_program_or_error /usr/bin/slapos-cron-config slapos-patches
+
+csih_check_program_or_error /usr/bin/slapos-cron-config slapos-cywgin
+csih_check_program_or_error /usr/bin/ipwin slapos-cygwin
+csih_check_program_or_error /usr/bin/ip slapos-cygwin
+csih_check_program_or_error /usr/bin/useradd slapos-cygwin
+csih_check_program_or_error /usr/bin/modadd slapos-cygwin
+csih_check_program_or_error /usr/bin/regpwd slapos-cygwin
 
 # -----------------------------------------------------------
 # Create paths

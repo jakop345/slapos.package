@@ -9,6 +9,13 @@
    </author>
    <revhistory>
      <revision>
+       <revnumber>0.5</revnumber>
+       <date>2013-08-29</date>
+       <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
+       <revremark>Add some packages when install cygwin; Change the steps of generating installer from source. </revremark>
+     </revision>
+
+     <revision>
        <revnumber>0.4</revnumber>
        <date>2013-08-01</date>
        <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
@@ -217,10 +224,12 @@ net start re6stnet
 D:
 MD slapos
 CD slapos
-SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P libwrap-devel
+SET PACKAGES=-P autobuild -P autoconf -P automake -P autossh -P binutils -P bison -P bzip2 -P ca-certificates -P cron -P curl -P cygport -P cygrunsrv -P file -P flex -P gcc4 -P gdbm -P libgdbm-devel -P gettext -P gettext-devel -P libglib2.0-devel -P libglib2.0_0 -P libexpat1 -P libexpat1-devel -P libmpfr-devel -P libmpfr4 -P libtool -P libxml2 -P libxml2-devel -P libxslt -P libxslt-devel -P make -P m4 -P libncurses-devel -P libncursesw-devel -P patch -P patchutils -P pkg-config -P python -P python-setuptools -P openssh -P openssl-devel -P libopenssl098 -P libopenssl100 -P popt -P readline -P libsqlite3-devel -P libsqlite3_0 -P swig -P syslog-ng -P zlib-devel -P vim -P wget -P libwrap-devel -P docbook-xsl -P docbook-xsl-ns -P mingw-gcc -P mingw64-i686-gcc -P mingw64-x86_64-gcc
 MOVE d:\temp\setup.exe .\
 setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos\cygwin -s http://www.netgull.com/cygwin
-</programlisting>Waiting for the installer finished.</para></listitem>
+</programlisting>Waiting for the installer finished.
+<note><para>Some packages only used to build slapos from sources. Refer to <xref linkend="package-slapos-developer"/> to know more details.</para></note>
+</para></listitem>
 </itemizedlist>
 A cygwin icon will be added in the windows desktop, click it to enter cygwin box. If the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
 <!--
@@ -301,11 +310,17 @@ Now we need patch slapos.core for supporting cygwin, after these code are merged
 cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/)
 _filename=/opt/git/slapos.package/windows/patches/slapos-core-format.patch
 patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &lt; ${_filename}
+cd $(ls -d /opt/slapos/eggs/supervisor-*.egg/)
+_filename=/opt/git/slapos.package/windows/patches/supervisor-cygwin.patch
+cd supervisor
+patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &lt; ${_filename}
 </programlisting>
-It seems netifaces.dll need to rebase,
+If "slapos node" report "remap error", you need to do as the following,
 <programlisting>
+cd ~
+find /opt/slapos -name "*.dll" &gt; /myfile.list
 echo "PATH .\bin;%PATH%" &gt; /autorebase.bat
-echo "dash /bin/rebaseall -v" &gt;&gt; /autorebase.bat
+echo "dash /bin/rebaseall -T /myfile.list -v" &gt;&gt; /autorebase.bat
 echo "EXIT 0" &gt;&gt; /autorebase.bat
 echo "Pause" &gt;&gt; /autorebase.bat
 exit
@@ -321,6 +336,11 @@ cd /opt
 rm -rf slapos/slapos.tar.gz
 tar czf slapos.tar.gz slapos/
 mv slapos.tar.gz slapos/
+</programlisting>
+Generate regpwd.exe, which used to save user's password to registry:
+<programlisting>
+cd /opt/git/slapos.package/windows/scripts
+gcc -o regpwd.exe regpwd.c
 </programlisting>
 Then build babeld for cygwin, we need use the sources in the slapos.package.git, they are patched for cygwin:
 <programlisting>
@@ -339,7 +359,7 @@ Now, build ipwin.exe which used to manage slapos network. If you have msvc build
 </itemizedlist>
 </para>
 <para>
-Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. If you really want to generate the document by your self, make sure docbook-utils package installed in the Cygwin. Refer to <xref linkend="package-docbook-utils"/> to know what about docbook-utils.
+Then generate user-guide.html from using-slapos-in-windows.xml, generally you need not do this, just copy this file (you're looking now) to /opt/git/slapos.package/windows/docs. 
 <programlisting>
 cd /opt/git/slapos.package/windows/docs
 # Before run make, be sure there is the file /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl, if not, find it first
@@ -358,23 +378,29 @@ Get re6stnet for cygwin
 <programlisting>
 cd /opt/git
 (cd re6stnet ; git pull) || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
-cd re6stnet
-python setup.py sdist
 
 cd /opt/git/re6stnet/re6st
-i686-pc-mingw32-gcc.exe ovpn-client.c -o ovpn-client-x86.exe
-i686-pc-mingw32-gcc.exe ovpn-server.c -o ovpn-server-x86.exe
-i686-w64-mingw32-gcc.exe ovpn-client.c -o ovpn-client-x64.exe
-i686-w64-mingw32-gcc.exe ovpn-server.c -o ovpn-server-x64.exe
+# i686-pc-mingw32-gcc.exe ovpn-client.c -o ovpn-client.exe
+# i686-pc-mingw32-gcc.exe ovpn-server.c -o ovpn-server.exe
+i686-w64-mingw32-gcc.exe ovpn-client.c -o ovpn-client.exe
+i686-w64-mingw32-gcc.exe ovpn-server.c -o ovpn-server.exe
+
+cd /opt/git/re6stnet
+python setup.py sdist
 </programlisting>
-Get the icons and openvpn files, if you use 32-bit windows, uncomment the comment line to download openvpn-x86.tar.gz other than openvpn-x64.tar.gz:
+Get openvpn files, download official openvpn installer for your windows, for example, openvpn-install-2.3.2-I001-x86_64.exe for windows 7 64-bit, double click it to install openvpn, then:
+<programlisting>
+mkdir /opt/openvpn
+cp -a /cygdrive/c/Program\ Files/OpenVPN/bin /opt/openvpn
+cp -a /cygdrive/c/Program\ Files/OpenVPN/driver /opt/openvpn
+cp -a /cygdrive/c/Program\ Files/TAP-Windows/driver /opt/openvpn
+cp /cygdrive/c/Program\ Files/TAP-Windows/bin/devcon.exe /opt/openvpn/bin
+</programlisting>
+Get the icons files
 <programlisting>
 cd /opt
 wget http://www.dashingsoft.com/products/slapos/images.tar.gz
-wget http://www.dashingsoft.com/products/slapos/openvpn-x64.tar.gz -O openvpn-driver.tar.gz
-# wget http://www.dashingsoft.com/products/slapos/openvpn-x86.tar.gz -O openvpn-driver.tar.gz
 tar xzf images.tar.gz --no-same-owner
-tar xzf openvpn-driver.tar.gz --no-same-owner
 </programlisting>
 Get configure template file:
 <programlisting>
@@ -559,8 +585,16 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <listitem><para>Editor/vim</para></listitem>
 <listitem><para>Web/wget</para></listitem>
 </itemizedlist>
-<note id="package-docbook-utils"><para>
-There is another package: Text/docbook-utils, it only used to generate user-guide.html from source file. But this package will increase required disk size remarkable, because many dependent packages are installed by Cygwin, so it recommand not to check this package when building slapos source or the installer. Only you really need to build the document, then install this package from cygwin setup gui interface by double clicking setup.exe downloaded from cygwin.com</para></note>
+<note id="package-slapos-developer"><para>
+The following packages only used to build slapos from sources, they are not required by slapos runtime.
+<itemizedlist>
+<listitem><para>Devel/mingw-gcc</para></listitem>
+<listitem><para>Devel/mingw64-i686-gcc</para></listitem>
+<listitem><para>Devel/mingw64-x86_64-gcc</para></listitem>
+<listitem><para>Text/docbook-xsl</para></listitem>
+<listitem><para>Text/docbook-xsl-ns</para></listitem>
+</itemizedlist>
+</para></note>
 </para>
 <!--
 <para>
