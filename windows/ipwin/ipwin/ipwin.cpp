@@ -56,6 +56,8 @@ HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
                                              OUT BSTR *pName,
                                              OUT BSTR *pErrMsg
                                              );
+HRESULT SlaposIPv6ShowRoute(int verbose);
+
 void Usage()
 {
   printf("Usage: ipwin [command] [options] \n\
@@ -65,6 +67,7 @@ Available command:\n\
   remove         Remove network adapter\n\
   guid           Get GUID of interface by name\n\
   name           Get name by GUID\n\
+  ipv6           Get information of IPv6\n\
   codepage       Get Windows CodePage\n\
 \n\
 *install\n\
@@ -74,7 +77,7 @@ Available command:\n\
   ipwin install INF-FILE HWID CONNECTION-NAME\n\
 \n\
   For example,\n\
-  ipwin install \"OemWin2k.inf\" tap0901 re6stnet-tcp\n\
+  ipwin install \"C:/openvpn/driver/OemWin2k.inf\" tap0901 re6stnet-tcp\n\
 \n\
   ipwin install \"netloop.inf\" *MSLOOP re6stnet-lo\n\
 \n\
@@ -101,6 +104,16 @@ Available command:\n\
 \n\
   For example,\n\
   ipwin name {610B0F3F-06A7-47EF-A38D-EF55503C481F}\n\
+\n\
+*ipv6\n\
+\n\
+  Print IPv6 route information:\n\
+  ipwin ipv6 show route\n\
+\n\
+\n\
+Exit status:\n\
+  0  if OK,\n\
+  other value if problems\n\
 \n\
 *codepage\n\
 \n\
@@ -324,6 +337,15 @@ int _tmain(int argc, TCHAR * argv[])
     else {
       hr = SlaposNetCfgGetNetworkConnectionName(argv[2], pGUID, pErrMsg);
       printf("%s", hr == S_OK ? pGUID : pErrMsg);
+    }
+  }
+  else if (wcscmp(argv[1], L"ipv6") == 0) {
+    if (argc < 4) {
+      Usage();
+      hr = E_FAIL;
+    }
+    else {
+      hr = SlaposIPv6ShowRoute(1);
     }
   }
   else if (wcscmp(argv[1], L"codepage") == 0) {

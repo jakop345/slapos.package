@@ -16,7 +16,7 @@ GOTO END
 :ARCH_X86
 IF EXIST %VCVARSALL%. (
    CALL %VCVARSALL%
-   cl /D"UNICODE" /D"_UNICODE" ipwin.cpp netcfg.cpp setupapi.lib iphlpapi.lib advapi32.lib
+   cl /D"UNICODE" /D"_UNICODE" ipwin.cpp netcfg.cpp setupapi.lib iphlpapi.lib advapi32.lib ws2_32.lib
    GOTO END )
 
 ECHO.
@@ -32,7 +32,7 @@ IF EXIST %SETENV%. (
    SETLOCAL ENABLEDELAYEDEXPANSION
    SETLOCAL ENABLEDELAYEDEXPANSION
    CALL %SETENV%
-   cl /D"UNICODE" /D"_UNICODE" ipwin.cpp netcfg.cpp setupapi.lib iphlpapi.lib advapi32.lib
+   cl /D"UNICODE" /D"_UNICODE" ipwin.cpp netcfg.cpp setupapi.lib iphlpapi.lib advapi32.lib ws2_32.lib
    GOTO END )
 
 ECHO.

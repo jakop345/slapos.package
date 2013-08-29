@@ -49,6 +49,7 @@ echo ""
 # ======================================================================
 # Constants
 # ======================================================================
+declare -r slapos_prefix=slapboot-
 declare -r slapos_client_home=~/.slapos
 declare -r client_configure_file=$slapos_client_home/slapos.cfg
 declare -r client_certificate_file=$slapos_client_home/certificate
@@ -58,10 +59,16 @@ declare -r node_certificate_file=/etc/opt/slapos/ssl/computer.crt
 declare -r node_key_file=/etc/opt/slapos/ssl/computer.key
 declare -r node_configure_file=/etc/opt/slapos/slapos.cfg
 
-declare -r slapos_ifname=slapboot-re6stnet-lo
 declare -r ipv4_local_network=10.202.29.0/24
 declare -r ipv6_local_address=2001:67c:1254:e:32::1
-declare -r slapos_user_basename=slapboot-user
+
+declare -r slapos_administrator=${slapos_prefix:-slap}root
+declare -r slapos_user_basename=${slapos_prefix:-slap}user
+declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
+declare -r re6stnet_service_name=${slapos_prefix}re6stnet
+declare -r cron_service_name=${slapos_prefix}cron
+declare -r syslog_service_name=${slapos_prefix}syslog-ng
+declare -r cygserver_service_name=${slapos_prefix}cygserver
 
 declare -r slapos_installer_software=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg
 declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")

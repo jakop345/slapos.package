@@ -11,6 +11,7 @@
 #include <Windows.h>
 #include <Setupapi.h>
 
+#include <ws2tcpip.h>
 #include <iphlpapi.h>
 #include <devguid.h>
 #include <stdio.h>
@@ -1336,4 +1337,51 @@ HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
   FREE(pAdaptAddr);
 
   return hrc;
+}
+
+HRESULT SlaposIPv6ShowRoute(int verbose)
+{
+  int i;
+  ULONG NumEntries = -1;
+
+#if _WIN32_WINNT < _WIN32_WINNT_VISTA
+  fprintf(stderr, "Error: unsupported platform\n");
+  return E_FAIL;
+#else
+  PMIB_IPFORWARD_TABLE2 pIpForwardTable2;
+  PMIB_IPFORWARD_ROW2 pRow2;
+  char prefix[200], gateway[200];
+  char ifname[IF_NAMESIZE];
+
+  if (NO_ERROR == GetIpForwardTable2(AF_INET6,
+                                     &pIpForwardTable2
+                                     )) {
+    NumEntries = pIpForwardTable2->NumEntries;
+    pRow2 = pIpForwardTable2 -> Table;
+    for (i = 0; i < NumEntries; i++, pRow2 ++) {
+      // Ignore invalid route
+      if (pRow2 -> Loopback || IN6_IS_ADDR_UNSPECIFIED(&((pRow2 -> NextHop).Ipv6.sin6_addr)))
+        continue;
+      inet_ntop(AF_INET6,
+                (PVOID)(&((pRow2 -> DestinationPrefix).Prefix.Ipv6.sin6_addr)),
+                prefix,
+                200
+                );
+      inet_ntop(AF_INET6,
+                (PVOID)(&((pRow2 -> NextHop).Ipv6.sin6_addr)),
+                gateway,
+                200
+                );
+      if_indextoname(pRow2 -> InterfaceIndex, ifname);
+      printf("Prefix       : %s/%d\n", prefix, (pRow2 -> DestinationPrefix).PrefixLength);
+      printf("Interface %d : %s\n", (unsigned int)(pRow2 -> InterfaceIndex), ifname);
+      printf("Gateway      : %s\n", gateway);
+      printf("\n");
+    }
+    FreeMibTable(pIpForwardTable2);
+    return S_OK;
+  }
+  fprintf(stderr, "GetIpForwardTable2 error\n");
+  return E_FAIL;
+#endif  
 }
