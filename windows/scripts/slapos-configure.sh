@@ -141,7 +141,7 @@ csih_check_program_or_error /usr/bin/slapos-cron-config slapos-cywgin
 csih_check_program_or_error /usr/bin/ipwin slapos-cygwin
 csih_check_program_or_error /usr/bin/ip slapos-cygwin
 csih_check_program_or_error /usr/bin/useradd slapos-cygwin
-csih_check_program_or_error /usr/bin/modadd slapos-cygwin
+csih_check_program_or_error /usr/bin/usermod slapos-cygwin
 csih_check_program_or_error /usr/bin/regpwd slapos-cygwin
 
 # -----------------------------------------------------------
