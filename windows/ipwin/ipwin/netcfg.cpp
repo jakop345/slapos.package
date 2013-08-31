@@ -143,6 +143,28 @@ static HMODULE loadSystemDll(const char *pszName)
   return LoadLibraryA(szPath);
 }
 
+static void removeConnectionRegistry(LPCSTR pGUID)
+{
+  HKEY hkeyNetwork;
+
+  LONG status;
+  status = RegOpenKeyExW (HKEY_LOCAL_MACHINE,
+                          L"SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}",
+                          0,
+                          DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE,
+                          &hkeyNetwork
+                          );
+  if ((status != ERROR_SUCCESS) || !hkeyNetwork) {
+    NonStandardLogFlow(("Open connection registry failed\n"));
+    return;
+  }
+
+  if (RegDeleteTreeA(hkeyNetwork, pGUID) != ERROR_SUCCESS)
+    NonStandardLogFlow(("Remove connection %s failed\n", pGUID));
+  
+  RegCloseKey (hkeyNetwork);
+}
+
 static HRESULT SlaposNetCfgWinINetCfgLock(IN INetCfg *pNetCfg,
                                           IN LPCWSTR pszwClientDescription,
                                           IN DWORD cmsTimeout,
@@ -1204,6 +1226,9 @@ HRESULT SlaposNetCfgWinRemoveNetworkInterface(IN LPCWSTR pHwid,
     }
   while (0);
 
+  /* Remove connection registry */
+  removeConnectionRegistry(pGUID);
+
   return hrc;
 }
 
@@ -1383,5 +1408,5 @@ HRESULT SlaposIPv6ShowRoute(int verbose)
   }
   fprintf(stderr, "GetIpForwardTable2 error\n");
   return E_FAIL;
-#endif  
+#endif
 }
