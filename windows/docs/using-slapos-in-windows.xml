@@ -380,10 +380,10 @@ cd /opt/git
 (cd re6stnet ; git pull) || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 
 cd /opt/git/re6stnet/re6st
-# i686-pc-mingw32-gcc.exe ovpn-client.c -o ovpn-client.exe
-# i686-pc-mingw32-gcc.exe ovpn-server.c -o ovpn-server.exe
-i686-w64-mingw32-gcc.exe ovpn-client.c -o ovpn-client.exe
-i686-w64-mingw32-gcc.exe ovpn-server.c -o ovpn-server.exe
+# i686-pc-mingw32-gcc.exe ovpn-client.c ovpn-pipe.c -o ovpn-client.exe
+# i686-pc-mingw32-gcc.exe ovpn-server.c ovpn-pipe.c -o ovpn-server.exe
+i686-w64-mingw32-gcc.exe ovpn-client.c ovpn-pipe.c -o ovpn-client.exe
+i686-w64-mingw32-gcc.exe ovpn-server.c ovpn-pipe.c -o ovpn-server.exe
 
 cd /opt/git/re6stnet
 python setup.py sdist
