@@ -4,9 +4,7 @@ SETLOCAL
 SET CYGWINHOME=%~dp0
 SET CYGWINROOT="%~dp0cygwin"
 
-IF "%1" == "slapos-build-installer" GOTO SLAPOS_BUILD_INSTALLER
-IF "%1" == "slapos-configure" GOTO SLAPOS_CONFIGURE
-
+:SLAPOS_WRAPPER
 CMD.EXE /C %CYGWINROOT%\bin\bash --login %*
 SET RETVALUE=%ERRORLEVEL%
 GOTO END

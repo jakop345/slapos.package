@@ -1,4 +1,5 @@
 #! /bin/bash
+# DEPRECATION WARNING: This script is useless. 
 script=$(cygpath -w $1)
 shift
 cscript.exe $script $*

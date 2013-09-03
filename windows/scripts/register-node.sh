@@ -1,5 +1,7 @@
 #! /bin/bash
 #
+# DEPRECATION WARNING: This script is useless.
+#
 #------------------------------------------------------------------------------
 # Copyright (c) 2010, 2011, 2012 Vifib SARL and Contributors.
 # All Rights Reserved.

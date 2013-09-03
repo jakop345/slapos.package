@@ -1,5 +1,7 @@
 #! /bin/bash
 #
+# DEPRECATION WARNING: This script is useless.
+#
 # It used to check the following network setting
 #
 #    1. Support IPv6 or not.

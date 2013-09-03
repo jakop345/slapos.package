@@ -210,7 +210,7 @@ net start re6stnet
 
 <chapter id="ch_generate_window_installer"><title>Generating windows installer from sources</title>
 <para>This chapter describes how to generate windows installer from sources.</para>
-<section><title>Setting Up Cygwin</title>
+<section id="sec_setup_cygwin"><title>Setting Up Cygwin</title>
 <para>We need Cygwin environment in order to build slapos sources code in the Windows. </para>
 <para>Go to <ulink url="http://cygwin.com/">"http://cygwin.com/"</ulink> and click on <ulink url="http://cygwin.com/setup-x86.exe">"setup-x86.exe"</ulink>. This will download a GUI installer called setup-x86.exe which can be run to download a complete cygwin installation via the internet. Follow the instructions on each screen to install Cygwin. </para>
 <para>The Root Directory for Cygwin (default C:\cygwin) will become / within your Cygwin installation. You must have write access to the parent directory, and any ACLs on the parent directory will determine access to installed files.</para>
@@ -380,8 +380,6 @@ cd /opt/git
 (cd re6stnet ; git pull) || git clone -b cygwin http://git.erp5.org/repos/re6stnet.git
 
 cd /opt/git/re6stnet/re6st
-# i686-pc-mingw32-gcc.exe ovpn-client.c ovpn-pipe.c -o ovpn-client.exe
-# i686-pc-mingw32-gcc.exe ovpn-server.c ovpn-pipe.c -o ovpn-server.exe
 i686-w64-mingw32-gcc.exe ovpn-client.c ovpn-pipe.c -o ovpn-client.exe
 i686-w64-mingw32-gcc.exe ovpn-server.c ovpn-pipe.c -o ovpn-server.exe
 
@@ -433,17 +431,10 @@ Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:
 
 <chapter id="ch_run_slapos_from_sources"><title>Run SlapOS From Sources</title>
 <para>This chapter describes how to run slapos slave node from sources in the windows.</para>
-<para>First follow the instructions in the above chapter <xref linkend="ch_generate_window_installer"/>, except the last section Making Installer.</para>
+<para>First Setting Up Cygwin follow the instructions in the above chapter <xref linkend="sec_setup_cygwin"/></para>
 <para>Next register to slapos community to get client and computer certificate and key files, refer to <xref linkend="sec_configure_slapos"/>.</para>
-<para>Then open cygwin box as Administrator, if the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
-<programlisting>
-(cd /opt/downloads; cp pyOpenSSL-0.13.tar.gz miniupnpc-1.8.tar.gz /)
-mkdir -p /etc/slapos/scripts
-/usr/local/bin/slapos-configure.sh
-/usr/local/bin/slapos-node.sh
-</programlisting>
-If there are some errors when run both of scripts, fix them and run again, until no any error reported, and now you can run any slapos command in this terminal.
-</para>
+<para>Then run slapos-bootstrap-configure.sh, got it from slapos.package.git/windows/scripts</para>
+<para>If there are some errors when run both of scripts, fix them and run again, until no any error reported, and now you can run any slapos command in this terminal.</para>
 </chapter>
 
 <chapter><title>SlapOS Sources Changed  For Windows</title>
@@ -513,7 +504,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <itemizedlist>
 <listitem><para>Install cygwin</para></listitem>
 <listitem><para>Prepare certificate, key, computer.key, computer.crt and test-computer.key, test-computer.crt</para></listitem>
-<listitem><para>Run slapos-cygwin-bootstrap.sh, got it from slapos.package.git/windows/scripts</para></listitem>
+<listitem><para>Run slapos-bootstrap-configure.sh, got it from slapos.package.git/windows/scripts</para></listitem>
 <listitem><para>Run command slapos node software/release until instance created</para></listitem>
 <listitem><para>Run command slapos remove to destroy this instance</para></listitem>
 </itemizedlist>
