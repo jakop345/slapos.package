@@ -28,12 +28,6 @@ function show_usage()
     echo ""
     echo "save them in your home path."
     echo ""
-    echo "Register another computer for test node, save them in the root path"
-    echo ""
-    echo "  test-computer.key"
-    echo "  test-computer.crt"
-    echo ""
-    echo ""
 }
 readonly -f show_usage
 
@@ -74,9 +68,72 @@ declare -r slapos_installer_software=http://git.erp5.org/gitweb/slapos.git/blob_
 declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
 
 # -----------------------------------------------------------
+# Local variable
+# -----------------------------------------------------------
+declare _administrator=${slapos_administrator}
+declare _password=
+declare _computer_certificate=
+declare _computer_key=
+declare _client_certificate=
+declare _client_key=
+declare _ipv4_local_network=${ipv4_local_network}
+
+# -----------------------------------------------------------
+# Command line options
+# -----------------------------------------------------------
+while test $# -gt 0; do
+    # Normalize the prefix.
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    --password=*)
+    _password=$optarg
+    ;;
+    -P)
+    _password=$2
+    shift
+    ;;
+    -P)
+    _administrator=$2
+    shift
+    ;;
+    --computer-certificate=*)
+    _computer_certificate=$optarg
+    ;;
+    --computer-key=*)
+    _computer_key=$optarg
+    ;;
+    --client-certificate=*)
+    _client_certificate=$optarg
+    ;;
+    --client-key=*)
+    _client_key=$optarg
+    ;;
+    --ipv4-local-network=*)
+    [[ x$optarg == x*.*.*.*/* ]] ||
+    csih_error "invalid --ipv4-local-network=$optarg, no match x.x.x.x/x"
+    _ipv4_local_network=$optarg
+    ;;
+    *)
+    show_usage
+    exit 1
+    ;;
+    esac
+
+    # Next please.
+    shift
+done
+
+# -----------------------------------------------------------
 # Patch cygwin packages for building slapos
 # -----------------------------------------------------------
 csih_inform "Patching cygwin packages for building slapos"
+
+csih_check_program_or_error /usr/bin/cygport cygport
+csih_check_program_or_error /usr/bin/libtool libtool
 
 csih_inform "libtool patched"
 sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
@@ -124,13 +181,13 @@ for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
 done
 
 if check_os_is_wow64 ; then
-    wget -c http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x64.exe failed"
-    csih_inform "download ipwin_x64.exe OK"
+    wget -c http://dashingsoft.com/products/slapos/ipwin-x64.exe -O /usr/bin/ipwin.exe ||
+    csih_error "download ipwin-x64.exe failed"
+    csih_inform "download ipwin-x64.exe OK"
 else
-    wget -c http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x86.exe failed"
-    csih_inform "download ipwin_x86.exe OK"
+    wget -c http://dashingsoft.com/products/slapos/ipwin-x86.exe -O /usr/bin/ipwin.exe ||
+    csih_error "download ipwin-x86.exe failed"
+    csih_inform "download ipwin-x86.exe OK"
 fi
 chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
 
@@ -197,12 +254,24 @@ csih_inform "start bin/buildout"
 (cd /opt/slapos ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
 _filename=~/slapos-core-format.patch
-wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
+wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "download ${_filename} OK"
 
 csih_inform "applay patch ${_filename}"
 (cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) &&
+csih_inform "patch at $(pwd)" &&
+patch -f --dry-run -p1 < ${_filename} > /dev/null &&
+patch -p1 < ${_filename} &&
+csih_inform "apply patch ${_filename} OK")
+
+_filename=~/supervisor-cygwin.patch
+wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
+csih_error "download ${_filename} failed"
+csih_inform "download ${_filename} OK"
+
+csih_inform "applay patch ${_filename}"
+(cd $(ls -d /opt/slapos/eggs/supervisor-*.egg)/supervisor &&
 csih_inform "patch at $(pwd)" &&
 patch -f --dry-run -p1 < ${_filename} > /dev/null &&
 patch -p1 < ${_filename} &&
@@ -293,40 +362,144 @@ csih_error "Run slapos node format failed. "
 echo ""
 
 # -----------------------------------------------------------
-# Request an instance of slapos installer software
+# Check and configure cygwin environments
 # -----------------------------------------------------------
-csih_inform "Supply slapos_installer_software in the ${computer_guid}"
+csih_check_program_or_error /usr/bin/cygrunsrv cygserver
+csih_check_program_or_error /usr/bin/syslog-ng-config syslog-ng
+csih_check_program_or_error /usr/bin/openssl openssl
+csih_check_program_or_error /usr/bin/ipwin slapos-patches
+csih_check_program_or_error /usr/bin/slapos-cron-config slapos-patches
 
-csih_inform "  ${slapos_installer_software}"
-/opt/slapos/bin/slapos supply ${slapos_installer_software} ${computer_guid}
-_title="SlapOS-Windows-Installer-In-${computer_guid}"
+if [[ ! ":$PATH" == :/opt/slapos/bin: ]] ; then
+    for profile in ~/.bash_profile ~/.profile ; do
+        ! grep -q "export PATH=/opt/slapos/bin:" $profile &&
+        csih_inform "add /opt/slapos/bin to PATH" &&
+        echo "export PATH=/opt/slapos/bin:\${PATH}" >> $profile
+    done
+fi
 
-csih_inform "Request an instance as ${_title}"
-/opt/slapos/bin/slapos request ${client_configure_file} ${_title} \
-    ${slapos_installer_software} --node computer_guid=${computer_guid}
-
-echo ""
-
-# -----------------------------------------------------------
-# Enter loop to release software, create an instance, report
-# -----------------------------------------------------------
-while true ; do
-    csih_inform "Releasing software ..."
-    /opt/slapos/bin/slapos node software --verbose || continue
-
-    csih_inform "Creating instance ..."
-    /opt/slapos/bin/slapos node instance --verbose
-
-    csih_inform "Sending report ..."
-    /opt/slapos/bin/slapos node report --verbose
-
-    /opt/slapos/bin/slapos request ${client_configure_file} ${_title} \
-        ${slapos_installer_software} --node computer_guid=${computer_guid} &&
-    break
+_path=/etc/slapos/scripts
+csih_inform "create path: ${_path}"
+mkdir -p ${_path}
+for _name in slapos-configure.sh slapos-include.sh post-install.sh slapos-cleanup.sh ; do
+    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_name} -O ${_path}/${_name} ||
+    csih_error "download ${_name} failed"
+    csih_inform "download script ${_path}/${_name} OK"
 done
 
+# Set prefix for slapos
+if [[ -n ${slapos_prefix} ]] ; then
+    echo "Set slapos prefix as ${slapos_prefix}"
+    sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}%" ${_path|/slapos-include.sh
+fi
+
+# -----------------------------------------------------------
+# Create account: slaproot
+# -----------------------------------------------------------
+# Start seclogon service in the Windows XP
+if csih_is_xp ; then
+    csih_inform "set start property of seclogon to auto"
+    sc config seclogon start= auto ||
+    csih_warning "failed to set seclogon to auto start."
+# In the later, it's RunAs service, and will start by default
+fi
+
+# echo Checking slapos account ${_administrator} ...
+slapos_check_and_create_privileged_user ${_administrator} ${_password} ||
+csih_error "failed to create account ${_administrator}."
+
+# -----------------------------------------------------------
+# Configure cygwin services: cygserver syslog-ng
+# -----------------------------------------------------------
+csih_inform "Starting configure cygwin services ..."
+if ! cygrunsrv --query ${cygserver_service_name} > /dev/null 2>&1 ; then
+    csih_inform "run cygserver-config ..."
+    /usr/bin/cygserver-config --yes || \
+        csih_error "failed to run cygserver-config"
+    [[ ${cygserver_service_name} == cygserver ]] ||
+    cygrunsrv -I ${cygserver_service_name} -d "CYGWIN ${cygserver_service_name}" -p /usr/sbin/cygserver ||
+    csih_error "failed to install service ${cygserver_service_name}"
+else
+    csih_inform "the cygserver service has been installed"
+fi
+check_cygwin_service ${cygserver_service_name}
+
+if ! cygrunsrv --query ${syslog_service_name} > /dev/null 2>&1 ; then
+    csih_inform "run syslog-ng-config ..."
+    /usr/bin/syslog-ng-config --yes || \
+        csih_error "failed to run syslog-ng-config"
+    [[ ${syslog_service_name} == "syslog-ng" ]] ||
+    cygrunsrv -I ${syslog_service_name} -d "CYGWIN ${syslog_service_name}" -p /usr/sbin/syslog-ng -a "-F" ||
+    csih_error "failed to install service ${syslog_service_name}"
+
+else
+    csih_inform "the syslog-ng service has been installed"
+fi
+check_cygwin_service ${syslog_service_name}
+
+# Use slapos-cron-config to configure slapos cron service.
+if ! cygrunsrv --query ${cron_service_name} > /dev/null 2>&1 ; then
+    [[ -x ${slapos_cron_config} ]] ||
+    csih_error "Couldn't find slapos cron config script: ${slapos_cron_config}"
+
+    if [[ -z "${csih_PRIVILEGED_PASSWORD}" ]] ; then
+        slapos_request_password ${_administrator} "Install cron service need the password of ${_administrator}."
+    fi
+
+    csih_inform "run slapos-cron-config ..."
+    ${slapos_cron_config} ${cron_service_name} ${_administrator} ${csih_PRIVILEGED_PASSWORD} ||
+    csih_error "Failed to run ${slapos_cron_config}"
+else
+    csih_inform "the cron service has been installed"
+fi
+check_cygwin_service ${cron_service_name}
+
+csih_inform "Configure cygwin services OK"
 echo ""
-csih_inform "Bootstrap slapos node successfully."
+
+# -----------------------------------------------------------
+# cron: Install cron service and create crontab
+# -----------------------------------------------------------
+csih_inform "Starting configure section cron ..."
+
+_cron_user=${_administrator}
+_crontab_file="/var/cron/tabs/${_cron_user}"
+if [[ ! -f ${_crontab_file} ]] ; then
+    cat <<EOF  > ${_crontab_file}
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+MAILTO=""
+
+# Run "Installation/Destruction of Software Releases" and "Deploy/Start/Stop Partitions" once per minute
+* * * * * /opt/slapos/bin/slapos node software --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
+* * * * * /opt/slapos/bin/slapos node instance --verbose --logfile=/opt/slapos/log/slapos-node-instance.log > /dev/null 2>&1
+
+# Run "Destroy Partitions to be destroyed" once per hour
+0 * * * * /opt/slapos/bin/slapos node report --maximal_delay=3600 --verbose --logfile=/opt/slapos/log/slapos-node-report.log > /dev/null 2>&1
+
+# Run "Check/add IPs and so on" once per hour
+0 * * * * /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
+EOF
+fi
+
+csih_inform "change owner of ${_crontab_file} to ${_cron_user}"
+chown ${_cron_user} ${_crontab_file}
+
+csih_inform "change mode of ${_crontab_file} to 644"
+chmod 644 ${_crontab_file}
+ls -l ${_crontab_file}
+
+csih_inform "begin of crontab of ${_administrator}:"
+csih_inform "************************************************************"
+cat ${_crontab_file} || csih_error "No crob tab found."
+csih_inform "************************************************************"
+csih_inform "end of crontab of ${_administrator}"
+
+csih_inform "Configure section cron OK"
+echo ""
+
+echo ""
+csih_inform "Configure slapos bootstrap node successfully."
 echo ""
 
 read -n 1 -t 60 -p "Press any key to exit..."
