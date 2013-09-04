@@ -9,6 +9,13 @@
    </author>
    <revhistory>
      <revision>
+       <revnumber>0.6</revnumber>
+       <date>2013-09-04</date>
+       <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
+       <revremark>Add chapter Inside SlapOS Cygwin Node. </revremark>
+     </revision>
+
+     <revision>
        <revnumber>0.5</revnumber>
        <date>2013-08-29</date>
        <authorinitials>Jondy Zhao - jondy.zhao@nexedi.com</authorinitials>
@@ -433,7 +440,7 @@ Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:
 <para>This chapter describes how to run slapos slave node from sources in the windows.</para>
 <para>First Setting Up Cygwin follow the instructions in the above chapter <xref linkend="sec_setup_cygwin"/></para>
 <para>Next register to slapos community to get client and computer certificate and key files, refer to <xref linkend="sec_configure_slapos"/>.</para>
-<para>Then run slapos-cygwin-bootstrap.sh, got it from slapos.package.git/windows/scripts</para>
+<para>Then run slapos-cygwin-bootstrap.sh, slapos-configure.sh, slapos-node.sh in turn, got it from slapos.package.git/windows/scripts</para>
 <para>If there are some errors when run both of scripts, fix them and run again, until no any error reported, and now you can run any slapos command in this terminal.</para>
 </chapter>
 
@@ -505,14 +512,110 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <listitem><para>Install cygwin</para></listitem>
 <listitem><para>Prepare certificate, key, computer.key, computer.crt</para></listitem>
 <listitem><para>Run slapos-cygwin-bootstrap.sh, got it from slapos.package.git/windows/scripts</para></listitem>
-<listitem><para>Run command slapos node software/release until instance created</para></listitem>
-<listitem><para>Run command slapos remove to destroy this instance</para></listitem>
+<listitem><para>Run slapos-configure.sh, got it from slapos.package.git/windows/scripts</para></listitem>
+<listitem><para>Go to https://www.slapos.org, install test-agent in this node</para></listitem>
+<listitem><para>Run command slapos-node.sh</para></listitem>
 </itemizedlist>
 </para>
 
 <section><title>Add SlapOS Bootstrap Node to Vifib Cluster</title>
 <para>Create an instance of SlapOS Test-Agent in slapos bootstrap node (computer.key/computer.crt), it will test the software: http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg, this software can build slapos windows installer, then run the installer to create a slapos test node.</para>
 <para>Create another instance of SlapOS Test-Agent used to test the instances running in the slapos test node (test-computer.key/test-computer.crt). This test agent can include any software which can run in the slapos windows.</para>
+</section>
+</chapter>
+
+<chapter><title>Inside SlapOS Cygwin Node</title>
+<para>This chapter descripts the internal of slapos cygwin node:
+<itemizedlist>
+<listitem><para>What we will do to create SlapOS node in the Cygwin</para></listitem>
+<listitem><para>Use shell scripts to do these tasks</para></listitem>
+</itemizedlist>
+</para>
+
+<section><title>What we will do to create SlapOS node in the Cygwin</title>
+<para>In order to install SlapOS Node in the Cgywin, the tasks include:
+<variablelist>
+  <varlistentry>
+    <term>Setup cygwin</term>
+    <listitem><para>See setup-cygwin.bat to know the detail</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Patch cygwin</term>
+    <listitem><para>See function slapos-cygwin-bootstrap.sh!slapos_patch_cygwin</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Create cygserver and syslog-ng service</term>
+    <listitem><para>The service names have a prefix so that we can install multi-nodes in one machine. Both of these services is running by local system account.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Install slapos-cygwin package</term>
+    <listitem><para>Extra scripts for slapos running in the cygwin, for examples, ipwin, regpwd, ip etc.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Create super user</term>
+    <listitem><para>The super user is used to start cron and re6stnet services, it's required in Windows 7 and later.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Create network interface for slapos</term>
+    <listitem><para>Slapos use a msloop insterface as its own interface, default name is 're6stnet-lo'. If there is more than one slapos node in the same machine, each node use a prefix.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Install re6stnet</term>
+    <listitem><para>We need re6stnet application except you specify an IPv6 address by manual way.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Run re6st-conf</term>
+    <listitem><para>By this way, we get our IPv6 address assigned by re6stnet network.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Install OpenVPN and Copy files to cygwin</term>
+    <listitem><para>It's required only no native IPv6</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Build cygwin babeld</term>
+    <listitem><para>It's required only no native IPv6</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Install re6stnet service</term>
+    <listitem><para>It's required only no native IPv6</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Build SlapOS</term>
+    <listitem><para>In the Cygwin, we need apply 2 patches: slapos-core-format.patch, supervisor-cygwin.patch</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Configure SlapOS Node</term>
+    <listitem><para></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Run slapos format</term>
+    <listitem><para></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Configure SlapOS Client</term>
+    <listitem><para>If we don't create instance in this SlapOS node, we need not configure slapos client.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Create Instance of Slap-Runner</term>
+    <listitem><para>After this software is releasesd, we need apply the patch 'slapos-cookbook-inotifyx.patch', otherwise it will not work in Cygwin now. </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>Create Instance of Test-Agent</term>
+    <listitem><para></para></listitem>
+  </varlistentry>
+</variablelist>
+Most of tasks list above section could be done by shell scripts, now we have the following scripts:
+<itemizedlist>
+<listitem><para>setup-cygwin.bat</para></listitem>
+<listitem><para>slapos-cygwin-bootstrap.sh</para></listitem>
+<listitem><para>slapos-configure.sh</para></listitem>
+<listitem><para>slapos-node.sh</para></listitem>
+<listitem><para>slapos-cleanup.sh</para></listitem>
+<listitem><para>autorebase.bat</para></listitem>
+</itemizedlist>
+Except autorebase.bat, all of these scripts could be downloaded from <ulink url="http://git.erp5.org/gitweb/slapos.package.git/tree/refs/heads/cygwin:/windows/scripts?js=1"/>. You can read the source or run script with '-h' to know the usage of these scripts.
+</para>
+<para>The autorebase.bat located in the cygwin root path is generated by slapos-cygwin-bootstap.sh, and used to fix the remap problem. If cygwin reports remap error, you could run this script to fix the problem. Before run this script, you need close all the cygwin terminals at first, then double click autorebase.bat in the windows explorer.</para>
 </section>
 </chapter>
 
