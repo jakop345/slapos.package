@@ -23,7 +23,7 @@ fi
 declare -r slapos_prefix=
 
 declare -r slapos_client_home=~/.slapos
-declare -r client_configure_file=$slapos_client_home/slapos.cfg
+declare -r client_configure_file=$slapos_client_home/slapos-client.cfg
 declare -r client_certificate_file=$slapos_client_home/client.crt
 declare -r client_key_file=$slapos_client_home/client.key
 declare -r client_template_file=/etc/slapos/slapos-client.cfg.example
@@ -434,7 +434,7 @@ function get_slapos_webrunner_instance()
     local _ret=0
 
     csih_inform "Trying to get connection information of SlapOS WebRunner instance ..."
-    /opt/slapos/bin/slapos request ${client_configure_file} \
+    /opt/slapos/bin/slapos request --cfg ${client_configure_file} \
         ${_title} slaposwebrunner --node computer_guid=${_guid} || return 1
 
     # Connection parameters of instance are:
@@ -443,7 +443,7 @@ function get_slapos_webrunner_instance()
     #  'password_recovery_code': 'e2d01c14',
     #  'ssh_command': 'ssh 2001:67c:1254:45::c5d5 -p 2222',
     #  'url': 'http://softinst39090.host.vifib.net/'}
-    _url=$(/opt/slapos/bin/slapos request ${client_configure_file} \
+    _url=$(/opt/slapos/bin/slapos request --cfg ${client_configure_file} \
         ${_title} slaposwebrunner --node computer_guid=${_guid} | \
         grep backend_url | sed -e "s/^.*': '//g" -e "s/',.*$//g")
 
