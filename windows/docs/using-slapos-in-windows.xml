@@ -328,8 +328,8 @@ cd ~
 find /opt/slapos -name "*.dll" &gt; /myfile.list
 echo "PATH .\bin;%PATH%" &gt; /autorebase.bat
 echo "dash /bin/rebaseall -T /myfile.list -v" &gt;&gt; /autorebase.bat
-echo "EXIT 0" &gt;&gt; /autorebase.bat
 echo "Pause" &gt;&gt; /autorebase.bat
+echo "EXIT 0" &gt;&gt; /autorebase.bat
 exit
 </programlisting>
 After exit cygwin, double click autorebase.bat in the Windows explorer. If the current user isn't Administrator, then right click it, click Run As Administrator.
