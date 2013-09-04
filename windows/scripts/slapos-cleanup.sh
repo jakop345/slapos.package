@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# When uninstall slapos, it will be called by uninstaller. Root right
+# When uninstalling slapos, it will be called by uninstaller. Root right
 # required to run this script.
 #
 #    /bin/bash/ --login -i pre-uninstall.sh
@@ -36,7 +36,7 @@ readonly -f slapos_kill_process
 #
 for name in ${re6stnet_service_name} ${cron_service_name} \
     ${syslog_service_name} ${cygserver_service_name} ; do
-    echo "Removing ervice $name"
+    echo "Removing service $name"
     cygrunsrv -R $name && echo OK.
 done
 
@@ -44,7 +44,7 @@ done
 # Stop slapos
 #
 if [[ -x /opt/slapos/bin/slapos ]] ; then
-    echo "Stoping slapos node ..."
+    echo "Stopping slapos node ..."
     /opt/slapos/bin/slapos node stop all && echo OK.
 fi
 slapos_kill_process /usr/bin/python2.7
@@ -78,7 +78,7 @@ echo "Removing ${_filename}"
 rm -rf ${_filename} && echo OK.
 
 #
-# Remove default instance root and software root, because it belong to
+# Remove default instance root and software root, because they belong to
 # slapuser, and would not be removed by the windows uninstaller.
 #
 [[ -f /srv/slapgrid ]] && echo "Removing /srv/slapgrid" && rm -rf /srv/slapgrid && echo OK.
