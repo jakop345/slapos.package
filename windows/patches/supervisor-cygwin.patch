@@ -1,9 +1,7 @@
-diff --git a/options.py~ b/options.py
-old mode 100644
-new mode 100755
-index 3ccab60..e220c10
---- a/options.py~
-+++ b/options.py
+diff --git a/supervisor/options.py b/supervisor/options.py
+index 3ccab60..e220c10 100644
+--- a/supervisor/options.py
++++ b/supervisor/options.py
 @@ -1197,7 +1197,7 @@ class ServerOptions(Options):
              return
  

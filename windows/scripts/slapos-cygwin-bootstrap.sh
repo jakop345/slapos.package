@@ -28,21 +28,6 @@ function show_usage()
     echo ""
     echo "  setup_cygwin.bat C:\slapos network"
     echo ""
-    echo "Then sign up slapos.org, got the following certificate files:"
-    echo ""
-    echo "  certificate"
-    echo "  key"
-    echo "  computer.key"
-    echo "  computer.crt"
-    echo ""
-    echo "save them in your home path."
-    echo ""
-    echo "Register another computer for test node, save them in the root path"
-    echo ""
-    echo "  test-computer.key"
-    echo "  test-computer.crt"
-    echo ""
-    echo ""
 }
 readonly -f show_usage
 
@@ -231,47 +216,17 @@ function install_ipv6_protocol()
 }
 readonly -f install_ipv6_protocol
 
-function install_cygserver_service()
-{
-    csih_inform "Starting configure cygwin services ..."
-    if ! cygrunsrv --query ${cygserver_service_name} > /dev/null 2>&1 ; then
-        csih_inform "run cygserver-config ..."
-        /usr/bin/cygserver-config --yes || \
-            csih_error "failed to run cygserver-config"
-        [[ ${cygserver_service_name} == cygserver ]] ||
-        cygrunsrv -I ${cygserver_service_name} -d "CYGWIN ${cygserver_service_name}" -p /usr/sbin/cygserver ||
-        csih_error "failed to install service ${cygserver_service_name}"
-    else
-        csih_inform "the cygserver service has been installed"
-    fi
-}
-readonly -f install_cygserver_service
-
-function install_syslog_service()
-{
-    if ! cygrunsrv --query ${syslog_service_name} > /dev/null 2>&1 ; then
-        csih_inform "run syslog-ng-config ..."
-        /usr/bin/syslog-ng-config --yes || \
-            csih_error "failed to run syslog-ng-config"
-        [[ ${syslog_service_name} == "syslog-ng" ]] ||
-        cygrunsrv -I ${syslog_service_name} -d "CYGWIN ${syslog_service_name}" -p /usr/sbin/syslog-ng -a "-F" ||
-        csih_error "failed to install service ${syslog_service_name}"
-
-    else
-        csih_inform "the syslog-ng service has been installed"
-    fi
-}
-readonly -f install_cygserver_service
-
 # -----------------------------------------------------------
 # Start script
 # -----------------------------------------------------------
 csih_inform "Starting bootstrap slapos node ..."
 echo ""
 
+# -----------------------------------------------------------
+# Command line options
+# -----------------------------------------------------------
 _prefix=
 _install_mode=
-
 while test $# -gt 0; do
     # Normalize the prefix.
     case "$1" in
@@ -304,8 +259,6 @@ done
 # Constants: slapos bootstrap node use prefiix "slapboot-"
 # ======================================================================
 declare -r slapos_prefix=${_prefix}
-declare -r cygserver_service_name=${slapos_prefix}cygserver
-declare -r syslog_service_name=${slapos_prefix}syslog-ng
 declare -r slapos_cygroot=$(cygpath -w /)
 
 # -----------------------------------------------------------
@@ -327,12 +280,6 @@ install_slapos_cygwin_package
 # Check IPv6 protocol, install it if it isn't installed
 # -----------------------------------------------------------
 install_ipv6_protocol
-
-# -----------------------------------------------------------
-# Configure cygwin services: cygserver syslog-ng
-# -----------------------------------------------------------
-install_cygserver_service
-install_syslog_service
 
 # -----------------------------------------------------------
 # End script

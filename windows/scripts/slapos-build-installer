@@ -1,7 +1,27 @@
 #! /bin/bash
 #
-# This script is used to build slapos installer of windows.
+# This script is used to build slapos installer of windows. There are 2
+# scripts need to run in prior:
+# 
+#     slapos-cygwin-bootstrap.sh
+#     
+#     build-slapos.sh
 #
+# In this script, it will do:
+# 
+#    * Prepare sources
+#    
+#    * Make installer
+#
+export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
+if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
+    echo "Error: Missing csih package."
+    exit 1
+fi
+
+# ======================================================================
+# Functions
+# ======================================================================
 function check_os_is_wow64()
 {
   [[ $(uname) == CYGWIN_NT-*-WOW64 ]]
@@ -17,12 +37,9 @@ function show_usage()
 }
 readonly -f show_usage
 
-export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
-if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
-    echo "Error: Missing csih package."
-    exit 1
-fi
-
+# ======================================================================
+# Start script
+# ======================================================================
 csih_inform "Starting build Slapos Windows installer ..."
 echo ""
 
@@ -33,7 +50,7 @@ declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
 declare -r ISCC=${cygwin_home}/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
-# Command line options
+# Start script
 # -----------------------------------------------------------
 while test $# -gt 0; do
     # Normalize the prefix.
@@ -43,9 +60,9 @@ while test $# -gt 0; do
     esac
 
     case "$1" in
-    install)
+    -h | --help)
+    show_usage
     exit 0
-    ;;
     *)
     show_usage
     exit 1
@@ -55,145 +72,6 @@ while test $# -gt 0; do
     # Next please.
     shift
 done
-
-# -----------------------------------------------------------
-# Patch cygwin packages for building slapos
-# -----------------------------------------------------------
-csih_inform "Patching cygwin packages for building slapos"
-
-csih_inform "libtool patched"
-sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
-
-csih_inform "/etc/passwd generated"
-[[ -f /etc/passwd ]] || mkpasswd > /etc/passwd
-
-csih_inform "/etc/group generated"
-[[ -f /etc/group ]] || mkgroup > /etc/group
-
-
-_filename=/usr/bin/cygport
-if [[ -f ${_filename} ]] ; then
-    csih_inform "Patching ${_filename} ..."
-    sed -i -e 's/D="${workdir}\/inst"/D="${CYGCONF_PREFIX-${workdir}\/inst}"/g' ${_filename} &&
-    csih_inform "OK"
-else
-    csih_error "Missing cygport package, no ${_filename} found."
-fi
-_filename=/usr/share/cygport/cygclass/autotools.cygclass
-if [[ -f ${_filename} ]] ; then
-    csih_inform "Patching ${_filename} ..."
-    sed -i -e 's/prefix=$(__host_prefix)/prefix=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &&
-    csih_inform "OK"
-else
-    csih_error "Missing cygport package, no ${_filename} found."
-fi
-_filename=/usr/share/cygport/cygclass/cmake.cygclass
-if [[ -f ${_filename} ]] ; then
-    csih_inform "Patching ${_filename} ..."
-    sed -i -e 's/-DCMAKE_INSTALL_PREFIX=$(__host_prefix)/-DCMAKE_INSTALL_PREFIX=${CYGCONF_PREFIX-$(__host_prefix)}/g' ${_filename} &&
-    csih_inform "OK"
-else
-    csih_error "Missing cygport package, no ${_filename} found."
-fi
-
-for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
-    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
-    csih_error "download ${_cmdname} failed"
-    csih_inform "download cygwin script ${_cmdname} OK"
-    chmod +x /usr/bin/${_cmdname} || csih_error "chmod /usr/bin/${_cmdname} failed"
-done
-
-if check_os_is_wow64 ; then
-    wget -c http://dashingsoft.com/products/slapos/ipwin_x64.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x64.exe failed"
-    csih_inform "download ipwin_x64.exe OK"
-else
-    wget -c http://dashingsoft.com/products/slapos/ipwin_x86.exe -O /usr/bin/ipwin.exe ||
-    csih_error "download ipwin_x86.exe failed"
-    csih_inform "download ipwin_x86.exe OK"
-fi
-chmod +x /usr/bin/ipwin.exe || csih_error "chmod /usr/bin/ipwin.exe failed"
-
-csih_inform "Patch cygwin packages for building slapos OK"
-echo ""
-
-# -----------------------------------------------------------
-# Make directories
-# -----------------------------------------------------------
-_optdir=${cygwin_home}/opt
-csih_inform "mkdir ${_optdir}"
-mkdir -p ${_optdir}
-
-[[ -d /opt ]] && [[ ! -h /opt ]] &&
-csih_error_multi "/opt isn't a symbol link" \
-    "in order to build the installer by this script, " \
-    "/opt should be link to ${_optdir}"
-
-[[ -h /opt ]] &&
-! ls -ld /opt | grep -q "\-> ${_optdir}" &&
-csih_error_multi "in order to build the installer by this script, " \
-    "/opt should be link to ${_optdir}" \
-    "now /opt link to another directory"
-
-[[ ! -d /opt ]] &&
-csih_inform "link ${_optdir} to /opt" &&
-(ln -s ${_optdir} /opt || csih_error "create link failed")
-
-csih_inform "mkdir /opt/slapos/log"
-mkdir -p /opt/slapos/log
-
-csih_inform "mkdir /opt/download-cache"
-mkdir -p /opt/download-cache
-
-csih_inform "mkdir /opt/git"
-mkdir -p /opt/git
-
-csih_inform "mkdir /opt/downloads"
-mkdir -p /opt/downloads
-
-echo ""
-
-# -----------------------------------------------------------
-# Run the buildout of slapos node
-# -----------------------------------------------------------
-csih_inform "Starting run buildout of slapos node ..."
-
-[[ -f /opt/slapos/buildout.cfg ]] ||
-(cd /opt/slapos && echo "[buildout]
-extends = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
-download-cache = /opt/download-cache
-prefix = ${buildout:directory}
-" > buildout.cfg) &&
-csih_inform "buildout.cfg generated"
-
-[[ -f /opt/slapos/bootstrap.py ]] ||
-(cd /opt/slapos &&
-python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > bootstrap.py ) ||
-csih_error "download bootstrap.py failed"
-csih_inform "download bootstrap.py OK"
-
-[[ -f /opt/slapos/bin/buildout ]] ||
-(cd /opt/slapos && python -S bootstrap.py) ||
-csih_error "run bootstrap.py failed"
-csih_inform  "run bootstrap.py OK"
-
-csih_inform "start bin/buildout"
-(cd /opt/slapos && /opt/slapos/bin/buildout -v -N) || csih_error "bin/buildout failed"
-
-_filename=~/slapos-core-format.patch
-wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/slapos-core-format.patch -O ${_filename} ||
-csih_error "download ${_filename} failed"
-csih_inform "download ${_filename} OK"
-
-csih_inform "applay patch ${_filename}"
-(cd $(ls -d /opt/slapos/eggs/slapos.core-*.egg/) &&
-csih_inform "patch at $(pwd)" &&
-patch -f --dry-run -p1 < ${_filename} > /dev/null &&
-patch -p1 < ${_filename} &&
-csih_inform "apply patch ${_filename} OK")
-
-csih_inform "Run buildout of slapos node OK"
-echo ""
 
 # -----------------------------------------------------------
 # Prepare the sources used to build installer
@@ -229,17 +107,25 @@ else
     csih_error "make babeld failed"
 fi
 
-csih_inform "making openvpn for cygwin ..."
-[[ -f /opt/git/slapos.package/windows/openvpn/Makefile ]] ||
-(cd /opt/git/slapos.package/windows/openvpn &&
-libtoolize &&
-aclocal -I m4 &&
-autoheader &&
-automake --add-missing &&
-autoreconf &&
-ac_cv_type_socklen_t=yes IFCONFIG="C:/WINDOWS/system32" LDFLAGS="-liphlpapi -lws2_32" CFLAGS="-DWIN32 -DCYGWIN -D__USE_W32_SOCKETS -D__INSIDE_CYGWIN_NET__ -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0503 -g" OPENSSL_CRYPTO_CFLAGS=-I/usr/include OPENSSL_CRYPTO_LIBS="-L/usr/lib -lcrypto" OPENSSL_SSL_CFLAGS=-I/usr/include OPENSSL_SSL_LIBS="-L/usr/lib -lssl" ./configure --disable-lzo --disable-pkcs11 --disable-plugin-auth-pam --disable-plugin-down-root) ||
-csih_error "openvpn configure failed"
-(cd /opt/git/slapos.package/windows/openvpn && make)|| csih_error "make openvpn failed"
+_filename=/opt/git/slapos.package/windows/scripts/regpwd.exe
+[[ ! -f ${_filename} ]] &&
+(cd /opt/git/slapos.package/windows/scripts ; gcc -o regpwd.exe regpwd.c) && 
+csih_inform "make regpwd.exe"
+
+_filename=~/openvpn-driver.tar.gz
+if check_os_is_wow64 ; then
+    _url=http://www.dashingsoft.com/products/slapos/openvpn-x64.tar.gz
+else
+    _url=http://www.dashingsoft.com/products/slapos/openvpn-x86.tar.gz
+fi
+wget -c ${_url} -O ${_filename} ||
+csih_error_multi "download ${_filename} failed" "  from ${_url}"
+csih_inform "Got ${_filename}"
+csih_inform "  from ${_url}"
+
+csih_inform "extracting ${_filename} ..."
+(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
+csih_error "extract ${_filename} failed"
 
 _filename=/opt/downloads/pyOpenSSL-0.13.tar.gz
 wget -c --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
@@ -256,6 +142,14 @@ csih_inform "updating re6stnet.git ..."
 (cd /opt/git ; git clone -b cygwin http://git.erp5.org/repos/re6stnet.git) ||
 csih_error "clone/pull re6stnet.git failed"
 
+# # Now package i686-w64-mingw32-gcc isn't installed, so ignore it in temporary
+# csih_inform "building ovpn-client and ovpn-server ..."
+# for _name in ovpn-client ovpn-server ; do
+#     (cd /opt/git/re6stnet/re6st ; i686-w64-mingw32-gcc -o ${_name}.exe ${_name}.c ovpn-pipe.c) ||
+#     csih_error "build ${_name}.exe failed"
+#     csih_inform "build ${_name}.exe OK"
+# done
+
 csih_inform "creating re6stnet source package ..."
 (cd /opt/git/re6stnet ; python setup.py sdist) ||
 csih_error "create re6stnet source package failed"
@@ -269,25 +163,17 @@ csih_inform "extracting ${_filename} ..."
 (cd /opt ; tar xzf ${_filename} --no-same-owner) ||
 csih_error "extract ${_filename} failed"
 
-_filename=~/openvpn-driver.tar.gz
+# This command need microsoft sdk to build, so we just copy it
+_filename=/opt/git/slapos.package/windows/ipwin/ipwin/ipwin.exe
 if check_os_is_wow64 ; then
-    _url=http://www.dashingsoft.com/products/slapos/openvpn-driver-x64.tar.gz
+    _url=http://www.dashingsoft.com/products/slapos/ipwin-x64.tar.gz
 else
-    _url=http://www.dashingsoft.com/products/slapos/openvpn-driver-x86.tar.gz
+    _url=http://www.dashingsoft.com/products/slapos/ipwin-x86.tar.gz
 fi
 wget -c ${_url} -O ${_filename} ||
 csih_error_multi "download ${_filename} failed" "  from ${_url}"
 csih_inform "Got ${_filename}"
 csih_inform "  from ${_url}"
-
-csih_inform "extracting ${_filename} ..."
-(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
-csih_error "extract ${_filename} failed"
-
-_filename=/opt/git/slapos.package/windows/ipwin/ipwin/ipwin.exe
-[[ ! -f ${_filename} ]] &&
-cp /usr/bin/ipwin.exe ${_filename} &&
-csih_inform "copy ipwin.exe"
 
 csih_inform "Prepare the sources OK"
 echo ""
@@ -311,7 +197,7 @@ csih_inform "patch ${_issfile} ..."
 sed -i -e "s%^OutputBaseFilename=.*%OutputBaseFilename=${_installer_name}%" \
        -e "s%^OutputDir=.*%OutputDir=${_output_dir}%" \
        -e "s%^SourceDir=.*%SourceDir=${_source_dir}%" \
-       -e "s%/etc/slapos/scripts/post-install.sh%/etc/slapos/scripts/post-install.sh slaptest-%" \
+       -e "s%/etc/slapos/scripts/slapos-cygwin-bootstrap.sh%/etc/slapos/scripts/slapos-cygwin-bootstrap.sh --prefix=slaptest-%" \
     ${_issfile} || csih_error "patch failed"
 
 csih_inform "run issc to build ${_issfile} ..."
@@ -322,7 +208,7 @@ csih_inform "Generate Windows installer OK"
 echo ""
 
 # -----------------------------------------------------------
-# Finish
+# End scirpt
 # -----------------------------------------------------------
 echo ""
 csih_inform "Build Slapos Windows installer successfully."

@@ -3,22 +3,31 @@
 # When uninstall slapos, it will be called by uninstaller. Root right
 # required to run this script.
 #
-#    /bin/bash/ --login -i pre-uninstall.sh
-#
-# It will do:
-#
-#    * Remove virtual netcards installed by re6stnet
-#
-#    * Remove service cron, cygserver syslog-ng re6stnet
-#
-#    * Remove account/group added by slapos configure script
-#
-#    * Remove instance and software root /srv/slapgrid /opt/slapgrid
-#
-# Required:
-#   grep gawk TASKKILL
+#    /bin/bash/ --login -i slapos-cleanup.sh
 #
 source $(/usr/bin/dirname $0)/slapos-include.sh
+
+function show_usage()
+{
+    echo "This script is used to remove everything added by slapos node."
+    echo ""
+    echo "Usage: ./slapos-cleanup.sh"
+    echo ""
+    echo "  It will do:"
+    echo ""
+    echo "    * Remove virtual netcards installed by re6stnet"
+    echo ""
+    echo "    * Remove service cron, cygserver syslog-ng re6stnet"
+    echo ""
+    echo "    * Remove account/group added by slapos configure script"
+    echo ""
+    echo "    * Remove instance and software root /srv/slapgrid /opt/slapgrid"
+    echo ""
+    echo "After run this script, you got a clean enviroments. Then you can run"
+    echo "slapos-configure.sh to configure slapos node again."
+    echo ""
+}
+readonly -f show_usage
 
 function slapos_kill_process()
 {
@@ -30,6 +39,34 @@ function slapos_kill_process()
     done
 }
 readonly -f slapos_kill_process
+
+# -----------------------------------------------------------
+# Start script
+# -----------------------------------------------------------
+echo "Start cleanup slapos node ..."
+echo ""
+
+while test $# -gt 0; do
+    # Normalize the prefix.
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    -h | --help)
+    show_usage
+    exit 0
+    ;;
+    *)
+    show_usage
+    exit 1
+    ;;
+    esac
+
+    # Next please.
+    shift
+done
 
 #
 # Remove services installed by cygwin,
@@ -112,8 +149,12 @@ done
 echo "Creating /etc/group ..."
 mkgroup -l > /etc/group && echo OK.
 
+# -----------------------------------------------------------
+# End script
+# -----------------------------------------------------------
 echo
 echo Run pre-uninstall script complete.
 echo
+
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0

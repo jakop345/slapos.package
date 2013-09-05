@@ -27,14 +27,13 @@ declare -r client_configure_file=$slapos_client_home/slapos.cfg
 declare -r client_certificate_file=$slapos_client_home/certificate
 declare -r client_key_file=$slapos_client_home/key
 declare -r client_template_file=/etc/slapos/slapos-client.cfg.example
+declare -r client_template_file_url=http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example
 
 declare -r node_certificate_file=/etc/opt/slapos/ssl/computer.crt
 declare -r node_key_file=/etc/opt/slapos/ssl/computer.key
 declare -r node_configure_file=/etc/opt/slapos/slapos.cfg
 declare -r node_template_file=/etc/slapos/slapos.cfg.example
-
-# Change it if it confilcts with your local network
-declare -r ipv4_local_network=10.201.67.0/24
+declare -r node_template_file_url=http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example
 
 declare -r openvpn_tap_driver_inf=/etc/slapos/driver/OemWin2k.inf
 declare -r openvpn_tap_driver_hwid=tap0901
@@ -42,9 +41,7 @@ declare -r openvpn_tap_driver_hwid=tap0901
 declare -r re6stnet_configure_file=/etc/re6stnet/re6stnet.conf
 declare -r slapos_cron_config=/usr/bin/slapos-cron-config
 declare -r slaprunner_startup_file=/etc/slapos/scripts/slap-runner.html
-declare -r slapos_run_key='\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 
-declare -r slapos_run_entry=${slapos_prefix:-slapos}-configure
 declare -r slapos_administrator=${slapos_prefix:-slap}root
 declare -r slapos_user_basename=${slapos_prefix:-slap}user
 declare -r slapos_ifname=${slapos_prefix}re6stnet-lo
@@ -53,6 +50,14 @@ declare -r cron_service_name=${slapos_prefix}cron
 declare -r syslog_service_name=${slapos_prefix}syslog-ng
 declare -r cygserver_service_name=${slapos_prefix}cygserver
 
+# ======================================================================
+# Routine: check_os_is_wow64
+# ======================================================================
+function check_os_is_wow64()
+{
+  [[ $(uname) == CYGWIN_NT-*-WOW64 ]]
+}  # === check_os_is_wow64 === #
+readonly -f check_os_is_wow64
 
 # ======================================================================
 # Routine: check_cygwin_service
@@ -152,10 +157,10 @@ function check_re6stnet_configure()
 }  # === check_re6stnet_configure() === #
 
 # ======================================================================
-# Routine: check_re6stnet_needed
+# Routine: check_openvpn_needed
 # Check re6stnet required or not
 # ======================================================================
-function check_re6stnet_needed()
+function check_openvpn_needed()
 {
     # This doesn't work in cygwin now, need hack ip script
     # re6st-conf --registry http://re6stnet.nexedi.com/ --is-needed
@@ -164,7 +169,7 @@ function check_re6stnet_needed()
     fi
     # re6stnet is required
     return 0
-}  # === check_re6stnet_needed() === #
+}  # === check_openvpn_needed() === #
 
 # ======================================================================
 # Routine: reset_slapos_connection
@@ -172,7 +177,7 @@ function check_re6stnet_needed()
 # ======================================================================
 function reset_slapos_connection()
 {
-    ifname=${1-re6stnet-lo}
+    ifname=${1:-re6stnet-lo}
     netsh interface ip set address $ifname source=dhcp
 }  # === reset_slapos_connection() === #
 
@@ -240,7 +245,7 @@ function start_cygwin_service()
 # ======================================================================
 slapos_request_password()
 {
-    local username="${1-slaproot}"
+    local username="${1:-slaproot}"
 
     csih_inform "$2"
     csih_get_value "Please enter the password:" -s
@@ -253,17 +258,28 @@ slapos_request_password()
 }  # === slapos_request_password() === #
 
 # ======================================================================
+# Routine: wget_slapos_file
+# Generate the template file for node and client
+# ======================================================================
+function slapos_wget_file()
+{
+    wget $1 -O $2 || return 1
+    csih_inform "Got $2."
+}  # === wget_slapos_file() === #
+readonly -f wget_slapos_file
+
+# ======================================================================
 # Routine: slapos_create_privileged_user
 #
-# Copied from csih_check_and_create_privileged_user, just create fix account:
-#   slaproot
+# Copied from csih_check_and_create_privileged_user
+# 
 # ======================================================================
 slapos_check_and_create_privileged_user()
 {
   csih_stacktrace "${@}"
   $_csih_trace
   local username_in_sam
-  local username="${1-slaproot}"
+  local username="${1:-slaproot}"
   local admingroup
   local dos_var_empty
   local _password="$2"
@@ -406,19 +422,6 @@ slapos_check_and_create_privileged_user()
 readonly -f slapos_check_and_create_privileged_user
 
 # ======================================================================
-# Routine: create_template_configure_file
-# Generate the template file for node and client
-# ======================================================================
-function create_template_configure_file()
-{
-    wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O $client_template_file || return 1
-    echo Got $client_template_file.
-
-    wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O $node_template_file || return 1
-    echo Got $node_template_file.
-}  # === create_template_configure_file() === #
-
-# ======================================================================
 # Routine: get_slapos_webrunner_instance
 # Get instance connection information and create slaprunner startup file
 # ======================================================================
@@ -427,7 +430,7 @@ function get_slapos_webrunner_instance()
     local _guid=$1
     local _title=$2
     local _feature_code="#-*- SlapOS Web Runner JavaScript Boot Code -*-#"
-    local _url
+    local _url=
     local _ret=0
 
     csih_inform "Trying to get connection information of SlapOS WebRunner instance ..."
@@ -446,12 +449,8 @@ function get_slapos_webrunner_instance()
 
     if [[ -n "${_url}" ]] ; then
         csih_inform "SlapOS WebRunner URL: ${_url}"
-        if grep -q -F "${_feature_code}" ${slaprunner_startup_file} ; then
-            csih_inform "Find feature code ${_feature_code} in the ${slaprunner_startup_file}"
-            echo "Check SlapOS Webrunner OK."
-        else
-            csih_inform "Generate SlapOS WebRunner startup file ${slaprunner_startup_file}"
-            cat <<EOF > ${slaprunner_startup_file}
+        csih_inform "Generate SlapOS WebRunner startup file ${slaprunner_startup_file}"
+        cat <<EOF > ${slaprunner_startup_file}
 <html>
 <head><title>SlapOS Web Runner</title>
 <script LANGUAGE="JavaScript">
@@ -466,10 +465,99 @@ function openwin() {
 <!-- $feature_code -->
 </html>
 EOF
-        fi
     else
         csih_error_multi "Request returned true, but I can't find connection information," \
             "something is wrong with slapos webrunner software."
     fi
     return ${_ret}
 }  # === get_slapos_webrunner_instance() === #
+readonly -f get_slapos_webrunner_instance
+
+# ======================================================================
+# Routine: create_test_agent_instance
+# Create test-agent instance
+# ======================================================================
+function create_test_agent_instance()
+{
+    local computer_guid=${1:-COMP-XXXX}
+
+    cat <<EOF > ~/test-agent.template
+<?xml version='1.0' encoding='utf-8'?>
+<instance>
+<parameter id="usercertificate">-----BEGIN CERTIFICATE-----
+MIIEBTCCAu2gAwIBAgIDAJNnMA0GCSqGSIb3DQEBBQUAMIGZMQswCQYDVQQGEwJG
+UjEbMBkGA1UECAwSTm9yZC1QYXMtZGUtQ2FsYWlzMQ4wDAYDVQQHDAVMaWxsZTET
+MBEGA1UECgwKVmlGaUIgU0FSTDEoMCYGA1UEAwwfQXV0b21hdGljIENlcnRpZmlj
+YXRlIEF1dGhvcml0eTEeMBwGCSqGSIb3DQEJARYPYWRtaW5AdmlmaWIuY29tMB4X
+DTEzMDYyNzEzMzUxNVoXDTIzMDYyNTEzMzUxNVowczELMAkGA1UEBhMCRlIxGzAZ
+BgNVBAgMEk5vcmQtUGFzLWRlLUNhbGFpczETMBEGA1UECgwKVmlGaUIgU0FSTDES
+MBAGA1UEAwwJQ09NUC0xNjU1MR4wHAYJKoZIhvcNAQkBFg9hZG1pbkB2aWZpYi5v
+cmcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDwFsiIAFuoSeZmp1tP
+dtdgvf63fV6BRMqcmoi14lDXE6A6a6GZSUJfcjE/hl1pMTkSb2C6t652z64Xg9oR
+GMlBmrHX6WeZkgcw5wxU1aKeS4yZ6kPvdVf+RvnGiez1yHaAfb/A1OjrbhyH5nn+
+yXvWMU+5jIKdTvnHtft02tjOS1s80JNFyP6i8WqJ5Ui6DOVj6TmRQitw4hw3h+4b
+VBCPBtOX8qN0ASRWi4IdQToBkzkspYPYtuWFhqEG0gxi2M3M7NAnBLs4vfveOo7C
+fCsMOrf1XgpkOg9U8pGv93ot+cCEgaLbldcmUvrFGEaPUTiGfrXB3/ViLHg9eCeY
+xgmPAgMBAAGjezB5MAkGA1UdEwQCMAAwLAYJYIZIAYb4QgENBB8WHU9wZW5TU0wg
+R2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBTyDEjz/fIvjVo2j6Jay7my
+Zlu5lTAfBgNVHSMEGDAWgBRjhJik1R6prfda41XfXWOP+F65uzANBgkqhkiG9w0B
+AQUFAAOCAQEANaJzQ+0Ifn3AIf1DrJoXO1g6ywfHTSeDFOmnfVCYb1uECnElBccB
+gV/MHl9hq6nyGawamPki9kTqZE6RhM72y+btNxqLELEaMZaXXkZn3ROT0oz2PWFT
+WOgTyI/QsHKlMhwa0rxX68G8sSoSw448ICPOQWT0eYAWxnniDW4QCxRZscSlVDFU
+heRljeJjwHrz1sRJev4CrOrg44tAlLdJpnO1ZHc+wtXRUJK6YQqKj8UQ/KmvuvWX
+br3Xyhksoy67Y+TsS7NzUy+3TFXUpe23JTqETHUPvUU0w4VMUBCcAMYIoh46SHvZ
+Dc8/wOQ7Z31zs02v/EQL76HQAfq4n+QvOQ==
+-----END CERTIFICATE-----
+</parameter>
+<parameter id="userkey">-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDwFsiIAFuoSeZm
+p1tPdtdgvf63fV6BRMqcmoi14lDXE6A6a6GZSUJfcjE/hl1pMTkSb2C6t652z64X
+g9oRGMlBmrHX6WeZkgcw5wxU1aKeS4yZ6kPvdVf+RvnGiez1yHaAfb/A1OjrbhyH
+5nn+yXvWMU+5jIKdTvnHtft02tjOS1s80JNFyP6i8WqJ5Ui6DOVj6TmRQitw4hw3
+h+4bVBCPBtOX8qN0ASRWi4IdQToBkzkspYPYtuWFhqEG0gxi2M3M7NAnBLs4vfve
+Oo7CfCsMOrf1XgpkOg9U8pGv93ot+cCEgaLbldcmUvrFGEaPUTiGfrXB3/ViLHg9
+eCeYxgmPAgMBAAECggEARY+UUjMoWz3uD1f10LQx+smRf0BHnVR9D5qGeYw0t9vr
+1IFStMLRBC5lrm4TqmKkkn7Km86UMcBCRHXjPIjd5rAXTuNFLO1uP/DxVbMABrUE
+66NAQ6TP9dBClg9oJF4MV3YXlJsbUPr6MTXJqtRdmNV4r93SChnTrNVBIb42iq4i
+9bpVSnql8Yr+9jZZnpRDz4IbSxlE3KAHXFmbJThtwc1FcvnYargNdjX9TGx25hyx
+hCUsyoCuJURmbwOd3DQjzfxKZT7uLt/nduNYbBNjstzc/HJ4qpuV500DT1kTDPf8
+LSp1LnjxzRCHdZwV+jtFebBOfa9euKMAVVYn5fBVIQKBgQD8nPDjrQEfj2igei3l
+R9E2KCeS0L+3scVPnytUAvgmZdlCyMcmNvnLl5W2Lwt8zgZaYAlcZpUR+m/zz0PX
+Ms9Pwr57CXyQo6K49l819myEPgeVXgETFY3F5/6Nmq6ma4w0GGvaSjxetlYb46D9
+oB9iBUzQzEEczO+ozbUxVm2QHQKBgQDzTtr0E07LqMvsgW8752Ufn8S90ThM8jmY
+7R/wV9bHPSUOFSACtF3mYuk84Pk9dpbaJmtIL1kz1XnbEHvAmJP7O9kerjR5/sde
+22pSR4+FEdGiRuigadmGtCdf+RMU7o3/i2+msB06cjirrGf5hRmS6z+ynfYLHTkF
+rzPDrDRomwKBgQC2HTKxANVxekLUhqC1zfuuzm4RMvs0JC36Q+bJr0ZU8FIcCoFA
+NJwLQaIF8I6YkDMWTmwROEc56dFx9LeU2iWI+/2019b8s2uparyjO59qCwoOjfG6
+X2yRA7qJPb2xbpFqMTz351L0eQFFI+q5Tgmx8d46HTbH25rfmEWLZyKfpQKBgCm4
+recIoIxfx4gosdBN35NKrEv4YnUfXC0TDFUEWvoTTBVcHf8YurlU4LXlxhd6DGgg
+Cml4ZQ10X87mxrHB+C4ulw6hxLHetIVZjqPJTZz97zqqeh13yStGHTJh3ZnLRmI5
+oM2uiXSKPZmCmNm6ryX4XRXd7GD/g9Wrs26sSthdAoGACzZqufKsXBhW71qJAPNO
+KK90Fb4QQPjaATY0tUe/Y3I18N7vkD7Z5nhj6R+i1UBSzAD0YKrXi6ROpy3mHeRt
+Sz8iN27b5Hyh461RFz6FLKiLofxY9gMaFYewayhvjKrOJXZ84xHS6Nfw5S6Ub5sz
+Eb4Vzgi4hhbpk2KbAHOy7Xw=
+-----END PRIVATE KEY-----</parameter>
+<parameter id="master-url">https://slap.vifib.com/</parameter>
+<parameter id="default_max_install_duration">36000</parameter>
+<parameter id="default_max_uninstall_duration">36000</parameter>
+<parameter id="default_max_request_duration">36000</parameter>
+<parameter id="default_max_destroy_duration">36000</parameter>
+<parameter id="configuration">
+
+[agent]
+node_title = VIFIB-TEST-AGENT-ON-${computer_guid}
+test_title = VIFIB-TEST-AGENT-FOR-WINDOWS-INSTALLER
+project_title = SlapOS For Windows
+task_count = 1
+report_url = https://webbuildbot:a2fgt5e1@www.tiolive.com/nexedi/
+
+###### windows self installer ############################################
+[test-windows-installer-on-windows7-64bits]
+computer_list = ["${computer_guid}"]
+url = http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/slapos-windows-installer/software.cfg
+request_kw = {"filter_kw": {"computer_guid": "${computer_guid}"},"partition_parameter_kw": {}}
+</parameter>
+</instance>
+EOF
+} # === create_test_agent_instance() === #
+readonly -f create_test_agent_instance

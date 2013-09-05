@@ -1,7 +1,15 @@
 #! /bin/bash
 source $(/usr/bin/dirname $0)/slapos-include.sh
-csih_inform "Start slapos-node script ..."
 
+# -----------------------------------------------------------
+# Start script
+# -----------------------------------------------------------
+csih_inform "Start slapos-node script ..."
+echo ""
+
+# -----------------------------------------------------------
+# Local variables
+# -----------------------------------------------------------
 declare computer_guid
 
 # -----------------------------------------------------------
@@ -22,7 +30,7 @@ check_cygwin_service ${cron_service_name}
 check_re6stnet_needed && check_cygwin_service ${re6stnet_service_name}
 
 # -----------------------------------------------------------
-# Get computer reference and re6stnet network
+# Get computer reference
 # -----------------------------------------------------------
 computer_guid=$(grep "CN=COMP" ${node_certificate_file} | \
     sed -e "s/^.*, CN=//g" | sed -e "s%/emailAddress.*\$%%g")
@@ -33,20 +41,6 @@ csih_error_multi "${computer_guid} is invalid computer guid." \
 csih_inform "Got computer reference id: ${computer_guid}"
 
 # -----------------------------------------------------------
-# Get re6stnet network
-# -----------------------------------------------------------
-if [[ -r ${re6stnet_configure_file} ]] ; then
-    _addr6=$(grep "Your subnet" ${re6stnet_configure_file} | \
-        sed -e "s/^.*subnet: //g" -e "s/\/80 (CN.*\$/1/g")
-    if [[ -n "${_addr6}" ]] ; then
-        csih_inform "Re6stnet address in this computer: ${_addr6}"
-        netsh interface ipv6 show addr ${slapos_ifname} level=normal | \
-            grep -q " ${_addr6}\$" || \
-            netsh interface ipv6 add addr ${slapos_ifname} ${_addr6}
-    fi
-fi
-
-# -----------------------------------------------------------
 # Format slapos node
 # -----------------------------------------------------------
 csih_inform "Formatting SlapOS Node ..."
@@ -54,40 +48,25 @@ csih_inform "Formatting SlapOS Node ..."
 csih_error "Run slapos node format failed. "
 
 # -----------------------------------------------------------
-# Request an instance of slapos webrunner
+# Run slapos software
 # -----------------------------------------------------------
-csih_inform "Supply slaposwebrunner in the computer ${computer_guid}"
-/opt/slapos/bin/slapos supply slaposwebrunner ${computer_guid}
-_title="SlapOS-WebRunner-In-${computer_guid}"
-csih_inform "Request slaposwebrunner instance as ${_title}"
-/opt/slapos/bin/slapos request ${client_configure_file} \
-    ${_title} slaposwebrunner --node computer_guid=${computer_guid} 
+/opt/slapos/bin/slapos node software --verbose
 
 # -----------------------------------------------------------
-# Enter loop to release software, create instance, report
+# Run slapos instance
 # -----------------------------------------------------------
-_patch_file=/etc/slapos/patches/slapos-cookbook-inotifyx.patch
-while true ; do
-    csih_inform "Releasing software ..."
-    /opt/slapos/bin/slapos node software --verbose || continue
+csih_inform "Creating instance ..."
+/opt/slapos/bin/slapos node instance --verbose
 
-    if [[ -r ${_patch_file} ]] ; then
-        for _x in $(find /opt/slapgrid/ -name slapos.cookbook-*.egg) ; do
-            patch -d ${_x} -f --dry-run -p1 < ${_patch_file} > /dev/null && 
-            csih_inform "Apply patch ${_patch_file} on ${_x}" &&
-            patch -d ${_x} -p1 < ${_patch_file}
-        done
-    fi
-    
-    csih_inform "Creating instance ..."
-    /opt/slapos/bin/slapos node instance --verbose
+# -----------------------------------------------------------
+# Run slapos report
+# -----------------------------------------------------------
+csih_inform "Sending report ..."
+/opt/slapos/bin/slapos node report --verbose
 
-    csih_inform "Sending report ..."
-    /opt/slapos/bin/slapos node report --verbose
-
-    get_slapos_webrunner_instance ${computer_guid} ${_title} && break
-done
-
+# -----------------------------------------------------------
+# End script
+# -----------------------------------------------------------
 echo ""
 csih_inform "Run slapos-node script successfully."
 echo ""

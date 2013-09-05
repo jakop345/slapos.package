@@ -557,7 +557,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
   </varlistentry>
   <varlistentry>
     <term>Create network interface for slapos</term>
-    <listitem><para>Slapos use a msloop insterface as its own interface, default name is 're6stnet-lo'. If there is more than one slapos node in the same machine, each node use a prefix.</para></listitem>
+    <listitem><para>Slapos use a msloop insterface as its own interface, default name is '$prefix-re6stnet-lo'. The usage of prefix is for running multi-nodes in one same machine.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Install re6stnet</term>
@@ -608,6 +608,7 @@ Most of tasks list above section could be done by shell scripts, now we have the
 <itemizedlist>
 <listitem><para>setup-cygwin.bat</para></listitem>
 <listitem><para>slapos-cygwin-bootstrap.sh</para></listitem>
+<listitem><para>build-slapos.sh</para></listitem>
 <listitem><para>slapos-configure.sh</para></listitem>
 <listitem><para>slapos-node.sh</para></listitem>
 <listitem><para>slapos-cleanup.sh</para></listitem>

@@ -1,73 +1,138 @@
 #! /bin/bash
+#
+# This script is used to build slapos node from source.
+#
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
-
-function show_error_exit()
-{
-    echo Error: ${1:-"build slapos failed."}
-    read -n 1 -p "Press any key to exit..."
+if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
+    echo "Error: Missing csih package."
     exit 1
+fi
+
+function show_usage()
+{
+    echo "This script is used to build slapos node in the Cygwin."
+    echo ""
+    echo "Usage: ./build-slapos.sh"
+    echo ""
 }
+readonly -f show_usage
 
-slapos_home=${1:-/opt/slapos}
-slapos_cache=/opt/download-cache
-slapos_url=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-0:/component/slapos/buildout.cfg
-slapos_cfg=$slapos_home/buildout.cfg
-slapos_bootstrap=$slapos_home/bootstrap.py
-patch_files=/etc/slapos/patches/slapos-core-format.patch
+function slapos_buildout()
+{
+    # -----------------------------------------------------------
+    # Run the buildout of slapos node
+    # -----------------------------------------------------------
+    csih_inform "Starting run buildout of slapos node ..."
 
-mkdir -p $slapos_home/log
-mkdir -p $slapos_cache
+    csih_inform "mkdir /opt/slapos/log"
+    mkdir -p ${slapos_home}/log
 
-echo "Checking $slapos_cfg ..."
-if [[ -r $slapos_cfg ]] ; then
-    echo "Change $slapos_cfg:"
-    echo "  extends = ${slapos_url}"
-    sed -i -e "s%^extends = .*$%extends = ${slapos_url}%g" $slapos_cfg
-else
-    cat <<EOF  > $slapos_cfg
-[buildout]
+    csih_inform "mkdir /opt/download-cache"
+    mkdir -p ${slapos_cache}
+
+    [[ ! -f ${slapos_cfg} ]] &&
+    echo "[buildout]
 extends = ${slapos_url}
 download-cache = ${slapos_cache}
-prefix = $${buildout:directory}
-EOF
-    echo "File $slapos_cfg has been generated."
-fi
+prefix = ${buildout:directory}
+" > ${slapos_cfg} &&
+    csih_inform "${slapos_cfg} generated"
 
-echo "Checking $slapos_bootstrap ..."
-if [[ ! -f $slapos_bootstrap ]] ; then
-    echo "Downloading $slapos_bootstrap ..."
-    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > $slapos_bootstrap ||
-    show_error_exit "Error: download $slapos_bootstrap"
-    echo "Downlaod $slapos_bootstrap OK."
-else
-    echo OK.
-fi
+    [[ -f ${slapos_bootstrap} ]] ||
+    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > ${slapos_bootstrap} ||
+    csih_error "download bootstrap.py failed"
+    csih_inform "download ${slapos_bootstrap} OK"
 
-if [[ ! -x $slapos_home/run/buildout ]] ; then
-    echo "Bootstrap slapos ..."
-    (cd $slapos_home ; python -S bootstrap.py) || show_error_exit "Error: slapos bootstrap failed."
-    echo "Bootstrap slapos OK."
-fi
+    [[ -x ${slapos_home}/bin/buildout ]] ||
+    (cd ${slapos_home} && python -S bootstrap.py) ||
+    csih_error "run bootstrap.py failed"
+    csih_inform  "run bootstrap.py OK"
 
-echo
-echo Start buildout of slapos ...
-echo
-(cd $slapos_home ; $slapos_home/bin/buildout -v -N) || show_error_exit "Error slapos buildout failed."
+    csih_inform "start bin/buildout"
+    (cd ${slapos_home} ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
-# apply patches
-for _filename in $patch_files ; do
-    if [[ -r ${_filename} ]] ; then
-        echo "Apply patch: ${_filename}"
-        for _path in $(find $slapos_home/eggs -name slapos.core-*.egg) ; do
-            echo "  at ${_path} ..."
-            (cd ${_path} ; patch -f --dry-run -p1 < ${_filename} > /dev/null &&
-                patch -p1 < ${_filename} && echo "OK.")
-        done
-    fi
+    _filename=~/slapos-core-format.patch
+    [[ -f ${_filename} ]] ||
+    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
+    csih_error "download ${_filename} failed"
+    csih_inform "download ${_filename} OK"
+
+    csih_inform "applay patch ${_filename}"
+    (cd $(ls -d ${slapos_home}/eggs/slapos.core-*.egg/) &&
+        csih_inform "patch at $(pwd)" &&
+        patch -f --dry-run -p1 < ${_filename} > /dev/null &&
+        patch -p1 < ${_filename} &&
+        csih_inform "apply patch ${_filename} OK")
+
+    _filename=~/supervisor-cygwin.patch
+    [[ -f ${_filename} ]] ||
+    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
+    csih_error "download ${_filename} failed"
+    csih_inform "download ${_filename} OK"
+
+    csih_inform "applay patch ${_filename}"
+    (cd $(ls -d ${slapos_home}/eggs/supervisor-*.egg) &&
+        csih_inform "patch at $(pwd)" &&
+        patch -f --dry-run -p1 < ${_filename} > /dev/null &&
+        patch -p1 < ${_filename} &&
+        csih_inform "apply patch ${_filename} OK")
+
+    csih_inform "Run buildout of slapos node OK"
+    echo ""
+}
+readonly -f slapos_buildout
+
+# -----------------------------------------------------------
+# Start script
+# -----------------------------------------------------------
+csih_inform "Start slapos node configure ..."
+echo ""
+
+# -----------------------------------------------------------
+# Local variable
+# -----------------------------------------------------------
+declare -r slapos_home=/opt/slapos
+declare -r slapos_cache=/opt/download-cache
+declare -r slapos_url=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
+declare -r slapos_cfg=${slapos_home}/buildout.cfg
+declare -r slapos_bootstrap=${slapos_home}/bootstrap.py
+
+# -----------------------------------------------------------
+# Command line options
+# -----------------------------------------------------------
+while test $# -gt 0; do
+    # Normalize the prefix.
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    -h | --help)
+    show_usage
+    exit 0
+    ;;
+    *)
+    show_usage
+    exit 1
+    ;;
+    esac
+
+    # Next please.
+    shift
 done
 
-echo
-echo Build slapos node successfully.
-echo
+# -----------------------------------------------------------
+# Build SlapOS
+# -----------------------------------------------------------
+slapos_buildout
+
+# -----------------------------------------------------------
+# End script
+# -----------------------------------------------------------
+echo ""
+csih_inform "Build slapos successfully."
+echo ""
+
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0
