@@ -7,8 +7,12 @@
 #    $ make
 #
 XSLTPROC=xsltproc
+# Under Cygwin:
 XSLFILE=/usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl
 XSLCHUNKFILE=/usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl
+# Under Linux/Ubuntu:
+#XSLFILE=/usr/share/xml/docbook/stylesheet/docbook-xsl/html/docbook.xsl
+#XSLCHUNKFILE=/usr/share/xml/docbook/stylesheet/docbook-xsl/html/chunk.xsl
 XSLTPARA=--stringparam section.autolabel 1 \
          --stringparam section.label.includes.component.label 1 \
          --stringparam variablelist.term.separator "" \

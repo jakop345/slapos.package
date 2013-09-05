@@ -238,7 +238,7 @@ setup.exe %PACKAGES% --no-verify -D -L -l D:\slapos\cygwin-packages -R D:\slapos
 <note><para>Some packages only used to build slapos from sources. Refer to <xref linkend="package-slapos-developer"/> to know more details.</para></note>
 </para></listitem>
 </itemizedlist>
-A cygwin icon will be added in the windows desktop, click it to enter cygwin box. If the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be suer you have enough rights to run the following commands:
+A cygwin icon will be added in the windows desktop, click it to enter the cygwin box. If the current user isn't Administrator, then right click cygwin icon, click Run As Administrator. Be sure you have enough rights to run the following commands:
 <!--
 You can create your script to start Cygwin in a tty terminal
 <programlisting>
@@ -257,7 +257,7 @@ sed -i -e "s/4\.3\.4/4.5.3/g" /usr/bin/libtool
 [[ -f /etc/group ]] || mkgroup > /etc/group
 cp /etc/passwd /etc/passwd.orig
 </programlisting>
-Now we need patch cygport, otherwise we can't specify install path in the buildout.cfg:
+Now we need to patch cygport, otherwise we can't specify the install path in buildout.cfg:
 <programlisting>
 _filename=/usr/bin/cygport
 if [[ -f ${_filename} ]] ; then
@@ -328,8 +328,8 @@ cd ~
 find /opt/slapos -name "*.dll" &gt; /myfile.list
 echo "PATH .\bin;%PATH%" &gt; /autorebase.bat
 echo "dash /bin/rebaseall -T /myfile.list -v" &gt;&gt; /autorebase.bat
-echo "EXIT 0" &gt;&gt; /autorebase.bat
 echo "Pause" &gt;&gt; /autorebase.bat
+echo "EXIT 0" &gt;&gt; /autorebase.bat
 exit
 </programlisting>
 After exit cygwin, double click autorebase.bat in the Windows explorer. If the current user isn't Administrator, then right click it, click Run As Administrator.
@@ -545,7 +545,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
   </varlistentry>
   <varlistentry>
     <term>Create cygserver and syslog-ng service</term>
-    <listitem><para>The service names have a prefix so that we can install multi-nodes in one machine. Both of these services is running by local system account.</para></listitem>
+    <listitem><para>The service names have a prefix so that we can install multi-nodes in one machine. Both of these services are run by local system account.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Install slapos-cygwin package</term>
@@ -569,19 +569,19 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
   </varlistentry>
   <varlistentry>
     <term>Install OpenVPN and Copy files to cygwin</term>
-    <listitem><para>It's required only no native IPv6</para></listitem>
+    <listitem><para>Required only if there is no native IPv6</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Build cygwin babeld</term>
-    <listitem><para>It's required only no native IPv6</para></listitem>
+    <listitem><para>Required only if there is no native IPv6</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Install re6stnet service</term>
-    <listitem><para>It's required only no native IPv6</para></listitem>
+    <listitem><para>Required only if there is no native IPv6</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Build SlapOS</term>
-    <listitem><para>In the Cygwin, we need apply 2 patches: slapos-core-format.patch, supervisor-cygwin.patch</para></listitem>
+    <listitem><para>In Cygwin, we need to apply 2 patches: slapos-core-format.patch, supervisor-cygwin.patch</para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Configure SlapOS Node</term>
@@ -597,7 +597,7 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
   </varlistentry>
   <varlistentry>
     <term>Create Instance of Slap-Runner</term>
-    <listitem><para>After this software is releasesd, we need apply the patch 'slapos-cookbook-inotifyx.patch', otherwise it will not work in Cygwin now. </para></listitem>
+    <listitem><para>After this software is releasesd, we need to apply the patch 'slapos-cookbook-inotifyx.patch', otherwise it will not work in Cygwin now. </para></listitem>
   </varlistentry>
   <varlistentry>
     <term>Create Instance of Test-Agent</term>
