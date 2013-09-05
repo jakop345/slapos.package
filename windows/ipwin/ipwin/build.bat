@@ -45,4 +45,6 @@ GOTO END
 
 :END
 ENDLOCAL
-Pause ...
+
+IF /I "%1" == "batch" EXIT 0
+PAUSE ...
