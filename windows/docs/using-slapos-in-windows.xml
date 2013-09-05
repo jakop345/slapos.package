@@ -510,6 +510,8 @@ Then upload the source packages dist/psutil-1.0.1.tar.gz to http://www.nexedi.or
 <para>This chapter descripts how to create a slapos node in the windows which used to test the windows installer self:
 <itemizedlist>
 <listitem><para>Install cygwin</para></listitem>
+<listitem><para>Install Microsoft Visual C++ 2008 Express Edition or later version. If you're running X64 environments, install Microsoft Windows SDK v7.0 either.</para></listitem>
+<listitem><para>Install inno-setup, copy all binary files to /opt/inno-setup</para></listitem>
 <listitem><para>Prepare certificate, key, computer.key, computer.crt</para></listitem>
 <listitem><para>Run slapos-cygwin-bootstrap.sh, got it from slapos.package.git/windows/scripts</para></listitem>
 <listitem><para>Run slapos-configure.sh, got it from slapos.package.git/windows/scripts</para></listitem>

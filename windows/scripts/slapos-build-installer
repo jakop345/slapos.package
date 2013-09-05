@@ -1,16 +1,30 @@
 #! /bin/bash
 #
-# This script is used to build slapos installer of windows. There are 2
-# scripts need to run in prior:
-# 
-#     slapos-cygwin-bootstrap.sh
-#     
-#     build-slapos.sh
+# This script is used to build slapos installer of windows. It's running
+# only in the SlapOS Cygwin bootstrap node. The directory structures of
+# bootstrap node looks like:
 #
-# In this script, it will do:
+#   ./cygwin-packages       Cygwin local packages
+#   ./setup.exe             Cygwin setup file
+#   ./cygwin                The root path of cygwin
+#
+# In the cygwin bootstrap node, the following files are required:
+#
+#   /opt/inno-setup
+#   Microsoft Visual C++ 2008 Express Edition or later version
+#   Microsoft Windows SDK v7.0 if you're in 64-bits environments
+#
+# Before run this script, you need first run build-slapos.sh to update
+# slapos node:
+#
+#    ./build-slapos.sh /opt/buildout
 # 
-#    * Prepare sources
-#    
+# In this script, it will do:
+#
+#    * Prepare the sources required by installer
+#
+#    * Build ipwin/regpwd/ovpn-server/ovpn-client
+#
 #    * Make installer
 #
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
@@ -32,7 +46,10 @@ function show_usage()
 {
     echo "Usage:"
     echo ""
-    echo "  ./slapos-build-installer"
+    echo "  ./slapos-build-installer [slapos-path]"
+    echo ""
+    echo "     slapos-path: specify slapos root path, the buildout.cfg will be put in"
+    echo "                  slapos-path/slapos. The default value is /opt/buildout"
     echo ""
 }
 readonly -f show_usage
@@ -42,12 +59,6 @@ readonly -f show_usage
 # ======================================================================
 csih_inform "Starting build Slapos Windows installer ..."
 echo ""
-
-# ======================================================================
-# Constants
-# ======================================================================
-declare -r cygwin_home=$(cygpath -a $(cygpath -w /)\\.. | sed -e "s%/$%%")
-declare -r ISCC=${cygwin_home}/inno-setup/ISCC.exe
 
 # -----------------------------------------------------------
 # Start script
@@ -63,9 +74,8 @@ while test $# -gt 0; do
     -h | --help)
     show_usage
     exit 0
+    ;;
     *)
-    show_usage
-    exit 1
     ;;
     esac
 
@@ -73,21 +83,35 @@ while test $# -gt 0; do
     shift
 done
 
+# ======================================================================
+# Constants
+# ======================================================================
+declare -r cygwin_home=$(cygpath -m $(cygpath -w /)\\.. | sed -e "s%/$%%")
+declare -r ISCC=$(cyypath -m /opt/inno-setup/ISCC.exe)
+declare -r slapos_path=${1:-/opt/buildout}
+
+# -----------------------------------------------------------
+# Build slapos
+# -----------------------------------------------------------
+slapos_buildout ${slapos_path} ${slapos_url}
+
+(cd ${slapos_path} ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz /opt/slapos) ||
+csih_error "create slapos.tar.gz failed"
+csih_inform "tar package /opt/slapos/slapos.tar.gz generated"
+
 # -----------------------------------------------------------
 # Prepare the sources used to build installer
 # -----------------------------------------------------------
 csih_inform "Preparing the sources used to build installer ..."
 
-(rm -rf /opt/slapos/slapos.tar.gz; cd /opt ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz slapos/) ||
-csih_error "create slapos.tar.gz failed"
-csih_inform "tar package /opt/slapos/slapos.tar.gz generated"
-
 _filename=/opt/slapos/slapos.cfg.example
+[[ -f ${_filename} ]] ||
 wget -c http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "Got ${_filename}"
 
 _filename=/opt/slapos/slapos-client.cfg.example
+[[ -f ${_filename} ]] ||
 wget -c http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "Got ${_filename}"
@@ -97,7 +121,7 @@ csih_inform "Got ${_filename}"
 csih_error "clone http://git.erp5.org/repos/slapos.package.git failed"
 csih_inform "clone/pull http://git.erp5.org/repos/slapos.package.git OK"
 
-if csih_is_vista ; then
+if check_os_is_wow64 ; then
     csih_inform "making babeld for vista or above ..."
     (cd /opt/git/slapos.package/windows/babeld ; WINVER=VISTA make) ||
     csih_error "make babeld failed"
@@ -108,8 +132,8 @@ else
 fi
 
 _filename=/opt/git/slapos.package/windows/scripts/regpwd.exe
-[[ ! -f ${_filename} ]] &&
-(cd /opt/git/slapos.package/windows/scripts ; gcc -o regpwd.exe regpwd.c) && 
+(cd /opt/git/slapos.package/windows/scripts ; gcc -o regpwd.exe regpwd.c) ||
+csih_error "make regpwd.exe failed"
 csih_inform "make regpwd.exe"
 
 _filename=~/openvpn-driver.tar.gz
@@ -128,11 +152,13 @@ csih_inform "extracting ${_filename} ..."
 csih_error "extract ${_filename} failed"
 
 _filename=/opt/downloads/pyOpenSSL-0.13.tar.gz
+[[ -f ${_filename} ]] ||
 wget -c --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "Got ${_filename}"
 
 _filename=/opt/downloads/miniupnpc-1.8.tar.gz
+[[ -f ${_filename} ]] ||
 wget -c http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "Got ${_filename}"
@@ -142,19 +168,19 @@ csih_inform "updating re6stnet.git ..."
 (cd /opt/git ; git clone -b cygwin http://git.erp5.org/repos/re6stnet.git) ||
 csih_error "clone/pull re6stnet.git failed"
 
-# # Now package i686-w64-mingw32-gcc isn't installed, so ignore it in temporary
-# csih_inform "building ovpn-client and ovpn-server ..."
-# for _name in ovpn-client ovpn-server ; do
-#     (cd /opt/git/re6stnet/re6st ; i686-w64-mingw32-gcc -o ${_name}.exe ${_name}.c ovpn-pipe.c) ||
-#     csih_error "build ${_name}.exe failed"
-#     csih_inform "build ${_name}.exe OK"
-# done
+csih_inform "building ovpn-client and ovpn-server ..."
+for _name in ovpn-client ovpn-server ; do
+    (cd /opt/git/re6stnet/re6st ; i686-w64-mingw32-gcc -o ${_name}.exe ${_name}.c ovpn-pipe.c) ||
+    csih_error "build ${_name}.exe failed"
+    csih_inform "build ${_name}.exe OK"
+done
 
 csih_inform "creating re6stnet source package ..."
 (cd /opt/git/re6stnet ; python setup.py sdist) ||
 csih_error "create re6stnet source package failed"
 
 _filename=~/images.tar.gz
+[[ -f ${_filename} ]] ||
 wget -c http://www.dashingsoft.com/products/slapos/images.tar.gz -O ${_filename} ||
 csih_error "download ${_filename} failed"
 csih_inform "Got ${_filename}"
@@ -163,17 +189,10 @@ csih_inform "extracting ${_filename} ..."
 (cd /opt ; tar xzf ${_filename} --no-same-owner) ||
 csih_error "extract ${_filename} failed"
 
-# This command need microsoft sdk to build, so we just copy it
 _filename=/opt/git/slapos.package/windows/ipwin/ipwin/ipwin.exe
-if check_os_is_wow64 ; then
-    _url=http://www.dashingsoft.com/products/slapos/ipwin-x64.tar.gz
-else
-    _url=http://www.dashingsoft.com/products/slapos/ipwin-x86.tar.gz
-fi
-wget -c ${_url} -O ${_filename} ||
-csih_error_multi "download ${_filename} failed" "  from ${_url}"
-csih_inform "Got ${_filename}"
-csih_inform "  from ${_url}"
+/opt/git/slapos.package/windows/ipwin/ipwin/build.bat "batch" ||
+csih_error "build ipwin.exe failed"
+csih_inform "build ${_filename} OK"
 
 csih_inform "Prepare the sources OK"
 echo ""
@@ -183,7 +202,7 @@ echo ""
 # -----------------------------------------------------------
 _issfile=~/slapos.iss
 _installer_name=slapos-windows-all-in-one
-_output_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
+_output_dir=$(cygpath -a -w $(cygpath -w /opt/publish) | sed -e 's%\\%\\\\%g')
 _source_dir=$(cygpath -a -w $(cygpath -w /)\\.. | sed -e 's%\\%\\\\%g')
 _srcfile=/opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss
 

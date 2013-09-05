@@ -8,74 +8,71 @@ if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
     exit 1
 fi
 
-function show_usage()
+# ======================================================================
+# Functions
+# ======================================================================
+function slapos_apply_patch()
 {
-    echo "This script is used to build slapos node in the Cygwin."
-    echo ""
-    echo "Usage: ./build-slapos.sh"
-    echo ""
+    local _filename=$1
+    local _destpath=$2
+    local _basename=$(basename ${_filename})
+
+    [[ -f ${_filename} ]] ||
+    cp /opt/git/slapos.package/windows/patches/${_basename} ${_filename} 2>/dev/null ||
+    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/${_basename} -O ${_filename} ||
+    csih_error "download ${_filename} failed"
+    csih_inform "download ${_filename} OK"
+
+    csih_inform "applay patch ${_filename}"
+    (cd $(ls -d ${_destpath}) &&
+        csih_inform "patch at $(pwd)" &&
+        patch -f --dry-run -p1 < ${_filename} > /dev/null &&
+        patch -p1 < ${_filename} &&
+        csih_inform "apply patch ${_filename} OK")
 }
-readonly -f show_usage
+readonly -f slapos_apply_patch
 
 function slapos_buildout()
 {
-    # -----------------------------------------------------------
-    # Run the buildout of slapos node
-    # -----------------------------------------------------------
+    local _home=$1/slapos
+    local _cache=$1/download-cache
+    local _buildcfg=${_home}/buildout.cfg
+    local _bootstrap=${_home}/bootstrap.py
+    local _buildurl=${2:-http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg}
+
+    [[ -z "$1" ]] && csih_error "no slapos path specified"
+
     csih_inform "Starting run buildout of slapos node ..."
 
-    csih_inform "mkdir /opt/slapos/log"
-    mkdir -p ${slapos_home}/log
+    csih_inform "mkdir ${_home}/log"
+    mkdir -p ${_home}/log 
 
-    csih_inform "mkdir /opt/download-cache"
-    mkdir -p ${slapos_cache}
+    csih_inform "mkdir ${_cache}"
+    mkdir -p ${_cache}
 
-    [[ ! -f ${slapos_cfg} ]] &&
+    [[ ! -f ${_buildcfg} ]] &&
     echo "[buildout]
-extends = ${slapos_url}
-download-cache = ${slapos_cache}
-prefix = ${buildout:directory}
-" > ${slapos_cfg} &&
-    csih_inform "${slapos_cfg} generated"
+extends = ${_buildurl}
+download-cache = ${_cache}
+prefix = \${buildout:directory}
+" > ${_buildcfg} &&
+    csih_inform "${_buildcfg} generated"
 
-    [[ -f ${slapos_bootstrap} ]] ||
-    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > ${slapos_bootstrap} ||
+    [[ -f ${_bootstrap} ]] ||
+    python -S -c 'import urllib2;print urllib2.urlopen("http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/bootstrap.py").read()' > ${_bootstrap} ||
     csih_error "download bootstrap.py failed"
-    csih_inform "download ${slapos_bootstrap} OK"
+    csih_inform "download ${_bootstrap} OK"
 
-    [[ -x ${slapos_home}/bin/buildout ]] ||
-    (cd ${slapos_home} && python -S bootstrap.py) ||
+    [[ -x ${_home}/bin/buildout ]] ||
+    (cd ${_home} && python -S bootstrap.py) ||
     csih_error "run bootstrap.py failed"
     csih_inform  "run bootstrap.py OK"
 
     csih_inform "start bin/buildout"
-    (cd ${slapos_home} ; bin/buildout -v -N) || csih_error "bin/buildout failed"
+    (cd ${_home} ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
-    _filename=~/slapos-core-format.patch
-    [[ -f ${_filename} ]] ||
-    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
-    csih_error "download ${_filename} failed"
-    csih_inform "download ${_filename} OK"
-
-    csih_inform "applay patch ${_filename}"
-    (cd $(ls -d ${slapos_home}/eggs/slapos.core-*.egg/) &&
-        csih_inform "patch at $(pwd)" &&
-        patch -f --dry-run -p1 < ${_filename} > /dev/null &&
-        patch -p1 < ${_filename} &&
-        csih_inform "apply patch ${_filename} OK")
-
-    _filename=~/supervisor-cygwin.patch
-    [[ -f ${_filename} ]] ||
-    wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/patches/$(basename ${_filename}) -O ${_filename} ||
-    csih_error "download ${_filename} failed"
-    csih_inform "download ${_filename} OK"
-
-    csih_inform "applay patch ${_filename}"
-    (cd $(ls -d ${slapos_home}/eggs/supervisor-*.egg) &&
-        csih_inform "patch at $(pwd)" &&
-        patch -f --dry-run -p1 < ${_filename} > /dev/null &&
-        patch -p1 < ${_filename} &&
-        csih_inform "apply patch ${_filename} OK")
+    slapos_apply_patch "~/slapos-core-format.patch" "${_home}/eggs/slapos.core-*.egg/"
+    slapos_apply_patch "~/supervisor-cygwin.patch" "${_home}/eggs/supervisor-*.egg/"
 
     csih_inform "Run buildout of slapos node OK"
     echo ""
@@ -91,11 +88,7 @@ echo ""
 # -----------------------------------------------------------
 # Local variable
 # -----------------------------------------------------------
-declare -r slapos_home=/opt/slapos
-declare -r slapos_cache=/opt/download-cache
-declare -r slapos_url=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/component/slapos/buildout.cfg
-declare -r slapos_cfg=${slapos_home}/buildout.cfg
-declare -r slapos_bootstrap=${slapos_home}/bootstrap.py
+declare -r slapos_path=${1:-/opt}
 
 # -----------------------------------------------------------
 # Command line options
@@ -125,7 +118,7 @@ done
 # -----------------------------------------------------------
 # Build SlapOS
 # -----------------------------------------------------------
-slapos_buildout
+slapos_buildout ${slapos_path}
 
 # -----------------------------------------------------------
 # End script
