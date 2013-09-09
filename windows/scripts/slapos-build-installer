@@ -2,7 +2,7 @@
 #
 # This script is used to build slapos installer of windows. It's running
 # only in the SlapOS Cygwin bootstrap node. The directory structures of
-# bootstrap node looks like:
+# bootstrap node looks like in the install path:
 #
 #   ./cygwin-packages       Cygwin local packages
 #   ./setup.exe             Cygwin setup file
@@ -11,6 +11,9 @@
 # In the cygwin bootstrap node, the following files are required:
 #
 #   /opt/inno-setup
+#   /opt/images
+#   /opt/openvpn/bin
+#   /opt/openvpn/driver
 #   Microsoft Visual C++ 2008 Express Edition or later version
 #   Microsoft Windows SDK v7.0 if you're in 64-bits environments
 #
@@ -18,10 +21,20 @@
 # slapos node:
 #
 #    ./build-slapos.sh /opt/buildout
-# 
+#
+# Then
+#
+#    ./slapos-build-installer /opt/buildout
+#
+# The parameter /opt/buildout is the root path used to run buildout slapos.
+#
 # In this script, it will do:
 #
 #    * Prepare the sources required by installer
+#
+#        * pull slapos.package.git branch cygwin: /opt/git/slapos.package
+#        * pull re6stnet.git branch cygwin: /opt/git/re6stnet
+#        *
 #
 #    * Build ipwin/regpwd/ovpn-server/ovpn-client
 #
@@ -90,19 +103,49 @@ declare -r cygwin_home=$(cygpath -m $(cygpath -w /)\\.. | sed -e "s%/$%%")
 declare -r ISCC=$(cyypath -m /opt/inno-setup/ISCC.exe)
 declare -r slapos_path=${1:-/opt/buildout}
 
-# -----------------------------------------------------------
-# Build slapos
-# -----------------------------------------------------------
-slapos_buildout ${slapos_path} ${slapos_url}
+# ======================================================================
+# Sanity check
+# ======================================================================
+[[ -d ${slapos_path}/slapos ]] &&
+csih_error "No slapos found in ${slapos_path}/slapos, you need run buildouut first"
 
-(cd ${slapos_path} ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz /opt/slapos) ||
-csih_error "create slapos.tar.gz failed"
-csih_inform "tar package /opt/slapos/slapos.tar.gz generated"
+if [[ ! -d /opt/images ]] ; then
+    _filename=~/images.tar.gz
+    [[ -f ${_filename} ]] ||
+    wget -c http://www.dashingsoft.com/products/slapos/images.tar.gz -O ${_filename} ||
+    csih_error "download ${_filename} failed"
+    csih_inform "Got ${_filename}"
+
+    csih_inform "extracting ${_filename} ..."
+    (cd /opt ; tar xzf ${_filename} --no-same-owner) ||
+    csih_error "extract ${_filename} failed"
+fi
+
+if [[ ! -d /opt/openvpn ]] ; then
+    _filename=~/openvpn-driver.tar.gz
+    if check_os_is_wow64 ; then
+        _url=http://www.dashingsoft.com/products/slapos/openvpn-x64.tar.gz
+    else
+        _url=http://www.dashingsoft.com/products/slapos/openvpn-x86.tar.gz
+    fi
+    wget -c ${_url} -O ${_filename} ||
+    csih_error_multi "download ${_filename} failed" "  from ${_url}"
+    csih_inform "Got ${_filename}"
+    csih_inform "  from ${_url}"
+
+    csih_inform "extracting ${_filename} ..."
+    (cd /opt ; tar xzf ${_filename} --no-same-owner) ||
+    csih_error "extract ${_filename} failed"
+fi
 
 # -----------------------------------------------------------
 # Prepare the sources used to build installer
 # -----------------------------------------------------------
 csih_inform "Preparing the sources used to build installer ..."
+
+(cd ${slapos_path} ; tar czf slapos.tar.gz slapos/ ; mv slapos.tar.gz /opt/slapos) ||
+csih_error "create slapos.tar.gz failed"
+csih_inform "tar package /opt/slapos/slapos.tar.gz generated"
 
 _filename=/opt/slapos/slapos.cfg.example
 [[ -f ${_filename} ]] ||
@@ -136,21 +179,6 @@ _filename=/opt/git/slapos.package/windows/scripts/regpwd.exe
 csih_error "make regpwd.exe failed"
 csih_inform "make regpwd.exe"
 
-_filename=~/openvpn-driver.tar.gz
-if check_os_is_wow64 ; then
-    _url=http://www.dashingsoft.com/products/slapos/openvpn-x64.tar.gz
-else
-    _url=http://www.dashingsoft.com/products/slapos/openvpn-x86.tar.gz
-fi
-wget -c ${_url} -O ${_filename} ||
-csih_error_multi "download ${_filename} failed" "  from ${_url}"
-csih_inform "Got ${_filename}"
-csih_inform "  from ${_url}"
-
-csih_inform "extracting ${_filename} ..."
-(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
-csih_error "extract ${_filename} failed"
-
 _filename=/opt/downloads/pyOpenSSL-0.13.tar.gz
 [[ -f ${_filename} ]] ||
 wget -c --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
@@ -178,16 +206,6 @@ done
 csih_inform "creating re6stnet source package ..."
 (cd /opt/git/re6stnet ; python setup.py sdist) ||
 csih_error "create re6stnet source package failed"
-
-_filename=~/images.tar.gz
-[[ -f ${_filename} ]] ||
-wget -c http://www.dashingsoft.com/products/slapos/images.tar.gz -O ${_filename} ||
-csih_error "download ${_filename} failed"
-csih_inform "Got ${_filename}"
-
-csih_inform "extracting ${_filename} ..."
-(cd /opt ; tar xzf ${_filename} --no-same-owner) ||
-csih_error "extract ${_filename} failed"
 
 _filename=/opt/git/slapos.package/windows/ipwin/ipwin/ipwin.exe
 /opt/git/slapos.package/windows/ipwin/ipwin/build.bat "batch" ||

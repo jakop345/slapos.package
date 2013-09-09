@@ -1,5 +1,25 @@
 #! /bin/bash
 #
+# This script need root rights. Before run it, make sure you have root
+# right. In Windows 7 and later,, you can start terminal by clicking
+# Run as Administrator, then run this script in this terminal.
+#
+# Generally, run this script after install cygwin. It will patch
+# cygwin and install slapos-cygwin so that cygwin can work with slapos
+# node, the main actions include:
+#
+#     * Patch cygwin self packages, for example, libtool, cygport etc.
+#
+#     * Install slapos-cygwin package, for example, ip, ipwin, regpwd
+#       etc. These commands are required by slapos node, but not
+#       included in the official cygwin.
+#
+#     * Check and install IPv6 protocol.
+#
+#     * Set slapos node prefix. When there are many slapos nodes in
+#       one same machine, we need a prefix to tell them. In this
+#       script, it will set prefix by modify slapos-include.sh
+#
 export PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 if ! source /usr/share/csih/cygwin-service-installation-helper.sh ; then
     echo "Error: Missing csih package."

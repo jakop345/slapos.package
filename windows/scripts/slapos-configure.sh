@@ -25,6 +25,19 @@
 #
 #     * test-agent: Create test-agent instance in this node.
 #
+# The use cases of slapos-configure.sh:
+#
+#    1. Configure slapos node after you have run slapos-cygwin-bootstrap.sh
+#
+#       ./slapos-configure.sh
+#
+#    2. Create slap-runner in your slapos node.
+#
+#       ./slapos-configure.sh slap-runner
+#
+#       You can run many times until it return OK.
+#       
+#    
 source $(/usr/bin/dirname $0)/slapos-include.sh
 
 # ======================================================================
