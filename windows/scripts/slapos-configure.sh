@@ -148,7 +148,9 @@ function configure_section_re6stnet()
     csih_inform "checking miniupnpc ..."
     if [[ ! -d /opt/miniupnpc ]] ; then
         _filename=/opt/downloads/miniupnpc.tar.gz
-        [[ -r ${_filename} ]] || csih_error "No package found: ${_filename}"
+        [[ -r ${_filename} ]] || 
+        wget -c http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O ${_filename} ||
+        csih_error "No package found: ${_filename}"
         csih_inform "installing miniupnpc ..."
         cd /opt
         tar xzf ${_filename} --no-same-owner
@@ -164,7 +166,9 @@ function configure_section_re6stnet()
     csih_inform "checking pyOpenSSL ..."
     if [[ ! -d /opt/pyOpenSSL ]] ; then
         _filename=/opt/downloads/pyOpenSSL.tar.gz
-        [[ -r ${_filename} ]] || csih_error "No package found: ${_filename}"
+        [[ -r ${_filename} ]] || 
+        wget -c --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
+        csih_error "No package found: ${_filename}"
         csih_inform "installing pyOpenSSL ..."
         cd /opt
         tar xzf ${_filename} --no-same-owner
@@ -200,7 +204,7 @@ function configure_section_re6stnet()
     if [[ ! -r ${re6stnet_configure_file} ]] ; then
         csih_inform "registering to http://re6stnet.nexedi.com ..."
         cd $(dirname ${re6stnet_configure_file})
-    # Your subnet: 2001:67c:1254:e:19::/80 (CN=917529/32)
+        # Your subnet: 2001:67c:1254:e:19::/80 (CN=917529/32)
         subnet=$(re6st-conf --registry http://re6stnet.nexedi.com/ --anonymous | \
             grep "^Your subnet:") || \
             csih_error "Register to nexedi re6stnet failed"
@@ -603,6 +607,8 @@ function remove_configure_items()
         rm -rf /opt/miniupnpc && echo "OK"
         csih_inform "Remove /opt/pyOpenSSL"
         rm -rf /opt/pyOpenSSL && echo "OK"
+        csih_inform "Remove /opt/re6stnet"
+        rm -rf /opt/re6stnet && echo "OK"
         csih_inform "Remove /etc/re6stnet"
         rm -rf /etc/re6stnet && echo "OK"
 
