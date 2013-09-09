@@ -51,20 +51,20 @@ function show_usage()
     echo ""
     echo "Usage:"
     echo ""
-    echo "    ./slapos-configure.sh [options] [configure items]"
+    echo "    ./slapos-configure.sh [options] [sections]"
     echo ""
     echo "    Availabe options:"
     echo ""
-    echo "        -P, --password=XXX        password of slapos administrator"
+    echo "        -P, --password=XXX                "
     echo "        --computer-certificate=FILENAME"
     echo "        --computer-key=FILENAME"
     echo "        --client-certificate=FILENAME"
     echo "        --client-key=FILENAME"
     echo "        --ipv4-local-network=x.x.x.x/n"
     echo "        --ipv6-local-address=::"
-    echo "        -f, --force               Reinstall even the item has"
-    echo "                                  been installed"
-    echo "        -r, --remove              Remove configuration items"
+    echo "        -f, --force                       Reinstall even the item has"
+    echo "                                          been installed"
+    echo "        -r, --remove                      Remove configuration sections"
     echo ""
     echo "    The configure items could be one or more of the following values:"
     echo ""
@@ -77,10 +77,10 @@ function show_usage()
     echo "        runner         Create slap-runner instance"
     echo "        test-agent     Create test-agent instance"
     echo ""
-    echo "    If no configure items specified, it will choose sections in this way: "
+    echo "    If no configure items specified, it will choose the following sections: "
     echo ""
-    echo "      client will not be selected if no --client-certificate and "
-    echo        "--client-key specified "
+    echo "      client will not be selected if nor --client-certificate and "
+    echo "      --client-key specified "
     echo ""
     echo "      cron will always be selected"
     echo ""
@@ -652,12 +652,6 @@ function get_default_sections()
 readonly -f get_default_sections
 
 # -----------------------------------------------------------
-# Start script
-# -----------------------------------------------------------
-csih_inform "Start slapos node configure ..."
-echo ""
-
-# -----------------------------------------------------------
 # Local variable
 # -----------------------------------------------------------
 declare _administrator=${slapos_administrator}
@@ -752,8 +746,16 @@ fi
 # Get default sections
 [[ -z "${_configure_sections}" ]] && _configure_sections=$(get_default_sections)
 
+# -----------------------------------------------------------
+# Start script
+# -----------------------------------------------------------
+csih_inform "Start slapos node configure ..."
+csih_inform "Configure section: ${_configure_sections//_/}"
+echo ""
+
 # Remove configuration if install mode is 'force' or 'remove'
 if [[ -n "${_install_mode}" ]] ; then
+    csih_inform "Install mode: ${_install_mode}"
     remove_configure_items
     retcode=$?
 
@@ -810,7 +812,7 @@ echo ""
 # -----------------------------------------------------------
 # re6stnet: Install required packages and register to nexedi
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_re6stnet_* ]]  then
+if [[ "${_configure_sections}" == *_re6stnet_* ]] ; then
     csih_inform "Starting configure section re6stnet ..."
     configure_section_re6stnet
     csih_inform "Configure section re6stnet OK"
@@ -820,7 +822,7 @@ fi
 # -----------------------------------------------------------
 # network: Install network connection used by slapos node
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_network_* ]]  then
+if [[ "${_configure_sections}" == *_network_* ]] ; then
     csih_inform "Starting configure slapos network ..."
     configure_section_network
     csih_inform "Configure section network OK"
@@ -830,7 +832,7 @@ fi
 # -----------------------------------------------------------
 # node: Generate slapos node configure file
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_node_* ]]  then
+if [[ "${_configure_sections}" == *_node_* ]] ; then
     csih_inform "Starting configure slapos node ..."
     configure_section_node
     csih_inform "Configure section node OK"
@@ -840,7 +842,7 @@ fi
 # -----------------------------------------------------------
 # client: Generate client configure file
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_client_* ]]  then
+if [[ "${_configure_sections}" == *_client_* ]] ; then
     csih_inform "Starting configure slapos client ..."
     configure_section_client
     csih_inform "Configure slapos client OK"
@@ -850,7 +852,7 @@ fi
 # -----------------------------------------------------------
 # openvpn: Install openvpn and re6stnet service
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_openvpn_* ]]  then
+if [[ "${_configure_sections}" == *_openvpn_* ]] ; then
     csih_inform "Starting configure section openvpn ..."
     configure_section_openvpn
     csih_inform "Configure section openvpn OK"
@@ -860,7 +862,7 @@ fi
 # -----------------------------------------------------------
 # cron: Install cron service and create crontab
 # -----------------------------------------------------------
-if [[ "${_configure_sections}" == *_cron_* ]]  then
+if [[ "${_configure_sections}" == *_cron_* ]] ; then
     csih_inform "Starting configure section cron ..."
     configure_section_cron
     csih_inform "Configure section cron OK"
