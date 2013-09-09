@@ -266,7 +266,7 @@ function slapos_wget_file()
     wget $1 -O $2 || return 1
     csih_inform "Got $2."
 }  # === wget_slapos_file() === #
-readonly -f wget_slapos_file
+readonly -f slapos_wget_file
 
 # ======================================================================
 # Routine: slapos_create_privileged_user

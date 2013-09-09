@@ -421,7 +421,7 @@ function configure_section_openvpn()
 
             csih_inform "copy /opt/openvpn/re6st/${name}.exe to ${_path}"
             cp /opt/openvpn/re6st/${name}.exe ${_path} ||csih_error "No available ovpn scripts: ${name}"
-        fi
+        done
 
         # Install re6stnet service if no native ipv6
         if ! cygrunsrv --query ${re6stnet_service_name} >/dev/null 2>&1 ; then
@@ -548,7 +548,7 @@ readonly -f configure_section_test_agent
 
 function remove_configure_items()
 {
-    if [[ "${_configure_sections}" == *_client_* ]]  then
+    if [[ "${_configure_sections}" == *_client_* ]] ; then
         csih_inform "Removing section client ..."
 
         csih_inform "Remove ${client_configure_file}"
@@ -563,7 +563,7 @@ function remove_configure_items()
         csih_inform "Remove section client OK"
     fi
 
-    if [[ "${_configure_sections}" == *_cron_* ]]  then
+    if [[ "${_configure_sections}" == *_cron_* ]] ; then
         csih_inform "Removing section cron ..."
 
         csih_inform "Remove service ${cron_service_name}"
@@ -576,12 +576,12 @@ function remove_configure_items()
         csih_inform "Remove section cron OK"
     fi
 
-    if [[ "${_configure_sections}" == *_network_* ]]  then
-        csih_inform "Removing network ${slapos_ifname ..."
+    if [[ "${_configure_sections}" == *_network_* ]] ; then
+        csih_inform "Removing network ${slapos_ifname} ..."
         ipwin remove *msloop ${slapos_ifname} && echo "OK"
     fi
 
-    if [[ "${_configure_sections}" == *_node_* ]]  then
+    if [[ "${_configure_sections}" == *_node_* ]] ; then
         csih_inform "Removing section node ..."
 
         csih_inform "Remove ${node_configure_file}"
@@ -596,7 +596,7 @@ function remove_configure_items()
         csih_inform "Remove section node OK"
     fi
 
-    if [[ "${_configure_sections}" == *_re6stnet_* ]]  then
+    if [[ "${_configure_sections}" == *_re6stnet_* ]] ; then
         csih_inform "Removing section re6stnet ..."
 
         csih_inform "Remove /opt/miniupnpc"
@@ -609,7 +609,7 @@ function remove_configure_items()
         csih_inform "Remove section re6stnet OK"
     fi
 
-    if [[ "${_configure_sections}" == *_openvpn_* ]]  then
+    if [[ "${_configure_sections}" == *_openvpn_* ]] ; then
         csih_inform "Removing section openvpn ..."
 
         csih_inform "Remove service ${re6stnet_service_name}"
@@ -624,10 +624,12 @@ function remove_configure_items()
         csih_inform "Remove section openvpn OK"
     fi
 
-    if [[ "${_configure_sections}" == *_slap-runner_* ]]  then
+    if [[ "${_configure_sections}" == *_slap-runner_* ]] ; then
+        csih_inform "Remove section slap-runner"
     fi
 
-    if [[ "${_configure_sections}" == *_test-agent_* ]]  then
+    if [[ "${_configure_sections}" == *_test-agent_* ]] ; then
+        csih_inform "Remove section test-agent"
     fi
 }
 readonly -f remove_configure_items
