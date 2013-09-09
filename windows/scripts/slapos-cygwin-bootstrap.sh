@@ -112,9 +112,9 @@ function slapos_patch_cygwin()
         unix2dos ${_filename} && echo OK.
     fi
 
-    _filename=".minttyrc"
+    _filename="~/.minttyrc"
     echo Checking  ${_filename} ...
-    if [[ ! -f ${_filename} || "${_install_mode}" == "force" ]] ; then
+    if [[ ! -f ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 BoldAsFont=no
 Font=Courier New
@@ -128,7 +128,7 @@ EOF
 
     _filename="/cygtty.bat"
     echo Checking  ${_filename} ...
-    if [[ ! -x ${_filename} || "${_install_mode}" == "force" ]] ; then
+    if [[ ! -x ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 @echo off
 
@@ -145,7 +145,7 @@ EOF
 
     _filename="/autorebase.bat"
     echo Checking  ${_filename} ...
-    if [[ ! -f ${_filename} || "${_install_mode}" == "force" ]] ; then
+    if [[ ! -f ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 @echo off
 ${slapos_cygroot:0:2}
@@ -178,7 +178,7 @@ readonly -f slapos_patch_cygwin
 function install_slapos_cygwin_package()
 {
     for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
-        [[ -f /usr/bin${_cmdname} && -z "${_install_mode}" ]] && continue
+        [[ -x /usr/bin${_cmdname} ]] && continue
         wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
         csih_error "download ${_cmdname} failed"
         csih_inform "download cygwin script ${_cmdname} OK"
@@ -186,7 +186,7 @@ function install_slapos_cygwin_package()
     done
 
     for _cmdname in regpwd ; do
-        [[ -x /usr/bin${_cmdname} && -z "${_install_mode}" ]] && continue
+        [[ -x /usr/bin${_cmdname} ]] && continue
         wget -c http://dashingsoft.com/products/slapos/${_cmdname}.exe -O /usr/bin/${_cmdname}.exe ||
         csih_error "download ${_filename} failed"
         csih_inform "download ${_filename} OK"
@@ -194,7 +194,7 @@ function install_slapos_cygwin_package()
     fi
 
     for _cmdname in ipwin ; do
-        [[ -x /usr/bin${_cmdname} && -z "${_install_mode}" ]] && continue
+        [[ -x /usr/bin${_cmdname} ]] && continue
         if check_os_is_wow64 ; then
             _filename=${_cmdname}-x64.exe
         else
@@ -210,19 +210,34 @@ function install_slapos_cygwin_package()
     csih_inform "create path: ${_path}"
     mkdir -p ${_path}
     for _name in slapos-include.sh slapos-cygwin-bootstrap.sh slapos-configure.sh slapos-cleanup.sh ; do
-        [[ -x ${_path}/${_name} && -z "${_install_mode}" ]] && continue
+        [[ -x ${_path}/${_name} ]] && continue
         wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_name} -O ${_path}/${_name} ||
         csih_error "download ${_name} failed"
         csih_inform "download script ${_path}/${_name} OK"
     done
-
-    # Set prefix for slapos
-    if [[ -n "${slapos_prefix}" ]] ; then
-        echo "Set slapos prefix as ${slapos_prefix}"
-        sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}%" ${_path|/slapos-include.sh
-    fi
 }
 readonly -f install_slapos_cygwin_package
+
+function remove_all_files()
+{
+    csih_inform "Remove /cygtty.bat"
+    rm -rf /cygtty.bat
+
+    csih_inform "Remove /autorebase.bat"
+    rm -rf /autorebase.bat
+
+    csih_inform "Remove ~/.minttyrc"
+    rm -rf ~/.minttyrc
+
+    for _cmdname in ip useradd usermod groupadd brctl tunctl regpwd.exe ipwin.exe ; do
+        csih_inform "Remove /usr/bin/${_cmdname}"
+        rm -rf /usr/bin/${_cmdname}
+    done
+    
+    csih_inform "Remove /etc/slapos/scripts"
+    rm -rf /etc/slapos/scripts
+}
+readonly -f remove_all_files
 
 function install_ipv6_protocol()
 {
@@ -276,7 +291,7 @@ while test $# -gt 0; do
 done
 
 # ======================================================================
-# Constants: slapos bootstrap node use prefiix "slapboot-"
+# Constants
 # ======================================================================
 declare -r slapos_prefix=${_prefix}
 declare -r slapos_cygroot=$(cygpath -w /)
@@ -285,6 +300,14 @@ declare -r slapos_cygroot=$(cygpath -w /)
 # Sanity Check
 # -----------------------------------------------------------
 slapos_sanity_check
+
+# ======================================================================
+# Force mode: remove all the files before run script
+# ======================================================================
+[[ "${_install_mode}" == "force" ]] && 
+csih_inform "Force mode, cleanup all the patched files ..." &&
+remove_all_files &&
+csih_inform "Cleanup OK."
 
 # -----------------------------------------------------------
 # Patch cygwin packages for building slapos
@@ -295,6 +318,15 @@ slapos_patch_cygwin
 # Install slapos cygwin package
 # -----------------------------------------------------------
 install_slapos_cygwin_package
+# -----------------------------------------------------------
+# Set prefix for this slapos node
+# -----------------------------------------------------------
+if [[ -n "${slapos_prefix}" ]] ; then
+    _filename=/etc/slapos/scripts/slapos-include.sh
+    csih_inform "Set slapos prefix as ${slapos_prefix} by"
+    csih_inform "changing file ${_filename}"
+    sed -i -e "s%slapos_prefix=.*\$%slapos_prefix=${slapos_prefix}%" ${_filename}
+fi
 
 # -----------------------------------------------------------
 # Check IPv6 protocol, install it if it isn't installed
