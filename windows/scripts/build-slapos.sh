@@ -11,6 +11,23 @@ fi
 # ======================================================================
 # Functions
 # ======================================================================
+function show_usage()
+{
+    echo ""
+    echo "Usage:"
+    echo ""
+    echo "    ./build-slapos.sh [slap_path]"
+    echo ""
+    echo "    You can specify the root path for slapos buildout, default is /opt"
+    echo ""
+    echo "    The following path will be created:"
+    echo ""
+    echo "      $slap_path/slapos               buildout.cfg will be here"
+    echo "      $slap_path/download-cache       used as buildout download cache"
+    echo ""
+}
+readonly -f show_usage
+
 function slapos_apply_patch()
 {
     local _filename=$1
@@ -71,8 +88,8 @@ prefix = \${buildout:directory}
     csih_inform "start bin/buildout"
     (cd ${_home} ; bin/buildout -v -N) || csih_error "bin/buildout failed"
 
-    slapos_apply_patch "~/slapos-core-format.patch" "${_home}/eggs/slapos.core-*.egg/"
-    slapos_apply_patch "~/supervisor-cygwin.patch" "${_home}/eggs/supervisor-*.egg/"
+    slapos_apply_patch ~/slapos-core-format.patch "${_home}/eggs/slapos.core-*.egg/"
+    slapos_apply_patch ~/supervisor-cygwin.patch "${_home}/eggs/supervisor-*.egg/"
 
     csih_inform "Run buildout of slapos node OK"
     echo ""
@@ -106,8 +123,6 @@ while test $# -gt 0; do
     exit 0
     ;;
     *)
-    show_usage
-    exit 1
     ;;
     esac
 
