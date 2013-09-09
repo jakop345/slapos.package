@@ -177,7 +177,7 @@ readonly -f slapos_patch_cygwin
 
 function install_slapos_cygwin_package()
 {
-    for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
+    for _cmdname in ip useradd usermod groupadd brctl tunctl slapos-cron-config ; do
         [[ -x /usr/bin/${_cmdname} ]] && continue
         wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
         csih_error "download ${_cmdname} failed"
@@ -230,7 +230,8 @@ function remove_all_files()
     csih_inform "Remove ~/.minttyrc"
     rm -rf ~/.minttyrc
 
-    for _cmdname in ip useradd usermod groupadd brctl tunctl regpwd.exe ipwin.exe ; do
+    for _cmdname in ip useradd usermod groupadd brctl tunctl \
+                    regpwd.exe ipwin.exe slapos-cron-config ; do
         csih_inform "Remove /usr/bin/${_cmdname}"
         rm -rf /usr/bin/${_cmdname}
     done
