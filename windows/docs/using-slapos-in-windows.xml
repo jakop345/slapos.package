@@ -81,8 +81,8 @@
 <para>It used to generate all the configure files required by slapos slave node, you can run it anytime when you need change the configure of your slapos slave node.</para>
 <para>Go to slapos.org (or any other SlapOS Master), register if not already done, go to My Account and request an SSL certificate:
 <itemizedlist>
-<listitem><para>Copy the certificate in a file, save it in C:/slapos/cygwin/certificate</para></listitem>
-<listitem><para>Copy the key in a file, save it in C:/slapos/cygwin/key</para></listitem>
+<listitem><para>Copy the certificate in a file, save it in C:/slapos/cygwin/client.crt</para></listitem>
+<listitem><para>Copy the key in a file, save it in C:/slapos/cygwin/client.key</para></listitem>
 </itemizedlist>
 You can save them anywhere, but it's better to save them in the path C:/slapos/cygwin which is your slapos installed, because  it's the default path in the slapos configure script. </para>
 <para>More information refer to <ulink url="http://community.slapos.org/wiki/osoe-Lecture.SlapOS.Extended/developer-Installing.SlapOS.Client"></ulink></para>

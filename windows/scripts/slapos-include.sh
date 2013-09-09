@@ -24,8 +24,8 @@ declare -r slapos_prefix=
 
 declare -r slapos_client_home=~/.slapos
 declare -r client_configure_file=$slapos_client_home/slapos.cfg
-declare -r client_certificate_file=$slapos_client_home/certificate
-declare -r client_key_file=$slapos_client_home/key
+declare -r client_certificate_file=$slapos_client_home/client.crt
+declare -r client_key_file=$slapos_client_home/client.key
 declare -r client_template_file=/etc/slapos/slapos-client.cfg.example
 declare -r client_template_file_url=http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.cfg.example
 

@@ -335,11 +335,11 @@ function configure_section_client()
   netdrive_reporter http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/cygwin-share:/software/netdrive-reporter/software.cfg
   " >> ${client_template_file}
 
-    get_configure_filename ${client_certificate_file} "/certificate" ${_client_certificate}
+    get_configure_filename ${client_certificate_file} "/client.crt" ${_client_certificate}
     openssl x509 -noout -in ${client_certificate_file} || \
         csih_error "Invalid client certificate: ${client_certificate_file}."
 
-    get_configure_filename ${client_key_file} "/key" ${_client_key}
+    get_configure_filename ${client_key_file} "/client.key" ${_client_key}
     openssl rsa -noout -in ${client_key_file} -check || \
         csih_error "Invalid client key: ${client_key_file}."
 
