@@ -112,7 +112,7 @@ function slapos_patch_cygwin()
         unix2dos ${_filename} && echo OK.
     fi
 
-    _filename="~/.minttyrc"
+    _filename=~/.minttyrc
     echo Checking  ${_filename} ...
     if [[ ! -f ${_filename} ]] ; then
         cat <<EOF > ${_filename}
@@ -178,7 +178,7 @@ readonly -f slapos_patch_cygwin
 function install_slapos_cygwin_package()
 {
     for _cmdname in ip useradd usermod groupadd brctl tunctl ; do
-        [[ -x /usr/bin${_cmdname} ]] && continue
+        [[ -x /usr/bin/${_cmdname} ]] && continue
         wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_cmdname} -O /usr/bin/${_cmdname} ||
         csih_error "download ${_cmdname} failed"
         csih_inform "download cygwin script ${_cmdname} OK"
@@ -186,15 +186,15 @@ function install_slapos_cygwin_package()
     done
 
     for _cmdname in regpwd ; do
-        [[ -x /usr/bin${_cmdname} ]] && continue
+        [[ -x /usr/bin/${_cmdname} ]] && continue
         wget -c http://dashingsoft.com/products/slapos/${_cmdname}.exe -O /usr/bin/${_cmdname}.exe ||
         csih_error "download ${_filename} failed"
         csih_inform "download ${_filename} OK"
         chmod +x /usr/bin/${_cmdname}.exe || csih_error "chmod /usr/bin/${_cmdname}.exe failed"
-    fi
+    done
 
     for _cmdname in ipwin ; do
-        [[ -x /usr/bin${_cmdname} ]] && continue
+        [[ -x /usr/bin/${_cmdname} ]] && continue
         if check_os_is_wow64 ; then
             _filename=${_cmdname}-x64.exe
         else
@@ -204,7 +204,7 @@ function install_slapos_cygwin_package()
         csih_error "download ${_filename} failed"
         csih_inform "download ${_filename} OK"
         chmod +x /usr/bin/${_cmdname}.exe || csih_error "chmod /usr/bin/${_cmdname}.exe failed"
-    fi
+    done
     
     _path=/etc/slapos/scripts
     csih_inform "create path: ${_path}"
@@ -214,6 +214,7 @@ function install_slapos_cygwin_package()
         wget -c http://git.erp5.org/gitweb/slapos.package.git/blob_plain/heads/cygwin:/windows/scripts/${_name} -O ${_path}/${_name} ||
         csih_error "download ${_name} failed"
         csih_inform "download script ${_path}/${_name} OK"
+        chmod +x ${_path}/${_name} || csih_error "chmod ${_path}/${_name} failed"
     done
 }
 readonly -f install_slapos_cygwin_package
