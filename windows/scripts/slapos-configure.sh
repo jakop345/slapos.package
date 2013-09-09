@@ -36,8 +36,11 @@
 #       ./slapos-configure.sh slap-runner
 #
 #       You can run many times until it return OK.
-#       
-#    
+#
+#    3. Remove client configuration files
+#
+#       ./slapos-configure.sh --remove client
+#
 source $(/usr/bin/dirname $0)/slapos-include.sh
 
 # ======================================================================
@@ -61,30 +64,37 @@ function show_usage()
     echo "        --ipv6-local-address=::"
     echo "        -f, --force               Reinstall even the item has"
     echo "                                  been installed"
+    echo "        -r, --remove              Remove configuration items"
     echo ""
     echo "    The configure items could be one or more of the following values:"
     echo ""
-    echo "        auto           Install only required configure items (default)"
-    echo "        re6stnet       Install re6stnet and dependencies"
+    echo "        client         Generate slapos client configure files"
+    echo "        cron           Generate cron file and start cron job"
     echo "        network        Install msloop network connection for slapos"
     echo "        node           Generate slapos node configure files"
-    echo "        client         Generate slapos client configure files"
     echo "        openvpn        Install openvpn and re6stnet service"
-    echo "        cron           Generate cron file and start cron job"
+    echo "        re6stnet       Install re6stnet and dependencies"
     echo "        runner         Create slap-runner instance"
     echo "        test-agent     Create test-agent instance"
     echo ""
-    echo "    If no configure items specified, it's same as 'auto'. In this way: "
+    echo "    If no configure items specified, it will choose sections in this way: "
     echo ""
-    echo "      re6stnet will not be installed if --ipv6-local-address specified"
+    echo "      client will not be selected if no --client-certificate and "
+    echo        "--client-key specified "
     echo ""
-    echo "      openvpn will not be installed if native IPv6 works"
+    echo "      cron will always be selected"
     echo ""
-    echo "      client will not be installed if no --client-x specified "
+    echo "      network will always be selected"
     echo ""
-    echo "      runner will not be installed"
+    echo "      node will always be selected"
     echo ""
-    echo "      test-agent will not be installed"
+    echo "      openvpn will not be selected if native IPv6 works"
+    echo ""
+    echo "      re6stnet will not be selected if --ipv6-local-address specified"
+    echo ""
+    echo "      runner will not be selected"
+    echo ""
+    echo "      test-agent will not be selected"
     echo ""
 }
 readonly -f show_usage
@@ -379,12 +389,12 @@ function configure_section_openvpn()
             [[ ! -x /opt/openvpn/bin/openvpn.exe ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
-            
+
             for name in openvpn.exe devcon.exe \
                 libeay32.dll  liblzo2-2.dll  libpkcs11-helper-1.dll  ssleay32.dll ; do
                 csih_inform "copy /opt/openvpn/bin/${name} to /usr/bin"
                 cp /opt/openvpn/bin/${name} /usr/bin ||csih_error "No available openvpn: ${name}"
-            done                
+            done
         fi
 
         # Check driver
@@ -394,11 +404,11 @@ function configure_section_openvpn()
             [[ ! -f /opt/openvpn/driver/OemWin2k.inf ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
-            
+
             for name in OemWin2k.inf tap0901.cat tap0901.sys ; do
                 csih_inform "copy /opt/openvpn/driver/${name} to ${_path}"
                 cp /opt/openvpn/driver/${name} ${_path} ||csih_error "No available openvpn tap-driver: ${name}"
-            done                
+            done
         fi
 
         # Check ovpn scripts
@@ -408,7 +418,7 @@ function configure_section_openvpn()
             [[ ! -f /opt/openvpn/re6st/${name}.exe ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
-            
+
             csih_inform "copy /opt/openvpn/re6st/${name}.exe to ${_path}"
             cp /opt/openvpn/re6st/${name}.exe ${_path} ||csih_error "No available ovpn scripts: ${name}"
         fi
@@ -536,6 +546,109 @@ function configure_section_test_agent()
 }
 readonly -f configure_section_test_agent
 
+function remove_configure_items()
+{
+    if [[ "${_configure_sections}" == *_client_* ]]  then
+        csih_inform "Removing section client ..."
+
+        csih_inform "Remove ${client_configure_file}"
+        rm -rf ${client_configure_file} && echo "OK"
+        csih_inform "Remove ${client_template_file}"
+        rm -rf ${client_template_file} && echo "OK"
+        csih_inform "Remove ${client_certificate_file}"
+        rm -rf ${client_certificate_file} && echo "OK"
+        csih_inform "Remove ${client_key_file}"
+        rm -rf ${client_key_file} && echo "OK"
+
+        csih_inform "Remove section client OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_cron_* ]]  then
+        csih_inform "Removing section cron ..."
+
+        csih_inform "Remove service ${cron_service_name}"
+        cygrunsrv --remove ${cron_service_name} && echo "OK"
+
+        _crontab_file="/var/cron/tabs/${_administrator}"
+        csih_inform "Remove ${_crontab_file}"
+        rm -rf ${_crontab_file} && echo "OK"
+
+        csih_inform "Remove section cron OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_network_* ]]  then
+        csih_inform "Removing network ${slapos_ifname ..."
+        ipwin remove *msloop ${slapos_ifname} && echo "OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_node_* ]]  then
+        csih_inform "Removing section node ..."
+
+        csih_inform "Remove ${node_configure_file}"
+        rm -rf ${node_configure_file} && echo "OK"
+        csih_inform "Remove ${node_template_file}"
+        rm -rf ${node_template_file} && echo "OK"
+        csih_inform "Remove ${node_certificate_file}"
+        rm -rf ${node_certificate_file} && echo "OK"
+        csih_inform "Remove ${node_key_file}"
+        rm -rf ${node_key_file} && echo "OK"
+
+        csih_inform "Remove section node OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_re6stnet_* ]]  then
+        csih_inform "Removing section re6stnet ..."
+
+        csih_inform "Remove /opt/miniupnpc"
+        rm -rf /opt/miniupnpc && echo "OK"
+        csih_inform "Remove /opt/pyOpenSSL"
+        rm -rf /opt/pyOpenSSL && echo "OK"
+        csih_inform "Remove /etc/re6stnet"
+        rm -rf /etc/re6stnet && echo "OK"
+
+        csih_inform "Remove section re6stnet OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_openvpn_* ]]  then
+        csih_inform "Removing section openvpn ..."
+
+        csih_inform "Remove service ${re6stnet_service_name}"
+        cygrunsrv --remove ${re6stnet_service_name} && echo "OK"
+
+        csih_inform "Remove /etc/slapos/driver"
+        rm -rf /etc/slapos/driver && echo "OK"
+
+        csih_inform "Remove /opt/openvpn"
+        rm -rf /opt/openvpn && echo "OK"
+
+        csih_inform "Remove section openvpn OK"
+    fi
+
+    if [[ "${_configure_sections}" == *_slap-runner_* ]]  then
+    fi
+
+    if [[ "${_configure_sections}" == *_test-agent_* ]]  then
+    fi
+}
+readonly -f remove_configure_items
+
+function get_default_sections()
+{
+    local sections="_cron_ _network_ _node_"
+
+    [[ -n "${_client_key}" || -n "${_client_certificate}" ]] &&
+    sections="$sections _client_"
+
+    [[ -z "${_ipv6_local_address}" ]] &&
+    sections="$sections _re6stnet_"
+
+    [[ -z "${_ipv6_local_address}" ]] && check_openvpn_needed &&
+    sections="$sections _openvpn_"
+
+    echo $sections
+}
+readonly -f get_default_sections
+
 # -----------------------------------------------------------
 # Start script
 # -----------------------------------------------------------
@@ -608,6 +721,9 @@ while test $# -gt 0; do
     -f | --force)
     _install_mode=force
     ;;
+    -r | --remove)
+    _install_mode=remove
+    ;;
     auto | client | cron | openvpn | network | node | re6stnet | \
         slap-runner | test-agent)
     _configure_sections="${_configure_sections} _$1_"
@@ -626,15 +742,22 @@ while test $# -gt 0; do
     shift
 done
 
-if [[ "${_configure_sections}" == *_auto_* ]] ; then
-    _configure_sections=""
-fi
-
 if [[ -z "${_ipv4_local_network}" ]] ; then
     _ipv4_local_network=$(get_free_local_ipv4_network) ||
     csih_error "no ipv4_local_network specified"
 fi
-exit 0
+
+# Get default sections
+[[ -z "${_configure_sections}" ]] && _configure_sections=$(get_default_sections)
+
+# Remove configuration if install mode is 'force' or 'remove'
+if [[ -n "${_install_mode}" ]] ; then
+    remove_configure_items
+    retcode=$?
+
+    [[ "${_install_mode}" == "remove" ]] && exit $?
+fi
+
 # -----------------------------------------------------------
 # Check and configure cygwin environments
 # -----------------------------------------------------------
@@ -685,8 +808,7 @@ echo ""
 # -----------------------------------------------------------
 # re6stnet: Install required packages and register to nexedi
 # -----------------------------------------------------------
-if [[ -z "${_ipv6_local_address}" || \
-    "${_configure_sections}" == *_re6stnet_* ]]  then
+if [[ "${_configure_sections}" == *_re6stnet_* ]]  then
     csih_inform "Starting configure section re6stnet ..."
     configure_section_re6stnet
     csih_inform "Configure section re6stnet OK"
@@ -696,32 +818,37 @@ fi
 # -----------------------------------------------------------
 # network: Install network connection used by slapos node
 # -----------------------------------------------------------
-csih_inform "Starting configure slapos network ..."
-configure_section_network
-csih_inform "Configure section network OK"
-echo ""
+if [[ "${_configure_sections}" == *_network_* ]]  then
+    csih_inform "Starting configure slapos network ..."
+    configure_section_network
+    csih_inform "Configure section network OK"
+    echo ""
+fi
 
 # -----------------------------------------------------------
-# node: Generate slapos node and client configure file
+# node: Generate slapos node configure file
 # -----------------------------------------------------------
-csih_inform "Starting configure slapos node ..."
-configure_section_node
-csih_inform "Configure section node OK"
-echo ""
+if [[ "${_configure_sections}" == *_node_* ]]  then
+    csih_inform "Starting configure slapos node ..."
+    configure_section_node
+    csih_inform "Configure section node OK"
+    echo ""
+fi
 
 # -----------------------------------------------------------
 # client: Generate client configure file
 # -----------------------------------------------------------
-csih_inform "Starting configure slapos client ..."
-configure_section_client
-csih_inform "Configure slapos client OK"
-echo ""
+if [[ "${_configure_sections}" == *_client_* ]]  then
+    csih_inform "Starting configure slapos client ..."
+    configure_section_client
+    csih_inform "Configure slapos client OK"
+    echo ""
+fi
 
 # -----------------------------------------------------------
 # openvpn: Install openvpn and re6stnet service
 # -----------------------------------------------------------
-if [[ -z "${_ipv6_local_address}" || \
-    "${_configure_sections}" == *_openvpn_* ]]  then
+if [[ "${_configure_sections}" == *_openvpn_* ]]  then
     csih_inform "Starting configure section openvpn ..."
     configure_section_openvpn
     csih_inform "Configure section openvpn OK"
@@ -731,10 +858,12 @@ fi
 # -----------------------------------------------------------
 # cron: Install cron service and create crontab
 # -----------------------------------------------------------
-csih_inform "Starting configure section cron ..."
-configure_section_cron
-csih_inform "Configure section cron OK"
-echo ""
+if [[ "${_configure_sections}" == *_cron_* ]]  then
+    csih_inform "Starting configure section cron ..."
+    configure_section_cron
+    csih_inform "Configure section cron OK"
+    echo ""
+fi
 
 # -----------------------------------------------------------
 # slap-runner: create instance of slap-runner
