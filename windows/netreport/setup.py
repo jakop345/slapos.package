@@ -13,7 +13,7 @@ def get_description():
     finally:
         f.close()
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 if sys.platform.startswith("cygwin"):
 
