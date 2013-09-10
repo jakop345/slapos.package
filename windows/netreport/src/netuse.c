@@ -132,7 +132,7 @@ netuse_user_info(PyObject *self, PyObject *args)
 }
 
 static char
-get_free_drive_letter()
+get_free_drive_letter(void)
 {
   DWORD bitmasks = GetLogicalDrives();
   char ch = 'A';
@@ -142,7 +142,7 @@ get_free_drive_letter()
     ++ ch;
     bitmasks >>= 1;
   }
-  return 0;
+  return (char)0;
 }
 
 static PyObject *
@@ -283,18 +283,36 @@ netuse_usage_report(PyObject *self, PyObject *args)
 
     bitmasks >>= 1;
     switch (GetDriveType(drivepath)) {
-      case DRIVE_FIXED:
       case DRIVE_REMOTE:
         break;
+      case DRIVE_FIXED:
+        continue;
       default:
         continue;
       }
 
+    /* If the network connection was made using the Microsoft LAN
+     * Manager network, and the calling application is running in a
+     * different logon session than the application that made the
+     * connection, a call to the WNetGetConnection function for the
+     * associated local device will fail. The function fails with
+     * ERROR_NOT_CONNECTED or ERROR_CONNECTION_UNAVAIL. This is
+     * because a connection made using Microsoft LAN Manager is
+     * visible only to applications running in the same logon session
+     * as the application that made the connection. (To prevent the
+     * call to WNetGetConnection from failing it is not sufficient for
+     * the application to be running in the user account that created
+     * the connection.)
+     *
+     * Refer to http://msdn.microsoft.com/en-us/library/windows/desktop/aa385453(v=vs.85).aspx
+     *
+     */
     dwResult = WNetGetConnection(drivename,
                                  szRemoteName,
                                  &cchBuff
                                  );
-    if (dwResult == NO_ERROR) {
+    if (dwResult == NO_ERROR || dwResult == ERROR_CONNECTION_UNAVAIL    \
+        || dwResult == ERROR_NOT_CONNECTED) {
       if (serverlen) {
         if ((cchBuff < serverlen + 3) ||
             (strncmp(servername, szRemoteName+2, serverlen) != 0) ||
@@ -302,16 +320,6 @@ netuse_usage_report(PyObject *self, PyObject *args)
             )
         continue;
       }
-    }
-
-    // The device is not currently connected, but it is a persistent connection.
-    else if (dwResult == ERROR_CONNECTION_UNAVAIL) {
-      continue;
-    }
-
-    // The device is not a redirected device.
-    else if (dwResult == ERROR_NOT_CONNECTED) {
-      continue;
     }
 
     else {
@@ -343,6 +351,18 @@ netuse_usage_report(PyObject *self, PyObject *args)
                                      szRemoteName,
                                      lFreeBytesAvailable,
                                      lTotalNumberOfBytes
+                                     );
+      if (PyList_Append(retvalue, pobj) == -1) {
+        Py_XDECREF(retvalue);
+        return NULL;
+      }
+    }
+    else if (dwResult == ERROR_CONNECTION_UNAVAIL || dwResult == ERROR_NOT_CONNECTED) {
+      PyObject *pobj = Py_BuildValue("ssLL",
+                                     drivename,
+                                     szRemoteName,
+                                     0L,
+                                     0L
                                      );
       if (PyList_Append(retvalue, pobj) == -1) {
         Py_XDECREF(retvalue);
