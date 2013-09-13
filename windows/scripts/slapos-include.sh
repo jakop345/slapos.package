@@ -152,7 +152,7 @@ function check_re6stnet_configure()
 {
     csih_inform "Checking slapos re6stnet configure ..."
     which re6stnet > /dev/null 2>&1 ||
-    csih_error "No re6stnet installed, please run Configure SlapOS first."
+    csih_warning "No re6stnet installed."
     csih_inform "Check slapos re6stnet configure Over."
 }  # === check_re6stnet_configure() === #
 
