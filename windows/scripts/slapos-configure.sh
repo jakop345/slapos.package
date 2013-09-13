@@ -391,7 +391,7 @@ function configure_section_openvpn()
         check_os_is_wow64 && _arch=x64
         if [[ ! -x /usr/bin/openvpn.exe ]] ; then
             [[ ! -x /opt/openvpn/bin/openvpn.exe ]] &&
-            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
+            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
 
             for name in openvpn.exe devcon.exe \
@@ -406,7 +406,7 @@ function configure_section_openvpn()
         if [[ ! -f ${_path}/OemWin2k.inf ]] ; then
             mkdir -p ${_path}
             [[ ! -f /opt/openvpn/driver/OemWin2k.inf ]] &&
-            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
+            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
 
             for name in OemWin2k.inf tap0901.cat tap0901.sys ; do
@@ -420,7 +420,7 @@ function configure_section_openvpn()
         for name in ovpn-client ovpn-server ; do
             [[ -x ${_path}/${name}.exe ]] && continue
             [[ ! -f /opt/openvpn/re6st/${name}.exe ]] &&
-            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz -O ~/openvpn.tar.gz &&
+            slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
             (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
 
             csih_inform "copy /opt/openvpn/re6st/${name}.exe to ${_path}"
