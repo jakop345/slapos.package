@@ -57,7 +57,7 @@
 
 <chapter id="ch_install_slapos"><title>Installing SlapOS node in the Windows</title>
 <para>At first, we need to sign up in VIFIB community Cloud by clicking here <ulink url="https://www.slapos.org/login_form"/></para>
-<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be X86 or x64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access internat; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
+<para>Then download the latest slapos windows installer from <ulink url="http://www.erp5.org/dists/installer"></ulink>, the filename of windows installer look like slapos-XXX-windows-YYY-all-in-one.exe or slapos-XXX-windows-YYY.exe, XXX stands for version-release information. YYY could be X86 or x64, the former means 32-bit, the latter 64-bit windows. The all-in-one installer include all the files required by slapos node, so it can run in the computer which doesn't access Internet; the later will download most of packages from internet and build, so it need more time than all-in-one installer. It's recommanded to use the former installer in case of slow or unstable internet even if the size of all-in-one installer is more than 100MB, compare of the latter which size is about 2MB.</para>
 <para>Double click the installer, click Next, Next ...
 <note><para>If the current user isn't Administrator, you need run it as Administrator. Right click the installer, then click Run As Administrator.</para></note>
 </para>
@@ -118,7 +118,7 @@ Next the configure script need certificate and key information:
 <listitem><para>Type client certificate filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 <listitem><para>Type client key filename, if it's stored in the default path as above, type Enter directly</para></listitem>
 </itemizedlist>
-Then waiting for configure script finished. Be sure the configure scrip report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and netx time you needn't input anything, configure scripts just checks all the configuration and update the configure files.
+Then waiting for configure script finished. Be sure the configure script report successfully, otherwise fix the problem and run it again. You can run Slapos Configure at anytime, and next time you needn't input anything, configure scripts just checks all the configuration and updates the configure files.
 </para>
 </section>
 
@@ -152,7 +152,7 @@ slapos node status
 </section>
 
 <section><title>User Guide</title>
-<para>It just shows this documnet in the web browser.</para>
+<para>It just shows this document in the web browser.</para>
 </section>
 
 <section><title>Cron Service</title>
@@ -294,7 +294,7 @@ Then restart cygwin command box.
 </section>
 
 <section><title>Building SlapOS</title>
-<para>Double click the desktop icon "Cygwin" to enter cygwin command box, the following commands are typed in this box.
+<para>Double click the desktop icon "Cygwin" to enter cygwin command box, then type the following commands:
 <programlisting>
 mkdir -p /opt/git
 cd /opt/git
@@ -337,7 +337,7 @@ After exit cygwin, double click autorebase.bat in the Windows explorer. If the c
 </section>
 
 <section><title>Preparing the sources files for installer</title>
-<para>Let's we start cygwin box, then clone slapos.package.git
+<para>Let's open the cygwin terminal again, and prepare the tar package:
 <programlisting>
 cd /opt
 rm -rf slapos/slapos.tar.gz
@@ -416,7 +416,7 @@ wget http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos-client.c
 </section>
 
 <section><title>Making installer</title>
-<para>We use Inno-Setup sripts to genarate microsoft installer, so we need install inno setup first. You can download the installer from <ulink url="http://www.innosetup.com"/>, then install inno-setup in you computer</para>
+<para>We use Inno-Setup scripts to genarate microsoft installer, so we need install inno setup first. You can download the installer from <ulink url="http://www.innosetup.com"/>, then install inno-setup in you computer</para>
 <para>Then click Start -> Inno Setup 5 -> Inno Setup Compiler, to open inno setup.</para>
 <para>In the inno setup window, click File -> Open, select the script: /opt/git/slapos.package/windows/scripts/slapos-all-in-one.iss</para>
 <para>In the section "Setup", there are some options:
@@ -432,7 +432,7 @@ Source: "images\slapos.ico"; DestDir: "{app}\cygwin\etc\slapos\images";
 Assum SourceDir in the section "Setup" is "D:\slapos", the builder will find "D:\slapos\images\slapos.ico" as the source, so this file should be exsited.
 </para>
 <para>Click menu Build -> Compile, then wait for the building process finished. You can check the installer in the OutputDir.</para>
-<para>There is another script "slapos.iss", it used to build network installer. All-in-one installer will include all the files, so no internet connection required. However network installer need internet connection to download the files and packages. It's remarkable smaller than all-in-one installer.</para>
+<para>There is another script "slapos.iss", it used to build network installer. All-in-one installer will include all the files, so no internet connection required. However network installer need internet connection to download the files and packages. It's remarkably smaller than all-in-one installer.</para>
 </section>
 </chapter>
 
@@ -623,7 +623,7 @@ Except autorebase.bat, all of these scripts could be downloaded from <ulink url=
 </chapter>
 
 <appendix id="appendix_cygwin_packages"><title>Cygwin Required Packages List</title>
-<para>The following packages are requied by SlapOS Node
+<para>The following packages are required by SlapOS Node
 <itemizedlist>
 <listitem><para>Devel/autobuild</para></listitem>
 <listitem><para>Devel/autoconf</para></listitem>

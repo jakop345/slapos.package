@@ -318,7 +318,7 @@ function configure_section_node()
     csih_inform "  computer_id:        ${_computer_guid}"
     csih_inform "  user_base_name:     ${slapos_user_basename}"
     csih_inform
-    csih_inform "  If ipv4_local_network confilcts with your local network, change it"
+    csih_inform "  If ipv4_local_network conflicts with your local network, change it"
     csih_inform "  in the file: ${node_configure_file} "
     csih_inform "  Or change it in $(dirname $0)/slapos-include.sh"
     csih_inform "  and run Configure SlapOS again."
