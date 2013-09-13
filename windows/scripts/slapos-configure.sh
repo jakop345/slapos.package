@@ -212,11 +212,9 @@ function configure_section_re6stnet()
             csih_error "No ${re6stnet_configure_file} found."
         csih_inform "register re6stnet OK"
 
-        _log_path=$(cygpath -m /var/log/re6stnet)
         csih_inform "Write information to re6stnet.conf:"
         csih_inform "  # $subnet"
         csih_inform "  table 0"
-        csih_inform "  log ${_log_path}"
         csih_inform "  ovpnlog"
         csih_inform "  main-interface ${slapos_ifname}"
         csih_inform "  interface ${slapos_ifname}"
