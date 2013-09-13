@@ -43,7 +43,15 @@ Use Cases
 Slave Node
 ----------
 
-Copy file "slapos-monitor", "netuse.dll" to /usr/sbin, then add a startup item for the domain user:
+Copy file "slapos-monitor", "netuse.dll" to /usr/sbin, create slapos-monitor.sh as the following:
+
+    cat <<EOF > /usr/sbin/netdrive-monitor.sh
+export PATH=/usr/local/bin:/bin:/sbin:$PATH
+/usr/sbin/slapos-monitor
+EOF
+    chmod 711 /usr/sbin/netdrive-monitor.sh
+
+then add a startup item for the domain user:
 
   * Logon as local administrator, run the following command in the cygwin terminal:
 
@@ -54,7 +62,7 @@ Copy file "slapos-monitor", "netuse.dll" to /usr/sbin, then add a startup item f
  strStartup = WshShell.SpecialFolders("Startup")
  Set oShellLink = WshShell.CreateShortcut("${target}")
  oShellLink.TargetPath = "$(cygpath -w /bin/mintty.exe)"
- oShellLink.Arguments = "-l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
+ oShellLink.Arguments = "-l /var/log/slap-monitor.log -w hide --exec /usr/sbin/netdrive-monitor.sh"
  oShellLink.WindowStyle = 1
  oShellLink.Description = "netdrive monitor"
  oShellLink.WorkingDirectory = "$(cygpath -w /usr/sbin)"
@@ -68,7 +76,7 @@ If you don't want to add a shortcut, the second way is to add a startup item in 
    * Login as domain user, and run the following command in the cygwin terminal:
 
    regtool set \\HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\slap-monitor \
-               "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
+               "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/netdrive-monitor.sh"
 
    You want to remove the entry by 
 
@@ -81,7 +89,7 @@ If you don't want to add a shortcut, the second way is to add a startup item in 
      It will list all the users in the current domain, find the expected sid, suppose it is "S-1-5-21-117609710-920026266-725345543-500", login as local administrator:
 
      regtool set \\HKU\\S-1-5-21-117609710-920026266-725345543-500\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\slap-monitor \
-             "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
+             "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/netdrive-monitor.sh"
 
 Master Node
 -----------
