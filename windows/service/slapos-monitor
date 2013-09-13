@@ -1,0 +1,54 @@
+#!/usr/bin/python
+import logging
+import os
+import sys
+
+from SimpleXMLRPCServer import SimpleXMLRPCServer
+from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+
+import netuse
+
+# Restrict to a particular path.
+class RequestHandler(SimpleXMLRPCRequestHandler):
+    rpc_paths = ('/RPC2',)
+
+class SlapNodeMonitor(object):
+
+    def __init__(self):
+        super(SlapNodeMonitor, self).__init__()
+        self.port = 8008
+        netuse.autoConnect()
+        self.drivelist = netuse.listNetDrive()
+        print 'Net drive list:'
+        print self.drivelist
+
+    def cleanup(self):
+        pass
+
+    def netdrive_usage(self):
+        '''Get net drive usage, return a list as
+        [ (user, drive, remote, free, total), ... ]
+        '''
+        result = []
+        for k in self.drivelist:
+            r = netuse.usageReport(k[0])
+            result.append((k[3], k[0], k[1], r[0], r[1]))
+        return repr(result)
+
+    def run(self):
+        # Create server
+        server = SimpleXMLRPCServer(('localhost', self.port),
+                                requestHandler=RequestHandler)
+        server.register_introspection_functions()
+        server.register_function(self.netdrive_usage, 'netdrive_usage')
+
+        try:
+            # Run the server's main loop
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.cleanup()
+
+if __name__ == '__main__':
+    SlapNodeMonitor().run()

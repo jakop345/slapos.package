@@ -18,7 +18,7 @@ Here are example of src/Makefile:
 
 PYTHON = /opt/slapos/bin/python
 
-.PHONY : test 
+.PHONY : test
 
 build: netuse.c
 	(cd ..; $(PYTHON) setup.py build)
@@ -32,7 +32,7 @@ Then run test:
 $ cd src
 $ make test
 
-Before test netreport.py, 
+Before test netreport.py,
 
 $ easy_install lxml
 $ ln -s /opt/git/slapos.core
@@ -42,6 +42,46 @@ Use Cases
 
 Slave Node
 ----------
+
+Copy file "slapos-monitor", "netuse.dll" to /usr/sbin, then add a startup item for the domain user:
+
+  * Logon as local administrator, run the following command in the cygwin terminal:
+
+   username="The domain user name, it could be seen in the C:/Documents and Seetings"
+   target=$(cygpath -w "/cygdrive/c/Documents and Settings/${username}/Start Menu/Programs/Startup/netdrive monitor.lnk")
+   cat <<EOF > create_shortcut.vbs
+ Set WshShell = WScript.CreateObject("WScript.Shell")
+ strStartup = WshShell.SpecialFolders("Startup")
+ Set oShellLink = WshShell.CreateShortcut("${target}")
+ oShellLink.TargetPath = "$(cygpath -w /bin/mintty.exe)"
+ oShellLink.Arguments = "-l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
+ oShellLink.WindowStyle = 1
+ oShellLink.Description = "netdrive monitor"
+ oShellLink.WorkingDirectory = "$(cygpath -w /usr/sbin)"
+ oShellLink.Save
+EOF
+  cscript //B create_shortcut.vbs
+  rm create_shortcut.vbs
+
+If you don't want to add a shortcut, the second way is to add a startup item in the registry:
+
+   * Login as domain user, and run the following command in the cygwin terminal:
+
+   regtool set \\HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\slap-monitor \
+               "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
+
+   You want to remove the entry by 
+
+   regtool unset \\HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\slap-monitor
+
+   * In case the domain user have no right to change registry, then get sid first:
+
+     mkpasswd -d
+
+     It will list all the users in the current domain, find the expected sid, suppose it is "S-1-5-21-117609710-920026266-725345543-500", login as local administrator:
+
+     regtool set \\HKU\\S-1-5-21-117609710-920026266-725345543-500\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\slap-monitor \
+             "$(cygpath -w /bin/mintty.exe) -l /var/log/slap-monitor.log -w hide --exec /usr/sbin/slapos-monitor"
 
 Master Node
 -----------
@@ -53,4 +93,3 @@ Issues
 ======
 
 1. Some records may be lost if the computer is shutdown in unnormal way.
-
