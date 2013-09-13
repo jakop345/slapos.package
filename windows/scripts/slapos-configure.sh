@@ -392,7 +392,7 @@ function configure_section_openvpn()
         if [[ ! -x /usr/bin/openvpn.exe ]] ; then
             [[ ! -x /opt/openvpn/bin/openvpn.exe ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
-            (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
+            (cd /opt ; tar xzf ~/openvpn.tar.gz --no-same-owner)
 
             for name in openvpn.exe devcon.exe \
                 libeay32.dll  liblzo2-2.dll  libpkcs11-helper-1.dll  ssleay32.dll ; do
@@ -407,7 +407,7 @@ function configure_section_openvpn()
             mkdir -p ${_path}
             [[ ! -f /opt/openvpn/driver/OemWin2k.inf ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
-            (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
+            (cd /opt ; tar xzf ~/openvpn.tar.gz --no-same-owner)
 
             for name in OemWin2k.inf tap0901.cat tap0901.sys ; do
                 csih_inform "copy /opt/openvpn/driver/${name} to ${_path}"
@@ -416,12 +416,12 @@ function configure_section_openvpn()
         fi
 
         # Check ovpn scripts
-        _path=/usr/lib/python2.7/site-packages/re6stnet/re6st
+        _path=$(ls -d /usr/lib/python2.7/site-packages/re6stnet-*.egg/re6st)
         for name in ovpn-client ovpn-server ; do
             [[ -x ${_path}/${name}.exe ]] && continue
             [[ ! -f /opt/openvpn/re6st/${name}.exe ]] &&
             slapos_wget_file http://dashingsoft.com/products/openvpn-${_arch}.tar.gz ~/openvpn.tar.gz &&
-            (cd /opt ; tar --no-same-owner xzf ~/openvpn.tar.gz)
+            (cd /opt ; tar xzf ~/openvpn.tar.gz --no-same-owner)
 
             csih_inform "copy /opt/openvpn/re6st/${name}.exe to ${_path}"
             cp /opt/openvpn/re6st/${name}.exe ${_path} ||csih_error "No available ovpn scripts: ${name}"
