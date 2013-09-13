@@ -745,7 +745,7 @@ while test $# -gt 0; do
 done
 
 if [[ -z "${_ipv4_local_network}" ]] ; then
-    _ipv4_local_network=$(get_free_local_ipv4_network) ||
+    _ipv4_local_network=$(get_free_local_ipv4_network).0/24 ||
     csih_error "no ipv4_local_network specified"
 fi
 

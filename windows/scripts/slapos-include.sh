@@ -204,7 +204,7 @@ function get_free_local_ipv4_network()
         addr=${seg1}.${seg2}
     
         ! IPCONFIG /ALL | grep -q ${addr} &&
-        echo ${addr} &&
+        echo 10.${addr} &&
         return 0
     
         let i--
