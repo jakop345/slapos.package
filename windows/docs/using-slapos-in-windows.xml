@@ -320,7 +320,7 @@ patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &l
 cd $(ls -d /opt/slapos/eggs/supervisor-*.egg/)
 _filename=/opt/git/slapos.package/windows/patches/supervisor-cygwin.patch
 cd supervisor
-patch -f --dry-run -p1 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p1 &lt; ${_filename}
+patch -f --dry-run -p2 &lt; ${_filename} &gt; /dev/null  &amp;&amp; patch -p2 &lt; ${_filename}
 </programlisting>
 If "slapos node" report "remap error", you need to do as the following,
 <programlisting>
