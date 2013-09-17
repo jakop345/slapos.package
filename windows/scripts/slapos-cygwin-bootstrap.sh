@@ -80,6 +80,13 @@ function slapos_patch_cygwin()
     csih_inform "/etc/group generated"
     [[ -f /etc/group ]] || mkgroup > /etc/group
 
+    csih_inform "Creating link to netsh"
+    _netsh=$(which netsh) || csih_error "Missing netsh.exe"
+    [[ -L /usr/bin/netsh ]] ||
+    ln -s ${_netsh} /usr/bin/netsh ||
+    csih_error "Failed"
+    csih_inform "OK"
+
     _filename=/usr/bin/cygport
     if [[ -f ${_filename} ]] ; then
         csih_inform "Patching ${_filename} ..."
