@@ -148,7 +148,7 @@ function configure_section_re6stnet()
     csih_inform "checking miniupnpc ..."
     if [[ ! -d /opt/miniupnpc ]] ; then
         _filename=/opt/downloads/miniupnpc.tar.gz
-        [[ -r ${_filename} ]] || 
+        [[ -r ${_filename} ]] ||
         wget -c http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.8.tar.gz -O ${_filename} ||
         csih_error "No package found: ${_filename}"
         csih_inform "installing miniupnpc ..."
@@ -166,7 +166,7 @@ function configure_section_re6stnet()
     csih_inform "checking pyOpenSSL ..."
     if [[ ! -d /opt/pyOpenSSL ]] ; then
         _filename=/opt/downloads/pyOpenSSL.tar.gz
-        [[ -r ${_filename} ]] || 
+        [[ -r ${_filename} ]] ||
         wget -c --no-check-certificate https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 -O ${_filename} ||
         csih_error "No package found: ${_filename}"
         csih_inform "installing pyOpenSSL ..."
@@ -218,7 +218,7 @@ function configure_section_re6stnet()
         csih_inform "  ovpnlog"
         csih_inform "  main-interface ${slapos_ifname}"
         csih_inform "  interface ${slapos_ifname}"
-        echo -e "# $subnet\ntable 0\nlog ${_log_path}\novpnlog" \
+        echo -e "# $subnet\ntable 0\novpnlog" \
             "\nmain-interface ${slapos_ifname}\ninterface ${slapos_ifname}" \
             >> ${re6stnet_configure_file}
     fi

@@ -141,11 +141,11 @@ class NetDriveUsageReporter(object):
 
     def insertUsageReport(self, monitor, start, duration):
         q = self._db.execute
-        for r in monitor.usageReport():
+        for r in eval(monitor.netdrive_usage()):
             q( "INSERT INTO net_drive_usage "
                "(config_id, domain_user, drive_letter, remote_folder, "
                " start, duration, usage_bytes )"
-               " VALUES (?, ?, ?, ?, ?, ?)",
+               " VALUES (?, ?, ?, ?, ?, ?, ?)",
                (self._config_id, r[0], r[1], r[2], start, duration, r[4] - r[3]))
 
     def sendAllReport(self):

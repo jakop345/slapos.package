@@ -131,7 +131,7 @@ netuse_user_info(PyObject *self, PyObject *args)
   return NULL;
 }
 
-static int 
+static int
 wnet_enumerate_netdrive(LPNETRESOURCE lpnr)
 {
   DWORD dwResult, dwResultEnum;
@@ -140,9 +140,9 @@ wnet_enumerate_netdrive(LPNETRESOURCE lpnr)
   DWORD cEntries = -1;        // enumerate all possible entries
   LPNETRESOURCE lpnrLocal;    // pointer to enumerated structures
   DWORD i;
-  dwResult = WNetOpenEnum(RESOURCE_GLOBALNET, 
+  dwResult = WNetOpenEnum(RESOURCE_GLOBALNET,
                           RESOURCETYPE_DISK,
-                          0, 
+                          0,
                           lpnr,       // NULL first time the function is called
                           &hEnum);    // handle to the resource
 
@@ -161,7 +161,7 @@ wnet_enumerate_netdrive(LPNETRESOURCE lpnr)
     dwResultEnum = WNetEnumResource(hEnum,     // resource handle
                                     &cEntries, // defined locally as -1
                                     lpnrLocal, // LPNETRESOURCE
-                                    &cbBuffer); 
+                                    &cbBuffer);
     if (dwResultEnum == NO_ERROR) {
       for (i = 0; i < cEntries; i++) {
         printf("NETRESOURCE[%ld] Usage: 0x%ld = ", i, lpnrLocal[i].dwUsage);
@@ -199,7 +199,7 @@ wnet_enumerate_netdrive(LPNETRESOURCE lpnr)
   return TRUE;
 }
 
-static int 
+static int
 reg_enumerate_netdrive(void)
 {
   /* LsaEnumerateLogonSessions -> LogonId */
@@ -228,7 +228,7 @@ netuse_list_drive(PyObject *self, PyObject *args)
   char szRemoteName[MAX_PATH];
   DWORD dwResult;
   DWORD cchBuff = MAX_PATH;
-  char szUserName[MAX_PATH];
+  char szUserName[MAX_PATH] = {0};
 
   if (! PyArg_ParseTuple(args, "|s", &servername)) {
     return NULL;
@@ -243,13 +243,15 @@ netuse_list_drive(PyObject *self, PyObject *args)
     drivename[0] = chdrive;
 
     dwResult = WNetGetConnection(drivename,
-                               szRemoteName,
-                               &cchBuff
-                               );
+                                 szRemoteName,
+                                 &cchBuff
+                                 );
     if (dwResult == NO_ERROR) {
-      dwResult = WNetGetUser("z:", 
-                             (LPSTR) szUserName, 
-                             &cchBuff); 
+      dwResult = WNetGetUser(drivename,
+                             (LPSTR) szUserName,
+                             &cchBuff);
+      if (dwResult != NO_ERROR)
+        snprintf(szUserName, MAX_PATH, "%s", "Unknown User");
       pobj = Py_BuildValue("ssss",
                            drivename,
                            szRemoteName,
@@ -299,7 +301,7 @@ connect_net_drive(char *remote, char *drive)
 
   dwFlags = CONNECT_REDIRECT;
   dwRetVal = WNetAddConnection2(&nr, password, user, dwFlags);
-  if (dwRetVal == NO_ERROR)    
+  if (dwRetVal == NO_ERROR)
     return 0;
   PyErr_Format(PyExc_RuntimeError,
                "WNetAddConnection2 failed with error: %lu\n",
@@ -327,7 +329,7 @@ netuse_remove_drive(PyObject *self, PyObject *args)
   dwRetVal = WNetCancelConnection2(drive, 0, force);
   if (dwRetVal == NO_ERROR)
     Py_RETURN_NONE;
-  
+
   PyErr_Format(PyExc_RuntimeError,
                "WNetCancelConnection2 failed with error: %lu\n",
                dwRetVal
@@ -670,7 +672,7 @@ static PyMethodDef NetUseMethods[] = {
      "When drive is an empty string, the system will automatically\n"
      "assigns network drive letters, letters are assigned beginning\n"
      "with Z:, then Y:, and ending with C:\n."
-     "For examples,"
+     "For examples,\n"
      "  mapNetDrive(r'\\\\server\\data')\n"
      "  mapNetDrive(r'\\\\server\\data', 'T:')\n"
      "  mapNetDrive(r'\\\\server\\data', 'T:', r'\\\\server\\jack', 'abc')\n"
@@ -711,7 +713,7 @@ static PyMethodDef NetUseMethods[] = {
     (
      "userInfo()\n\n"
      "Get the logon user information, return a tuple:\n"
-     "(server, domain, user).\n"
+     "  (server, domain, user).\n"
      )
   },
   {NULL, NULL, 0, NULL}
