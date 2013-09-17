@@ -183,7 +183,7 @@ function reset_slapos_connection()
 
 # ======================================================================
 # Routine: get_free_local_ipv4_network
-# Get a free local ipv4 network in 10.x.x.0/24, return 10.x.x
+# Get a free local ipv4 network in 10.x.x.0/24, return 10.x.x.0/24
 # ======================================================================
 function get_free_local_ipv4_network()
 {
@@ -204,7 +204,7 @@ function get_free_local_ipv4_network()
         addr=${seg1}.${seg2}
     
         ! IPCONFIG /ALL | grep -q ${addr} &&
-        echo 10.${addr} &&
+        echo "10.${addr}.0/24" &&
         return 0
     
         let i--

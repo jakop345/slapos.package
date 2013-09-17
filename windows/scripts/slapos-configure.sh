@@ -233,7 +233,7 @@ function configure_section_network()
         csih_error "install network interface ${slapos_ifname} failed"
     fi
     _addr4=$(echo ${_ipv4_local_network} | sed -e "s%\.0/%.1/%g")
-    if [[ -n "${_addr}" ]] ; then
+    if [[ -n "${_addr4}" ]] ; then
         netsh interface ip show addr ${slapos_ifname} | grep -q "${_addr4}" ||
         ip -4 addr add ${_addr4} dev ${slapos_ifname} ||
         csih_error "add ipv4 address failed"
@@ -743,7 +743,7 @@ while test $# -gt 0; do
 done
 
 if [[ -z "${_ipv4_local_network}" ]] ; then
-    _ipv4_local_network=$(get_free_local_ipv4_network).0/24 ||
+    _ipv4_local_network=$(get_free_local_ipv4_network) ||
     csih_error "no ipv4_local_network specified"
 fi
 
