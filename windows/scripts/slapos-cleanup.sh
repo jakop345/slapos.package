@@ -32,9 +32,9 @@ readonly -f show_usage
 function slapos_kill_process()
 {
     name=$1
-    echo "Try to kill all $name ..."
+    csih_inform "Try to kill all $name ..."
     for pid in $(ps | grep "$name" | gawk '{print $4}') ; do
-        echo "Kill pid $pid"
+        csih_inform "Kill pid $pid"
         TASKKILL /F /T /PID $pid
     done
 }
@@ -43,7 +43,7 @@ readonly -f slapos_kill_process
 # -----------------------------------------------------------
 # Start script
 # -----------------------------------------------------------
-echo "Start cleanup slapos node ..."
+csih_inform "Start cleanup slapos node ..."
 echo ""
 
 while test $# -gt 0; do
@@ -73,16 +73,16 @@ done
 #
 for name in ${re6stnet_service_name} ${cron_service_name} \
     ${syslog_service_name} ${cygserver_service_name} ; do
-    echo "Removing service $name"
-    cygrunsrv -R $name && echo OK.
+    csih_inform "Removing service $name"
+    cygrunsrv -R $name && csih_inform "OK."
 done
 
 #
 # Stop slapos
 #
 if [[ -x /opt/slapos/bin/slapos ]] ; then
-    echo "Stopping slapos node ..."
-    /opt/slapos/bin/slapos node stop all && echo OK.
+    csih_inform "Stopping slapos node ..."
+    /opt/slapos/bin/slapos node stop all && csih_inform "OK."
 fi
 slapos_kill_process /usr/bin/python2.7
 
@@ -93,68 +93,68 @@ slapos_kill_process /usr/bin/python2.7
 #
 # Remove virtual netcard installed by slapos
 #
-echo "Removing network connection ${slapos_ifname}"
-ipwin remove *msloop ${slapos_ifname} && echo OK.
+csih_inform "Removing network connection ${slapos_ifname}"
+ipwin remove *msloop ${slapos_ifname} && csih_inform "OK."
 
-echo "Removing all Tap-Windows Drivers ..."
-which devcon >/dev/null 2>&1 && devcon remove tap0901 && echo OK.
+csih_inform "Removing all Tap-Windows Drivers ..."
+which devcon >/dev/null 2>&1 && devcon remove tap0901 && csih_inform "OK."
 
 #
 # Remove configure files
 #
-echo Removing /etc/opt/slapos
-rm -rf /etc/opt/slapos/ && echo OK.
-echo Removing ~/.slapos
-rm -rf ~/.slapos && echo OK.
+csih_inform Removing /etc/opt/slapos
+rm -rf /etc/opt/slapos/ && csih_inform "OK."
+csih_inform Removing ~/.slapos
+rm -rf ~/.slapos && csih_inform "OK."
 
 #
 # Remove crontab
 #
 _filename=/var/cron/tabs/${slapos_administrator}
-echo "Removing ${_filename}"
-rm -rf ${_filename} && echo OK.
+csih_inform "Removing ${_filename}"
+rm -rf ${_filename} && csih_inform "OK."
 
 #
 # Remove default instance root and software root, because they belong to
 # slapuser, and would not be removed by the windows uninstaller.
 #
-[[ -f /srv/slapgrid ]] && echo "Removing /srv/slapgrid" && rm -rf /srv/slapgrid && echo OK.
-[[ -f /opt/slapgrid ]] && echo "Removing /opt/slapgrid" && rm -rf /opt/slapgrid && echo OK.
+[[ -d /srv/slapgrid ]] && csih_inform "Removing /srv/slapgrid" && rm -rf /srv/slapgrid && csih_inform "OK."
+[[ -d /opt/slapgrid ]] && csih_inform "Removing /opt/slapgrid" && rm -rf /opt/slapgrid && csih_inform "OK."
 
 #
 # Remove users installed by slapos
 #
-[[ -f /var/empty ]] && echo "Removing /var/empty" && rm -rf /var/empty && echo OK.
+[[ -d /var/empty ]] && csih_inform "Removing /var/empty" && rm -rf /var/empty && csih_inform "OK."
 for _name in $(NET USER) ; do
     if [[ "${_name}" == ${slapos_user_basename}* ]] ; then
-        echo "Removing user: ${_name}"
-        NET USER ${_name} /DELETE && echo OK.
+        csih_inform "Removing user: ${_name}"
+        NET USER ${_name} /DELETE && csih_inform "OK."
     elif echo "${_name}" | grep -q -E "(cyg_server)|(${slapos_administrator})" ; then
-        echo "Removing user: ${_name}"
-        NET USER ${_name} /DELETE && echo OK.
+        csih_inform "Removing user: ${_name}"
+        NET USER ${_name} /DELETE && csih_inform "OK."
     fi
 done
-echo "Creating /etc/passwd ..."
-mkpasswd -l > /etc/passwd && echo OK.
+csih_inform "Creating /etc/passwd ..."
+mkpasswd -l > /etc/passwd && csih_inform "OK."
 
 #
 # Remove local group installed by slapos node
 #
 for _name in $(NET LOCALGROUP | sed -n -e "s/^*//p" | sed -e "s/\\s//g") ; do
     if [[ "${_name}" == grp_${slapos_user_basename}* ]] ; then
-        echo "Removing localgroup: ${_name}"
-        NET LOCALGROUP ${_name} /DELETE && echo OK.
+        csih_inform "Removing localgroup: ${_name}"
+        NET LOCALGROUP ${_name} /DELETE && csih_inform "OK."
     fi
 done
-echo "Creating /etc/group ..."
-mkgroup -l > /etc/group && echo OK.
+csih_inform "Creating /etc/group ..."
+mkgroup -l > /etc/group && csih_inform "OK."
 
 # -----------------------------------------------------------
 # End script
 # -----------------------------------------------------------
-echo
-echo Run pre-uninstall script complete.
-echo
+echo ""
+csih_inform Run pre-uninstall script complete.
+echo ""
 
 read -n 1 -t 60 -p "Press any key to exit..."
 exit 0
