@@ -102,9 +102,9 @@ which devcon >/dev/null 2>&1 && devcon remove tap0901 && csih_inform "OK."
 #
 # Remove configure files
 #
-csih_inform Removing /etc/opt/slapos
+csih_inform "Removing /etc/opt/slapos"
 rm -rf /etc/opt/slapos/ && csih_inform "OK."
-csih_inform Removing ~/.slapos
+csih_inform "Removing ~/.slapos"
 rm -rf ~/.slapos && csih_inform "OK."
 
 #
@@ -153,7 +153,7 @@ mkgroup -l > /etc/group && csih_inform "OK."
 # End script
 # -----------------------------------------------------------
 echo ""
-csih_inform Run pre-uninstall script complete.
+csih_inform "Run pre-uninstall script complete."
 echo ""
 
 read -n 1 -t 60 -p "Press any key to exit..."
