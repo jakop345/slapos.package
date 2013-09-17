@@ -27,10 +27,10 @@
 #
 ##############################################################################
 import argparse
+import json
 import os.path
 import slapos.slap.slap
 import sqlite3
-import sys
 import xmlrpclib
 
 from datetime import datetime, date
@@ -67,6 +67,7 @@ def parseArgumentTuple():
                         help="If True, send report per day at mid-night. "
                              "Otherwise send report instantly.",
                         default=False)
+    parser.add_argument('--verbose', action='store_true')
     option = parser.parse_args()
 
     # Build option_dict
@@ -129,6 +130,9 @@ class NetDriveUsageReporter(object):
                 current_timestamp = datetime.now()
                 d = current_timestamp - last_timestamp
                 if d.seconds < self.report_interval:
+                    if self.verbose:
+                        print 'sleeping', interval
+                        print '%s < %s' % (d.seconds, self.report_interval)
                     sleep(interval)
                     continue
                 self.insertUsageReport(monitor, last_timestamp.isoformat(), d.seconds)
@@ -141,7 +145,7 @@ class NetDriveUsageReporter(object):
 
     def insertUsageReport(self, monitor, start, duration):
         q = self._db.execute
-        for r in eval(monitor.netdrive_usage()):
+        for r in json.loads(monitor.netdrive_usage()):
             q( "INSERT INTO net_drive_usage "
                "(config_id, domain_user, drive_letter, remote_folder, "
                " start, duration, usage_bytes )"
@@ -167,6 +171,8 @@ class NetDriveUsageReporter(object):
         #    (Optional) Move all the reported data to histroy table
         today = date.today().isoformat()
         if (not self.batch) or self._report_date < today:
+            if self.verbose:
+                print 'Creating report'
             self._postData(self.generateDailyReport(self._config_id,
                                                     self.computer_id,
                                                     self._report_date))
@@ -221,7 +227,7 @@ class NetDriveUsageReporter(object):
             movement = etree.Element('movement')
 
             element = etree.Element("resource")
-            element.text = r[0]
+            element.text = r[1]
             movement.append(element)
 
             element = etree.Element("title")
@@ -229,15 +235,15 @@ class NetDriveUsageReporter(object):
             movement.append(element)
 
             element = etree.Element("reference")
-            element.text = etree.Element("domain_user"),
+            element.text = r[0]
             movement.append(element)
 
-            element = etree.Element("reference")
-            element.text = report_date
-            movement.append(element)
+#            element = etree.Element("reference")
+#            element.text = report_date
+#            movement.append(element)
 
             element = etree.Element("quantity")
-            element.text = str(r[1] * r[2])
+            element.text = str(r[2] * r[3])
             movement.append(element)
 
             element = etree.Element("price")
