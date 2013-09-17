@@ -115,12 +115,12 @@ function slapos_patch_cygwin()
     # Change format of readme.txt
     _filename=$(cygpath -u $(cygpath -m /)/../readme.txt)
     if [[ -f ${_filename} ]] ; then
-        echo "Changing $(cygpath -w ${_filename}) as dos format ..."
-        unix2dos ${_filename} && echo OK.
+        csih_inform "Changing $(cygpath -w ${_filename}) as dos format ..."
+        unix2dos ${_filename} && csih_inform "OK."
     fi
 
     _filename=~/.minttyrc
-    echo Checking  ${_filename} ...
+    csih_inform "Checking  ${_filename} ..."
     if [[ ! -f ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 BoldAsFont=no
@@ -128,13 +128,13 @@ Font=Courier New
 FontHeight=16
 Scrollbar=none
 EOF
-        echo "${_filename} has been generated."
+        csih_inform "${_filename} has been generated."
     else
-        echo OK.
+        csih_inform "OK."
     fi
 
     _filename="/cygtty.bat"
-    echo Checking  ${_filename} ...
+    csih_inform "Checking  ${_filename} ..."
     if [[ ! -x ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 @echo off
@@ -145,13 +145,13 @@ chdir ${slapos_cygroot}\\bin
 start mintty.exe -i /Cygwin-Terminal.ico -
 EOF
         chmod +x ${_filename}
-        echo "${_filename} has been generated."
+        csih_inform "${_filename} has been generated."
     else
-        echo OK.
+        csih_inform "OK."
     fi
 
     _filename="/autorebase.bat"
-    echo Checking  ${_filename} ...
+    csih_inform "Checking  ${_filename} ..."
     if [[ ! -f ${_filename} ]] ; then
         cat <<EOF > ${_filename}
 @echo off
@@ -172,9 +172,9 @@ PAUSE ...
 EXIT 0
 EOF
         chmod +x ${_filename}
-        echo "${_filename} has been generated."
+        csih_inform "${_filename} has been generated."
     else
-        echo OK.
+        csih_inform "OK."
     fi
 
     csih_inform "Patch cygwin packages for building slapos OK"
@@ -212,7 +212,7 @@ function install_slapos_cygwin_package()
         csih_inform "download ${_filename} OK"
         chmod +x /usr/bin/${_cmdname}.exe || csih_error "chmod /usr/bin/${_cmdname}.exe failed"
     done
-    
+
     _path=/etc/slapos/scripts
     csih_inform "create path: ${_path}"
     mkdir -p ${_path}
@@ -242,7 +242,7 @@ function remove_all_files()
         csih_inform "Remove /usr/bin/${_cmdname}"
         rm -rf /usr/bin/${_cmdname}
     done
-    
+
     csih_inform "Remove /etc/slapos/scripts"
     rm -rf /etc/slapos/scripts
 }
@@ -313,7 +313,7 @@ slapos_sanity_check
 # ======================================================================
 # Force mode: remove all the files before run script
 # ======================================================================
-[[ "${_install_mode}" == "force" ]] && 
+[[ "${_install_mode}" == "force" ]] &&
 csih_inform "Force mode, cleanup all the patched files ..." &&
 remove_all_files &&
 csih_inform "Cleanup OK."
