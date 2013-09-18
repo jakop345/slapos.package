@@ -46,6 +46,7 @@ Source: "cygwin\opt\git\slapos.package\windows\scripts\ip"; DestDir: "{app}\cygw
 Source: "cygwin\opt\git\slapos.package\windows\scripts\useradd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\git\slapos.package\windows\scripts\usermod"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\git\slapos.package\windows\scripts\groupadd"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
+Source: "cygwin\opt\git\slapos.package\windows\scripts\set_primary_group"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\git\slapos.package\windows\scripts\brctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\git\slapos.package\windows\scripts\tunctl"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;
 Source: "cygwin\opt\git\slapos.package\windows\scripts\slapos-cron-config"; DestDir: "{app}\cygwin\bin"; Permissions: everyone-readexec;

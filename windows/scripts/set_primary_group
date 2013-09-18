@@ -1,0 +1,16 @@
+#!/bin/bash
+
+USER=$1
+GROUP=$2
+
+[ -z "$USER" ] && echo "User name is required" >&2 && exit 1
+[ -z "$GROUP" ] && echo "Group name is required" >&2 && exit 2
+
+GID=$(egrep "^$GROUP" /etc/group | cut -f3 -d':')
+
+[ -z "$GID" ] && echo "User $USER not in passwd" >&2 && exit 3
+
+sed -i "s/^$USER:unused:\([0-9]*\):[0-9]*:/$USER:unused:\1:$GID:/" /etc/passwd
+
+echo "User $USER: primary group set to $GROUP"
+

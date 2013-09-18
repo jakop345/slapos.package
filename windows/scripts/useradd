@@ -153,7 +153,7 @@ function add_member_to_group()
 {
   local name=$1
   local grpname=$2
-  net localgroup $grpname > /dev/null 2>&1 || grpname="grp_$grpname"
+  net localgroup $grpname > /dev/null 2>&1 || grpname="$grpname"
   net localgroup $grpname > /dev/null 2>&1 || return 1
   if ! net localgroup $grpname | grep -q -e "^$name$" ; then
       net localgroup $grpname $name /add
@@ -205,6 +205,8 @@ for grpname in ${USER_INIT_GROUP} ${USER_OTHER_GROUP} ; do
     add_member_to_group ${USER_NAME} $grpname ||
     (echo "Failed to add ${USER_NAME} to group $group" ; exit 1)
 done
+
+set_primary_group $USER_NAME $USER_INIT_GROUP
 
 # net user "${USER_NAME}" /delete ||
 # (echo "Failed to delete user ${USER_NAME}" ; exit 1)
