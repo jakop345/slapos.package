@@ -1,7 +1,7 @@
 @ECHO OFF
 
 SETLOCAL
-SET VCVARSALL="C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"
+SET VCVARSALL="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
 SET SETENV="C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin\SetEnv.cmd"
 
 IF /I "%PROCESSOR_ARCHITEW6432%" == "AMD64" GOTO ARCH_AMD64
