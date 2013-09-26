@@ -199,8 +199,8 @@ function get_free_local_ipv4_network()
     return 0
         
     while (( i )) ; do
-        let seg1=($(date +%N) % 255) 2>&1 > /dev/null
-        let seg2=($(date +%N) % 255) 2>&1 > /dev/null
+        let seg1=($RANDOM % 255) 2>&1 > /dev/null
+        let seg2=($RANDOM % 255) 2>&1 > /dev/null
         addr=${seg1}.${seg2}
     
         ! IPCONFIG /ALL | grep -q ${addr} &&
