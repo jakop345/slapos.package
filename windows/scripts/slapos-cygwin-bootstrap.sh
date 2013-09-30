@@ -342,6 +342,14 @@ fi
 # -----------------------------------------------------------
 install_ipv6_protocol
 
+# -------------------
+# Extract /opt/slapos
+# -------------------
+[[ -f /opt/downloads/slapos.tar.gz ]] && (
+    csih_inform "Extracting /opt/slapos..."
+    tar -xzf /opt/downloads/slapos.tar.gz -C /opt
+)
+
 # -----------------------------------------------------------
 # End script
 # -----------------------------------------------------------

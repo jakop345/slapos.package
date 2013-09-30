@@ -86,7 +86,6 @@ Name: "{group}\User Guide"; Filename: "{app}\user-guide.html";
 [Run]
 Filename: "{app}\setup-cygwin.bat"; Parameters: """{app}"""; StatusMsg: "Installing Cygwin..."; Flags: runhidden;
 Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i /etc/slapos/scripts/slapos-cygwin-bootstrap.sh"; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Configure Cygwin..."; Flags: skipifdoesntexist;
-Filename: "{app}\cygwin\bin\bash.exe"; Parameters: "--login -i -c ""cd /opt ; tar -xzf /opt/downloads/slapos.tar.gz"""; WorkingDir: "{app}\cygwin\bin"; Description: "Configure Cygwin"; StatusMsg: "Extract slapos node ...";
 
 [UninstallRun]
 Filename: "{app}\cygwin\bin\mintty.exe"; Parameters: "-c ~/.minttyrc -h never -t ""Uninstall SlapOS"" /etc/slapos/scripts/slapos-cleanup.sh"; WorkingDir: "{app}\cygwin\bin"; Flags: skipifdoesntexist;
