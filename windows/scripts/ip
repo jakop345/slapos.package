@@ -305,7 +305,12 @@ function format_interface_name()
     
     local guid="$1"
     if [[ ${guid} == {*} ]] ; then
-        echo $(ipwin name ${guid})
+        name=$(ipwin name ${guid})
+        if [[ "x$LANG" = "x" ]]; then
+            echo $name
+        else
+            echo $name | iconv -f cp1252 -t $(echo $LANG | cut -d. -f2)
+        fi
     else
         echo ${guid}
     fi
