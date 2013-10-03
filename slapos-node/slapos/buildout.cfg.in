@@ -16,7 +16,7 @@ download-cache= download-cache
 [python2.7]
 configure-options +=
   --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-make-options +=
+environment +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
 [openssl]
