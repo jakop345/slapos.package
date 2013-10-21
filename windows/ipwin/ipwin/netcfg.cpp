@@ -1384,9 +1384,12 @@ HRESULT SlaposIPv6ShowRoute(int mode)
     NumEntries = pIpForwardTable2->NumEntries;
     pRow2 = pIpForwardTable2 -> Table;
     for (i = 0; i < NumEntries; i++, pRow2 ++) {
-      // Ignore invalid route
-      if (pRow2 -> Loopback || IN6_IS_ADDR_UNSPECIFIED(&((pRow2 -> NextHop).Ipv6.sin6_addr)))
+      // Ignore loopback route
+      if (pRow2 -> Loopback) 
         continue;
+      // Ignore local route
+      // if (IN6_IS_ADDR_UNSPECIFIED(&((pRow2 -> NextHop).Ipv6.sin6_addr)))
+      //   continue;
       inet_ntop(AF_INET6,
                 (PVOID)(&((pRow2 -> DestinationPrefix).Prefix.Ipv6.sin6_addr)),
                 prefix,
