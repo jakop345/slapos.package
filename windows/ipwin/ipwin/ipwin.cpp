@@ -56,7 +56,7 @@ HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
                                              OUT BSTR *pName,
                                              OUT BSTR *pErrMsg
                                              );
-HRESULT SlaposIPv6ShowRoute(int verbose);
+HRESULT SlaposIPv6ShowRoute(int mode);
 
 void Usage()
 {
@@ -109,6 +109,9 @@ Available command:\n\
 \n\
   Print IPv6 route information:\n\
   ipwin ipv6 show route\n\
+\n\
+  Print IPv6 default route information:\n\
+  ipwin ipv6 show route default\n\
 \n\
 \n\
 Exit status:\n\
@@ -344,7 +347,12 @@ int _tmain(int argc, TCHAR * argv[])
       Usage();
       hr = E_FAIL;
     }
+    else if (argc == 5) {
+      // Only show default route
+      hr = SlaposIPv6ShowRoute(0);
+    }
     else {
+      // Show all ipv6 route
       hr = SlaposIPv6ShowRoute(1);
     }
   }

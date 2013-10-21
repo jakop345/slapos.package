@@ -1364,7 +1364,7 @@ HRESULT SlaposNetCfgGetNetworkConnectionName(IN LPCWSTR pGUID,
   return hrc;
 }
 
-HRESULT SlaposIPv6ShowRoute(int verbose)
+HRESULT SlaposIPv6ShowRoute(int mode)
 {
   int i;
   ULONG NumEntries = -1;
@@ -1398,10 +1398,22 @@ HRESULT SlaposIPv6ShowRoute(int verbose)
                 200
                 );
       if_indextoname(pRow2 -> InterfaceIndex, ifname);
-      printf("Prefix       : %s/%d\n", prefix, (pRow2 -> DestinationPrefix).PrefixLength);
-      printf("Interface %d : %s\n", (unsigned int)(pRow2 -> InterfaceIndex), ifname);
-      printf("Gateway      : %s\n", gateway);
-      printf("\n");
+      if (mode == 1) {
+        printf("Prefix       : %s/%d\n", prefix, (pRow2 -> DestinationPrefix).PrefixLength);
+        printf("Interface %d : %s\n", (unsigned int)(pRow2 -> InterfaceIndex), ifname);
+        printf("Gateway      : %s\n", gateway);
+        printf("\n");
+      }
+      else if (mode == 0) {
+        // Print default route
+        if (IN6_IS_ADDR_UNSPECIFIED(&((pRow2 -> DestinationPrefix).Prefix.Ipv6.sin6_addr)))
+          printf("default    proto %d metric %d mtu %s advmss %s\n",
+                 pRow2 -> Protocol,
+                 pRow2 -> Metric,
+                 "unknown",
+                 "unknown"
+                 );
+      }
     }
     FreeMibTable(pIpForwardTable2);
     return S_OK;

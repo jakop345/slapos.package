@@ -581,6 +581,9 @@ elif [[ $object == "route" ]] ; then
     if [[ $command != "show" ]] ; then
         prefix=$1
         shift
+    elif [[ "$1" == "default" ]] ; then
+        ipwin ipv6 show route default
+        exit $?
     fi
 
     while [[ "$1" != "" ]] ; do
