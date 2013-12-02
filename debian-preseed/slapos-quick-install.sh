@@ -1,13 +1,7 @@
-#!/bin/bash
+#!/bin/sh -e
 
 # This Script automates the the setup of SLAPOS Servers with
 # Essential information.
-set -e
-
-if [ -z "$EMAIL" ]; then
-  echo " [ERROR] Please export EMAIL= variable, and rerun the script, it is mandatory for re6stnet"
-  exit 1
-fi
 
 if [ -z "$COMPUTERNAME" ]; then
   echo " [ERROR] Please export COMPUTERNAME= variable, and rerun the script, it is mandatory for slapos"
@@ -39,7 +33,7 @@ sed -i "/tapVPN/d" /etc/cron.d/slapos-node
 
 if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
   # Register re6stnet.
-  re6st-conf --registry http://re6stnet.nexedi.com/ -r emailAddress $EMAIL -d /etc/re6stnet --anonymous
+  re6st-conf --registry http://re6stnet.nexedi.com/ -r title $COMPUTERNAME -d /etc/re6stnet --anonymous
 
   echo "table 0" >> /etc/re6stnet/re6stnet.conf
   echo "interface eth0" >> /etc/re6stnet/re6stnet.conf
@@ -56,12 +50,6 @@ fi
 set +e
 
 IPV6WAITTIME=5
-ping -c 2 re6stnet.nexedi.com
-while [ $? != 0 ]; do
-    sleep 5
-    ping -c 2 re6stnet.nexedi.com
-done
-
 # Wait for native ipv6 connection to be ready 
 i=0
 ping6 -c 2 ipv6.google.com
@@ -84,9 +72,7 @@ if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
 fi
 
 cat > /usr/local/sbin/slapos-tweak << EOF
-#!/bin/bash
-
-set -e
+#!/bin/sh -e
 
 mkdir -v -p -m 0755 `grep ^certificate_repository_path /etc/opt/slapos/slapos.cfg | sed 's/^certificate_repository_path.*= *//'` 
 
