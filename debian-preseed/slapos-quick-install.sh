@@ -78,9 +78,7 @@ if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
 fi
 
 cat > /usr/local/sbin/slapos-tweak << EOF
-#!/bin/bash 
-
-set -e
+#!/bin/sh -e
 
 mkdir -v -p -m 0755 `grep ^certificate_repository_path /etc/opt/slapos/slapos.cfg | sed 's/^certificate_repository_path.*= *//'` 
 
@@ -123,17 +121,21 @@ modprobe kvm_intel
 sleep 1
 chmod 666 /dev/kvm
 
+# By pass if some of the followed modules are not available. 
+# This is usually needed or preferred for a specific hardware/distribution.
+set +e
 # Set power saving
 modprobe acpi_cpufreq > /dev/null  2>&1
 
 # Set hardware monitoring tools (for Shuttle xh61 machines)
 modprobe coretemp > /dev/null  2>&1
 modprobe f71882fg > /dev/null  2>&1
+set -e
 
 # Activate KSM (shared memory for KVM)
 echo 1 > /sys/kernel/mm/ksm/run
 
-slapos node format --now
+slapos node format -v -c --now
 
 EOF
 
