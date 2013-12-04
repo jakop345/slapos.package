@@ -1,4 +1,4 @@
-#!/bin/sh -e
+!/bin/sh -e
 
 # This Script automates the the setup of SLAPOS Servers with
 # Essential information.
@@ -34,6 +34,12 @@ sed -i "/tapVPN/d" /etc/cron.d/slapos-node
 if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
   # Register re6stnet.
   re6st-conf --registry http://re6stnet.nexedi.com/ -r title $COMPUTERNAME -d /etc/re6stnet --anonymous
+
+  # For some reason this initial restart still needed
+  # for workarround eventual default routes.
+  /etc/init.d/re6stnet restart
+
+  sleep 2
 
   echo "table 0" >> /etc/re6stnet/re6stnet.conf
   echo "interface eth0" >> /etc/re6stnet/re6stnet.conf
@@ -72,7 +78,9 @@ if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
 fi
 
 cat > /usr/local/sbin/slapos-tweak << EOF
-#!/bin/sh -e
+#!/bin/bash 
+
+set -e
 
 mkdir -v -p -m 0755 `grep ^certificate_repository_path /etc/opt/slapos/slapos.cfg | sed 's/^certificate_repository_path.*= *//'` 
 
@@ -125,7 +133,7 @@ modprobe f71882fg > /dev/null  2>&1
 # Activate KSM (shared memory for KVM)
 echo 1 > /sys/kernel/mm/ksm/run
 
-slapos format --now
+slapos node format --now
 
 EOF
 
