@@ -136,7 +136,8 @@ set -e
 echo 1 > /sys/kernel/mm/ksm/run
 
 slapos node format -v -c --now
-
+echo "[SlapOS Tweak] Finished at: "
+date
 EOF
 
 chmod a+x /usr/local/sbin/slapos-tweak
@@ -147,8 +148,8 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
-@reboot root slapos-tweak
-@reboot root /opt/slapos/bin/bang /etc/opt/slapos/slapos.cfg -m "Reboot." 
+@reboot root slapos-tweak >> /opt/slapos/log/slapos-tweak.log 2>&1
+@reboot root /opt/slapos/bin/bang /etc/opt/slapos/slapos.cfg -m "Reboot." >> /opt/slapos/log/slapos-tweak.log 2>&1
 
 EOF
 
