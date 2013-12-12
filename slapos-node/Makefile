@@ -14,10 +14,6 @@ install: all
 	cp slapos-test $(DESTDIR)/usr/sbin/
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/bin/
 	# Open VPN configuration
-	mkdir -p $(DESTDIR)/etc/openvpn/
-	cp -r template/openvpn/* $(DESTDIR)/etc/openvpn/
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
-	# By default, we want to activate openvpn usage
-	touch $(DESTDIR)/etc/opt/openvpn-needed
 clean:
 #	cd slapos; make clean

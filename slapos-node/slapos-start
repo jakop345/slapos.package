@@ -25,19 +25,9 @@ if [ $ONLY_SLAPFORMAT = false ]; then
         ping -c 2 $IPV4CHECK >/dev/null 2>&1
     done
 
-    # Launch openvpn
-    if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
-        echo "Starting openvpn..."
-        /etc/init.d/openvpn start
-    fi
-
     # Wait for ipv6 connection to be ready
     echo "Checking IPv6 connectivity. This may take a few seconds..."
-    if [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
-        PING6_COMMAND="ping6 -I tapVPN -c 2 $IPV6CHECK"
-    else
-        PING6_COMMAND="ping6 -c 2 $IPV6CHECK"
-    fi
+    PING6_COMMAND="ping6 -c 2 $IPV6CHECK"
     $PING6_COMMAND
     while [ $? != 0 ];
     do

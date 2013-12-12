@@ -38,15 +38,8 @@ done
 IPV6CHECK=ipv6.google.com
 IPV4CHECK=google.com
 IPV6WAITTIME=5
-SLAPVPN="ipv6_interface = tapVPN"
 
 SLAPOS_CONFIGURATION='%(slapos_configuration)s'
-
-# Test ipv4/ipv6 connectivity and if not working use openvpn 
-# and wait for it to be ready
-if [ ! -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
-    /etc/init.d/openvpn stop
-fi
 
 ping -c 2 $IPV4CHECK
 while [ $? != 0 ]; do
@@ -65,24 +58,6 @@ do
     sleep 1
     ping6 -c 2 $IPV6CHECK
 done
-
-if [ $? != 0 ] || [ -f $SLAPOS_CONFIGURATION/openvpn-needed ]; then
-    echo """ Starting openVPN """
-    /etc/init.d/openvpn start
-    sleep 10
-    ping6 -I tapVPN -c 2 $IPV6CHECK
-    while [[ $? != 0 ]]; do
-        ping6 -I tapVPN -c 2 $IPV6CHECK
-    done
-    # Ask slapos to use openvpn as ipv6 provider
-    sed -i "/${SLAPVPN}/ s/# *//" $SLAPOS_CONFIGURATION/slapos.cfg
-    # Use tapVPN as default interface for ipv6 traffic
-    /sbin/ip -6 route del default dev br0
-    sleep 2
-else
-    # OpenVPN not needed, comment line about he_ipv6 (if not ailready done)
-    sed -i "/${SLAPVPN}/ s/^\([^#]\)/#\1/g" $SLAPOS_CONFIGURATION/slapos.cfg
-fi
 
 SLAP_INSTALL_LOG=/opt/slapos/slapos-install.log
 
