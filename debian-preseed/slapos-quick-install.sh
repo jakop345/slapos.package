@@ -59,7 +59,7 @@ IPV6WAITTIME=5
 # Wait for native ipv6 connection to be ready 
 i=0
 ping6 -c 2 ipv6.google.com
-while [[ $? != 0 ]] && [[ $i < $IPV6WAITTIME ]]
+while [ $? != 0 ] && [ $i < $IPV6WAITTIME ]
 do
     let i++
     sleep 1
