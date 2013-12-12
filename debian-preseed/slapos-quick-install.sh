@@ -1,4 +1,4 @@
-!/bin/sh -e
+#!/bin/sh -e
 
 # This Script automates the the setup of SLAPOS Servers with
 # Essential information.
