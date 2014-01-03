@@ -31,13 +31,13 @@ configure-options =
   && make depend
 
 make-options +=
-  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
+  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%;
 
 [gettext]
-configure-options +=
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-make-options +=
-  DESTDIR=%BUILD_ROOT_DIRECTORY%
+#configure-options +=
+#  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+#make-options +=
+#  DESTDIR=%BUILD_ROOT_DIRECTORY%
 # Add gettext library path to RPATH as its binaries are used to build
 # glib for example
 environment =
@@ -50,4 +50,14 @@ configure-options +=
 make-options +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
+[slapos]
+recipe = z3c.recipe.scripts
+python = python2.7
+eggs =
+  slapos.libnetworkcache
+  zc.buildout
+  ${lxml-python:egg}
+  slapos.core
 
+[version]
+setuptools = 1.1.6
