@@ -20,9 +20,16 @@ make-options +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
 [openssl]
-configure-options +=
+configure-options =
+  -I${zlib:location}/include
+  -L${zlib:location}/lib
   --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
   --openssldir=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}/etc/ssl
+  --libdir=lib
+  shared no-idea no-mdc2 no-rc5 zlib
+  -Wl,-rpath=${zlib:location}/lib -Wl,-rpath=${buildout:parts-directory}/${:_buildout_section_name_}/lib
+  && make depend
+
 make-options +=
   INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
 
