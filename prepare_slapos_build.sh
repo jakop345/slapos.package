@@ -1,14 +1,22 @@
 #!/bin/bash -e
 
-VERSION=0.35
-RECIPE_VERSION=0.148
-RELEASE=2
+# Edit for release
+VERSION=1.0
+# Edit for release
+RECIPE_VERSION=0.202
+# Edit for release
+RELEASE=1
 
 VERSION_REGEX="s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
 CURRENT_DIRECTORY="$(pwd)"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
+
+# Edit for release
+# Stable one
+#OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
+# Development one
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 
 
