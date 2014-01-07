@@ -40,7 +40,7 @@ Group: Application/Network
 Source0: slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}.tar.gz
 URL: http://www.slapos.org/ 
 Vendor: Vifib
-Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedric.leninivin@tiolive.com>, Cédric de Saint Martin <cedric.dsm@nexedi.com>
+Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedric.leninivin@tiolive.com>, Cédric de Saint Martin <cedric.dsm@nexedi.com>, Rafael Monnerat <rafael@nexedi.com>
 
 
 %if 0%{?suse_version} == 1210
