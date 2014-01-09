@@ -1,3 +1,9 @@
+slapos-node (1.0+0.203+2) unstable; urgency=low
+
+  * New version of slapos (1.0+0.203+2)
+
+ -- Cedric de Saint Martin <cedric.dsm@nexedi.com>  Wed, 08 Jan 2014 09:58:09 +0100
+
 slapos-node (0.XXX+0.XXX+0) unstable; urgency=low
 
   * New version of SlapOS (0.XXX)
