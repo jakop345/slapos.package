@@ -1,14 +1,28 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
-VERSION=0.35
-RECIPE_VERSION=0.148
-RELEASE=2
+# Edit for release
+VERSION=1.0
+# Edit for release
+RECIPE_VERSION=0.203
+# Edit for release
+RELEASE=3
 
-VERSION_REGEX="s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
+# Define URL to compile
+#BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-$RECIPE_VERSION:/component/slapos/buildout.cfg
+
+# Development version of the build
+BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/slapos:/component/slapos/buildout.cfg
+
+VERSION_REGEX="s!\%BUILDOUT_URL\%!$BUILDOUT_URL!g;s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
 CURRENT_DIRECTORY="$(pwd)"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
+
+# Edit for release
+# Stable one
+#OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
+# Development one
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 
 

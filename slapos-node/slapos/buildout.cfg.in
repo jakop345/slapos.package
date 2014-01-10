@@ -1,6 +1,6 @@
 [buildout]
 extends =
-  http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-%RECIPE_VERSION%:/component/slapos/buildout.cfg
+  %BUILDOUT_URL%
 
 extends-cache= extends-cache
 download-cache= download-cache
@@ -16,21 +16,28 @@ download-cache= download-cache
 [python2.7]
 configure-options +=
   --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-make-options +=
+environment +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
 [openssl]
-configure-options +=
+configure-options =
+  -I${zlib:location}/include
+  -L${zlib:location}/lib
   --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
   --openssldir=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}/etc/ssl
+  --libdir=lib
+  shared no-idea no-mdc2 no-rc5 zlib
+  -Wl,-rpath=${zlib:location}/lib -Wl,-rpath=${buildout:parts-directory}/${:_buildout_section_name_}/lib
+  && make depend
+
 make-options +=
-  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
+  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%;
 
 [gettext]
-configure-options +=
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-make-options +=
-  DESTDIR=%BUILD_ROOT_DIRECTORY%
+#configure-options +=
+#  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+#make-options +=
+#  DESTDIR=%BUILD_ROOT_DIRECTORY%
 # Add gettext library path to RPATH as its binaries are used to build
 # glib for example
 environment =
@@ -43,4 +50,14 @@ configure-options +=
 make-options +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
+[slapos]
+recipe = z3c.recipe.scripts
+python = python2.7
+eggs =
+  slapos.libnetworkcache
+  zc.buildout
+  ${lxml-python:egg}
+  slapos.core
 
+[version]
+setuptools = 1.1.6
