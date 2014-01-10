@@ -1,6 +1,6 @@
 [buildout]
 extends =
-  http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-%RECIPE_VERSION%:/component/slapos/buildout.cfg
+  %BUILDOUT_URL%
 
 extends-cache= extends-cache
 download-cache= download-cache
