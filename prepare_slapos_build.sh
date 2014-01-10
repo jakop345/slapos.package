@@ -8,10 +8,13 @@ RECIPE_VERSION=0.203
 RELEASE=3
 
 # Define URL to compile
-#BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-$RECIPE_VERSION:/component/slapos/buildout.cfg
+BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-$RECIPE_VERSION:/component/slapos/buildout.cfg
+OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
 
-# Development version of the build
+# Development Section [Uncomment for use] 
+#OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
 BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/slapos:/component/slapos/buildout.cfg
+
 
 VERSION_REGEX="s!\%BUILDOUT_URL\%!$BUILDOUT_URL!g;s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
 CURRENT_DIRECTORY="$(pwd)"
@@ -19,68 +22,85 @@ TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
 
-# Edit for release
-# Stable one
-#OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
-# Development one
-OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
-
-
 # Prepare directory for new version if needed
 if [ ! -d "$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY" ]; then
     cp -r $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY
 fi
 
-# Prepare Makefile and offline script
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/Makefile.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/Makefile
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/offline.sh
+function prepare_template_files
+{
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/Makefile.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/Makefile
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/offline.sh
+}
 
-# Prepare Download Cache for SlapOS
-cd $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
-#rm -rf build/
-bash offline.sh || (echo "Impossible to build SlapOS, exiting." && exit 1)
+function prepare_download_cache
+{
+    cd $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
+    rm -rf build/
+    bash offline.sh || (echo "Impossible to build SlapOS, exiting." && exit 1)
+    # Go back to starting point
+    cd $CURRENT_DIRECTORY
+}
 
-# Prepare tarball
-cd $CURRENT_DIRECTORY
-tar -czf $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
+function prepare_tarball
+{
+    tar -czf $SLAPOS_DIRECTORY.tar.gz $SLAPOS_DIRECTORY
+}
 
+function prepare_deb_packaging
+{
 
-#################    Prepare obs   ###################################
-cd $OBS_DIRECTORY
+    # Add entry to changelog
+    cd $TEMPLATES_DIRECTORY/debian
+    dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
 
-# Update directory
-osc up
+    # Add cron and logrotate files
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $TEMPLATES_DIRECTORY/debian/cron.d
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $TEMPLATES_DIRECTORY/debian/slapos-node.logrotate
+    cd $TEMPLATES_DIRECTORY
+    tar -czf debian.tar.gz debian
+    cd $OBS_DIRECTORY
+    cp $TEMPLATES_DIRECTORY/debian.tar.gz .
+}
 
-# Remove former configuration
-osc rm -f $SLAPOS_ORGINAL_DIRECTORY*.tar.gz
-osc rm -f slapos.spec
+function obs_upload
+{
+    cd $OBS_DIRECTORY
 
-# Prepare new tarball
-cp $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY.tar.gz .
-osc add $SLAPOS_DIRECTORY.tar.gz
+    # Update directory
+    osc up
 
-# Prepare new specfile
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/slapos.spec.in > slapos.spec
-osc add slapos.spec
+    # Remove former configuration
+    osc rm -f $SLAPOS_ORGINAL_DIRECTORY*.tar.gz
+    osc rm -f slapos.spec
 
-##################### Prepare configuration file for .deb ############
-# Add entry to changelog
-cd $TEMPLATES_DIRECTORY/debian
-dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
-# Add cron and logrotate files
-cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $TEMPLATES_DIRECTORY/debian/cron.d
-cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $TEMPLATES_DIRECTORY/debian/slapos-node.logrotate
-cd $TEMPLATES_DIRECTORY
-tar -czf debian.tar.gz debian
-cd $OBS_DIRECTORY
-cp $TEMPLATES_DIRECTORY/debian.tar.gz .
-#prepare new .dsc file
-osc rm -f slapos*.dsc
-sed $VERSION_REGEX $TEMPLATES_DIRECTORY/slapos.dsc.in > $SLAPOS_DIRECTORY.dsc
-osc add $SLAPOS_DIRECTORY.dsc
+    # Prepare new tarball
+    cp $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY.tar.gz .
+    osc add $SLAPOS_DIRECTORY.tar.gz
 
-## Upload new Package
-osc commit -m "New SlapOS Recipe $RECIPE_VERSION"
+    # Prepare new specfile
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/slapos.spec.in > slapos.spec
+    osc add slapos.spec
+
+    # Prepare new .dsc file
+    osc rm -f slapos*.dsc
+    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/slapos.dsc.in > $SLAPOS_DIRECTORY.dsc
+    osc add $SLAPOS_DIRECTORY.dsc
+
+    ## Upload new Package
+    osc commit -m "New SlapOS Recipe $RECIPE_VERSION"
+
+}
+
+prepare_template_files
+
+prepare_download_cache
+
+prepare_tarball
+
+prepare_deb_packaging
+
+obs_upload
 
 # Save current version
 echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
