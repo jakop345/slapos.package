@@ -13,6 +13,11 @@ case "$1" in
         rm -rf /opt/slapos/parts
     ;;
 esac
+if [ -f /etc/openvpn/vifib.conf ]; then
+  cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
+  cp -rf /etc/openvpn/vifib-keys/ /etc/openvpn/vifib-backup-keys
+  sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
+fi
 
 #DEBHELPER#
 
