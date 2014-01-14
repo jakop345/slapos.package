@@ -96,6 +96,14 @@ mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 /
 %defattr(-,root,root)
 
+%pre
+if [ -f /etc/openvpn/vifib.conf ]; then
+    cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
+    mkdir -p /etc/openvpn/vifib-keys
+    cp -rf /etc/openvpn/vifib-keys /etc/openvpn/vifib-backup-keys
+    sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
+fi
+
 %post
 echo """To generate slapos configuration run '#slapos node register'"""
 if [ -f /bin/systemctl ]; then
@@ -105,9 +113,9 @@ fi
 
 %preun
 if [ -f /etc/openvpn/vifib.conf ]; then 
-  cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
-  cp -rf /etc/openvpn/vifib-keys/ /etc/openvpn/vifib-backup-keys
-  sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
+    cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
+    cp -rf /etc/openvpn/vifib-keys/ /etc/openvpn/vifib-backup-keys
+    sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
 fi
 if [ -f /bin/systemctl ]; then
     systemctl stop slapos-node.service
