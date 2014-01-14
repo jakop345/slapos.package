@@ -1,0 +1,103 @@
+#!/bin/sh -e 
+
+SLAPOS_CFG_PATH=/etc/opt/slapos/slapos.cfg
+
+if [ -z "$COMPUTERNAME" ]; then
+  if [ -z "$1" ]; then
+    echo " [ERROR] Use re6st-setup.sh COMPUTERNAME or Please export COMPUTERNAME= variable, and rerun the script, it is mandatory for re6st setup script"
+    exit 1
+  fi
+  export COMPUTERNAME=$1
+fi
+
+
+function re6st_conf_repos
+{
+    if [ ! -f /usr/bin/re6st-conf ]; then
+      if [ -f /usr/bin/zypper ]; then
+        zypper addrepo http://git.erp5.org/dist/rpm/ git.erp5.org
+        zypper update
+        zypper install re6stnet
+      else
+        if [ -f /usr/bin/apt-get ]; then
+          gpg --keyserver subkeys.pgp.net --recv-keys 1A716324
+          gpg --export 1A716324 | apt-key add -
+
+          echo "deb http://git.erp5.org/dist/deb ./" > /etc/apt/sources.list.d/git.erp5.org.list
+          apt-get update
+          apt-get install re6st
+        else
+          echo "[ERROR] Unable to install re6st package, no apt-get or zypper found"
+          exit 1
+        fi
+      fi
+    fi
+}
+
+
+function re6st_conf_generation
+{
+    if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
+      re6st_conf_repos
+      # Generate re6st configuration
+      REGISTRY="http://re6stnet.nexedi.com"
+      re6st-conf -d /etc/re6stnet --registry $REGISTRY -r title $COMPUTERNAME --anonymous
+      echo "File /etc/re6stnet/re6stnet.conf generated"
+      echo "You now need to reboot your server manually for the changes to take\
+effect"
+    fi
+}
+
+function remove_VPN_conf
+{
+    # Remove VPN configuration
+    if [ -e /etc/openvpn/vifib.conf ]; then
+        mv /etc/openvpn/vifib.conf /etc/openvpn/vifib.conf.disabled`date`
+        echo "Removed vifib OpenVPN configuration files"
+    fi
+
+    if [ -e /etc/opt/slapos/openvpn-needed ]; then
+        rm /etc/opt/slapos/openvpn-needed
+        echo "Removed /etc/opt/slapos/openvpn-needed"
+    fi
+    echo "###################################################################################################"
+    echo "WARNING: RESTART OpenVPN can cut your access out, if you are connected via tapVPN IPv6 address!!!!!"
+    echo "###################################################################################################"
+}
+
+function modify_interfaces_in_SlapOS_conf
+{
+    # Modify slapos.cfg to use lo
+    cp $SLAPOS_CFG_PATH $SLAPOS_CFG_PATH.old
+    echo "Copied old slapos.cfg to $SLAPOS_CFG_PATH.old"
+
+    sed 's/\(interface_name =\).*/\1 lo/g' $SLAPOS_CFG_PATH.old > $SLAPOS_CFG_PATH.tmp
+    sed 's/.*ipv6_interface =.*//g' $SLAPOS_CFG_PATH.tmp > $SLAPOS_CFG_PATH
+    rm $SLAPOS_CFG_PATH.tmp
+}
+
+#XXX Vivien: fugly logic, feel free to modify it if you can do better
+#            or if install/upgrade procedure was simplified
+if [ ! -e /etc/re6stnet/re6stnet.conf ]; then
+    if [ -e $SLAPOS_CFG_PATH ]; then
+        # In case of an upgrade test for native ipv6 inside slapos.cfg
+        # Only migrates if tapVPN is used.
+        if grep -qe "ipv6_interface = tapVPN" $SLAPOS_CFG_PATH && ! grep -qe "#ipv6_interface" $SLAPOS_CFG_PATH; then
+            # If using vifib VPN
+            remove_VPN_conf
+
+            modify_interfaces_in_SlapOS_conf
+
+            re6st_conf_generation
+        else
+            # Manual configuration by user before upgrade
+            echo "You seem to have no separate interface for ipv6, please proceed \
+with the configuration of re6st and SlapOS Node by yourself."
+        fi
+    else
+        # New node
+        re6st_conf_generation
+    fi
+else
+  echo "WARNING: /etc/re6stnet/re6stnet.conf is present on your system, skip to run. Please check your existing configuration."
+fi
