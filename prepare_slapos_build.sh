@@ -14,7 +14,7 @@ OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
 
 # Development Section [Uncomment for use] 
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
-BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/slapos:/component/slapos/buildout.cfg
+BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/master:/component/slapos/buildout.cfg
 
 
 VERSION_REGEX="s!\%BUILDOUT_URL\%!$BUILDOUT_URL!g;s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
