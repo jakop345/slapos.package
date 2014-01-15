@@ -13,6 +13,7 @@ install: all
 	cp slapos-start $(DESTDIR)/usr/sbin/
 	cp slapos-test $(DESTDIR)/usr/sbin/
 	cp slapos-re6st-setup $(DESTDIR)/usr/sbin/
+	cp slapos-tweak $(DESTDIR)/usr/sbin/
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/bin/
 	# Open VPN configuration
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
