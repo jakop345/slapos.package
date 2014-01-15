@@ -1,4 +1,4 @@
-#!/bin/sh -e 
+#!/bin/bash -e 
 
 SLAPOS_CFG_PATH=/etc/opt/slapos/slapos.cfg
 
@@ -20,12 +20,14 @@ function re6st_conf_repos
         zypper install re6stnet
       else
         if [ -f /usr/bin/apt-get ]; then
-          gpg --keyserver subkeys.pgp.net --recv-keys 1A716324
-          gpg --export 1A716324 | apt-key add -
+          if [ ! -f /etc/apt/sources.list.d/git.erp5.org.list ]; then 
+            gpg --keyserver subkeys.pgp.net --recv-keys 1A716324
+            gpg --export 1A716324 | apt-key add -
 
-          echo "deb http://git.erp5.org/dist/deb ./" > /etc/apt/sources.list.d/git.erp5.org.list
+            echo "deb http://git.erp5.org/dist/deb ./" > /etc/apt/sources.list.d/git.erp5.org.list
+          fi
           apt-get update
-          apt-get install re6st
+          apt-get install -y re6stnet
         else
           echo "[ERROR] Unable to install re6st package, no apt-get or zypper found"
           exit 1
