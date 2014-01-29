@@ -33,8 +33,8 @@ sysctl -w kernel.panic=120
 e2label /dev/sda1 SLAPOS
 
 # Enable noop scheduler for disk which have SLAPOS labeled partition
-disk=\`blkid -L SLAPOS | sed -r -e 's/(\/dev\/|[0-9]*$)//g'\`
-echo noop > /sys/block/\$disk/queue/scheduler
+disk=`blkid -L SLAPOS | sed -r -e 's/(\/dev\/|[0-9]*$)//g'`
+echo noop > /sys/block/$disk/queue/scheduler
 
 # Set kvm up
 modprobe kvm_intel
