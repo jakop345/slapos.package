@@ -14,7 +14,7 @@ if [ ! -f /etc/apt/sources.list.d/slapos.list ]; then
 fi
 
 apt-get update
-apt-get install -y slapos-node
+apt-get install -y ntp slapos-node
 
 if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
   slapos-re6st-setup $COMPUTERNAME
@@ -65,7 +65,7 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
-@reboot root slapos-tweak >> /opt/slapos/log/slapos-tweak.log 2>&1
+@reboot root /usr/sbin/slapos-tweak >> /opt/slapos/log/slapos-tweak.log 2>&1
 @reboot root /opt/slapos/bin/bang /etc/opt/slapos/slapos.cfg -m "Reboot." >> /opt/slapos/log/slapos-tweak.log 2>&1
 
 EOF
