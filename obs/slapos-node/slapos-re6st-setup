@@ -58,6 +58,12 @@ function remove_VPN_conf
         echo "Removed vifib OpenVPN configuration files"
     fi
 
+    # Remove VPN configuration
+    if [ -e /etc/openvpn/vifib.backup.conf ]; then
+        mv /etc/openvpn/vifib.backup.conf /etc/openvpn/vifib.backup.conf.disabled`date`
+        echo "Removed vifib OpenVPN configuration files"
+    fi
+
     if [ -e /etc/opt/slapos/openvpn-needed ]; then
         rm /etc/opt/slapos/openvpn-needed
         echo "Removed /etc/opt/slapos/openvpn-needed"
