@@ -89,7 +89,6 @@ cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_numb
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
 cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/slapos.logrotate.conf
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
-cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.service %{buildroot}/etc/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 
 %files
@@ -106,10 +105,6 @@ fi
 
 %post
 echo """To generate slapos configuration run '#slapos node register'"""
-if [ -f /bin/systemctl ]; then
-    systemctl enable slapos-node.service
-    systemctl start slapos-node.service
-fi
 
 %preun
 if [ -f /etc/openvpn/vifib.conf ]; then 

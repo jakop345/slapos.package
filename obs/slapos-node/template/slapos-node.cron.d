@@ -11,3 +11,6 @@ MAILTO=""
 
 # Run "Check/add IPs and so on" once per hour
 0 * * * * root /opt/slapos/bin/slapos node format >> /opt/slapos/log/slapos-node-format.log 2>&1
+
+# Run "Booting" on every system start
+@reboot root /opt/slapos/bin/slapos node boot >> /opt/slapos/log/slapos-node-format.log 2>&1
