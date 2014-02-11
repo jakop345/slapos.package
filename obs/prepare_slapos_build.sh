@@ -1,9 +1,9 @@
 #!/bin/sh -e
 
 # Edit for release
-VERSION=1.0.2.1
+VERSION=1.0.3
 # Edit for release
-RECIPE_VERSION=0.203
+RECIPE_VERSION=0.205
 # Edit for release
 RELEASE=1
 
