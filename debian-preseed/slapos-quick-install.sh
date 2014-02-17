@@ -16,6 +16,9 @@ fi
 apt-get update
 apt-get install -y ntp slapos-node
 
+# Firmware for realtek
+apt-get install -y firmware-realtek 
+
 if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
   slapos-re6st-setup $COMPUTERNAME
 
