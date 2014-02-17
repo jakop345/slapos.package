@@ -44,7 +44,7 @@ Directory Organisation
 	     - slapos.spec.in : configuration file for rpm packaging
 - slapos-node/ : Template to build package
   	       - Makefile : Makefile to build slapos and add files for package
-	       - slapos-start : shell script that will be run on startup (called by slapos-node daemon)
+	       - slapos-re6st-setup : shell script that can setup re6st for you.
 	       - slapos-test : python script to check user configuration and cron file
 	       - template/ : template files for package (cron.d, service)
 	       - slapos/ : to build slapos. Contain buildout.cfg.in
