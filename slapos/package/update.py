@@ -36,10 +36,6 @@ import os
 import subprocess as sub
 import sys
 import tempfile
-import _autoupdate
-
-from slapos.networkcachehelper import helper_download_network_cached_to_file
-
 
 # create console handler and set level to warning
 ch = logging.StreamHandler()
@@ -48,7 +44,6 @@ ch.setLevel(logging.WARNING)
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
 # add formatter to ch
 ch.setFormatter(formatter)
-
 
 class Parser(OptionParser):
   """
@@ -83,193 +78,66 @@ class Parser(OptionParser):
     (options, args) = self.parse_args()
     return options
 
-
-class NetworkCache ():
-  def __init__(self, slapos_conf):
-    if os.path.exists(slapos_conf):
-      network_cache_info = ConfigParser.RawConfigParser()
-      network_cache_info.read(slapos_conf)
-      self.download_binary_cache_url  = network_cache_info.get('networkcache', 'download-binary-cache-url')
-      self.download_cache_url         = network_cache_info.get('networkcache', 'download-cache-url')
-      self.download_binary_dir_url    = network_cache_info.get('networkcache', 'download-binary-dir-url')
-      self.signature_certificate_list = network_cache_info.get('networkcache', 'signature-certificate-list')
-    else:
-      self.download_binary_cache_url = "http://www.shacache.org/shacache"
-      self.download_cache_url = "https://www.shacache.org/shacache"
-      self.download_binary_dir_url = "http://www.shacache.org/shadir"
-      self.signature_certificate_list = ""
-
-    self.signature_certificate_list = """
------BEGIN CERTIFICATE-----
-MIIB9jCCAV+gAwIBAgIJANd3qMXJcWPgMA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV
-BAMMCENPTVAtOTAyMCAXDTEyMDkwNDEyMDM1OFoYDzIxMTIwODExMTIwMzU4WjAT
-MREwDwYDVQQDDAhDT01QLTkwMjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
-nhfhuGEO3gsQXkYjbhMFzY3b74bAcOvT3vwYd3V+V38XYC2Ds7ugyKIp3EisrREN
-8bRzxLTJjEwNhBjdS3GfFt/8uxB7hoKul4lEtdYmM4NCIlLbmoXwoJOVYzL7QWNg
-4uMEm9Bf46zhgY3ZNgCLELn8YgUDSr/dfdSDnN7wpoUCAwEAAaNQME4wHQYDVR0O
-BBYEFHgf9WN8LY9BZvtAcWrGtk6rCTq3MB8GA1UdIwQYMBaAFHgf9WN8LY9BZvtA
-cWrGtk6rCTq3MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAIFHRgb3D
-7va0+kUmw6xidJf9t4X5bkhOt/FBKpJK3tXctIN6DYPlPcemktMmrnYtYimq387I
-NYK/ZbWhfgv7VZqJ2OUvGaDQIm9oAuRfcu7QCbEzN10RibLLRKdDDgIhb34iLxVg
-jlD7tZ2DbRKHu5FadsKWNZpqC9H0BRLjBwY=
------END CERTIFICATE-----
-""" + self.signature_certificate_list
-
-
-def download_info_from_networkcache(path, slapos_conf):
-  """
-  Download a tar of the repository from cache, and untar it.
-  """
-  shacache = NetworkCache(slapos_conf)
-
-  def strategy(entry_list):
-    """
-    Get the latest entry.
-    """
-    timestamp = 0
-    best_entry = None
-    for entry in entry_list:
-      if entry['timestamp'] > timestamp:
-        best_entry = entry
-    return best_entry
-
-  return helper_download_network_cached_to_file(
-    path=path,
-    directory_key='slapos-under-testing-key',
-    required_key_list=['timestamp'],
-    strategy=strategy,
-    # Then we give a lot of not interesting things
-    dir_url=shacache.download_binary_dir_url,
-    cache_url=shacache.download_binary_cache_url,
-    signature_certificate_list=shacache.signature_certificate_list,
-  )
-
-def get_info_from_master(config):
-  """
-  Get status information and return its path
-  """
-  info, path = tempfile.mkstemp()
-  if not download_info_from_networkcache(
-    path, config.slapos_configuration) == False:
-    print open(path).read()
-    return path
-  else:
-    raise ValueError("No result from shacache")
-
-def save_current_state(current_state, config):
-  """
-  Will save ConfigParser to config file
-  """
-  file = open(config.srv_file, "w")
-  current_state.write(file)
-  file.close()
-
-def checkConsistency(*args, **kw):
-  print "CHECK CONSISTENCY %s" % ((args, kw),)
-
-def update_machine(config):
-  """
-  Will fetch information from web and update and/or reboot
-  machine if needed
-  """
-  # Define logger for update_machine
-  logger = logging.getLogger('Updating your machine')
-  logger.setLevel(logging.DEBUG)
-  # add ch to logger
-  logger.addHandler(ch)
-
-  # Get configuration
-  current_state = ConfigParser.RawConfigParser()
-  current_state.read(config.srv_file)
-  next_state = ConfigParser.RawConfigParser()
-  next_state_file = get_info_from_master(config)
-  next_state.read(next_state_file)
-  os.remove(next_state_file)
-  config.getSystemInfo(current_state, next_state)
-  config.displayConfig()
-
-  # Check if run for first time
-  if config.first_time:
-    current_state.add_section('system')
-    current_state.set('system', 'reboot', config.today.isoformat())
-    current_state.set('system', 'upgrade', config.today.isoformat())
-    save_current_state(current_state, config)
-    # Purge repositories list and add new ones
-    checkConsistency()
-  else:
-    if config.last_upgrade < config.upgrade:
-      # Purge repositories list and add new ones
-
-      current_state.set('system', 'upgrade', config.today.isoformat())
-      save_current_state(current_state, config)
-      checkConcistency()
-    else:
-      logger.info("Your system is up to date")
-
-    if config.last_reboot < config.reboot:
-      current_state.set('system', 'reboot', config.today.isoformat())
-      save_current_state(current_state, config)
-
-
 # Class containing all parameters needed for configuration
 class Config:
-  def setConfig(self, option_dict):
-    """
-    Set options given by parameters.
-    """
+  def __init__(self, option_dict):
     # Set options parameters
     for option, value in option_dict.__dict__.items():
       setattr(self, option, value)
 
-    self.today = datetime.date.today()
+class Upgrader:
+  def __init__(self, config_dict):
+    # Set options parameters
+    self.config = Config(config_dict)
 
-    # Define logger for register
-    self.logger = logging.getLogger('slapupdate configuration')
+    self.logger = logging.getLogger('Updating your machine')
     self.logger.setLevel(logging.DEBUG)
     # add ch to logger
     self.logger.addHandler(ch)
 
-    if self.verbose:
-      ch.setLevel(logging.DEBUG)
 
-  def getSystemInfo(self, current_state, next_state):
+  def checkConsistency(self, *args, **kw):
+    print "CHECK CONSISTENCY %s" % ((args, kw),)
+
+  def run(self):
     """
-    Extract information from config file and server file
+    Will fetch information from web and update and/or reboot
+    machine if needed
     """
-    self.reboot = datetime.datetime.strptime(next_state.get('system', 'reboot'),
-                                             "%Y-%m-%d").date()
-    self.upgrade = datetime.datetime.strptime(next_state.get('system', 'upgrade'),
-                                              "%Y-%m-%d").date()
-    self.opensuse_version = next_state.getfloat('system', 'opensuse_version')
-    if not current_state.has_section('system'):
-      self.first_time = True
+    today = datetime.date.today().isoformat()
+  
+    # Get configuration
+    signature = Signature(self.config)
+  
+    signature.load()
+  
+    self.logger.debug("Expected Reboot early them %s" % signature.reboot)
+    self.logger.debug("Expected Upgrade early them %s" % signature.upgrade)
+    self.logger.debug("Last reboot : %s" % signature.last_reboot)
+    self.logger.debug("Last upgrade : %s" % signature.last_upgrade)
+  
+    # Check if run for first time
+    if signature.last_reboot is None:
+      signature.update(reboot=today, upgrade=today)
+  
+      # Purge repositories list and add new ones
+      self.checkConsistency()
     else:
-      self.first_time = False
-      self.last_reboot = datetime.datetime.strptime(
-        current_state.get('system', 'reboot'),
-        "%Y-%m-%d").date()
-      self.last_upgrade = datetime.datetime.strptime(
-        current_state.get('system', 'upgrade'),
-        "%Y-%m-%d").date()
-
-  def displayConfig(self):
-    """
-    Display Config
-    """
-    self.logger.debug("reboot %s" % self.reboot)
-    self.logger.debug("upgrade %s" % self.upgrade)
-    self.logger.debug("suse version %s" % self.opensuse_version)
-    if not self.first_time:
-      self.logger.debug("Last reboot : %s" % self.last_reboot)
-      self.logger.debug("Last upgrade : %s" % self.last_upgrade)
-
-
+      if signature.last_upgrade < signature.upgrade:
+        # Purge repositories list and add new ones
+  
+        signature.update(upgrade=today)
+        self.checkConcistency()
+      else:
+        logger.info("Your system is up to date")
+  
+      if signature.last_reboot < signature.reboot:
+        signature.update(reboot=today)
+  
 def main():
   """Update computer and slapos"""
   usage = "usage: %s [options] " % sys.argv[0]
   # Parse arguments
-  config = Config()
-  config.setConfig(Parser(usage=usage).check_args())
-  #config.displayUserConfig()
-  update_machine(config)
+  upgrader = Upgrader(Parser(usage=usage).check_args())
+  upgrader.run()
   sys.exit()
