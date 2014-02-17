@@ -81,10 +81,6 @@ Check your config
 -------------------------------------------
 Check your config file and your cron file
 +++++++++++++++++++++++++++++++++++++++++
-Run:
-# slapos-test
-This script will check your config file for missing section or parameters
-
 You can use the slapos.cfg.example config file as reference for slapos.cfg.
 http://git.erp5.org/gitweb/slapos.core.git/blob_plain/HEAD:/slapos.cfg.example
 
@@ -113,9 +109,3 @@ LXC
 If you want to run lxc on you machine run these command:
 
 # touch /etc/opt/slapos/SlapContainer-needed ; systemctl restart slapos-boot-dedicated.service
-
-openvpn
-+++++++
-Openvpn by vifib for ipv6 is forced by default in the package.
-- If you want to deactivate it run
-# rm /etc/opt/slapos/openvpn-needed
