@@ -36,6 +36,8 @@ import os
 import subprocess as sub
 import sys
 import tempfile
+from signature import Signature
+
 
 # create console handler and set level to warning
 ch = logging.StreamHandler()
@@ -95,7 +97,6 @@ class Upgrader:
     # add ch to logger
     self.logger.addHandler(ch)
 
-
   def checkConsistency(self, *args, **kw):
     print "CHECK CONSISTENCY %s" % ((args, kw),)
 
@@ -118,21 +119,25 @@ class Upgrader:
   
     # Check if run for first time
     if signature.last_reboot is None:
-      signature.update(reboot=today, upgrade=today)
+      if not self.config.dry_run:
+        signature.update(reboot=today, upgrade=today)
   
       # Purge repositories list and add new ones
-      self.checkConsistency()
+      self.checkConsistency(fixit=not self.config.dry_run)
     else:
       if signature.last_upgrade < signature.upgrade:
         # Purge repositories list and add new ones
-  
-        signature.update(upgrade=today)
-        self.checkConcistency()
+        if not self.config.dry_run:
+          signature.update(upgrade=today)
+        self.checkConsistency(fixit=not self.config.dry_run)
       else:
         logger.info("Your system is up to date")
   
       if signature.last_reboot < signature.reboot:
-        signature.update(reboot=today)
+        if not self.config.dry_run:
+          signature.update(reboot=today)
+        else:
+          self.logger.debug("Dry run: Rebooting required.")
   
 def main():
   """Update computer and slapos"""
@@ -141,3 +146,7 @@ def main():
   upgrader = Upgrader(Parser(usage=usage).check_args())
   upgrader.run()
   sys.exit()
+
+
+if __name__ == '__main__':
+  main()
