@@ -37,7 +37,7 @@ class PackageManager:
     return self.getOSSignature() in signature_list
 
   def getOSSignature(self):
-    return "+++".join(patched_linux_distribution())
+    return "+++".join([i.strip().lower() for i in patched_linux_distribution()])
 
   def getDistributionName(self):
     return patched_linux_distribution()[0]
