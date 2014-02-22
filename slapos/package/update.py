@@ -37,7 +37,7 @@ import subprocess as sub
 import sys
 import tempfile
 from signature import Signature
-
+from base_promise import BasePromise
 
 # create console handler and set level to warning
 ch = logging.StreamHandler()
@@ -97,47 +97,77 @@ class Upgrader:
     # add ch to logger
     self.logger.addHandler(ch)
 
-  def checkConsistency(self, *args, **kw):
-    print "CHECK CONSISTENCY %s" % ((args, kw),)
-
-  def run(self):
-    """
-    Will fetch information from web and update and/or reboot
-    machine if needed
-    """
+  def fixConsistency(self, signature, upgrade=0, reboot=0, boot=0, **kw):
+    print upgrade, reboot, boot
     today = datetime.date.today().isoformat()
+    if upgrade and boot:
+      signature.update(reboot=today, upgrade=today)
+    if upgrade:
+      signature.update(upgrade=today)
+    elif reboot:
+      signature.update(reboot=today)
+    else:
+      raise ValueError(
+        "You need upgrade and/or reboot when invoke fixConsistency!")
+
+    if upgrade:
+      pkgmanager = BasePromise()
+      configuration_dict = signature.get_signature_dict()
+      for entry in configuration_dict:
+         signature_list = configuration_dict[entry].get("signature-list")
+         if pkgmanager.matchSignatureList(signature_list):
+           print "Upgrade FOUND!!!! %s " % entry
+           upgrade_goal = configuration_dict[entry]
+           break
+
+      repository_tuple_list = []
+      for repository in upgrade_goal['repository-list']:
+        alias, url = repository.split("=")
+        repository_tuple_list.append((alias.strip(), url.strip()))
+
+      pkgmanager.update(repository_tuple_list, upgrade_goal['filter-package-list'])
+
+  def checkConsistency(self, fixit=0, **kw):
   
     # Get configuration
     signature = Signature(self.config)
-  
     signature.load()
   
     self.logger.debug("Expected Reboot early them %s" % signature.reboot)
     self.logger.debug("Expected Upgrade early them %s" % signature.upgrade)
     self.logger.debug("Last reboot : %s" % signature.last_reboot)
     self.logger.debug("Last upgrade : %s" % signature.last_upgrade)
-  
+
+    if signature.upgrade > datetime.date.today():
+      self.logger.debug("Upgrade will happens on %s" % signature.upgrade)
+      #return
+ 
     # Check if run for first time
     if signature.last_reboot is None:
-      if not self.config.dry_run:
-        signature.update(reboot=today, upgrade=today)
-  
-      # Purge repositories list and add new ones
-      self.checkConsistency(fixit=not self.config.dry_run)
+      if fixit:
+        # Purge repositories list and add new ones
+        self.fixConsistency(signature, upgrade=1, boot=1)
     else:
       if signature.last_upgrade < signature.upgrade:
         # Purge repositories list and add new ones
-        if not self.config.dry_run:
-          signature.update(upgrade=today)
-        self.checkConsistency(fixit=not self.config.dry_run)
+        if fixit:
+          self.fixConsistency(signature, upgrade=1)
       else:
         logger.info("Your system is up to date")
   
       if signature.last_reboot < signature.reboot:
         if not self.config.dry_run:
-          signature.update(reboot=today)
+          self.fixConsistency(signature, reboot=1)
         else:
           self.logger.debug("Dry run: Rebooting required.")
+  
+
+  def run(self):
+    """
+    Will fetch information from web and update and/or reboot
+    machine if needed
+    """
+    self.checkConsistency(fixit=not self.config.dry_run)
   
 def main():
   """Update computer and slapos"""
@@ -146,7 +176,6 @@ def main():
   upgrader = Upgrader(Parser(usage=usage).check_args())
   upgrader.run()
   sys.exit()
-
 
 if __name__ == '__main__':
   main()

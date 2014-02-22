@@ -55,7 +55,7 @@ class BasePromise(PackageManager):
     self.log("Calling: %s" % ' '.join(cmd_args))
 
     if not dry_run:
-      p = sub.Popen(cmd_args, stdout=stdout, stderr=stderr)
+      p = subprocess.Popen(cmd_args, stdout=stdout, stderr=stderr)
       output, err = p.communicate()
       return output, err
 

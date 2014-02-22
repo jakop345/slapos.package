@@ -36,6 +36,10 @@ import sys
 from update import Config
 from signature import Signature
 
+def do_upgrade(config):
+  signature = Signature(config)
+  signature.upload(dry_run=config.dry_run)
+
 
 class Parser(OptionParser):
   """
@@ -84,28 +88,10 @@ def get_yes_no(prompt):
     if answer.upper() in ['N', 'NO']:
         return False
 
-def new_upgrade(config):
-  signature = Signature(config)
-  signature.upload(dry_run=1) 
-
-  print " You will update this :"
-  print open(config.upgrade_file).read()
-  if not get_yes_no("Do you want to continue? "):
-    sys.exit(0)
-
-  if not config.dry_run:
-    print "Uploading..."
-    signature.upload()
-
 def main():
   """Upload file to update computer and slapos"""
   usage = "usage: [options] "
   # Parse arguments
   config = Config(Parser(usage=usage).check_args())
-  config.srv_file = "/srv/slapupdate"
-  new_upgrade(config)
+  do_upgrade(config)
   sys.exit()
-
-
-if __name__ == '__main__':
-  main()

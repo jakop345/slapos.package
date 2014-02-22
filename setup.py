@@ -1,6 +1,7 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-version = '0.0.1.1'
+# Still under development
+version = '0.0.1.3'
 name = 'slapos.package'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -16,7 +17,8 @@ setup(name=name,
       license='GPLv3',
       url='http://www.slapos.org',
       author='VIFIB',
-      packages=['slapos.package'],
+      namespace_packages=['slapos'],
+      packages=find_packages(),
       include_package_data=True,
       install_requires=[
           'slapos.libnetworkcache',
@@ -25,8 +27,16 @@ setup(name=name,
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              'slapos-update = slapos.package.update:main',
-          ]
+              # Those entry points are development version
+              'slappkg-update = slapos.package.update:main',
+              'slappkg-discover = slapos.package.distribution:do_discover',
+              'slappkg-upload-key = slapos.package.upload_key:main'
+          ],
+
+        # Not supported yet
+        #'slapos.cli': [
+        #  'package upload-key = slapos.package.upload_key:main'
+        #  ]
       },
       test_suite="slapos.package.test",
 )

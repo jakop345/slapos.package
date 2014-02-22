@@ -1,5 +1,7 @@
 import platform
+import glob
 import re
+import os
 
 _distributor_id_file_re = re.compile("(?:DISTRIB_ID\s*=)\s*(.*)", re.I)
 _release_file_re = re.compile("(?:DISTRIB_RELEASE\s*=)\s*(.*)", re.I)
@@ -30,6 +32,13 @@ def patched_linux_distribution(distname='', version='', id='',
     return platform.linux_distribution(distname, version, id, supported_dists, full_distribution_name)
 
 class PackageManager:
+
+  def matchSignatureList(self, signature_list):
+    return self.getOSSignature() in signature_list
+
+  def getOSSignature(self):
+    return "+++".join(patched_linux_distribution())
+
   def getDistributionName(self):
     return patched_linux_distribution()[0]
 
@@ -62,36 +71,60 @@ class PackageManager:
     """ Add a repository """
     return self._getDistribitionHandler().updateRepository(self._call)
 
-  def _installSoftware(self, name):
+  def _installSoftwareList(self, name_list):
     """ Upgrade softwares """
-    return self._getDistribitionHandler().installSoftware(self._call, name)
+    return self._getDistribitionHandler().installSoftwareList(self._call, name_list)
 
   def _updateSoftware(self):
     """ Upgrade softwares """
     return self._getDistribitionHandler().updateSoftware(self._call)
 
-  def updateSystem(self):
+  def _updateSystem(self):
     """ Dist-Upgrade of system """
     return self._getDistribitionHandler().updateSystem(self._call)
 
+  def update(self, repository_list=[], package_list=[]):
+    """ Perform upgrade """
+    self._purgeRepository()
+    for alias, url in repository_list:
+      self._addRepository(url, alias)
+    self._updateRepository()
+    if len(package_list):
+      self._installSoftwareList(package_list)
+
 # This helper implements API for package handling
 class AptGet:
+ 
+  source_list_path = "/etc/apt/sources.list"
+  source_list_d_path = "/etc/apt/sources.list.d"
+
   def purgeRepository(self, caller):
     """ Remove all repositories """
-    raise NotImplemented
+    # Aggressive removal
+    os.remove(self.source_list_path)
+    open("/etc/apt/sources.list", "w+").write("# Removed all")
+    for file_path in glob.glob("%s/*" % self.source_list_d_path):
+      os.remove(file_path)
 
   def addRepository(self, caller, url, alias):
     """ Add a repository """
-    raise NotImplemented
+    repos_file = open("%s/%s.list" % (self.source_list_d_path, alias), "w")
+    prefix = "deb "
+    if alias.endswith("-src"):
+      prefix = "deb-src "
+    repos_file.write(prefix + url)
+    repos_file.close()
 
   def updateRepository(self, caller):
     """ Add a repository """
     caller(['apt-get', 'update'], stdout=None)
 
-  def installSoftware(self, caller, name):
+  def installSoftwareList(self, caller, name_list):
     """ Instal Software """
     self.updateRepository(caller)
-    caller(["apt-get", "install", "-y", name], stdout=None) 
+    command_list = ["apt-get", "install", "-y"]
+    command_list.extend(name_list)
+    caller(command_list, stdout=None) 
 
   def isUpgradable(self, caller, name):
     output, err = caller(["apt-get", "upgrade", "--dry-run"])
@@ -132,10 +165,12 @@ class Zypper:
         return False
     return True
 
-  def installSoftware(self, caller, name):
+  def installSoftwareList(self, caller, name_list):
     """ Instal Software """
     self.updateRepository(caller)
-    caller(['zypper', '--gpg-auto-import-keys', 'up', '-ly', name], stdout=None) 
+    command_list = ['zypper', '--gpg-auto-import-keys', 'up', '-ly']
+    command_list.extend(name_list)
+    caller(command_list, stdout=None) 
 
   def updateSoftware(self, caller):
     """ Upgrade softwares """
@@ -144,4 +179,10 @@ class Zypper:
   def updateSystem(self, caller):
     """ Dist-Upgrade of system """
     caller(['zypper', '--gpg-auto-import-keys', 'dup', '-ly'], stdout=None)
+
+
+def do_discover():
+  package_manager = PackageManager()
+  print package_manager.getOSSignature()
+
 

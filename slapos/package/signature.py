@@ -73,6 +73,14 @@ class NetworkCache:
     else:
       self.directory_key = "slapos-upgrade-testing-key"
 
+def get_yes_no(prompt):
+  while True:
+    answer = raw_input(prompt + " [y,n]: ")
+    if answer.upper() in ['Y', 'YES']:
+        return True
+    if answer.upper() in ['N', 'NO']:
+        return False
+
 class Signature:
 
   def __init__(self, config, logger=None):
@@ -92,6 +100,7 @@ class Signature:
       for entry in entry_list:
         if entry['timestamp'] > timestamp:
           best_entry = entry
+
       return best_entry
 
     return helper_download_network_cached_to_file(
@@ -145,7 +154,7 @@ class Signature:
     except Exception:
       print 'Unable to upload to cache:\n%s.' % traceback.format_exc()
 
-  def upload(self, dry_run=0):
+  def upload(self, dry_run=0, verbose=1):
     upgrade_info = ConfigParser.RawConfigParser()
     upgrade_info.read(self.config.upgrade_file)
 
@@ -160,13 +169,17 @@ class Signature:
     upgrade_info.write(file)
     file.close()
 
+    if verbose:
+      print " You will update this :"
+      print open(self.config.upgrade_file).read()
+
     if dry_run:
       return
 
-    self._upload(self.config.upgrade_file)
+    if get_yes_no("Do you want to continue? "):
+      self._upload(self.config.upgrade_file)
  
   def update(self, reboot=None, upgrade=None):
-    self.load()
     if reboot is None and upgrade is None:
       return 
     if not self.current_state.has_section('system'):
@@ -182,6 +195,20 @@ class Signature:
     self.current_state.write(current_state_file)
     current_state_file.close()
 
+  def get_signature_dict(self):
+    """ Convert Next state info into a dict """
+    map_dict = {}
+    for key in self.next_state.sections():
+      if key == "system":
+        continue
+      def clean_list(l):
+        return [x.strip() for x in l.split('\n') if x.strip() != '']
+      map_dict[key] = {}
+      for entry in self.next_state.options(key):
+        map_dict[key][entry] = clean_list(self.next_state.get(key, entry))
+
+    return map_dict
+
   def _read_state(self, state, name):
     """ Extract information from config file """
     if not state.has_section('system'):
@@ -196,10 +223,10 @@ class Signature:
     self.current_state = ConfigParser.RawConfigParser()
     self.current_state.read(self.config.srv_file)
 
-    self.next_state = ConfigParser.RawConfigParser()
+    self.next_state = ConfigParser.ConfigParser()
     self.next_state.read(self.download())
 
-    self.reboot = self._read_state(self.next_state, "upgrade")
+    self.reboot = self._read_state(self.next_state, "reboot")
     self.upgrade = self._read_state(self.next_state, "upgrade")
     self.last_reboot = self._read_state(self.current_state, "reboot")
     self.last_upgrade = self._read_state(self.current_state, "upgrade")
