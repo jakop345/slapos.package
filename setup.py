@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 # Still under development
-version = '0.0.1.3'
+version = '0.0.1.4'
 name = 'slapos.package'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -27,10 +27,14 @@ setup(name=name,
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              # Those entry points are development version
-              'slappkg-update = slapos.package.update:main',
-              'slappkg-discover = slapos.package.distribution:do_discover',
-              'slappkg-upload-key = slapos.package.upload_key:main'
+              # Those entry points are development version and
+              # self updatable API
+              'slappkg-update-raw = slapos.package.update:main',
+              'slappkg-discover-raw = slapos.package.distribution:do_discover',
+              'slappkg-upload-key-raw = slapos.package.upload_key:main',
+              'slappkg-update = slapos.package.autoupdate:do_update',
+              'slappkg-discover = slapos.package.autoupdate:do_discover',
+              'slappkg-upload-key = slapos.package.autoupdate:do_upload',
           ],
 
         # Not supported yet

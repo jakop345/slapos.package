@@ -183,6 +183,6 @@ class Zypper:
 
 def do_discover():
   package_manager = PackageManager()
-  print package_manager.getOSSignature()
+  print "The signature for your current system is: %s" % package_manager.getOSSignature()
 
 

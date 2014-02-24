@@ -1,0 +1,8 @@
+Changes
+=======
+
+0.0.1.4 (2014-02-24)
+---------------------
+
+ * Initial Release of Basic Functions for Debian/Ubuntu and OpenSuse. [Rafael Monnerat]
+
