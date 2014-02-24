@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2012-2014 Vifib SARL and Contributors.
+# Copyright (c) 2012 Vifib SARL and Contributors.
 # All Rights Reserved.
 #
 # WARNING: This program as such is intended to be used by professional
@@ -95,16 +95,6 @@ class Upgrader:
 
   def fixConsistency(self, signature, upgrade=0, reboot=0, boot=0, **kw):
     today = datetime.date.today().isoformat()
-    if upgrade and boot:
-      signature.update(reboot=today, upgrade=today)
-    if upgrade:
-      signature.update(upgrade=today)
-    elif reboot:
-      signature.update(reboot=today)
-    else:
-      raise ValueError(
-        "You need upgrade and/or reboot when invoke fixConsistency!")
-
     if upgrade:
       pkgmanager = BasePromise()
       configuration_dict = signature.get_signature_dict()
@@ -121,6 +111,16 @@ class Upgrader:
         repository_tuple_list.append((alias.strip(), url.strip()))
 
       pkgmanager.update(repository_tuple_list, upgrade_goal['filter-package-list'])
+
+    if upgrade and boot:
+      signature.update(reboot=today, upgrade=today)
+    if upgrade:
+      signature.update(upgrade=today)
+    elif reboot:
+      signature.update(reboot=today)
+    else:
+      raise ValueError(
+        "You need upgrade and/or reboot when invoke fixConsistency!")
 
   def checkConsistency(self, fixit=0, **kw):
   
