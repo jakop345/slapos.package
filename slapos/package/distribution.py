@@ -2,6 +2,7 @@ import platform
 import glob
 import re
 import os
+import subprocess
 
 _distributor_id_file_re = re.compile("(?:DISTRIB_ID\s*=)\s*(.*)", re.I)
 _release_file_re = re.compile("(?:DISTRIB_RELEASE\s*=)\s*(.*)", re.I)
@@ -51,10 +52,10 @@ class PackageManager:
 
   def _getDistribitionHandler(self):
     distribution_name = self.getDistributionName()
-    if distribution_name.lower() == 'opensuse':
+    if distribution_name.lower().strip() == 'opensuse':
       return Zypper()
 
-    elif distribution_name.lower() in ['debian', 'ubuntu']:
+    elif distribution_name.lower().strip() in ['debian', 'ubuntu']:
       return AptGet()
 
     raise NotImplemented("Distribution (%s) is not Supported!" % distribution_name) 
@@ -145,14 +146,18 @@ class AptGet:
 class Zypper:
   def purgeRepository(self, caller):
     """Remove all repositories"""
-    listing, err = caller(['zypper', 'lr'])
+    listing, err = caller(['zypper', 'lr'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while listing.count('\n') > 2:
       output, err = caller(['zypper', 'rr', '1'], stdout=None)
-      listing, err = caller(['zypper', 'lr'])
+      listing, err = caller(['zypper', 'lr'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def addRepository(self, caller, url, alias):
     """ Add a repository """
-    output, err = caller(['zypper', 'ar', '-fc', url, alias], stdout=None)
+    base_command = ['zypper', 'ar', '-fc']
+    if alias.endswith("unsafe"):
+      base_command.append('--no-gpgcheck')
+    base_command.extend([url, alias])
+    output, err = caller(base_command, stdout=None)
 
   def updateRepository(self, caller):
     """ Add a repository """
