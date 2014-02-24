@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2012 Vifib SARL and Contributors.
+# Copyright (c) 2012-2014 Vifib SARL and Contributors.
 # All Rights Reserved.
 #
 # WARNING: This program as such is intended to be used by professional
@@ -28,14 +28,10 @@
 #
 ##############################################################################
 
-import ConfigParser
 import datetime
 import logging
 from optparse import OptionParser, Option
-import os
-import subprocess as sub
 import sys
-import tempfile
 from signature import Signature
 from base_promise import BasePromise
 
@@ -98,7 +94,6 @@ class Upgrader:
     self.logger.addHandler(ch)
 
   def fixConsistency(self, signature, upgrade=0, reboot=0, boot=0, **kw):
-    print upgrade, reboot, boot
     today = datetime.date.today().isoformat()
     if upgrade and boot:
       signature.update(reboot=today, upgrade=today)
@@ -140,7 +135,7 @@ class Upgrader:
 
     if signature.upgrade > datetime.date.today():
       self.logger.debug("Upgrade will happens on %s" % signature.upgrade)
-      #return
+      return
  
     # Check if run for first time
     if signature.last_reboot is None:
@@ -153,7 +148,7 @@ class Upgrader:
         if fixit:
           self.fixConsistency(signature, upgrade=1)
       else:
-        logger.info("Your system is up to date")
+        self.logger.info("Your system is up to date")
   
       if signature.last_reboot < signature.reboot:
         if not self.config.dry_run:
