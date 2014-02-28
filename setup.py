@@ -29,7 +29,7 @@ setup(name=name,
           'console_scripts': [
               # Those entry points are development version and
               # self updatable API
-              'slappkg-update-raw = slapos.package.update:main',
+              'slappkg-update-raw = slapos.package.update:do_update',
               'slappkg-discover-raw = slapos.package.distribution:do_discover',
               'slappkg-upload-key-raw = slapos.package.upload_key:main',
               'slappkg-update = slapos.package.autoupdate:do_update',

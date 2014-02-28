@@ -123,11 +123,11 @@ class Upgrader:
         "You need upgrade and/or reboot when invoke fixConsistency!")
 
   def checkConsistency(self, fixit=0, **kw):
-  
+
     # Get configuration
     signature = Signature(self.config)
     signature.load()
-  
+
     self.logger.debug("Expected Reboot early them %s" % signature.reboot)
     self.logger.debug("Expected Upgrade early them %s" % signature.upgrade)
     self.logger.debug("Last reboot : %s" % signature.last_reboot)
@@ -136,7 +136,7 @@ class Upgrader:
     if signature.upgrade > datetime.date.today():
       self.logger.debug("Upgrade will happens on %s" % signature.upgrade)
       return
- 
+
     # Check if run for first time
     if signature.last_reboot is None:
       if fixit:
@@ -149,13 +149,13 @@ class Upgrader:
           self.fixConsistency(signature, upgrade=1)
       else:
         self.logger.info("Your system is up to date")
-  
+
       if signature.last_reboot < signature.reboot:
         if not self.config.dry_run:
           self.fixConsistency(signature, reboot=1)
         else:
           self.logger.debug("Dry run: Rebooting required.")
-  
+
 
   def run(self):
     """
@@ -163,8 +163,8 @@ class Upgrader:
     machine if needed
     """
     self.checkConsistency(fixit=not self.config.dry_run)
-  
-def main():
+
+def do_update():
   """Update computer and slapos"""
   usage = "usage: %s [options] " % sys.argv[0]
   # Parse arguments
@@ -172,5 +172,3 @@ def main():
   upgrader.run()
   sys.exit()
 
-if __name__ == '__main__':
-  main()
