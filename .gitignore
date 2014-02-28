@@ -5,6 +5,7 @@ obs/slapos-version
 obs/templates/debian.tar.gz
 obs/templates/debian/cron.d
 obs/templates/debian/slapos-node.logrotate
+debian-preseed/*.iso
 *pyc
 slapprepare/build
 slapprepare/dist
