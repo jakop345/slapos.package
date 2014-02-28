@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 
-# Still under development
-version = '0.0.1.5'
+version = '0.1'
 name = 'slapos.package'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
