@@ -33,7 +33,7 @@ import datetime
 from optparse import OptionParser, Option
 import sys
 
-from update import Config
+from base_promise import Config
 from signature import Signature
 
 def do_upgrade(config):

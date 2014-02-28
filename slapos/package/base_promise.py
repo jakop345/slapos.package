@@ -30,7 +30,12 @@
 
 import os
 import subprocess
+import logging
+import ConfigParser
+
+# slapos.package imports
 from distribution import PackageManager
+from signature import Signature
 
 class SlapError(Exception):
   """
@@ -47,14 +52,71 @@ class UsageError(SlapError):
 class ExecError(SlapError):
   pass
 
+# Class containing all parameters needed for configuration
+class Config:
+  def __init__(self, option_dict):
+    # Set options parameters
+    for option, value in option_dict.__dict__.items():
+      setattr(self, option, value)
+
 class BasePromise(PackageManager):
 
   systemctl_path_list = ["/bin/systemctl", 
                          "/usr/bin/systemctl"]
 
+  def __init__(self, config_dict):
+    self.config = Config(config_dict)
+
+    self.logger = logging.getLogger('')
+    self.logger.setLevel(logging.DEBUG)
+    # add ch to logger
+    #self.logger.addHandler(ch)
+
+    self.signature = None
+
+  def getSignature(self):
+    """ Return signature loaded from signature file """
+    # Get configuration
+    if self.signature is None:
+      self.signature = Signature(self.config)
+      self.signature.load()
+
+    return self.signature
+
+  def getSlapOSConfigurationDict(self, section="slapos"):
+    """ Return a dictionary with the slapos.cfg configuration """
+
+    configuration_info = ConfigParser.RawConfigParser()
+    configuration_info.read(self.config.slapos_configuration)
+
+    return dict(configuration_info.items(section))
+
+  def isApplicable(self):
+    """ Define if the promise is applicable checking the promise list """
+    upgrade_goal = self.getPromiseSectionDict()
+    if upgrade_goal is None:
+      return False
+
+    if upgrade_goal.get("filter-promise-list") is None:
+      # Run all if no filter is provided
+      return True
+
+    module = self.__module__.split(".")[-1]
+    return module in upgrade_goal.get("filter-promise-list")
+
+
+  def getPromiseSectionDict(self):
+    """ Get the section which matches with the system """
+    signature = self.getSignature()
+    configuration_dict = signature.get_signature_dict()
+    for entry in configuration_dict:
+      signature_list = configuration_dict[entry].get("signature-list")
+      if self.matchSignatureList(signature_list):
+        return configuration_dict[entry]
+
   def log(self, message):
     """ For now only prints, but it is usefull for test purpose """
-    print message
+    self.logger.info(message)
 
   def _isSystemd(self):
     """ Dectect if Systemd is used """
@@ -87,26 +149,3 @@ class BasePromise(PackageManager):
       p = subprocess.Popen(cmd_args, stdout=stdout, stderr=stderr)
       output, err = p.communicate()
       return output, err
-
-class BasePackagePromise(BasePromise):
-
-  package_name = None
-  binary_path = None
-
-  def checkConsistency(self, fixit=0, **kw):
-    is_ok = True
-    if self.binary is not None and \
-        not os.path.exists(self.binary_path):
-      is_ok = False
-
-    if self._isUpgradable(self.package_name):
-      is_ok = False
-
-    if not is_ok and fixit:
-      return self.fixConsistency(**kw)
-
-    return is_ok
-
-  def fixConsistency(self, **kw):
-    self._installSoftware(self.package_name)
-    return self.checkConsistency(fixit=0, **kw)

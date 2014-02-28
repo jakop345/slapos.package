@@ -87,11 +87,20 @@ class Signature:
     self.config = config
     self.logger = logger
 
+  def log(self, message):
+    if self.logger is not None:
+      self.logger.debug(message)
+    else:
+      print message
+
   def _download(self, path):
     """
     Download a tar of the repository from cache, and untar it.
     """
     shacache = NetworkCache(self.config.slapos_configuration)
+
+    if shacache.signature_certificate_list is None:
+      raise ValueError("You need at least one valid signature for download")
 
     def strategy(entry_list):
       """Get the latest entry. """
@@ -150,9 +159,9 @@ class Signature:
         shadir_cert_file=shacache.shadir_cert_file,
         shadir_key_file=shacache.shadir_key_file,
       ):
-        print 'Uploaded update file to cache.'
+        self.log('Uploaded update file to cache.')
     except Exception:
-      print 'Unable to upload to cache:\n%s.' % traceback.format_exc()
+      self.log('Unable to upload to cache:\n%s.' % traceback.format_exc())
 
   def upload(self, dry_run=0, verbose=1):
     upgrade_info = ConfigParser.RawConfigParser()
@@ -170,8 +179,8 @@ class Signature:
     file.close()
 
     if verbose:
-      print " You will update this :"
-      print open(self.config.upgrade_file).read()
+      self.log(" You will update this :")
+      self.log(open(self.config.upgrade_file).read())
 
     if dry_run:
       return
