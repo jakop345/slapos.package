@@ -17,6 +17,57 @@ Basic Usage
 
   # slappkg-update --slapos-configuration update.cfg
 
+Upgrade Signature File
+=======================
+
+The signature file is composed by at least 2 sections:
+
+System Section ([system]) where is defines reboot and upgrade expected dates. If 
+server was upgraded before the dates present there, the upgrade will be trigger 
+for packages (This only affects core promise).
+
+Example:
+::
+ [system]
+ reboot = 2011-10-10
+ upgrade = 2014-02-20
+
+Distribution sections can have any other name choses by the user and it should 
+contains the follow entries (always use new line for multiple values):
+
+ * repository-list: define a list of repository entries, defined by (name = value). 
+                    Special minor notations explaned futher.
+ * filter-package-list: list of package names that are going to be keep installed and
+                    updated.
+
+ * filter-promise-list: list of promises that are enabled for this distribution. The user
+                    can decide which promises are going to be checked on every run. If this
+                    section is not present, all promises available are going to be checked.
+
+ * signature-list: defines which systems the promises are applicable on. The signature for
+                   every system can be found by slappkg-discover command. If None signature 
+                   matches, the system will not be upgraded.
+ 
+Example:
+::
+[debian-default]
+repository-list =
+        main = http://ftp.fr.debian.org/debian/ wheezy main
+        main-src = http://ftp.fr.debian.org/debian/ wheezy main
+        update = http://ftp.fr.debian.org/debian/ wheezy-updates main
+        update-src = http://ftp.fr.debian.org/debian/ wheezy-updates main
+        slapos = http://download.opensuse.org/repositories/home:/VIFIBnexedi/Debian_7.0 ./
+        re6stnet = http://git.erp5.org/dist/deb ./
+filter-package-list =
+        ntp
+        slapos.node
+        re6stnet
+filter-promise-list =
+        core
+        hostname
+signature-list =
+        debian+++jessie/sid+++
+
 Configuration Examples
 ========================
 
@@ -32,6 +83,7 @@ download-binary-cache-url = http://www.shacache.org/shacache
 download-cache-url = https://www.shacache.org/shacache
 download-binary-dir-url = http://www.shacache.org/shadir
 
+# It is important to use only trustfull keys.
 signature-certificate-list =
   -----BEGIN CERTIFICATE-----
   MIIB8DCCAVmgAwIBAgIJAPFf61p8y809MA0GCSqGSIb3DQEBBQUAMBAxDjAMBgNV
@@ -63,6 +115,9 @@ filter-package-list =
         ntp
         slapos.node
         re6stnet
+filter-promise-list = 
+        core
+        hostname
 signature-list = 
         debian+++jessie/sid+++
 
@@ -81,4 +136,5 @@ signature-list =
 [system]
 reboot = 2011-10-10
 upgrade = 2014-02-20
+
 
