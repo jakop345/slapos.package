@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2012,2013 Vifib SARL and Contributors.
+# Copyright (c) 2012-2014 Vifib SARL and Contributors.
 # All Rights Reserved.
 #
 # WARNING: This program as such is intended to be used by professional
