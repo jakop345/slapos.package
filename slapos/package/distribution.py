@@ -191,10 +191,10 @@ class Zypper:
 
   def updateRepository(self, caller):
     """ Add a repository """
-    caller(['zypper', '--gpg-auto-import-keys', 'up', '-Dly'], stdout=None)
+    caller(['zypper', '--gpg-auto-import-keys', 'in', '-Dly'], stdout=None)
 
   def isUpgradable(self, caller, name):
-    output, err = caller(['zypper', '--gpg-auto-import-keys', 'up', '-ly'])
+    output, err = caller(['zypper', '--gpg-auto-import-keys', 'up', '-ly'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     for line in output.splitlines():
       if line.startswith("'%s' is already installed." % name):
         return False
@@ -203,7 +203,7 @@ class Zypper:
   def installSoftwareList(self, caller, name_list):
     """ Instal Software """
     self.updateRepository(caller)
-    command_list = ['zypper', '--gpg-auto-import-keys', 'up', '-ly']
+    command_list = ['zypper', '--gpg-auto-import-keys', 'in', '-ly']
     command_list.extend(name_list)
     caller(command_list, stdout=None) 
 
