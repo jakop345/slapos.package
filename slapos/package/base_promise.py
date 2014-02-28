@@ -54,17 +54,18 @@ class ExecError(SlapError):
 
 # Class containing all parameters needed for configuration
 class Config:
-  def __init__(self, option_dict):
-    # Set options parameters
-    for option, value in option_dict.__dict__.items():
-      setattr(self, option, value)
+  def __init__(self, option_dict=None):
+    if option_dict is not None:
+      # Set options parameters
+      for option, value in option_dict.__dict__.items():
+        setattr(self, option, value)
 
 class BasePromise(PackageManager):
 
   systemctl_path_list = ["/bin/systemctl", 
                          "/usr/bin/systemctl"]
 
-  def __init__(self, config_dict):
+  def __init__(self, config_dict=None):
     self.config = Config(config_dict)
 
     self.logger = logging.getLogger('')
