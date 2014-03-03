@@ -55,6 +55,5 @@ set -e
 # Activate KSM (shared memory for KVM)
 echo 1 > /sys/kernel/mm/ksm/run
 
-slapos node format -v --now
 echo "[SlapOS Tweak] Finished at: `date`"
 echo "######################################################################"
