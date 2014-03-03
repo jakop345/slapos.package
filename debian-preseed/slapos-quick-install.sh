@@ -8,13 +8,21 @@ if [ -z "$COMPUTERNAME" ]; then
   exit 1
 fi
 
-if [ ! -f /etc/apt/sources.list.d/slapos.list ]; then 
-  echo "deb http://download.opensuse.org/repositories/home:/VIFIBnexedi/Debian_7.0/ ./" | tee /etc/apt/sources.list.d/slapos.list
+if [ ! -f /etc/slapos-aptget-flag ]; then 
   wget -O- "http://download.opensuse.org/repositories/home:/VIFIBnexedi/Debian_7.0/Release.key" | apt-key add -
+  gpg --keyserver subkeys.pgp.net --recv-keys 1A716324
+  gpg --export 1A716324 | apt-key add -
+  touch /etc/slapos-aptget-flag
 fi
 
-apt-get update
-apt-get install -y ntp slapos-node
+if [ ! -f /usr/local/bin/slappkg-update ]; then
+  apt-get install python-setuptools
+  easy_install -U slapos.package
+fi
+
+slappkg-conf --key=slapos-update-v0-iePo8Patho4aejai2reew1cai7exeibiepa8winideefar3aiBoh8ohpaingieTh --slapos-configuration=/etc/opt/update.cfg
+
+slappkg-update --slapos-configuration=/etc/opt/update.cfg
 
 # Firmware for realtek
 apt-get install -y firmware-realtek 
@@ -54,6 +62,8 @@ set -e
 
 if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
   slapos node register $COMPUTERNAME --partition-number 20 --ipv6-interface lo --interface-name eth0
+  rm /etc/opt/update.cfg
+  slappkg-conf --key=slapos-update-v0-iePo8Patho4aejai2reew1cai7exeibiepa8winideefar3aiBoh8ohpaingieTh --slapos-configuration=/etc/opt/update.cfg
 fi
 
 if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
@@ -61,6 +71,7 @@ if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
  exit 1
 fi
 
+# slapos-tweak should be merged with slapos.package
 slapos-tweak
 
 cat > /etc/cron.d/slapos-boot << EOF
@@ -69,7 +80,6 @@ PATH=/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
 
 @reboot root /usr/sbin/slapos-tweak >> /opt/slapos/log/slapos-tweak.log 2>&1
-@reboot root /opt/slapos/bin/bang /etc/opt/slapos/slapos.cfg -m "Reboot." >> /opt/slapos/log/slapos-tweak.log 2>&1
 
 EOF
 
