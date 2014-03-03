@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.1.1'
 name = 'slapos.package'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -31,9 +31,11 @@ setup(name=name,
               'slappkg-update-raw = slapos.package.update:do_update',
               'slappkg-discover-raw = slapos.package.distribution:do_discover',
               'slappkg-upload-key-raw = slapos.package.upload_key:main',
+              'slappkg-conf-raw = slapos.package.conf:do_conf',
               'slappkg-update = slapos.package.autoupdate:do_update',
               'slappkg-discover = slapos.package.autoupdate:do_discover',
               'slappkg-upload-key = slapos.package.autoupdate:do_upload',
+              'slappkg-conf = slapos.package.autoupdate:do_conf',
           ],
 
         # Not supported yet

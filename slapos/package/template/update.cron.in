@@ -1,0 +1,7 @@
+# BEWARE: This file will be automatically regenerated on each boot
+SHELL=/bin/sh
+PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/usr/local/bin
+MAILTO=root
+
+# This file expects that 
+0 0 * * * root slappkg-update --slapos-configuration=%(configuration_path)s -v >> %(slapos_location)s/log/slappkg-update.log 2>&1

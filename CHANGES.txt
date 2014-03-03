@@ -1,5 +1,16 @@
 Changes
-=======
+========
+
+0.1.1 (2014-02-28)
+------------------
+
+ * Included slappkg-conf [Rafael Monnerat]
+ * Fixed README.txt syntax [Rafael Monnerat]
+
+0.1 (2014-02-28)
+----------------
+
+ * Initial Stable Release [Rafael Monnerat]
 
 0.0.1.4 (2014-02-24)
 ---------------------

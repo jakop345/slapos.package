@@ -45,6 +45,9 @@ def do_update():
 def do_upload():
   _run_command('slappkg-upload-key-raw')
 
+def do_conf():
+  _run_command('slappkg-conf-raw')
+
 def _run_command(command):
     if '--no-update' in sys.argv:
         sys.argv.remove('--no-update')
