@@ -80,7 +80,6 @@ def get_template(name):
 import os, errno
 
 def mkdir_p(path):
-  import pdb;pdb.set_trace()
   if not os.path.exists(path):
     os.makedirs(path)
   
