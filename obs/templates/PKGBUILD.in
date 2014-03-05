@@ -1,11 +1,11 @@
-# Maintainer: Vivien Alger <algervivie@tiolive.com>
+# Maintainer: Rafael Monnerat <rafael@nexedi.com>
 pkgname=slapos-node
 pkgver=%VERSION%+%RECIPE_VERSION%+%RELEASE%
 pkgdesc="Slapos client"
 arch=('x86_64' 'i686')
 url="http://www.slapos.org"
 license=('GPL')
-depends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'bridge-utils' 'openvpn')
+depends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'bridge-utils')
 makedepends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'chrpath')
 install='slapos-node.install'
 source=($pkgname_$pkgver.tar.gz)
