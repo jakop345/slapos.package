@@ -89,7 +89,9 @@ function obs_upload
     osc add $SLAPOS_DIRECTORY.dsc
 
     osc rm -f PKGBUILD
-    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/PKGBUILD.in > PKGBUILD
+    SOURCEMD5=`md5sum $SLAPOS_DIRECTORY.tar.gz | cut -d\  -f1`
+    sed $VERSION_REGEX;s/\%SOURCEMD5\%/$SOURCEMD5/g $TEMPLATES_DIRECTORY/PKGBUILD.in > PKGBUILD
+
     cp $TEMPLATES_DIRECTORY/slapos-node.install .
     osc add PKGBUILD slapos-node.install
 
