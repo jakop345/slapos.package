@@ -1,19 +1,20 @@
 # Maintainer: Rafael Monnerat <rafael@nexedi.com>
 pkgname=slapos-node
 pkgver=%VERSION%+%RECIPE_VERSION%+%RELEASE%
-pkgdesc="Slapos client"
+pkgdesc="Slapos node"
+pkgrel=1
 arch=('x86_64' 'i686')
 url="http://www.slapos.org"
 license=('GPL')
 depends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'bridge-utils')
-makedepends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'chrpath')
+makedepends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'chrpath' 'net-tools')
 install='slapos-node.install'
 source=($pkgname_$pkgver.tar.gz)
-md5sums=() #generate with 'makepkg -g'
+md5sums=(%SOURCEMD5)
 
 build() {
 	cd "$srcdir/$pkgname_$pkgver"
-	make
+	make PYTHON=python2
 }
 
 package() {

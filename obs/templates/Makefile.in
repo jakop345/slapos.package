@@ -4,6 +4,7 @@
 VERSION = %VERSION%
 RECIPE_VERSION = %RECIPE_VERSION%
 
+PY = $(PYTHON)
 INSTALL_DIRECTORY = $(DESTDIR)/opt/slapos
 TARGET_DIRECTORY = /opt/slapos
 BUILD_ROOT_DIRECTORY := $(shell pwd)/build
@@ -25,7 +26,7 @@ build-stamp:
 
 	@echo 'Preparing source tarball (recipe version: $(RECIPE_VERSION))'
 	cd $(BUILD_DIRECTORY) && \
-		./bin/buildout -v
+		$(PY) ./bin/buildout -v
 
 	@touch build-stamp
 
