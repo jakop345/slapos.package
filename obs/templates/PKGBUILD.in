@@ -9,15 +9,15 @@ license=('GPL')
 depends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'bridge-utils')
 makedepends=('gcc' 'make' 'patch' 'wget' 'python2' 'python2-distribute' 'chrpath' 'inetutils')
 install='slapos-node.install'
-source=($pkgname_$pkgver.tar.gz)
+source=(${pkgname}_${pkgver}.tar.gz)
 md5sums=(%SOURCEMD5)
 
 build() {
-	cd "$srcdir/$pkgname_$pkgver"
+	cd "${srcdir}/${pkgname}_${pkgver}"
 	make PYTHON=python2
 }
 
 package() {
-	cd "$srcdir/$pkgname_$pkgver"
+	cd "${srcdir}/${pkgname}_${pkgver}"
 	make DESTDIR="$pkgdir/" install
 }
