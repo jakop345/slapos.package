@@ -5,8 +5,8 @@ VERSION=1.0.3
 # Edit for release
 RECIPE_VERSION=0.209
 # Edit for release
-RELEASE=1
-GITHASH=c2b5180ab7a8b2455ef8be13a33571b161d2b94d
+RELEASE=7
+GITHASH=568ffc57ecd8c23f60f4f37984294149d2b17e25
 
 CURRENT_DIRECTORY="$(pwd)"
 # Define URL to compile
@@ -90,7 +90,7 @@ function obs_upload
 
     osc rm -f PKGBUILD
     SOURCEMD5=`md5sum $SLAPOS_DIRECTORY.tar.gz | cut -d\  -f1`
-    sed $VERSION_REGEX;s/\%SOURCEMD5\%/$SOURCEMD5/g $TEMPLATES_DIRECTORY/PKGBUILD.in > PKGBUILD
+    sed "$VERSION_REGEX;s/\%SOURCEMD5\%/$SOURCEMD5/g" $TEMPLATES_DIRECTORY/PKGBUILD.in > PKGBUILD
 
     cp $TEMPLATES_DIRECTORY/slapos-node.install .
     osc add PKGBUILD slapos-node.install
