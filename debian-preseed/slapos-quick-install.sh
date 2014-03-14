@@ -13,7 +13,7 @@ if [ -z "$SLAPPKGKEY" ]; then
 fi
 
 if [ ! -f /etc/apt/trusted.gpg.d/slapos.openbuildservice.gpg ]; then
-  wget -O /etc/apt/trusted.gpg.d/slapos.openbuildservice.gpg "http://download.opensuse.org/repositories/home:/VIFIBnexedi/Debian_7.0/Release.gpg"
+  wget -O /etc/apt/trusted.gpg.d/slapos.openbuildservice.gpg "http://git.erp5.org/gitweb/slapos.package.git/blob_plain/HEAD:/debian-preseed/slapos.openbuildservice.key"
 fi 
 
 if [ ! -f /etc/apt/trusted.gpg.d/git.erp5.org.gpg ]; then
