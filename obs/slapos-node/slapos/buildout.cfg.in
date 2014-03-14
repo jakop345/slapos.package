@@ -2,6 +2,9 @@
 extends =
   %BUILDOUT_URL%
 
+# Don't load extensions
+extensions = 
+
 extends-cache= extends-cache
 download-cache= download-cache
 
@@ -19,25 +22,7 @@ configure-options +=
 environment +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
-[openssl]
-configure-options =
-  -I${zlib:location}/include
-  -L${zlib:location}/lib
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-  --openssldir=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}/etc/ssl
-  --libdir=lib
-  shared no-idea no-mdc2 no-rc5 zlib
-  -Wl,-rpath=${zlib:location}/lib -Wl,-rpath=${buildout:parts-directory}/${:_buildout_section_name_}/lib
-  && make depend
-
-make-options +=
-  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%;
-
 [gettext]
-#configure-options +=
-#  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-#make-options +=
-#  DESTDIR=%BUILD_ROOT_DIRECTORY%
 # Add gettext library path to RPATH as its binaries are used to build
 # glib for example
 environment =
@@ -50,14 +35,5 @@ configure-options +=
 make-options +=
   DESTDIR=%BUILD_ROOT_DIRECTORY%
 
-[slapos]
-recipe = z3c.recipe.scripts
-python = python2.7
-eggs =
-  slapos.libnetworkcache
-  zc.buildout
-  ${lxml-python:egg}
-  slapos.core
-
-[version]
-setuptools = 1.1.6
+[versions]
+cliff = 1.4.5
