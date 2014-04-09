@@ -42,11 +42,16 @@ URL: http://www.slapos.org/
 Vendor: Vifib
 Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedric.leninivin@tiolive.com>, Cédric de Saint Martin <cedric.dsm@nexedi.com>, Rafael Monnerat <rafael@nexedi.com>
 
-
+%if 0%{?suse_version}
 %if 0%{?suse_version} == 1210
-BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-distribute, openssl-devel
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-distribute, openssl-devel, python-xml
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute, python-xml
+%else
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-setuptools, openssl-devel, python-xml
+
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools, python-xml
+%endif
 %else
 BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-setuptools, openssl-devel
 
@@ -54,7 +59,6 @@ Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools
 %endif
 
 AutoReqProv: no
-
 
 %description
  Client-side to deploy applications with SlapOS 
