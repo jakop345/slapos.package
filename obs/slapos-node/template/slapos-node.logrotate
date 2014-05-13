@@ -20,3 +20,14 @@
     create 640 root root
     sharedscripts
 }
+
+/srv/slapgrid/*/.slapgrid/log/instance.log {
+    compress
+    dateext
+    daily
+    rotate 30
+    missingok
+    notifempty
+    sharedscripts
+}
+
