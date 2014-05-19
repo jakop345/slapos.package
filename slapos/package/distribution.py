@@ -98,6 +98,10 @@ class PackageManager:
     """ Add a repository """
     return self._getDistribitionHandler().addRepository(self._call, url, alias)
 
+  def _addKey(self, url, alias):
+    """ Add a gpg or a key """
+    return self._getDistributionHandler().addKey(self.call, url)
+
   def _updateRepository(self):
     """ Add a repository """
     return self._getDistribitionHandler().updateRepository(self._call)
@@ -114,12 +118,14 @@ class PackageManager:
     """ Dist-Upgrade of system """
     return self._getDistribitionHandler().updateSystem(self._call)
 
-  def update(self, repository_list=[], package_list=[]):
+  def update(self, repository_list=[], package_list=[], key_list=[]):
     """ Perform upgrade """
     self._purgeRepository()
     for alias, url in repository_list:
       self._addRepository(url, alias)
     self._updateRepository()
+    for alias, url in key_list:
+      self._addKey(url, alias)
     if len(package_list):
       self._installSoftwareList(package_list)
 
@@ -128,12 +134,14 @@ class AptGet:
  
   source_list_path = "/etc/apt/sources.list"
   source_list_d_path = "/etc/apt/sources.list.d"
+  trusted_gpg_d_path = "/etc/apt/trusted.gpg.d" 
+
 
   def purgeRepository(self, caller):
     """ Remove all repositories """
     # Aggressive removal
     os.remove(self.source_list_path)
-    open("/etc/apt/sources.list", "w+").write("# Removed all")
+    open(self.source_list_path, "w+").write("# Removed all")
     for file_path in glob.glob("%s/*" % self.source_list_d_path):
       os.remove(file_path)
 
@@ -145,6 +153,14 @@ class AptGet:
       prefix = "deb-src "
     repos_file.write(prefix + url)
     repos_file.close()
+
+  def addKey(self, caller, url, alias):
+    """ Download and add a gpg key """
+    gpg_path = open("%s/%s.gpg" % self.trusted_gpg_d_path, alias)
+    if os.path.exists(gpg_path):
+      # File already exists, skip
+      return
+    raise NotImplementedError("Download part is missing")
 
   def updateRepository(self, caller):
     """ Add a repository """
@@ -189,6 +205,10 @@ class Zypper:
     base_command.extend([url, alias])
     output, err = caller(base_command, stdout=None)
 
+  def addKey(self, caller, url, alias):
+    """ Add gpg or key """
+    raise NotImplementedError("Not implemented for this distribution")
+
   def updateRepository(self, caller):
     """ Add a repository """
     caller(['zypper', '--gpg-auto-import-keys', 'in', '-Dly'], stdout=None)
@@ -219,5 +239,4 @@ class Zypper:
 def do_discover():
   package_manager = PackageManager()
   print "The signature for your current system is: %s" % package_manager.getOSSignature()
-
 

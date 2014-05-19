@@ -50,7 +50,14 @@ class Promise(BasePromise):
         alias, url = repository.split("=")
         repository_tuple_list.append((alias.strip(), url.strip()))
 
-      self.update(repository_tuple_list, upgrade_goal['filter-package-list'])
+      key_tuple_list = []
+      for key in upgrade_goal['key-list']:
+        alias, url = key.split("=")
+        key_tuple_list.append((alias.strip(), url.strip()))
+
+      self.update(repository_tuple_list, 
+                  upgrade_goal['filter-package-list'], 
+                  key_tuple_list)
 
     if upgrade and boot:
       signature.update(reboot=today, upgrade=today)
