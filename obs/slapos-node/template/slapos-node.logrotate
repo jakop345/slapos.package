@@ -10,6 +10,17 @@
     sharedscripts
 }
 
+/opt/slapos/log/slapos-node-collect.log {
+    nocompress
+    dateext
+    daily
+    rotate 14
+    missingok
+    notifempty
+    create 640 root root
+    sharedscripts
+}
+
 /opt/slapos/log/slapos-node-format.log {
     nocompress
     dateext

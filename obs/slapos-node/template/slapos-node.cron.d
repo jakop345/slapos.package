@@ -14,3 +14,6 @@ MAILTO=""
 
 # Run "Booting" on every system start
 @reboot root /opt/slapos/bin/slapos node boot >> /opt/slapos/log/slapos-node-format.log 2>&1
+
+# Run "Collect" once a minute
+* * * * * root /opt/slapos/bin/slapos node collect >> /opt/slapos/log/slapos-node-collect.log 2>&1
