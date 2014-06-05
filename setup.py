@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1.1'
+version = '0.1.2'
 name = 'slapos.package'
 long_description = open("README.txt").read() + "\n" + \
     open("CHANGES.txt").read() + "\n"
@@ -20,7 +20,7 @@ setup(name=name,
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
-          'slapos.libnetworkcache',
+          'slapos.libnetworkcache>=0.14.1',
           'iniparse',
       ],
       zip_safe=False,

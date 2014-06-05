@@ -36,8 +36,33 @@ import tempfile
 import datetime
 
 from slapos.networkcachehelper import helper_download_network_cached_to_file
-from slapos.networkcachehelper import helper_upload_network_cached_from_file
+from slapos.networkcachehelper import NetworkcacheClient
 
+
+def helper_upload_network_cached_from_file(dir_url, cache_url,
+    path, directory_key, metadata_dict,
+    signature_private_key_file, shacache_cert_file, shacache_key_file,
+    shadir_cert_file, shadir_key_file):
+  """
+  Upload an existing file, using a file_descriptor.
+  """
+  file_descriptor = open(path, 'r')
+  if not (dir_url and cache_url):
+    return False
+
+  # backward compatibility
+  metadata_dict.setdefault('file', 'notused')
+  metadata_dict.setdefault('urlmd5', 'notused')
+
+  # convert '' into None in order to call nc nicely
+  with NetworkcacheClient(cache_url, dir_url,
+        signature_private_key_file=signature_private_key_file or None,
+        shacache_cert_file=shacache_cert_file or None,
+        shacache_key_file=shacache_key_file or None,
+        shadir_cert_file=shadir_cert_file or None,
+        shadir_key_file=shadir_key_file or None,
+      ) as nc:
+    return nc.upload(file_descriptor, directory_key, **metadata_dict)
 
 class NetworkCache:
   def __init__(self, configuration_path):
