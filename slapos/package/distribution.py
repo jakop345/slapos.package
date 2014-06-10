@@ -38,6 +38,9 @@ _distributor_id_file_re = re.compile("(?:DISTRIB_ID\s*=)\s*(.*)", re.I)
 _release_file_re = re.compile("(?:DISTRIB_RELEASE\s*=)\s*(.*)", re.I)
 _codename_file_re = re.compile("(?:DISTRIB_CODENAME\s*=)\s*(.*)", re.I)
 
+class UnsupportedOSException(Exception):
+  pass
+
 def patched_linux_distribution(distname='', version='', id='',
                                supported_dists=platform._supported_dists,
                                full_distribution_name=1):
@@ -80,7 +83,7 @@ class PackageManager:
     """ This is implemented in BasePromise """
     raise NotImplemented
 
-  def _getDistribitionHandler(self):
+  def _getDistributionHandler(self):
     distribution_name = self.getDistributionName()
     if distribution_name.lower().strip() == 'opensuse':
       return Zypper()
@@ -88,15 +91,15 @@ class PackageManager:
     elif distribution_name.lower().strip() in ['debian', 'ubuntu']:
       return AptGet()
 
-    raise NotImplemented("Distribution (%s) is not Supported!" % distribution_name) 
+    raise UnsupportedOSException("Distribution (%s) is not Supported!" % distribution_name) 
 
   def _purgeRepository(self):
     """ Remove all repositories """
-    return self._getDistribitionHandler().purgeRepository(self._call)
+    return self._getDistributionHandler().purgeRepository(self._call)
 
   def _addRepository(self, url, alias):
     """ Add a repository """
-    return self._getDistribitionHandler().addRepository(self._call, url, alias)
+    return self._getDistributionHandler().addRepository(self._call, url, alias)
 
   def _addKey(self, url, alias):
     """ Add a gpg or a key """
@@ -104,19 +107,19 @@ class PackageManager:
 
   def _updateRepository(self):
     """ Add a repository """
-    return self._getDistribitionHandler().updateRepository(self._call)
+    return self._getDistributionHandler().updateRepository(self._call)
 
   def _installSoftwareList(self, name_list):
     """ Upgrade softwares """
-    return self._getDistribitionHandler().installSoftwareList(self._call, name_list)
+    return self._getDistributionHandler().installSoftwareList(self._call, name_list)
 
   def _updateSoftware(self):
     """ Upgrade softwares """
-    return self._getDistribitionHandler().updateSoftware(self._call)
+    return self._getDistributionHandler().updateSoftware(self._call)
 
   def _updateSystem(self):
     """ Dist-Upgrade of system """
-    return self._getDistribitionHandler().updateSystem(self._call)
+    return self._getDistributionHandler().updateSystem(self._call)
 
   def update(self, repository_list=[], package_list=[], key_list=[]):
     """ Perform upgrade """
