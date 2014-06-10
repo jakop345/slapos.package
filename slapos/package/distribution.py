@@ -70,14 +70,17 @@ class PackageManager:
   def matchSignatureList(self, signature_list):
     return self.getOSSignature() in signature_list
 
+  def _getLinuxDistribution(self):
+    return patched_linux_distribution()
+
   def getOSSignature(self):
-    return "+++".join([i.strip().lower() for i in patched_linux_distribution()])
+    return "+++".join([i.strip().lower() for i in self._getLinuxDistribution()])
 
   def getDistributionName(self):
-    return patched_linux_distribution()[0]
+    return self._getLinuxDistribution()[0]
 
   def getVersion(self):
-    return patched_linux_distribution()[1]
+    return self._getLinuxDistribution()[1]
 
   def _call(self, *args, **kw):
     """ This is implemented in BasePromise """
