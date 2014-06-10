@@ -106,7 +106,7 @@ class PackageManager:
 
   def _addKey(self, url, alias):
     """ Add a gpg or a key """
-    return self._getDistributionHandler().addKey(self.call, url)
+    return self._getDistributionHandler().addKey(self._call, url, alias)
 
   def _updateRepository(self):
     """ Add a repository """
