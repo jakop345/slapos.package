@@ -130,7 +130,6 @@ class testPackageManager(unittest.TestCase):
       return dummy_handler
 
     package_manager._getDistributionHandler = DummyCase
-
     self.assertEquals(package_manager._getDistributionHandler(), dummy_handler)
     self.assertEquals(dummy_handler.called, [])
     return package_manager, dummy_handler
@@ -149,7 +148,6 @@ class testPackageManager(unittest.TestCase):
     package_manager, handler = self._getPatchedPackageManagerForApiTest()
     package_manager._addKey("http://...", "slapos")
     self.assertEquals(handler.called, ["addKey"])
-
 
   def testUpdateRepositoryAPI(self):
     package_manager, handler = self._getPatchedPackageManagerForApiTest()

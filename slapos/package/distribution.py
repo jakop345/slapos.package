@@ -196,15 +196,18 @@ class AptGet:
 
   def updateSystem(self, caller):
     """ Dist-Upgrade of system """
+    self.updateRepository(caller)
     caller(['apt-get', 'dist-upgrade', '-y'], stdout=None)
 
 class Zypper:
   def purgeRepository(self, caller):
     """Remove all repositories"""
-    listing, err = caller(['zypper', 'lr'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    listing, err = caller(['zypper', 'lr'], 
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while listing.count('\n') > 2:
       output, err = caller(['zypper', 'rr', '1'], stdout=None)
-      listing, err = caller(['zypper', 'lr'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      listing, err = caller(['zypper', 'lr'], 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def addRepository(self, caller, url, alias):
     """ Add a repository """
@@ -223,7 +226,8 @@ class Zypper:
     caller(['zypper', '--gpg-auto-import-keys', 'in', '-Dly'], stdout=None)
 
   def isUpgradable(self, caller, name):
-    output, err = caller(['zypper', '--gpg-auto-import-keys', 'up', '-ly'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, err = caller(['zypper', '--gpg-auto-import-keys', 'up', '-ly'], 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     for line in output.splitlines():
       if line.startswith("'%s' is already installed." % name):
         return False
@@ -247,5 +251,6 @@ class Zypper:
 
 def do_discover():
   package_manager = PackageManager()
-  print "The signature for your current system is: %s" % package_manager.getOSSignature()
+  print "The signature for your current system is: %s" % \
+                              package_manager.getOSSignature()
 
