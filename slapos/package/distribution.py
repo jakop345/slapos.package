@@ -146,13 +146,16 @@ class AptGet:
   def purgeRepository(self, caller):
     """ Remove all repositories """
     # Aggressive removal
-    os.remove(self.source_list_path)
+    if os.path.exists(self.source_list_path):
+      os.remove(self.source_list_path)
     open(self.source_list_path, "w+").write("# Removed all")
     for file_path in glob.glob("%s/*" % self.source_list_d_path):
       os.remove(file_path)
 
   def addRepository(self, caller, url, alias):
     """ Add a repository """
+    if not os.path.exists(self.source_list_d_path):
+      os.mkdir(self.source_list_d_path)
     repos_file = open("%s/%s.list" % (self.source_list_d_path, alias), "w")
     prefix = "deb "
     if alias.endswith("-src"):
@@ -209,7 +212,7 @@ class Zypper:
     if alias.endswith("unsafe"):
       base_command.append('--no-gpgcheck')
     base_command.extend([url, alias])
-    output, err = caller(base_command, stdout=None)
+    caller(base_command, stdout=None)
 
   def addKey(self, caller, url, alias):
     """ Add gpg or key """
