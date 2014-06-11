@@ -121,7 +121,3 @@ class NetworkCacheTestCase(unittest.TestCase):
     self.assertRaises(ValueError, signature.NetworkCache, 
                           "/abc/123")
 
-
-
-
-
