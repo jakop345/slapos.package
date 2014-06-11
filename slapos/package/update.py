@@ -46,7 +46,7 @@ class Parser(OptionParser):
     OptionParser.__init__(self, usage=usage, version=version,
                       option_list=[
         Option("--slapos-configuration",
-               default='/etc/opt/slapos/slapos.cfg',
+               default='/etc/opt/update.cfg',
                help="Path to slapos configuration file"),
         Option("--srv-file",
                default='/srv/slapupdate',

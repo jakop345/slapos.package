@@ -52,7 +52,7 @@ class Parser(OptionParser):
     OptionParser.__init__(self, usage=usage, version=version,
                       option_list=[
         Option("--slapos-configuration",
-               default='/etc/opt/slapos/slapos.cfg',
+               default='/etc/opt/update.cfg',
                help="Configuration File used to upload the key."),
         Option("--upgrade-file",
                default='/etc/opt/slapos/slapos-upgrade',

@@ -47,7 +47,7 @@ class Parser(OptionParser):
     OptionParser.__init__(self, usage=usage, version=version,
                       option_list=[
         Option("--slapos-configuration",
-               default='/etc/opt/slapos/update.cfg',
+               default='/etc/opt/update.cfg',
                help="Path to slapos configuration file"),
         Option("--key",
                default="slapos-generic-key",
@@ -94,6 +94,7 @@ def do_conf():
   """Generate Default Configuration file """
   usage = "usage: %s [options] " % sys.argv[0]
   run_config(Config(Parser(usage=usage).check_args()))
+  sys.exit()
 
 def run_config(config):
   if os.path.exists(config.slapos_configuration):
@@ -111,6 +112,4 @@ def run_config(config):
                 "configuration_path": config.slapos_configuration,
                 "slapos_location": config.slapos_location
         })
-
-  sys.exit()
 
