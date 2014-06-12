@@ -33,35 +33,11 @@ import time
 import traceback
 import tempfile
 import datetime
+import shutil
 
-from slapos.networkcachehelper import helper_download_network_cached_to_file
-from slapos.networkcachehelper import NetworkcacheClient
+from slapos.networkcachehelper import NetworkcacheClient, \
+                                      helper_download_network_cached
 
-
-def helper_upload_network_cached_from_file(dir_url, cache_url,
-    path, directory_key, metadata_dict,
-    signature_private_key_file, shacache_cert_file, shacache_key_file,
-    shadir_cert_file, shadir_key_file):
-  """
-  Upload an existing file, using a file_descriptor.
-  """
-  file_descriptor = open(path, 'r')
-  if not (dir_url and cache_url):
-    return False
-
-  # backward compatibility
-  metadata_dict.setdefault('file', 'notused')
-  metadata_dict.setdefault('urlmd5', 'notused')
-
-  # convert '' into None in order to call nc nicely
-  with NetworkcacheClient(cache_url, dir_url,
-        signature_private_key_file=signature_private_key_file or None,
-        shacache_cert_file=shacache_cert_file or None,
-        shacache_key_file=shacache_key_file or None,
-        shadir_cert_file=shadir_cert_file or None,
-        shadir_key_file=shadir_key_file or None,
-      ) as nc:
-    return nc.upload(file_descriptor, directory_key, **metadata_dict)
 
 class NetworkCache:
   def __init__(self, configuration_path):
@@ -97,6 +73,64 @@ class NetworkCache:
     else:
       self.directory_key = "slapos-upgrade-testing-key"
 
+  def upload(self, path, metadata_dict):
+    """
+    Upload an existing file, using a file_descriptor.
+    """
+    file_descriptor = open(path, 'r')
+    if not (self.dir_url and self.cache_url):
+      return False
+  
+    # backward compatibility
+    metadata_dict.setdefault('file', 'notused')
+    metadata_dict.setdefault('urlmd5', 'notused')
+  
+    # convert '' into None in order to call nc nicely
+    with NetworkcacheClient(self.cache_url, self.dir_url,
+          signature_private_key_file=self.signature_private_key_file or None,
+          shacache_cert_file=self.shacache_cert_file or None,
+          shacache_key_file=self.shacache_key_file or None,
+          shadir_cert_file=self.shadir_cert_file or None,
+          shadir_key_file=self.shadir_key_file or None,
+        ) as nc:
+      return nc.upload(file_descriptor, self.directory_key, **metadata_dict)
+
+
+  def download(self, path, wanted_metadata_dict={}, 
+                            required_key_list=[], strategy=None):
+
+    result = helper_download_network_cached(
+              self.download_binary_dir_url, 
+              self.download_binary_cache_url,
+              self.signature_certificate_list,
+              self.directory_key, wanted_metadata_dict, 
+              required_key_list, strategy)
+
+    if result:
+      # XXX check if nc filters signature_certificate_list!
+      # Creates a file with content to desired path.
+      file_descriptor, metadata_dict = result
+      f = open(path, 'w+b')
+      try:
+        shutil.copyfileobj(file_descriptor, f)
+        # XXX method should check MD5.
+        return metadata_dict
+      finally:
+        f.close()
+        file_descriptor.close()
+    return False
+ 
+def strategy(entry_list):
+  """Get the latest entry. """
+  timestamp = 0
+  best_entry = None
+  for entry in entry_list:
+    if entry['timestamp'] > timestamp:
+      best_entry = entry
+      timestamp = entry['timestamp']
+
+  return best_entry 
+
 def get_yes_no(prompt):
   while True:
     answer = raw_input(prompt + " [y,n]: ")
@@ -126,26 +160,9 @@ class Signature:
     if shacache.signature_certificate_list is None:
       raise ValueError("You need at least one valid signature for download")
 
-    def strategy(entry_list):
-      """Get the latest entry. """
-      timestamp = 0
-      best_entry = None
-      for entry in entry_list:
-        if entry['timestamp'] > timestamp:
-          best_entry = entry
-
-      return best_entry
-
-    return helper_download_network_cached_to_file(
-      path=path,
-      directory_key=shacache.directory_key,
+    return shacache.download(path=path,
       required_key_list=['timestamp'],
-      strategy=strategy,
-      # Then we give a lot of not interesting things
-      dir_url=shacache.download_binary_dir_url,
-      cache_url=shacache.download_binary_cache_url,
-      signature_certificate_list=shacache.signature_certificate_list,
-    )
+      strategy=strategy)
   
   def download(self):
     """
@@ -170,19 +187,8 @@ class Signature:
       'timestamp': time.time(),
     }
     try:
-      if helper_upload_network_cached_from_file(
-        path=path,
-        directory_key=shacache.directory_key,
-        metadata_dict=metadata_dict,
-        # Then we give a lot of not interesting things
-        dir_url=shacache.dir_url,
-        cache_url=shacache.cache_url,
-        signature_private_key_file=shacache.signature_private_key_file,
-        shacache_cert_file=shacache.shacache_cert_file,
-        shacache_key_file=shacache.shacache_key_file,
-        shadir_cert_file=shacache.shadir_cert_file,
-        shadir_key_file=shacache.shadir_key_file,
-      ):
+      if shacache.upload(path=path,
+                         metadata_dict=metadata_dict):
         self.log('Uploaded update file to cache.')
     except Exception:
       self.log('Unable to upload to cache:\n%s.' % traceback.format_exc())
