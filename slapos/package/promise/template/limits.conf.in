@@ -1,0 +1,6 @@
+*                hard    nproc           8096
+*                soft    nproc           1024
+*                hard    nofile          32768
+*                soft    nofile          32768
+root             hard    nofile          65535
+root             soft    nofile          65535
