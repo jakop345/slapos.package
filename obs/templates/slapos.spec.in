@@ -108,7 +108,7 @@ if [ -f /etc/openvpn/vifib.conf ]; then
 fi
 
 %post
-echo """To generate slapos configuration run '#slapos node register'"""
+echo """To generate slapos configuration run 'slapos node register'"""
 
 %preun
 if [ -f /etc/openvpn/vifib.conf ]; then 

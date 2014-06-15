@@ -44,7 +44,6 @@ Directory Organisation
 	     - slapos.spec.in : configuration file for rpm packaging
 - slapos-node/ : Template to build package
   	       - Makefile : Makefile to build slapos and add files for package
-	       - slapos-re6st-setup : shell script that can setup re6st for you.
 	       - template/ : template files for package (cron.d, service)
 	       - slapos/ : to build slapos. Contain buildout.cfg.in
 
