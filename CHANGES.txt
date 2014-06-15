@@ -1,6 +1,18 @@
 Changes
 ========
 
+0.2.0 (2014-06-15)
+------------------
+
+ * Included a lot of tests [Rafael Monnerat]
+ * Minor fixed on general code [Rafael Monnerat]
+ * Include limits promise [Rafael Monnerat]
+
+0.1.2 (2014-06-05)
+------------------
+
+ * Fix slapos.libnetworkcache usage [Rafael Monnerat]
+
 0.1.1 (2014-02-28)
 ------------------
 
