@@ -69,11 +69,15 @@ class Promise(BasePromise):
       raise ValueError(
         "You need upgrade and/or reboot when invoke fixConsistency!")
 
+    signature.load()
+    self.log("Retrying after fixConsistency....\n\n")
+    return self.checkConsistency(fixit=0, **kw)
+
   def checkConsistency(self, fixit=0, **kw):
   
     # Get configuration
     signature = self.getSignature()
-  
+
     self.log("Expected Reboot early them %s" % signature.reboot)
     self.log("Expected Upgrade early them %s" % signature.upgrade)
     self.log("Last reboot : %s" % signature.last_reboot)
@@ -81,24 +85,32 @@ class Promise(BasePromise):
 
     if signature.upgrade > datetime.date.today():
       self.log("Upgrade will happens on %s" % signature.upgrade)
-      return
+      # It is consistent for now
+      return True
  
     # Check if run for first time
     if signature.last_reboot is None:
       if fixit:
         # Purge repositories list and add new ones
-        self.fixConsistency(upgrade=1, boot=1)
+        return self.fixConsistency(upgrade=1, boot=1)
+      return False
     else:
+      is_ok = True
       if signature.last_upgrade < signature.upgrade:
         # Purge repositories list and add new ones
+        self.log('Upgrade is required.')
         if fixit:
-          self.fixConsistency(upgrade=1)
+          is_ok = self.fixConsistency(upgrade=1)
+        else:
+          is_ok = False
       else:
         self.log("Your system is up to date")
   
       if signature.last_reboot < signature.reboot:
-        if not self.config.dry_run:
-          self.fixConsistency(reboot=1)
-        else:
-          self.log("Dry run: Rebooting required.")
-
+        self.log("Rebooting is required.")
+        if fixit:
+          return self.fixConsistency(reboot=1)
+        return False
+      else:
+        self.log("No need to reboot.")
+      return is_ok

@@ -170,7 +170,6 @@ class Signature:
     """
     info, path = tempfile.mkstemp()
     if not self._download(path) == False:
-      print open(path).read()
       return path
     else:
       raise ValueError("No result from shacache")

@@ -29,6 +29,7 @@
 
 from slapos.package import update, signature
 from slapos.libnetworkcache import NetworkcacheClient
+from optparse import Values
 import slapos.signature
 import time
 import difflib
@@ -133,6 +134,8 @@ upgrade = 2014-06-04
 
 """
 
+
+
 def _fake_upload(self, *args, **kwargs):
   return True
 
@@ -140,6 +143,20 @@ class NetworkCacheTestCase(unittest.TestCase):
 
   def setUp(self):
     NetworkcacheClient.upload = _fake_upload
+
+
+    self.config_dict = {
+      "slapos_configuration": self._createConfigurationFile(),
+      "srv_file": "/tmp/test_base_promise_slapupdate",
+      "dry_run": False,
+      "verbose": False 
+    }
+   
+
+  def _createConfigurationFile(self):
+    with open("/tmp/test_signature_000000_configuration.cfg", "w") as configuration_file:
+      configuration_file.write(VALID_UPDATE_CFG_DATA)
+    return "/tmp/test_signature_000000_configuration.cfg"
 
   def test_basic_configuration(self):
     info, self.configuration_file_path = tempfile.mkstemp()
@@ -278,4 +295,83 @@ shadir-key-file = %(tempfile)s
     self.assertEquals(
         signature.strategy(entry_list), 
             {'timestamp': 123824.0})
+
+  def testLoadSignature(self):
+    sig = signature.Signature(Values(self.config_dict))
+
+    self.assertNotEquals(getattr(sig, "current_state", "COUSOUS!!!"), 
+                                 "COUSCOUS!!!")
+
+    sig.load()
+
+    self.assertNotEquals(sig.current_state, None)
+    self.assertEquals(sig.reboot.strftime("%Y-%m-%d"), "2011-10-10" )  
+    self.assertEquals(sig.upgrade.strftime("%Y-%m-%d"), "2014-06-04" )  
+    self.assertEquals(sig.last_reboot, None )  
+    self.assertEquals(sig.last_upgrade, None )  
+
+
+  def testLoadSignatureWithLast(self):
+    modified_config_dict = self.config_dict.copy()
+    info, slapupdate_path = tempfile.mkstemp()
+    with open(slapupdate_path, "w") as slapupdate_file:
+      slapupdate_file.write("""
+[system]
+reboot = 2010-10-10
+upgrade = 2010-06-04
+""")
+    modified_config_dict["srv_file"] = slapupdate_path
+    sig = signature.Signature(Values(modified_config_dict))
+
+    self.assertNotEquals(getattr(sig, "current_state", "COUSOUS!!!"), 
+                                 "COUSCOUS!!!")
+
+    sig.load()
+
+    self.assertNotEquals(sig.current_state, None)
+    self.assertEquals(sig.reboot.strftime("%Y-%m-%d"), "2011-10-10" )  
+    self.assertEquals(sig.upgrade.strftime("%Y-%m-%d"), "2014-06-04" )  
+    self.assertEquals(sig.last_reboot.strftime("%Y-%m-%d"), "2010-10-10" )  
+    self.assertEquals(sig.last_upgrade.strftime("%Y-%m-%d"), "2010-06-04" )  
+
+
+  def testSignatureUpdate(self):
+    modified_config_dict = self.config_dict.copy()
+    info, slapupdate_path = tempfile.mkstemp()
+    with open(slapupdate_path, "w") as slapupdate_file:
+      slapupdate_file.write("""
+[system]
+reboot = 2010-10-10
+upgrade = 2010-06-04
+""")
+    modified_config_dict["srv_file"] = slapupdate_path
+    sig = signature.Signature(Values(modified_config_dict))
+
+
+    sig.load()
+
+    self.assertNotEquals(sig.current_state, None)
+    self.assertEquals(sig.reboot.strftime("%Y-%m-%d"), "2011-10-10" )  
+    self.assertEquals(sig.upgrade.strftime("%Y-%m-%d"), "2014-06-04" )  
+    self.assertEquals(sig.last_reboot.strftime("%Y-%m-%d"), "2010-10-10" )  
+    self.assertEquals(sig.last_upgrade.strftime("%Y-%m-%d"), "2010-06-04" )  
+
+    sig.update(reboot="2014-07-01")
+
+    self.assertEquals(open(slapupdate_path, "r").read().strip(), """[system]
+reboot = 2014-07-01
+upgrade = 2010-06-04""")
+
+    sig.update(upgrade="2014-07-03")
+
+    self.assertEquals(open(slapupdate_path, "r").read().strip(), """[system]
+reboot = 2014-07-01
+upgrade = 2014-07-03""")
+
+    sig.update(reboot="2014-08-10", upgrade="2014-08-11")
+
+    self.assertEquals(open(slapupdate_path, "r").read().strip(), """[system]
+reboot = 2014-08-10
+upgrade = 2014-08-11""")
+
 
