@@ -109,7 +109,3 @@ prepare_tarball
 prepare_deb_packaging
 
 obs_upload
-
-# Save current version
-echo "$RECIPE_VERSION" > $CURRENT_DIRECTORY/slapos-recipe-version
-echo "$VERSION" > $CURRENT_DIRECTORY/slapos-version
