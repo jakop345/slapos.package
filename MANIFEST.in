@@ -1,2 +1,3 @@
 include CHANGES.txt
 include slapos/package/template/*
+include slapos/package/promise/template/*
