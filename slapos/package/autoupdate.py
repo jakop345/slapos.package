@@ -43,7 +43,6 @@ def _run_command(command):
     if '--no-update' in sys.argv:
         sys.argv.remove('--no-update')
     else:
-      print 'Updating slapprepare'
       subprocess.call(['easy_install', '-U', 'slapos.package'])
 
     args = [
