@@ -36,17 +36,8 @@ import os
 import subprocess
 import sys
 
-def do_discover():
-  _run_command('slappkg-discover-raw')
-
 def do_update():
   _run_command('slappkg-update-raw')
-
-def do_upload():
-  _run_command('slappkg-upload-key-raw')
-
-def do_conf():
-  _run_command('slappkg-conf-raw')
 
 def _run_command(command):
     if '--no-update' in sys.argv:

@@ -29,13 +29,10 @@ setup(name=name,
               # Those entry points are development version and
               # self updatable API
               'slappkg-update-raw = slapos.package.update:do_update',
-              'slappkg-discover-raw = slapos.package.distribution:do_discover',
-              'slappkg-upload-key-raw = slapos.package.upload_key:main',
-              'slappkg-conf-raw = slapos.package.conf:do_conf',
+              'slappkg-discover = slapos.package.distribution:do_discover',
+              'slappkg-upload-key = slapos.package.upload_key:main',
+              'slappkg-conf = slapos.package.conf:do_conf',
               'slappkg-update = slapos.package.autoupdate:do_update',
-              'slappkg-discover = slapos.package.autoupdate:do_discover',
-              'slappkg-upload-key = slapos.package.autoupdate:do_upload',
-              'slappkg-conf = slapos.package.autoupdate:do_conf',
           ],
 
         # Not supported yet
