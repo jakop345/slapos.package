@@ -28,14 +28,43 @@
 #
 ##############################################################################
 
-import core
-import hostname
-import slappkgcron
+from slapos.package.base_promise import BasePromise
+from slapos.package.conf import get_template, create
+import os
+import pkg_resources
 
-promise_list = (
-  core.Promise,
-  hostname.Promise,
-  slappkgcron.Promise,
-  limits.Promise
- )
+
+class Promise(BasePromise):
+
+  configuration_file_path = '/etc/cron.d/slappkg-update' 
+
+  def _getCronTemplate(self, slapos_location, slapos_configuration):
+    configuration_content = get_template("update.cron.in")
+    return configuration_content % {
+                "configuration_path": self.config.slapos_configuration,
+                "slapos_location": "/opt/slapos"
+           } 
+
+  def checkConsistency(self, fixit=0, **kw):
+    is_ok = False
+
+    if os.path.exists(self.configuration_file_path):
+       expected_content = self._getCronTemplate()
+       with open(self.configuration_file_path, 'r') as actual_conf:
+         is_ok = expected_content == actual_conf.read()
+
+    if not is_ok and fixit:
+      return self.fixConsistency(**kw)
+
+    return is_ok
+
+  def fixConsistency(self, **kw):
+    self.log("Update cron : %s" % self.configuration_file_path)
+    if os.path.exists(self.configuration_file_path):
+      shutil.rmtree(self.configuration_file_path)
+
+    create(path=self.configuration_file_path,
+           text=self._getCronTemplate()) 
+
+    return self.checkConsistency(fixit=0, **kw)
 
