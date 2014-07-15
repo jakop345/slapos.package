@@ -29,6 +29,7 @@
 ##############################################################################
 
 import platform
+import urllib
 import glob
 import re
 import os
@@ -165,11 +166,14 @@ class AptGet:
 
   def addKey(self, caller, url, alias):
     """ Download and add a gpg key """
-    gpg_path = open("%s/%s.gpg" % (self.trusted_gpg_d_path, alias))
+    if not os.path.exists(self.trusted_gpg_d_path):
+      os.mkdir(self.trusted_gpg_d_path)
+    gpg_path = "%s/%s.gpg" % (self.trusted_gpg_d_path, alias)
+    urllib.urlretrieve(url, gpg_path)
+
     if os.path.exists(gpg_path):
       # File already exists, skip
       return
-    raise NotImplementedError("Download part is missing")
 
   def updateRepository(self, caller):
     """ Add a repository """

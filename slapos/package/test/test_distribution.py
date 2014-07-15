@@ -29,6 +29,8 @@
 
 from slapos.package.distribution import PackageManager, AptGet, Zypper, \
                                         UnsupportedOSException 
+import tempfile
+import shutil
 import os
 import glob
 import unittest
@@ -202,20 +204,34 @@ class testPackageManager(unittest.TestCase):
   
     source_list_d = "/tmp/test_distribution_sources.list.d"
     if os.path.exists(source_list_d):
-      os.rmdir(source_list_d)
+      shutil.rmtree(source_list_d)
 
     handler.addRepository(dummy_caller, "http://test main", "slapos")
     self.assertTrue(os.path.exists(source_list_d))
     self.assertEquals(open("%s/slapos.list" % source_list_d, "r").read(), 
                       "deb http://test main")
 
-#  def addKey(self, caller, url, alias):
-#    """ Download and add a gpg key """
-#    gpg_path = open("%s/%s.gpg" % self.trusted_gpg_d_path, alias)
-#    if os.path.exists(gpg_path):
-#      # File already exists, skip
-#      return
-#    raise NotImplementedError("Download part is missing")
+
+  def testAptGetAddKey(self):
+    handler = AptGet()
+    called = []
+    def dummy_caller(*args, **kwargs):
+      called.append("called")
+  
+    info, fake_gpg_path = tempfile.mkstemp()
+
+    with open(fake_gpg_path, "w") as f:
+      f.write("KEY")
+
+    trusted_list_d = "/tmp/test_distribution_trusted.gpg.d" 
+    if os.path.exists(trusted_list_d):
+      shutil.rmtree(trusted_list_d)
+
+    handler.addKey(dummy_caller, "file://%s" % fake_gpg_path, "slapos")
+    self.assertTrue(os.path.exists(trusted_list_d))
+    self.assertEquals(open("%s/slapos.gpg" % trusted_list_d, "r").read(), 
+                      "KEY")
+
     
   def testAptGetUpdateRepository(self):
     handler = AptGet()
