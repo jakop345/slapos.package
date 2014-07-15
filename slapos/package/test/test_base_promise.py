@@ -48,7 +48,9 @@ def _fake_signature_download(self, path, *args, **kwargs):
 class testBasePromiseCase(unittest.TestCase):
 
   def setUp(self):
+    self.original_basepromise_call = BasePromise._call
     BasePromise._call = _fake_call
+    self.original_network_cache_download = NetworkCache.download
     NetworkCache.download = _fake_signature_download
     global FAKE_CALL_COUNTER
     FAKE_CALL_COUNTER = 0
@@ -59,6 +61,10 @@ class testBasePromiseCase(unittest.TestCase):
       "dry_run": False,
       "verbose": False 
     }
+
+  def tearDown(self):
+    BasePromise._call = self.original_basepromise_call 
+    NetworkCache.download = self.original_network_cache_download
    
 
   def _createConfigurationFile(self):
