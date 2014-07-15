@@ -230,7 +230,8 @@ reboot = 2100-11-11
     def _fake_signature_download(self, path, *args, **kwargs):
       with open(path, 'w') as upgrade_signature:
         modified_upgrade_key = UPGRADE_KEY_WITHOUT_KEY_LIST.replace(
-              "upgrade = 2014-06-04", "upgrade = 2100-01-01") 
+              "upgrade = 2014-06-04", 
+              "upgrade = %s" % datetime.datetime.today().strftime("%Y-%m-%d")) 
         upgrade_signature.write(modified_upgrade_key)
       return True
 
@@ -242,7 +243,7 @@ reboot = 2100-11-11
     slapupdate_path = "/tmp/testFixConsistencyUpgrade"
     with open(slapupdate_path, 'w') as slapupdate:
       slapupdate.write("""[system]
-upgrade = 2000-11-11
+upgrade = 1999-11-11
 reboot = 2100-11-11
 """)
 
@@ -254,10 +255,19 @@ reboot = 2100-11-11
 
     expected_message_list = [
       'Expected Reboot early them 2011-10-10', 
-      'Expected Upgrade early them 2100-01-01', 
+      'Expected Upgrade early them %s' % \
+              datetime.datetime.today().strftime("%Y-%m-%d"), 
       'Last reboot : 2100-11-11', 
-      'Last upgrade : 2000-11-11', 
-      'Upgrade will happens on 2100-01-01']
+      'Last upgrade : 1999-11-11', 
+      'Upgrade is required.',
+      'Retrying after fixConsistency....\n\n',
+      'Expected Reboot early them 2011-10-10',
+      'Expected Upgrade early them 2014-07-15',
+      'Last reboot : 2100-11-11',
+      'Last upgrade : 2014-07-15',
+      'Your system is up to date',
+      'No need to reboot.',
+      'No need to reboot.']
 
     self.assertEquals(promise._message_list, expected_message_list)
 
