@@ -1,6 +1,12 @@
 Changes
 ========
 
+0.2.1 (2014-07-15)
+------------------
+
+ * Fix test inconsistencies [Rafael Monnerat]
+ * Implement download of repositories keys [Rafael Monnerat]
+
 0.2.0 (2014-06-15)
 ------------------
 
