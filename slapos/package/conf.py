@@ -33,7 +33,6 @@ import logging
 from optparse import OptionParser, Option
 import sys
 from base_promise import Config
-from promise import promise_list
 import os
 
 class Parser(OptionParser):

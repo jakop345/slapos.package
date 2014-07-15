@@ -30,6 +30,7 @@
 
 import core
 import hostname
+import limits
 import slappkgcron
 
 promise_list = (
