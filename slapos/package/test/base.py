@@ -104,3 +104,49 @@ reboot = 2011-10-10
 upgrade = 2014-06-04
 
 """
+
+
+UPGRADE_KEY_WITHOUT_KEY_LIST = """[debian-default]
+repository-list = 
+	main = http://ftp.fr.debian.org/debian/ wheezy main
+	main-src = http://ftp.fr.debian.org/debian/ wheezy main
+	update = http://ftp.fr.debian.org/debian/ wheezy-updates main
+	update-src = http://ftp.fr.debian.org/debian/ wheezy-updates main
+	slapos = http://download.opensuse.org/repositories/home:/VIFIBnexedi:/branches:/home:/VIFIBnexedi/Debian_7.0/ ./
+	re6stnet = http://git.erp5.org/dist/deb ./
+filter-package-list = 
+	ntp
+	openvpn
+	slapos.node
+	re6stnet
+filter-promise-list = 
+	core
+signature-list = 
+	debian+++jessie/sid+++
+	debian+++7.4+++
+	debian+++7.5+++
+	debian+++7.3+++
+	debian+++7+++
+
+[opensuse-legacy]
+repository-list = 
+	suse = http://download.opensuse.org/distribution/12.1/repo/oss/
+	slapos = http://download.opensuse.org/repositories/home:/VIFIBnexedi:/branches:/home:/VIFIBnexedi/openSUSE_12.1/
+	re6st = http://git.erp5.org/dist/rpm
+filter-promise-list = 
+	core
+filter-package-list = 
+	ntp
+	openvpn
+	slapos.node
+	re6stnet
+signature-list = 
+	opensuse+++12.1+++x86_64
+
+[system]
+reboot = 2011-10-10
+upgrade = 2014-06-04
+
+"""
+
+

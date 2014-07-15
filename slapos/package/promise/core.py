@@ -51,7 +51,7 @@ class Promise(BasePromise):
         repository_tuple_list.append((alias.strip(), url.strip()))
 
       key_tuple_list = []
-      for key in upgrade_goal['key-list']:
+      for key in upgrade_goal.get('key-list', []):
         alias, url = key.split("=")
         key_tuple_list.append((alias.strip(), url.strip()))
 

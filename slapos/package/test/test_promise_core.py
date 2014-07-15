@@ -27,8 +27,10 @@
 #
 ##############################################################################
 
+import datetime
 from slapos.package.promise import core
-from slapos.package.test.base import CONFIGURATION_FILE, UPGRADE_KEY, _fake_call
+from slapos.package.test.base import CONFIGURATION_FILE, UPGRADE_KEY, \
+                                     _fake_call, UPGRADE_KEY_WITHOUT_KEY_LIST
 from slapos.package.signature import NetworkCache
 from optparse import Values
 
@@ -51,8 +53,11 @@ class TestCoreCase(unittest.TestCase):
 
   def setUp(self):
     core.Promise._call = _fake_call
-    core.Promise.log = _log_message_list 
+    core.Promise.log = _log_message_list
+
+    self.original_promise_update = core.Promise.update
     core.Promise.update = _fake_update
+
     self.original_network_cache_download = NetworkCache.download    
 
     # Patch Download
@@ -71,6 +76,9 @@ class TestCoreCase(unittest.TestCase):
       "verbose": False 
     }
    
+  def tearDown(self):
+    NetworkCache.download = self.original_network_cache_download
+    core.Promise.update = self.original_promise_update
 
   def _createConfigurationFile(self):
     with open("/tmp/test_base_promise_configuration.cfg", "w") as configuration_file:
@@ -144,9 +152,11 @@ reboot = 2100-11-11
 
     # Patch Download
     def _fake_signature_download(self, path, *args, **kwargs):
+      copy_of_upgrade_key = UPGRADE_KEY
       with open(path, 'w') as upgrade_signature:
-        modified_upgrade_key = UPGRADE_KEY.replace("upgrade = 2014-06-04", 
-                                                   "upgrade = 2100-01-01") 
+        modified_upgrade_key = copy_of_upgrade_key.replace(
+                                              "upgrade = 2014-06-04", 
+                                              "upgrade = 2100-01-01") 
         upgrade_signature.write(modified_upgrade_key)
       return True
 
@@ -187,7 +197,7 @@ reboot = 2100-11-11
       'Expected Reboot early them 2011-10-10', 
       'Expected Upgrade early them 2014-06-04', 
       'Last reboot : 2100-11-11', 
-      'Last upgrade : 2014-06-14', 
+      'Last upgrade : %s' % datetime.datetime.today().strftime("%Y-%m-%d"),
       'Your system is up to date', 
       'No need to reboot.', 
       'No need to reboot.']
@@ -211,4 +221,59 @@ reboot = 2100-11-11
 
     self.assertEquals(promise._fake_update_call[2], key_list) 
 
+
+  def testFixConsistency_without_key_list(self):
+    
+    modified_config_dict = self.config_dict.copy()
+
+    # Patch Download
+    def _fake_signature_download(self, path, *args, **kwargs):
+      with open(path, 'w') as upgrade_signature:
+        modified_upgrade_key = UPGRADE_KEY_WITHOUT_KEY_LIST.replace(
+              "upgrade = 2014-06-04", "upgrade = 2100-01-01") 
+        upgrade_signature.write(modified_upgrade_key)
+      return True
+
+    NetworkCache.download = _fake_signature_download
+    
+    def _fake_update(self, repository_list=[], package_list=[], key_list=[]):
+      self._fake_update_call = (repository_list, package_list, key_list)
+      
+    slapupdate_path = "/tmp/testFixConsistencyUpgrade"
+    with open(slapupdate_path, 'w') as slapupdate:
+      slapupdate.write("""[system]
+upgrade = 2000-11-11
+reboot = 2100-11-11
+""")
+
+    modified_config_dict["srv_file"] = slapupdate_path
+
+    promise = core.Promise(Values(modified_config_dict))
+    self.assertEquals(promise.checkConsistency(fixit=1), True)
+    self.maxDiff = None
+
+    expected_message_list = [
+      'Expected Reboot early them 2011-10-10', 
+      'Expected Upgrade early them 2100-01-01', 
+      'Last reboot : 2100-11-11', 
+      'Last upgrade : 2000-11-11', 
+      'Upgrade will happens on 2100-01-01']
+
+    self.assertEquals(promise._message_list, expected_message_list)
+
+    repository_list = [
+      ('main', 'http://ftp.fr.debian.org/debian/ wheezy main'), 
+      ('main-src', 'http://ftp.fr.debian.org/debian/ wheezy main'),  
+      ('update', 'http://ftp.fr.debian.org/debian/ wheezy-updates main'), 
+      ('update-src', 'http://ftp.fr.debian.org/debian/ wheezy-updates main'), 
+      ('slapos', 'http://download.opensuse.org/repositories/home:/VIFIBnexedi:/branches:/home:/VIFIBnexedi/Debian_7.0/ ./'), 
+      ('re6stnet', 'http://git.erp5.org/dist/deb ./')]
+    filter_package_list = ['ntp', 'openvpn', 'slapos.node', 're6stnet'] 
+    key_list = [] 
+
+    self.assertEquals(promise._fake_update_call[0], repository_list)
+
+    self.assertEquals(promise._fake_update_call[1], filter_package_list)
+
+    self.assertEquals(promise._fake_update_call[2], key_list) 
 

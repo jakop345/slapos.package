@@ -62,8 +62,13 @@ signature-certificate-list =
   -----END CERTIFICATE-----
 
 """
-
 UPDATE_CFG_DATA = """
+[slapupdate]
+upgrade_key = slapos-upgrade-testing-key-with-config-file-invalid
+
+""" + BASE_UPDATE_CFG_DATA
+
+UPDATE_UPLOAD_CFG_DATA = """
 [slapupdate]
 upgrade_key = slapos-upgrade-testing-key-with-config-file
 
@@ -142,6 +147,7 @@ def _fake_upload(self, *args, **kwargs):
 class NetworkCacheTestCase(unittest.TestCase):
 
   def setUp(self):
+    self.original_networkcache_upload = NetworkcacheClient.upload
     NetworkcacheClient.upload = _fake_upload
 
 
@@ -152,6 +158,8 @@ class NetworkCacheTestCase(unittest.TestCase):
       "verbose": False 
     }
    
+  def tearDown(self):
+    NetworkcacheClient.upload = self.original_networkcache_upload
 
   def _createConfigurationFile(self):
     with open("/tmp/test_signature_000000_configuration.cfg", "w") as configuration_file:
@@ -173,7 +181,7 @@ class NetworkCacheTestCase(unittest.TestCase):
                      SIGNATURE)            
 
     self.assertEqual(shacache.directory_key,
-                     'slapos-upgrade-testing-key-with-config-file')
+                     'slapos-upgrade-testing-key-with-config-file-invalid')
     # Check keys that don't exist
     # Not mandatory
     self.assertEqual(shacache.dir_url , None)
@@ -200,7 +208,7 @@ class NetworkCacheTestCase(unittest.TestCase):
                      SIGNATURE)            
 
     self.assertEqual(shacache.directory_key,
-                     'slapos-upgrade-testing-key-with-config-file')
+                     'slapos-upgrade-testing-key-with-config-file-invalid')
     # Check keys that don't exist
     # Not mandatory
     self.assertEqual(shacache.dir_url , 'https://www.shacache.org/shadir')
@@ -239,6 +247,7 @@ class NetworkCacheTestCase(unittest.TestCase):
                         strategy=signature.strategy)
    
     self.maxDiff = None
+
     self.assertEquals(UPGRADE_KEY.splitlines(), 
                       open(path, 'r').read().splitlines())
 
@@ -260,7 +269,7 @@ class NetworkCacheTestCase(unittest.TestCase):
                                          signature_private_key_file, 
                                          "COMP-123A")
 
-    configuration_content = UPDATE_CFG_DATA + """
+    configuration_content = UPDATE_UPLOAD_CFG_DATA + """
 signature_private_key_file = %(signature_private_key_file)s 
 signature_certificate_file = %(signature_certificate_file)s
 upload-cache-url = https://www.shacache.org/shacache

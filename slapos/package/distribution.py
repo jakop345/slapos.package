@@ -165,7 +165,7 @@ class AptGet:
 
   def addKey(self, caller, url, alias):
     """ Download and add a gpg key """
-    gpg_path = open("%s/%s.gpg" % self.trusted_gpg_d_path, alias)
+    gpg_path = open("%s/%s.gpg" % (self.trusted_gpg_d_path, alias))
     if os.path.exists(gpg_path):
       # File already exists, skip
       return
