@@ -12,22 +12,14 @@ if [ -z "$SLAPPKGKEY" ]; then
   SLAPPKGKEY=slapos-update-v0-iePo8Patho4aejai2reew1cai7exeibiepa8winideefar3aiBoh8ohpaingieTh
 fi
 
-if [ ! -f /etc/apt/trusted.gpg.d/slapos.openbuildservice.gpg ]; then
-  wget -O /etc/apt/trusted.gpg.d/slapos.openbuildservice.gpg "http://git.erp5.org/gitweb/slapos.package.git/blob_plain/HEAD:/debian-preseed/slapos.openbuildservice.key"
-fi 
-
-if [ ! -f /etc/apt/trusted.gpg.d/git.erp5.org.gpg ]; then
-  wget -O /etc/apt/trusted.gpg.d/git.erp5.org.gpg "http://git.erp5.org/gitweb/slapos.package.git/blob_plain/HEAD:/debian-preseed/git.erp5.org.key" 
-fi
-
 if [ ! -f /usr/local/bin/slappkg-update ]; then
-  apt-get install python-setuptools
+  apt-get install -y python-setuptools openssl
   easy_install -U slapos.package
 fi
 
-slappkg-conf --key=$SLAPPKGKEY --slapos-configuration=/etc/opt/update.cfg
+slappkg-conf --key=$SLAPPKGKEY 
 
-slappkg-update --slapos-configuration=/etc/opt/update.cfg
+slappkg-update 
 
 # Firmware for realtek
 apt-get install -y firmware-realtek 
@@ -53,9 +45,7 @@ if [ ! -f /etc/re6stnet/re6stnet.conf ]; then
 fi
 
 if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
-  slapos node register $COMPUTERNAME --partition-number 20 --ipv6-interface lo --interface-name eth0
-  rm /etc/opt/update.cfg
-  slappkg-conf --key=$SLAPPKGKEY --slapos-configuration=/etc/opt/update.cfg
+  slapos node register $COMPUTERNAME --partition-number 20 --interface-name lo
 fi
 
 if [ ! -f /etc/opt/slapos/slapos.cfg ]; then
