@@ -30,13 +30,13 @@
 
 import core
 import hostname
-import limits
+import limitconf
 import slappkgcron
 
 promise_list = (
   core.Promise,
   hostname.Promise,
   slappkgcron.Promise,
-  limits.Promise
+  limitconf.Promise
  )
 

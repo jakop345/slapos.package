@@ -27,7 +27,7 @@
 #
 ##############################################################################
 
-from slapos.package.promise import limits
+from slapos.package.promise import limitconf
 import os
 import pkg_resources
 import unittest
@@ -35,15 +35,15 @@ import unittest
 def _fake_call(self, *args, **kw):
   self.last_call = (args, kw)
 
-class testLimitsTestCase(unittest.TestCase):
+class testLimitConfTestCase(unittest.TestCase):
 
   def setUp(self):
-    limits.Promise._call = _fake_call
+    limitconf.Promise._call = _fake_call
     if os.path.exists("/tmp/test_promise_testing_limits.conf"):
       os.remove("/tmp/test_promise_testing_limits.conf")
 
-  def testLimitsCheckConsistency(self):
-    promise = limits.Promise()
+  def testLimitConfCheckConsistency(self):
+    promise = limitconf.Promise()
     promise.configuration_file_path = "/tmp/test_promise_testing_limits.conf"
 
     self.assertFalse(promise.checkConsistency())
@@ -52,9 +52,9 @@ class testLimitsTestCase(unittest.TestCase):
 
     self.assertFalse(promise.checkConsistency())
 
-  def testLimitsFixConsistency(self):
-    limits.Promise._call = _fake_call
-    promise = limits.Promise()
+  def testLimitConfFixConsistency(self):
+    limitconf.Promise._call = _fake_call
+    promise = limitconf.Promise()
     promise.configuration_file_path = "/tmp/test_promise_testing_limits.conf"
 
     self.assertFalse(promise.checkConsistency())
@@ -63,5 +63,5 @@ class testLimitsTestCase(unittest.TestCase):
 
     self.assertTrue(os.path.exists(promise.configuration_file_path))
     limit_content = open(promise.configuration_file_path, "r").read()
-    self.assertEquals(limit_content, pkg_resources.resource_stream(limits.__name__,
+    self.assertEquals(limit_content, pkg_resources.resource_stream(limitconf.__name__,
                                              'template/limits.conf.in').read())
