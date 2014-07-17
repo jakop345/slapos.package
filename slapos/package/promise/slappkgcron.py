@@ -38,10 +38,11 @@ class Promise(BasePromise):
 
   configuration_file_path = '/etc/cron.d/slappkg-update' 
 
-  def _getCronTemplate(self, slapos_location, slapos_configuration):
+  def _getCronTemplate(self): 
     configuration_content = get_template("update.cron.in")
     return configuration_content % {
                 "configuration_path": self.config.slapos_configuration,
+                # XXX Unhardcore me please.
                 "slapos_location": "/opt/slapos"
            } 
 
