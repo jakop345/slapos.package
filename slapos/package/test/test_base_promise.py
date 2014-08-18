@@ -179,7 +179,7 @@ class testBasePromiseCase(unittest.TestCase):
 
   def testIsAplicable(self):
    
-    from slapos.package.promise import core, limits 
+    from slapos.package.promise import core, limitconf 
     def fake_debian_getOSSignature():
       return "debian+++7.4+++"
 
@@ -189,7 +189,7 @@ class testBasePromiseCase(unittest.TestCase):
     self.assertEquals(promise.isApplicable(), True)
 
 
-    promise = limits.Promise(Values(self.config_dict))
+    promise = limitconf.Promise(Values(self.config_dict))
     promise.getOSSignature = fake_debian_getOSSignature
     self.assertEquals(promise.isApplicable(), False)
  
