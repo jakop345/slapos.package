@@ -253,18 +253,18 @@ reboot = 2100-11-11
     self.assertEquals(promise.checkConsistency(fixit=1), True)
     self.maxDiff = None
 
+    _today = datetime.datetime.today().strftime("%Y-%m-%d")
     expected_message_list = [
       'Expected Reboot early them 2011-10-10', 
-      'Expected Upgrade early them %s' % \
-              datetime.datetime.today().strftime("%Y-%m-%d"), 
+      'Expected Upgrade early them %s' % _today, 
       'Last reboot : 2100-11-11', 
       'Last upgrade : 1999-11-11', 
       'Upgrade is required.',
       'Retrying after fixConsistency....\n\n',
       'Expected Reboot early them 2011-10-10',
-      'Expected Upgrade early them 2014-07-15',
+      'Expected Upgrade early them %s' % _today,
       'Last reboot : 2100-11-11',
-      'Last upgrade : 2014-07-15',
+      'Last upgrade : %s' % _today,
       'Your system is up to date',
       'No need to reboot.',
       'No need to reboot.']
