@@ -4,5 +4,6 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/usr/local/bin
 MAILTO=root
 
-# This file expects that 
-0 */6 * * * root slappkg-update --slapos-configuration=%(configuration_path)s -v >> %(slapos_location)s/log/slappkg-update.log 2>&1
+# This file expects that
+0 1 * * * root slappkg-update --self-update --slapos-configuration=%(configuration_path)s -v >> %(slapos_location)s/log/slappkg-update.log 2>&1
+10 * * * * root slappkg-update --wait --slapos-configuration=%(configuration_path)s -v >> %(slapos_location)s/log/slappkg-update.log 2>&1

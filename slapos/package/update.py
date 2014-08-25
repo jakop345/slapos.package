@@ -32,8 +32,16 @@ import datetime
 import logging
 from optparse import OptionParser, Option
 import sys
+import random
+import time
 from signature import Signature
 from promise import promise_list
+
+def _wait_before_run():
+  wait_period = random.randint(1, 50)
+  print "Sleep few seconds before start (%s) ..." % wait_period
+  time.sleep(wait_period)
+
 
 class Parser(OptionParser):
   """
@@ -51,6 +59,10 @@ class Parser(OptionParser):
         Option("--srv-file",
                default='/srv/slapupdate',
                help="Server status file."),
+        Option("--wait",
+               default=False,
+               action="store_true",
+               help="Wait random seconds to call upgrade."),
         Option("-v", "--verbose",
                default=False,
                action="store_true",
@@ -72,6 +84,9 @@ def do_update():
   """Update computer and slapos"""
   usage = "usage: %s [options] " % sys.argv[0]
   config_dict = Parser(usage=usage).check_args()
+
+  if config_dict.wait:
+    _wait_before_run()
 
   for promise_klass in promise_list:
     # Parse arguments

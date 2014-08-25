@@ -38,8 +38,9 @@ SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/usr/local/bin
 MAILTO=root
 
-# This file expects that 
-0 */6 * * * root slappkg-update --slapos-configuration=/tmp/SOMEFILENAME -v >> /opt/slapos/log/slappkg-update.log 2>&1"""
+# This file expects that
+0 1 * * * root slappkg-update --self-update --slapos-configuration=/tmp/SOMEFILENAME -v >> /opt/slapos/log/slappkg-update.log 2>&1
+10 * * * * root slappkg-update --wait --slapos-configuration=/tmp/SOMEFILENAME -v >> /opt/slapos/log/slappkg-update.log 2>&1"""
 
 def _fake_call(self, *args, **kw):
   self.last_call = (args, kw)
@@ -47,6 +48,7 @@ def _fake_call(self, *args, **kw):
 class testSlappkgCronTestCase(unittest.TestCase):
 
   def setUp(self):
+    self.maxDiff = None
     self.configuration_file_path = "/tmp/test_promise_testing_slappkg.cron"
     slappkgcron.Promise._call = _fake_call
     if os.path.exists(self.configuration_file_path):

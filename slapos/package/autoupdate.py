@@ -40,10 +40,12 @@ def do_update():
   _run_command('slappkg-update-raw')
 
 def _run_command(command):
-    if '--no-update' in sys.argv:
-        sys.argv.remove('--no-update')
-    else:
-      subprocess.call(['easy_install', '-U', 'slapos.package'])
+    if '--self-update' in sys.argv:
+      sys.argv.remove('--self-update')
+      subprocess.call(['easy_install', '-U',
+         "-f", "http://www.nexedi.org/static/packages/source/",
+         "--allow-hosts", "http://www.nexedi.org/static/packages/source/",
+                       'slapos.package'])
 
     args = [
         os.path.join(os.path.dirname(sys.argv[0]), command)
