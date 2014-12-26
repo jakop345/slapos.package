@@ -1,10 +1,10 @@
-obs/home:VIFIBnexedi*
-obs/slapos-node_*
-obs/slapos-recipe-version
-obs/slapos-version
-obs/templates/debian.tar.gz
-obs/templates/debian/cron.d
-obs/templates/debian/slapos-node.logrotate
+obs/slapos/home:VIFIBnexedi*
+obs/slapos/slapos-node_*
+obs/slapos/slapos-recipe-version
+obs/slapos/slapos-version
+obs/slapos/templates/debian.tar.gz
+obs/slapos/templates/debian/cron.d
+obs/slapos/templates/debian/slapos-node.logrotate
 debian-preseed/*.iso
 *pyc
 slapprepare/build
