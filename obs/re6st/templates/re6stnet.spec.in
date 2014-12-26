@@ -1,0 +1,56 @@
+%define slapversion %RECIPE_VERSION%
+%define version %VERSION%
+%define unmangled_version %VERSION%
+%define release_number %RELEASE%
+
+Summary:   resilient, scalable, IPv6 network application
+Name:      re6st-node
+Version:   %{slapversion} 
+Release:   %{release_number}
+Source:    re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}.tar.gz
+License:   GPLv2+
+Group:     Applications/Internet
+
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-setuptools, openssl-devel
+
+Requires:  python 
+
+
+AutoReqProv: no
+
+
+%description
+
+%prep
+rm -rf $RPM_BUILD_DIR/re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}
+zcat $RPM_SOURCE_DIR/re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}.tar.gz | tar -xvf -
+
+%build
+cd $RPM_BUILD_DIR/re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}
+make
+
+%install
+cd $RPM_BUILD_DIR/re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}/
+make DESTDIR=$RPM_BUILD_ROOT install
+
+%files
+/etc/systemd
+/etc/systemd/re6stnet.service
+/etc/NetworkManager
+/etc/NetworkManager/dispatcher.d
+/etc/NetworkManager/dispatcher.d/50re6stnet
+/etc/re6stnet
+/usr/bin/re6st-conf
+/usr/bin/re6st-registry
+/usr/bin/re6stnet
+/var/lib/re6stnet
+/var/log/re6stnet
+/opt/re6st
+%defattr(-,root,root) 
+
+%post
+
+%preun
+
+%postun
+

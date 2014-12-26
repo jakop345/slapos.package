@@ -1,9 +1,9 @@
 #!/bin/sh -e
 
 # Edit for release
-VERSION=1.3.5
+VERSION=1.3.9
 # Edit for release
-RECIPE_VERSION=0.250
+RECIPE_VERSION=0.250.1
 # Edit for release
 RELEASE=1
 GITHASH=5f52d060953f2bff342dff8ae29cc44d98e918af

@@ -1,0 +1,155 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+VERSION = %VERSION%
+RECIPE_VERSION = %RECIPE_VERSION%
+
+PY = $(PYTHON)
+INSTALL_DIRECTORY = $(DESTDIR)/opt/re6st
+TARGET_DIRECTORY = /opt/re6st
+BUILD_ROOT_DIRECTORY := $(shell pwd)/build
+BUILD_DIRECTORY := $(BUILD_ROOT_DIRECTORY)$(TARGET_DIRECTORY)
+PATCHES_DIRECTORY := $(shell pwd)/patches
+
+#Use to get path of buildout correct
+ORIGINAL_DIRECTORY := $(shell cat ./original_directory)
+
+BOOTSTRAP_URL := 'http://svn.zope.org/*checkout*/zc.buildout/trunk/bootstrap/bootstrap.py?rev=127518'
+
+build: build-stamp
+build-stamp:
+
+	@echo "Fixing buildout path to $(BUILD_ROOT_DIRECTORY) rather than $(ORIGINAL_DIRECTORY) for buildout"
+	grep -rIl '$(ORIGINAL_DIRECTORY)' $(BUILD_ROOT_DIRECTORY) 2> /dev/null | \
+		xargs sed -i 's#$(ORIGINAL_DIRECTORY)#$(BUILD_ROOT_DIRECTORY)#g' || \
+		echo "No path to fix."
+
+	@echo 'Preparing source tarball (recipe version: $(RECIPE_VERSION))'
+	cd $(BUILD_DIRECTORY) && \
+		$(PY) ./bin/buildout -v
+
+	@touch build-stamp
+
+cleanup-build: cleanup-build-stamp
+cleanup-build-stamp: build
+	@echo "Deleting unecessary files to reduce source tarball size"
+
+	# TODO: Figure out why there is no write permission even for
+	#       the owner
+	chmod -R u+w $(BUILD_DIRECTORY)
+
+	# Buildout files
+	rm -rfv $(BUILD_DIRECTORY)/downloads
+
+	rm -fv $(BUILD_DIRECTORY)/bootstrap.py $(BUILD_DIRECTORY)/buildout.cfg \
+		$(BUILD_DIRECTORY)/bin/buildout $(BUILD_DIRECTORY)/.installed.cfg \
+		$(BUILD_DIRECTORY)/environment.*
+
+	rm -rfv $(BUILD_DIRECTORY)/parts/*-patch-download/ \
+		$(BUILD_DIRECTORY)/parts/*-hooks-download/
+
+	rm -rfv $(BUILD_DIRECTORY)/extends-cache/ \
+		$(BUILD_DIRECTORY)/download-cache/
+
+	# Removing locales, terminfo and base_completion.d directories
+	find $(BUILD_DIRECTORY) -type d \
+		\( -name locale -o -name terminfo -o -name bash_completion.d \) \
+		-prune -exec rm -rfv '{}' ';'
+
+	rm -rf $(BUILD_DIRECTORY)/parts/glib/share/glib-2.0/gdb/ \
+		$(BUILD_DIRECTORY)/parts/glib/share/gdb
+
+	rm -rf $(BUILD_DIRECTORY)/parts/ncurses/lib/terminfo
+
+	# Removing gettext archive tarball containing all versions
+	rm -fv $(BUILD_DIRECTORY)/parts/gettext/share/gettext/archive.dir.tar.gz
+
+	# Removing documentations
+	find $(BUILD_DIRECTORY)/parts -regextype posix-extended -type d \
+		-iregex '.*/(gtk-)?(doc[s]?|man|info|test[s]?)$$' \
+		-prune -exec rm -rfv '{}' ';'
+
+	find $(BUILD_DIRECTORY) -regextype posix-extended -type f \
+		-iregex '.*(COPYING|LICENSE).*' -exec rm -f '{}' ';'
+
+	# Removing include directories
+	find $(BUILD_DIRECTORY) -type d \( -name include -o -name pkgconfig \) | \
+		grep -v python | xargs rm -rfv
+
+	find $(BUILD_DIRECTORY) -type f -executable -name '*-config' | \
+		grep -v python | xargs rm -fv
+
+	# Removing Python byte-compiled files (as it will be done upon
+	# package installation) and static libraries
+	find $(BUILD_DIRECTORY) -regextype posix-extended -type f \
+		-iregex '.*/*\.(py[co]|[l]?a|exe|bat)$$' -exec rm -fv '{}' ';'
+
+	# Removing empty directories
+	find $(BUILD_DIRECTORY) -type d -empty -prune -exec rmdir '{}' ';'
+
+	@touch cleanup-build-stamp
+
+strip-binaries: strip-binaries-stamp
+strip-binaries-stamp: build
+	set -e; \
+	for f in `find $(BUILD_DIRECTORY) -type f -executable ! -name '*.so*'`; do \
+	 	if file $$f | grep -Eq '.*ELF.*(executable|shared).*'; then \
+			echo "Stripping executable $$f"; \
+	 		strip --remove-section=.comment --remove-section=.note $$f; \
+		fi; \
+	done
+
+	set -e; \
+	for f in `find $(BUILD_DIRECTORY) -type f -name '*.so*'`; do \
+		if file $$f | grep -Eq '.*ELF.*shared.*'; then \
+			echo "Stripping shared library $$f"; \
+	 		strip --remove-section=.comment --strip-unneeded \
+	 			--remove-section=.note $$f; \
+		fi; \
+	done
+
+	@touch strip-binaries-stamp
+
+all: all-stamp
+all-stamp: build cleanup-build strip-binaries
+	@touch all-stamp
+
+install: all
+	mkdir -p $(INSTALL_DIRECTORY)
+	cp -r $(BUILD_DIRECTORY)/* $(INSTALL_DIRECTORY)
+
+	set -e; \
+	for l in `find $(INSTALL_DIRECTORY) -type l -lname '$(BUILD_DIRECTORY)/*'`; do \
+		echo "Fixing symlink $$l"; \
+		base_directory=`echo $$l|sed 's#^$(INSTALL_DIRECTORY)/\(.*/\).*#\1#'|sed -r 's#[^/]+#..#g'`; \
+		cd `dirname $$l` && \
+			ln -sf `readlink $$l | sed "s#$(BUILD_DIRECTORY)#$$base_directory#"` \
+				 `basename $$l`; \
+	done
+
+	@echo "Removing shebang from Python files not in bin/"
+	for f in `grep --exclude-dir='bin' --include='*.py' -rIl '^#!' $(INSTALL_DIRECTORY) 2> /dev/null`; do \
+		chmod -x $$f && sed -i '1d' $$f; \
+	done
+
+	@echo "Fixing path to $(TARGET_DIRECTORY) rather than $(BUILD_DIRECTORY)"
+	grep -rIl '$(BUILD_DIRECTORY)' $(INSTALL_DIRECTORY) 2> /dev/null | \
+		xargs sed -i 's#$(BUILD_DIRECTORY)#$(TARGET_DIRECTORY)#g' || \
+		echo "No path to fix."
+
+	set -e; \
+	for f in `find $(INSTALL_DIRECTORY) \( -type f -o -type l \) \( -executable -o -name "*.so" \)`; do \
+		if file -L $$f | grep -Eq '.*ELF.*(executable|shared).*'; then \
+			OLD_RPATH="`chrpath $$f|awk -F'RPATH=' '{print $$2}'|sed 's#$(BUILD_DIRECTORY)#$(TARGET_DIRECTORY)#g' 2> /dev/null`"; \
+			if [ -n "$$OLD_RPATH" ]; then \
+				chrpath -r "$$OLD_RPATH" $$f; \
+			fi; \
+		fi; \
+	done
+
+
+clean:
+	rm -rf $(BUILD_ROOT_DIRECTORY)
+	rm -f *-stamp
+
+.PHONY: build cleanup-build strip-binaries all install clean

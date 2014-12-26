@@ -1,8 +1,9 @@
-obs/slapos/home:VIFIBnexedi*
+obs/*/home:VIFIBnexedi*
 obs/slapos/slapos-node_*
 obs/slapos/slapos-recipe-version
 obs/slapos/slapos-version
-obs/slapos/templates/debian.tar.gz
+obs/re6st/re6st-node_*
+obs/*/templates/debian.tar.gz
 obs/slapos/templates/debian/cron.d
 obs/slapos/templates/debian/slapos-node.logrotate
 debian-preseed/*.iso
