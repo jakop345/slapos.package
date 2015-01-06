@@ -1,0 +1,11 @@
+--- include/linux/binfmts.h 2014-09-14 00:41:52.000000000 +0200
++++ include/linux/binfmts.h.new 2015-01-06 14:19:42.559830302 +0100
+@@ -15,7 +15,7 @@
+ #define MAX_ARG_STRINGS 0x7FFFFFFF
+
+ /* sizeof(linux_binprm->buf) */
+-#define BINPRM_BUF_SIZE 128
++#define BINPRM_BUF_SIZE 1024
+
+ #ifdef __KERNEL__
+ #include <linux/list.h>
