@@ -1,0 +1,10 @@
+--- include/uapi/linux/binfmts.h        2015-01-07 06:18:47.128314803 +0100
++++ include/uapi/linux/binfmts.h        2015-01-07 06:18:39.580314799 +0100
+@@ -15,6 +15,6 @@
+ #define MAX_ARG_STRINGS 0x7FFFFFFF
+
+ /* sizeof(linux_binprm->buf) */
+-#define BINPRM_BUF_SIZE 128
++#define BINPRM_BUF_SIZE 1024
+
+ #endif /* _UAPI_LINUX_BINFMTS_H */
