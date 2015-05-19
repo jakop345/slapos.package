@@ -10,15 +10,15 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt/re6st/bin
-NAME=re6stnet
+NAME=re6st-node
 DESC="Resilient, Scalable, IPv6 Network application"
-DAEMON=/opt/re6st/bin/$NAME
+DAEMON=/opt/re6st/bin/re6stnet
 CONFDIR=/etc/re6stnet
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed or not configured
-[ -x $DAEMON -a -r $CONFDIR/$NAME.conf ] || exit 0
+[ -x $DAEMON -a -r $CONFDIR/re6stnet.conf ] || exit 0
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -38,7 +38,7 @@ do_start()
 	#   2 if daemon could not be started
 	set start-stop-daemon --quiet --pidfile $PIDFILE
 	"$@" --stop --test --name $NAME && return 1
-	"$@" --start --make-pidfile --background --chdir $CONFDIR --exec $DAEMON -- @$NAME.conf || return 2
+	"$@" --start --make-pidfile --background --chdir $CONFDIR --exec $DAEMON -- @re6stnet.conf || return 2
 }
 
 #
@@ -68,7 +68,7 @@ do_stop()
 	return "$RETVAL"
 }
 
-cd $CONFDIR; $DAEMON @$NAME.conf --test "main_interface != 'lo'" ||
+cd $CONFDIR; $DAEMON @re6stnet.conf --test "main_interface != 'lo'" ||
 case "$1" in start) exit 0;; restart|force-reload) set stop;; esac
 
 case "$1" in
