@@ -94,9 +94,17 @@ mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
 cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/slapos.logrotate.conf
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
+rm $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_easy_install.py
 
 %files
-/
+/opt/slapos
+/etc/cron.d/slapos-node
+/etc/logrotate.d/slapos.logrotate.conf
+/etc/opt
+/etc/systemd
+/etc/systemd/system
+/usr/bin/slapos
+/usr/sbin/slapos-tweak
 %defattr(-,root,root)
 
 %pre
