@@ -32,6 +32,8 @@ make
 %install
 cd $RPM_BUILD_DIR/re6st-node_%{unmangled_version}+%{slapversion}+%{release_number}/
 make DESTDIR=$RPM_BUILD_ROOT install
+mkdir -p $RPM_BUILD_ROOT/etc/systemd/
+install -Dpm 0644 daemon/re6stnet.service $RPM_BUILD_ROOT/etc/systemd/re6stnet.service
 
 %files
 /etc/systemd
