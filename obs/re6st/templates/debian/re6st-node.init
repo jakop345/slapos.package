@@ -10,12 +10,12 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt/re6st/bin
-NAME=re6st-node
+NAME=re6stnet
 DESC="Resilient, Scalable, IPv6 Network application"
 DAEMON=/opt/re6st/bin/re6stnet
 CONFDIR=/etc/re6stnet
 PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
+SCRIPTNAME=/etc/init.d/re6st-node
 
 # Exit if the package is not installed or not configured
 [ -x $DAEMON -a -r $CONFDIR/re6stnet.conf ] || exit 0
