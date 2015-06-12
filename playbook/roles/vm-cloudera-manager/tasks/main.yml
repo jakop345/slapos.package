@@ -1,0 +1,47 @@
+---
+
+  - name: get CDH repository package
+    get_url: url=http://archive.cloudera.com/cdh5/one-click-install/wheezy/amd64/cdh5-repository_1.0_all.deb dest=~/cdh5-repository_1.0_all.deb
+
+  - name: Install CDH repository package
+    shell: dpkg -i ~/cdh5-repository_1.0_all.deb
+
+  - name: get ClouderaManager repo list
+    get_url: url=http://archive.cloudera.com/cm5/debian/wheezy/amd64/cm/cloudera.list dest=/etc/apt/sources.list.d/cloudera-manager.list
+
+  - name: update the repositories
+    shell: apt-get update
+
+  - name: update apt repositories
+    action: shell apt-get update ; true
+
+  - name: install python-apt
+    raw: "apt-get install -y python-apt"
+
+  - name: install sudo
+    apt: name=sudo state=latest
+
+  - name: install tree
+    apt: name=tree state=latest
+
+  - name: install curl
+    apt: name=curl state=latest
+
+  - name: install oracle-j2sdk1.6
+    apt: name=oracle-j2sdk1.7 state=latest
+
+  - name: managing hosts file 
+    action: lineinfile dest=/etc/hosts regexp="^127.0.1.1" line=""
+
+  - name: install CM server
+    apt: name={{ item }} state=latest
+    with_items:
+    - cloudera-manager-daemons
+    - cloudera-manager-server-db
+    - cloudera-manager-server
+
+  - name: start cloudera-manager-server and -db
+    service: name={{ item }} state=started
+    with_items:
+    - cloudera-scm-server-db
+    - cloudera-scm-server

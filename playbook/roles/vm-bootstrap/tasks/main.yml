@@ -1,0 +1,25 @@
+
+  - name: Create /etc/opt dir
+    file: dest=/etc/opt mode=775 state=directory
+
+  - name: Download configuration
+    get_url: url=http://10.0.2.100/netconfig.sh dest=/etc/opt/netconfig.sh mode=755
+    ignore_errors: True
+
+  - name: stat /etc/opt/netconfig.sh
+    stat: path=/etc/opt/netconfig.sh
+    register: netconfig_file
+
+  - name: replace /etc/rc.local
+    copy: src=/etc/opt/netconfig.sh dest=/etc/rc.local mode=755
+    when: netconfig_file.stat.exists == True
+
+  - name: call netconfig.sh
+    command: /etc/opt/netconfig.sh 
+    when: netconfig_file.stat.exists == True
+    ignore_errors: True
+
+  - include: hostname.yml
+  - include: user.yml
+  - include: sudo.yml
+  - include: ssh.yml

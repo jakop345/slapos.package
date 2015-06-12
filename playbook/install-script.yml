@@ -1,0 +1,38 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+   - playbook_file: https://lab.nexedi.cn/rafael/slapos.playbook/repository/archive.tar.gz?ref=master 
+   - base_path: .
+
+  pre_tasks:
+    - name: Create script structure
+      command: mkdir -p {{ base_path }}/{{ item }} 
+      with_items:
+        - install/gnet/
+        - install/imt/
+
+    - name: generate scripts
+      template: src=roles/install-script/templates/base_setup.j2 dest={{ base_path }}/install/base-setup mode=0666
+
+    - name: Register base-setup md5
+      stat: path={{ base_path }}/install/base-setup
+      register: base_setup
+
+    - name: generate scripts
+      template: src=roles/install-script/templates/dev.j2 dest={{ base_path }}/install/devbook mode=0666
+
+  roles:
+    - { role: "install-script", playbook_yml: "slapos.yml", script_path: "install/slapos" }
+    - { role: "install-script", playbook_yml: "re6stnet.yml", script_path: "install/re6st"}
+    - { role: "install-script", playbook_yml: "vifib.yml", script_path: "install/vifib"}
+    - { role: "install-script", playbook_yml: "erp5-standalone.yml", script_path: "install/erp5-standalone"}
+    - { role: "install-script", playbook_yml: "slapos-test-node.yml", script_path: "install/slapos-test-node"}
+    - { role: "install-script", playbook_yml: "gnet-re6stnet.yml", script_path: "install/gnet/re6st"}
+    - { role: "install-script", playbook_yml: "gnet-server.yml", script_path: "install/gnet/slapos"}
+    - { role: "install-script", playbook_yml: "imt-server-update.yml", script_path: "install/imt/slapos-update"}
+    - { role: "install-script", playbook_yml: "imt-server.yml", script_path: "install/imt/slapos"}
+    - { role: "install-script", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/vm-bootstrap"}
+    - { role: "install-script", playbook_yml: "imt-vm-cloudera-manager.yml", script_path: "install/imt/vm-cloudera-manager"}
+    - { role: "install-script", playbook_yml: "imt-re6stnet.yml", script_path: "install/imt/re6st"}

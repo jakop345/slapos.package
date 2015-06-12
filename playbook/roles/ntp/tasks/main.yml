@@ -1,0 +1,12 @@
+
+
+  - name: Install ntp
+    apt: name=ntp state=latest
+    when: ansible_os_family == "Debian"
+
+  - name: Install ntp
+    yum: name=ntp state=latest
+    when: ansible_os_family == "RedHat"
+
+  - name: ensure ntp is runing
+    service: name=ntp state=running enabled=yes

@@ -1,0 +1,23 @@
+  - name: Install packages using apt
+    apt: name=slapos-node state=present update_cache=yes cache_valid_time=3600
+    when: ansible_os_family == "Debian"
+
+  - name: Install re6stnet on CentOS
+    yum: name=slapos.node state=present update_cache=yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Check if configuration exists already
+    stat: path=/etc/opt/slapos/slapos.cfg
+    register: slapos_cfg
+
+  - name: Configure SlapOS with slapos node register
+    shell: "slapos node register --token {{ slapostoken }} --master-url {{ slapos_master_url }} --master-url-web {{ slapos_web_master_url }} --interface-name {{ interface_name }} {{ computer_name }}"
+    when: slapos_cfg.stat.exists == False and "{{ slapostoken }}" != "notoken" and "{{ computer_name }}" != "noname"
+
+  - name: Check if configuration exists already
+    stat: path=/etc/opt/slapos/slapos.cfg
+    register: xslapos_cfg
+
+  - name: Run slapos format for initial bootstrap
+    shell: "slapos node format --now --alter_user=True"
+    when: xslapos_cfg.stat.exists == True

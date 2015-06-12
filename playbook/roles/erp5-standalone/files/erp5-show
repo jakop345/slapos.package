@@ -1,0 +1,117 @@
+#!/usr/bin/python2.7
+
+import os
+import sys
+import subprocess
+import glob
+import time
+import getopt
+import sqlite3
+
+from xml.dom import minidom
+#from slapos.proxy.db_version import DB_VERSION
+import json
+
+def fmt_date():
+  return time.strftime("%Y%m%d")
+
+def get_connection_information():
+  conn = sqlite3.connect("/opt/slapos/slapproxy.db")
+  cur = conn.cursor()
+  qry = cur.execute("SELECT connection_xml FROM partition11 WHERE connection_xml IS NOT NULL AND software_type='create-erp5-site'")
+  for row in qry:
+    xml = str(row[0])
+    break 
+  instance = minidom.parseString(xml)
+
+  try:
+    el = instance.getElementsByTagName('parameter')[0]
+    value = el.childNodes[0].nodeValue
+    json_text = json.loads(value)
+    return (json_text['family-admin'], json_text['inituser-password'])
+  except Exception, e:
+    print e
+    print "empty" 
+  return (None, None)  
+
+def check_tables():
+  conn = sqlite3.connect("/opt/slapos/slapproxy.db")
+  cur = conn.cursor()
+  qry = cur.execut("SELECT CASE WHEN tbl_name = 'partition11' THEN 1 ELSE 0 END FROM sqlite_master WHERE tbl_name = 'partition11' AND type = 'table'")
+
+  if qry:
+    pass
+  else:
+    print "tables aren't ready yet, your build may have failed, check logs in /opt/slapos/log/"
+    sys.exit(0)
+
+def get_build_status():
+  try:
+    f = open("/opt/slapos/log/slapos-node-software-" + fmt_date() + ".log")
+  except:
+    f = open("/opt/slapos/log/slapos-node-software.log")
+  lines = f.readlines()
+  if "Finished software releases" not in lines[-1]:
+    return False
+  if "ERROR" in lines[-3]:
+    return "err"
+  return True
+
+# Check if the last two lines show the software finished building.
+# If an error came just before this, we'll report failure.
+# Otherwise it passed and we can move on.
+# We want to open today's log, as it is most up to date
+
+def status():
+  build = get_build_status()
+  if build:
+    zope_ip, pw = get_connection_information()
+    print ("Build successful, connect to:\n"
+           "  " + zope_ip + " with\n"
+           "  username: zope  password: " + pw)
+  elif not build:
+    print "Your software is still building, be patient it can take awhile"
+  elif build == "err":
+    print "An error occurred while building, check /opt/slapos/log/slapos-node-software-" + \
+          fmt_date() + ".log for details"
+
+def info():
+  if get_build_status():
+    print get_connection_information()
+  else:
+    print "Information unavailable at this time, run " + sys.argv[0] + " -s for details"
+
+def usage():
+  print ("Get the status and information of your ERP5 build\n"
+         "Usage:")
+  print ("  --help    (-h):  Print this message and exit\n"
+         "  --status  (-s):  Print the status of the build\n"
+         "  --info    (-i):  Print the partition tables\n"
+         "  --dump    (-d):  Dump the entire database (alias for slapos proxy show)\n") 
+
+def dump():
+  subprocess.call(["slapos", "proxy", "show", "-u", "/opt/slapos/slapproxy.db"])
+
+def main(argv):
+  # parse command line options
+  try:
+    opts, args = getopt.getopt(argv, "sihd", ["status", "info", "help", "dump"])
+  except getopt.error, msg:
+    usage()
+    sys.exit(2)
+  # process arguments
+  for opt, arg in opts:
+    if opt in ("-h", "--help"):
+       usage()
+       sys.exit()
+    elif opt in ("-s", "--status"):
+      check_tables()
+      status()
+    elif opt in ("-i", "--info"):
+      check_tables()
+      info()
+    elif opt in ("-d", "--dump"):
+      dump()
+ 
+if __name__ == "__main__":
+  main(sys.argv[1:])

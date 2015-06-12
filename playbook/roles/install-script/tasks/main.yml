@@ -1,0 +1,6 @@
+---
+  - name: generate scripts
+    template: src=install.j2 dest={{ base_path }}/{{ script_path }} mode=0666
+ 
+  - name: Set ansible playbook on scripts
+    lineinfile: dest={{ base_path }}/{{ script_path }} line="ansible-playbook {{ playbook_yml }} -i hosts --connection=local" state=present

@@ -1,0 +1,8 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  roles:
+    - vm-bootstrap
+    - ntp
+    - vm-cloudera-manager

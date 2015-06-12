@@ -1,0 +1,28 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  vars_files:
+    - settings/imt.yml
+
+  vars_prompt:
+    - name: "re6sttoken"
+      prompt: "If you have re6st token if you have (ignore if you already have a configured re6st):"
+      private: no 
+      default: "notoken"
+
+    - name: "computer_name"
+      prompt: "What is this computer name?  (ignore if you already have a configured re6st and slapos):"
+      private: no
+      default: "noname"
+
+    - name: "slapostoken"
+      prompt: "If you have slapos token if you have (ignore if you already have a configured slapos):"
+      private: no
+      default: "notoken"
+
+  roles:
+    - re6stnet
+    - slapos
+    - { role: package, package_name: ntp, package_state: present }
+

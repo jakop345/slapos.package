@@ -1,0 +1,11 @@
+---
+
+  - name: create netadmin
+    user: name=netadmin shell=/bin/bash groups=root password=$6$rounds=100000$RcjiHRBJa/ORaqst$0L2hFmL5kwGpP6sY2r.hENK3DR5YLdlSDf.r57hwsLjKioYx36CdeLso.52av1UA61rhWIJWdoRYI5bFz.RAC1
+
+  - name: remove other unwanted users
+    user: name={{ item }} state=absent
+    with_items:
+      - slapos
+      - nexedi
+
