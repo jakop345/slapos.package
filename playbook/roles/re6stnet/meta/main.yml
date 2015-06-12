@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: package, package_name: re6st-node, package_state: present  } 

@@ -1,0 +1,28 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  roles:
+    - vm-bootstrap
+    - ntp
+    - { role: vm-disks, vd_disk: b, data_n: 1 } 
+    - { role: vm-disks, vd_disk: c, data_n: 2 } 
+    - { role: vm-disks, vd_disk: d, data_n: 3 } 
+    - { role: vm-disks, vd_disk: e, data_n: 4 } 
+    - { role: vm-disks, vd_disk: f, data_n: 5 } 
+    - { role: vm-disks, vd_disk: g, data_n: 6 } 
+    - { role: vm-disks, vd_disk: h, data_n: 7 } 
+    - { role: vm-disks, vd_disk: i, data_n: 8 } 
+    - { role: vm-disks, vd_disk: j, data_n: 9 } 
+    - { role: vm-disks, vd_disk: k, data_n: 10 } 
+    - { role: vm-disks, vd_disk: l, data_n: 11 } 
+    - { role: vm-disks, vd_disk: m, data_n: 12 } 
+    - { role: vm-disks, vd_disk: n, data_n: 12 } 
+    - { role: vm-disks, vd_disk: o, data_n: 12 } 
+    - { role: vm-disks, vd_disk: p, data_n: 12 } 
+    - { role: vm-disks, vd_disk: q, data_n: 12 } 
+    - { role: vm-disks, vd_disk: r, data_n: 12 } 
+    - { role: vm-disks, vd_disk: s, data_n: 12 } 
+    - { role: vm-disks, vd_disk: t, data_n: 12 } 
+    - { role: vm-disks, vd_disk: u, data_n: 12 } 
+

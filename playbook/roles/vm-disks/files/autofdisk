@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DISK=$1
+
+echo "n
+p
+1
+
+
+w
+"|fdisk $DISK

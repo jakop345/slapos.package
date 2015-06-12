@@ -1,0 +1,32 @@
+---
+  - name: Create ~/.ssh
+    file: path=/root/.ssh state=directory mode=700
+
+  - name: Create /home/netadmin/.ssh
+    file: path=/home/netadmin/.ssh state=directory mode=700 owner=netadmin group=netadmin
+
+  - name: Download ssh authorized keys
+    get_url: url=http://10.0.2.100/authorized_keys dest=/root/.ssh/authorized_keys.download mode=755
+    ignore_errors: True
+
+  - name: stat /root/.ssh/authorized_keys.download
+    stat: path=/root/.ssh/authorized_keys.download
+    register: authorized_keys
+
+  - name: replace /root/.ssh/authorized_keys
+    copy: src=/root/.ssh/authorized_keys.download dest=/root/.ssh/authorized_keys mode=644
+    when: authorized_keys.stat.exists == True
+
+  - name: replace /home/netadmin/.ssh/authorized_keys
+    copy: src=/root/.ssh/authorized_keys.download dest=/home/netadmin/.ssh/authorized_keys mode=644 owner=netadmin group=netadmin
+    when: authorized_keys.stat.exists == True
+
+  - name: update /etc/ssh/sshd_config
+    lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin (?!no)" line="PermitRootLogin no"
+    notify:
+      - restart ssh
+
+  - name: update /etc/ssh/sshd_config
+    lineinfile: dest=/etc/ssh/sshd_config line="PermitRootLogin no"
+    notify: 
+      - restart ssh

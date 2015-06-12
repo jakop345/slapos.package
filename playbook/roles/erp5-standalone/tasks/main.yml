@@ -1,0 +1,37 @@
+---
+  - name: Add ipv6 to lo interface
+    shell: ip -6 addr add 2001::1/64 dev lo
+    ignore_errors: True
+
+  - name: Supply erp5 software release
+    shell: slapos supply http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/erp5-cluster:/software/erp5/software.cfg local_computer
+
+  - name: create partition script
+    copy: src=request-erp5-cluster dest=/tmp/playbook-request-erp5-cluster mode=700
+
+  - name: create erp5-show
+    copy: src=erp5-show dest=/usr/local/bin/erp5-show mode=755
+
+  - name: Request ERP5 Cluster
+    shell: cat /tmp/playbook-request-erp5-cluster | slapos console 
+
+  - name: Add startup script
+    copy: src=erp5-startup dest=/usr/local/bin/erp5-startup mode=755
+  
+  - name: Add to rc.local
+    lineinfile: 
+      dest=/etc/rc.local insertbefore=BOF 
+      line='bash /usr/local/bin/erp5-startup &'
+      state=present
+
+  - name: Get slapos.playbook directory name
+    shell: cd /tmp/tmpplaybookerp5-standalone.*/slapos.playbook.git/playbook/; echo $(pwd)/
+    register: tmp_dir
+
+  - name: Check if /opt/slapos.playbook already exists
+    stat: path=/opt/slapos.playbook/
+    register: playbook_state
+
+  - name: Copy slapos.playbook
+    copy: src={{ tmp_dir.stdout }} dest=/opt/slapos.playbook/
+    when: playbook_state.stat.exists == False

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Reruns the ansible playbook, does nothing else
+
+PLAYBOOK_ROOT=/opt/slapos.playbook/playbook/
+PLAYBOOK_FILE=erp5-standalone.yml
+
+cd $PLAYBOOK_ROOT # cd into the playbook directory
+echo "Starting Ansible playbook:"
+
+ansible-playbook $PLAYBOOK_FILE -i  hosts --connection=local

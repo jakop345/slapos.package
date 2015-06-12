@@ -1,0 +1,15 @@
+---
+  - name: Include table 0 on re6st
+    shell: echo "TODO"
+
+  - name: interface on re6st
+    shell: echo "TODO"
+
+  - name: Load kvm_intel
+    shell: echo "TODO if machine has support."
+
+  - name: Set 666 on /dev/kvm
+    shell: echo "TODO if machine has support."
+
+  - name: Increase ulimit
+    shell: echo "TODO"

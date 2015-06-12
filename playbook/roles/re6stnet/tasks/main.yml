@@ -1,0 +1,11 @@
+  - name: Check if configuration exists already
+    stat: path=/etc/re6stnet/re6stnet.conf
+    register: re6stnet_conf
+
+  - name: Configure Re6st with re6st-conf
+    shell: "re6st-conf --registry {{ re6st_registry_url }} --token {{ re6sttoken }} -r title {{ computer_name }}  -d /etc/re6stnet"
+    when: re6stnet_conf.stat.exists == False and "{{ re6sttoken }}" != "notoken" and "{{ computer_name }}" != "noname"
+
+  - name: Start re6st-node service
+    service: name=re6st-node state=started enabled=yes
+    when: re6stnet_conf.stat.exists == True

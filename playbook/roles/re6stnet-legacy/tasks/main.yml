@@ -1,0 +1,39 @@
+---
+
+  - name: Install GPG
+    command: gpg --keyserver keys.gnupg.net --recv-keys 0990BF79AC87AE42AE5329074C23BE591A716324
+    when: ansible_distribution == "Debian"
+
+  - name: Install Debian 7 repository key
+    shell: gpg --export 1A716324 | apt-key add - 
+    when: ansible_distribution == "Debian" 
+
+  - name: Install Debian 7 repository
+    apt_repository: repo='deb http://git.erp5.org/dist/deb ./' state=present
+    when: ansible_distribution == "Debian" 
+
+  - name: Install re6stnet package
+    apt: name=babeld=1.5.1-nxd2 state=present update_cache=yes
+    when: ansible_distribution == "Debian"
+
+  - name: Install re6stnet package
+    apt: name=re6stnet state=present update_cache=yes
+    when: ansible_distribution == "Debian"
+
+  - name: Check if configuration exists already
+    stat: path=/etc/re6stnet/re6stnet.conf
+    register: re6stnet_conf
+
+  - name: Configure Re6st with re6st-conf
+    shell: "re6st-conf --registry {{ re6st_registry_url }} -r title {{ computer_name }}  -d /etc/re6stnet --anonymous"
+    when: ansible_distribution == "Debian" and re6stnet_conf.stat.exists == False and "{{ computer_name }}" != "noname"
+
+  - name: Start re6stnet service
+    service: name=re6stnet state=started enabled=yes
+    when: ansible_distribution == "Debian" and re6stnet_conf.stat.exists == True
+
+
+  - name: Add table 0
+    lineinfile: dest=/etc/re6stnet/re6stnet.conf line="table 0"
+    notify:
+      - restart re6stnet

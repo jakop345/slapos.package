@@ -1,0 +1,59 @@
+---
+
+  - name: Download hostname
+    get_url: url=http://10.0.2.100/hostname dest=/etc/opt/hostname mode=666
+    ignore_errors: True
+
+  - name: Download ipv4
+    get_url: url=http://10.0.2.100/ipv4 dest=/etc/opt/ipv4 mode=666
+    ignore_errors: True
+
+  - name: Download cluster.hash
+    get_url: url=http://10.0.2.100/cluster.hash dest=/tmp/cluster.hash mode=666
+    ignore_errors: True
+
+  - name: stat /etc/opt/hostname
+    stat: path=/etc/opt/hostname
+    register: hostname_file
+
+  - name: stat /etc/opt/ipv4
+    stat: path=/etc/opt/ipv4
+    register: ipv4_file
+
+  - name: stat /tmp/cluster.hash
+    stat: path=/tmp/cluster.hash
+    register: cluster_hash
+
+  - name: replace /etc/hostname
+    copy: src=/etc/opt/hostname dest=/etc/hostname mode=666
+    when: hostname_file.stat.exists == True
+
+  - name: update hostname
+    command: hostname -F /etc/hostname
+    when: hostname_file.stat.exists == True
+
+  - name: managing hosts file 
+    lineinfile: dest=/etc/hosts regexp="^127.0.1.1" line=""
+    when: hostname_file.stat.exists == True
+
+  - name: setting hosts special line
+    lineinfile: dest=/etc/hosts line="{{ lookup('file', '/etc/opt/ipv4') }}  {{ lookup('file', '/etc/opt/hostname') }}.tl.teralab-datascience.fr {{ lookup('file', '/etc/opt/hostname') }}" 
+    when: hostname_file.stat.exists == True
+
+  - name: setting cluster 
+    get_url: url="{{ lookup('file', '/tmp/cluster.hash') }}/hosts" dest=/tmp/hosts mode=666 validate_certs=no
+    when: cluster_hash.stat.exists == True
+
+  - name: stat /tmp/hosts
+    stat: path=/tmp/hosts
+    register: hostname_file
+
+  - name: Format hosts
+    script: format_hosts /tmp/hosts tl.teralab-datascience.fr 
+    when: cluster_hash.stat.exists == True
+
+  - name: managing resolv.conf file
+    lineinfile: dest=/etc/resolv.conf line="search tl.teralab-datascience.fr"
+
+  - name: adding entry from workspace
+    lineinfile: dest=/etc/resolv.conf line="nameserver 10.200.218.1"

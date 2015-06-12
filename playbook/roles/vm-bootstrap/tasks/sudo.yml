@@ -1,0 +1,21 @@
+---
+
+  - name: Ensure sudo is installed
+    apt: name=sudo state=latest update_cache=yes cache_valid_time=3600
+    when: ansible_os_family == "Debian"
+
+  - name: Ensure sudo is installed (yum)
+    yum: name=sudo state=latest update_cache=yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Ensure /etc/sudoers.d directory is present
+    file: path=/etc/sudoers.d state=directory
+
+  - name: Ensure /etc/sudoers.d is scanned by sudo
+    action: lineinfile dest=/etc/sudoers regexp="#includedir\s+/etc/sudoers.d" line="#includedir /etc/sudoers.d"
+
+  - name: Add hadoop user to the sudoers
+    lineinfile: dest=/etc/sudoers.d/netadmin state=present create=yes regexp="netadmin .*" line="netadmin ALL=(root)  NOPASSWD:ALL"
+
+  - name: Ensure /etc/sudoers.d/netadmin file has correct permissions
+    action: file path=/etc/sudoers.d/netadmin mode=0440 state=file owner=root group=root

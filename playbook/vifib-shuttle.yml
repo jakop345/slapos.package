@@ -1,0 +1,24 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  vars_files:
+    - settings/vifib.yml
+
+  vars_prompt:
+    - name: "computer_name"
+      prompt: "What is this computer name?  (ignore if you already have a configured re6st and slapos):"
+      private: no
+      default: "noname"
+
+    - name: "slapostoken"
+      prompt: "If you have slapos token if you have (ignore if you already have a configured slapos):"
+      private: no
+      default: "notoken"
+
+  roles:
+    - re6stnet-legacy
+    - slapos
+    - { role: package, package_name: ntp, package_state: present }
+    - vifib-server-shuttle
+

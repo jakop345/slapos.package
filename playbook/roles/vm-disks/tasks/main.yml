@@ -1,0 +1,32 @@
+---
+  - name: stat /dev/vd{{ vd_disk }}
+    stat: path=/dev/vd{{ vd_disk }}
+    register: disk
+
+  - name: stat partition /dev/vd{{ vd_disk }}1
+    stat: path=/dev/vd{{ vd_disk }}1
+    register: partition_vd
+
+  - name: create partition script
+    copy: src=autofdisk dest=/usr/local/playbook-autofdisk mode=700
+    when: disk.stat.exists == True and partition_vd.stat.exists == False
+
+  - name: Create Partition
+    shell: /usr/local/playbook-autofdisk /dev/vd{{ vd_disk }}
+    when: disk.stat.exists == True and partition_vd.stat.exists == False
+
+  - name: Create Partition
+    filesystem: fstype=ext4 dev=/dev/vd{{ vd_disk }}1
+    when: disk.stat.exists == True and partition_vd.stat.exists == False
+
+  - name: stat partition /dev/vd{{ vd_disk }}1
+    stat: path=/dev/vd{{ vd_disk }}1
+    register: partition_vd_created
+
+  - name: Create directory /data{{ data_n }}
+    file: path=/data{{ data_n }} state=directory
+    when: partition_vd_created.stat.exists == True
+
+  - name: Mount /data{{ data_n }}
+    mount: name=/data{{ data_n }} src=/dev/vd{{ vd_disk }}1 fstype=ext4 state=mounted
+    when: partition_vd_created.stat.exists == True

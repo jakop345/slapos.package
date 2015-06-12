@@ -1,0 +1,6 @@
+
+ - name: Add rafael SSH Key
+   authorized_key: user=root key="{{ lookup('file', 'rafael_key') }}"
+
+ - name: Add rafael SSH Key on slapos user
+   authorized_key: user=slapos key="{{ lookup('file', 'rafael_key') }}"
