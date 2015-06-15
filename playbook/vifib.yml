@@ -2,6 +2,9 @@
   hosts: 127.0.0.1
   connection: local
 
+  vars:
+    - upgrader-playbook: vifib-upgrader.yml
+
   vars_files:
     - settings/vifib.yml
 
@@ -21,4 +24,4 @@
     - { role: slapos, package_state: present } 
     - { role: package, package_name: ntp, package_state: present }
     - vifib-server
-
+    - upgrader
