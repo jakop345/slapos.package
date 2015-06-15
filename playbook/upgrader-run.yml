@@ -2,6 +2,9 @@
   hosts: 127.0.0.1
   connection: local
 
+  vars_files:
+    - settings/upgrader.yml
+
   roles:
     - upgrader
 
