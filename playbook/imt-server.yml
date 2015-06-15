@@ -22,7 +22,8 @@
       default: "notoken"
 
   roles:
-    - re6stnet
-    - slapos
+    - { role: re6stnet, package_state: present }
+    - { role: slapos, package_state: present }
     - { role: package, package_name: ntp, package_state: present }
+
 

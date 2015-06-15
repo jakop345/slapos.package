@@ -23,6 +23,15 @@
     - name: generate scripts
       template: src=roles/install-script/templates/dev.j2 dest={{ base_path }}/install/devbook mode=0666
 
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/index.html mode=0666
+
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/gnet/index.html mode=0666
+
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/imt/index.html mode=0666
+
   roles:
     - { role: "install-script", playbook_yml: "slapos.yml", script_path: "install/slapos" }
     - { role: "install-script", playbook_yml: "re6stnet.yml", script_path: "install/re6st"}
