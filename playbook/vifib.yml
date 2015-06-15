@@ -17,8 +17,8 @@
       default: "notoken"
 
   roles:
-    - re6stnet-legacy
-    - slapos
+    - { role: re6stnet-legacy, package_state: present }
+    - { role: slapos, package_state: present } 
     - { role: package, package_name: ntp, package_state: present }
     - vifib-server
 

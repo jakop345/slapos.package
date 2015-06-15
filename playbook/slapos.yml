@@ -17,7 +17,7 @@
       default: "notoken"
 
   roles:
-    - slapos
+    - { role: slapos, package_state: present }
     - { role: package, package_name: ntp, package_state: present }
 
 

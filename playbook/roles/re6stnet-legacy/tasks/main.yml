@@ -13,11 +13,11 @@
     when: ansible_distribution == "Debian" 
 
   - name: Install re6stnet package
-    apt: name=babeld=1.5.1-nxd2 state=present update_cache=yes
+    apt: name=babeld=1.5.1-nxd2 state={{ package_state }} update_cache=yes
     when: ansible_distribution == "Debian"
 
   - name: Install re6stnet package
-    apt: name=re6stnet state=present update_cache=yes
+    apt: name=re6stnet state={{ package_state }} update_cache=yes
     when: ansible_distribution == "Debian"
 
   - name: Check if configuration exists already
