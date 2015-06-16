@@ -84,9 +84,11 @@ def status(software_release):
              "  username: zope  password: " + pw)
   elif not build:
     print "Your software is still building, be patient it can take awhile"
+    sys.exit(2)
   elif build == "error":
     print "An error occurred while building, check /opt/slapos/log/slapos-node-software-" + \
           fmt_date() + ".log for details"
+    sys.exit(2)
 
   # check if the services are actually running (run slapos node and parse output)
   if pw is None:
@@ -96,9 +98,9 @@ def status(software_release):
     print "At least one of your services isn't running! Check with slapos node"
     print "restart a service with slapos node restart slappart:service"
 
-def info():
+def info(software_release):
   if get_build_status():
-    print get_connection_information()
+    print get_connection_information(software_release)
   else:
     print "Information unavailable at this time, run " + sys.argv[0] + " -s for details"
 

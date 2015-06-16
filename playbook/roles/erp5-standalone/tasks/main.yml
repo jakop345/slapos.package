@@ -1,8 +1,4 @@
 ---
-  - name: Add ipv6 to lo interface
-    shell: ip -6 addr add 2001::1/64 dev lo
-    ignore_errors: True
-
   - name: Supply erp5 software release
     shell: slapos supply {{ software_release_url }} local_computer
 
