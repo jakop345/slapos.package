@@ -2,6 +2,9 @@
   hosts: 127.0.0.1
   connection: local
 
+  vars:
+    software_release_url: https://lab.nexedi.cn/nexedi/slapos/raw/1.0/software/wendelin/software.cfg
+
   roles:
     - wendelin-standalone
     - standalone-shared

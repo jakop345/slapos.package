@@ -2,6 +2,9 @@
   hosts: 127.0.0.1
   connection: local
 
+  vars:
+    software_release_url: https://lab.nexedi.cn/nexedi/slapos/raw/erp5-cluster-0.1/software/erp5/software.cfg
+
   roles:
     - erp5-standalone
 
