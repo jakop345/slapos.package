@@ -1,5 +1,5 @@
 import json
-software_url = 'http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/erp5-cluster:/software/erp5/software.cfg'
+software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/erp5-cluster-0.1/software/erp5/software.cfg' 
 # Choose a SlapOS Node
 # If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
 computer_id = 'local_computer'

@@ -18,6 +18,10 @@
   - name: Wait for proxy
     wait_for: host=127.0.0.1 port=8080 delay=10
 
+  - name: Add ipv6 to lo interface
+    shell: ip -6 addr add 2001::1/64 dev lo
+    ignore_errors: True
+
   - name: Run slapos format for initial bootstrap
     shell: "slapos node format --now --alter_user=True"
     when: slapos_cfg.stat.exists == False

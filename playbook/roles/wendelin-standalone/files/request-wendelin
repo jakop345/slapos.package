@@ -1,36 +1,11 @@
 import json
 # copied from the request-erp5-cluster script, only changed the url to point to wendelin
-software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/master/software/wendelin/software.cfg'
+software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/1.0/software/wendelin/software.cfg'
 # Choose a SlapOS Node
 # If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
 computer_id = 'local_computer'
 
 parameter_dict = {
-  "timezone": "UTC",
-  "site-id": "erp5",
-  "bt5": "erp5_full_text_myisam_catalog erp5_configurator_standard",
-  "zope-partition-dict": {
-    "admin": {
-      "family": "admin",
-      "thread-amount": 4,
-      "port-base": 2220,
-      "instance-count": 1
-    },
-    "activities-node": {
-      "family": "activities",
-      "thread-amount": 4,
-      "instance-count": 1,
-      "timerserver-interval": 1,
-      "port-base": 2230
-    },
-    "distribution-node": {
-      "family": "distribution",
-      "thread-amount": 1,
-      "instance-count": 1,
-      "port-base": 2210,
-      "timerserver-interval": 1
-    }
-  }
 }
 
 # Choose a title
@@ -40,7 +15,5 @@ request(software_url,
   title,
   filter_kw={'computer_guid': computer_id},
   software_type='default',
-  partition_parameter_kw={
-   '_': json.dumps(parameter_dict, sort_keys=True, indent=2),
-  }
+  partition_parameter_kw={}
 )

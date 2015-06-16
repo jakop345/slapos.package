@@ -1,10 +1,6 @@
 ---
-  - name: Add ipv6 to lo interface
-    shell: ip -6 addr add 2001::1/64 dev lo
-    ignore_errors: True
-
   - name: Supply erp5 software release
-    shell: slapos supply http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/heads/erp5-cluster:/software/erp5/software.cfg local_computer
+    shell: slapos supply {{ software_release_url }} local_computer
 
   - name: create partition script
     copy: src=request-erp5-cluster dest=/tmp/playbook-request-erp5-cluster mode=700
