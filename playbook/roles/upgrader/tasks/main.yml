@@ -1,0 +1,55 @@
+---
+  - stat: path=/opt/upgrader/last-upgrade
+    register: last_upgrade
+
+  - shell: echo 1 > /opt/upgrader/last-upgrade
+    when: last_upgrade.stat.exists == False
+
+  - file: path=/opt/upgrader/ state=directory mode=0755
+
+  - shell: rm -rf /opt/upgrader/playbook/
+  
+  - file: path=/opt/upgrader/playbook/ state=directory mode=0755
+
+  - name: Periodically download the latest playbook 
+    shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
+
+  - name: Uncompress
+    unarchive: src=/opt/upgrader/archive.tar.gz dest=/opt/upgrader/playbook/
+
+  - name: Save new archive MD5
+    stat: path=/opt/upgrader/archive.tar.gz
+    register:
+      archive
+
+  - name: Update playbook md5
+    shell: echo {{ archive.stat.md5 }} > /opt/upgrader/next-upgrade-signature
+
+  - name: Stat Current Upgrade Signature
+    file: path=/opt/upgrader/current-upgrade-signature state=touch mode="0666" 
+
+  - name: Get /opt/upgrader/next-upgrade-signature content
+    shell: cat /opt/upgrader/next-upgrade-signature
+    register: 
+      next_upgrade_signature
+
+  - name: Get /opt/upgrader/current-upgrade-signature content
+    shell: cat /opt/upgrader/current-upgrade-signature
+    register:
+      current_upgrade_signature
+
+  - name: Do upgrade
+    shell: ansible-playbook {{ upgrader_playbook }} -i hosts >> /opt/upgrader/latest_upgrade.log 
+    when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
+    args:
+      chdir: /opt/upgrader/playbook/
+
+  - name: Upgrade Current Upgrade Signature
+    shell: cat /opt/upgrader/next-upgrade-signature > /opt/upgrader/current-upgrade-signature 
+    when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
+
+  - shell: echo {{ ansible_date_time.epoch }} > /opt/upgrader/last-upgrade
+    when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
+
+  - name: Set Cron  
+    cron: name="Launch Upgrader" minute="0" hour="*/3" job='ansible-playbook upgrader-run.yml --with-vars "upgrader-playbook={{ upgrader_playbook }}" -i hosts >> /opt/upgrader/latest_upgrade.log' 

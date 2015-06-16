@@ -1,0 +1,19 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    - upgrader-playbook: vifib-upgrader.yml
+    - computer_name: noname
+    - slapostoken: notoken 
+
+  vars_files:
+    - settings/vifib.yml
+
+  roles:
+    - { role: re6stnet-legacy, package_state: latest }
+    - { role: slapos, package_state: latest }
+    - { role: package, package_name: ntp, package_state: latest }
+    - { role: package, package_name: ntp, package_state: latest }
+    - vifib-server
+    - upgrader

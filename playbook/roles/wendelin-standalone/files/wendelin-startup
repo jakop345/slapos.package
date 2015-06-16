@@ -1,0 +1,9 @@
+#!/bin/bash
+# Reruns the ansible playbook, does nothing else
+
+PLAYBOOK_ROOT=/opt/slapos.playbook/
+PLAYBOOK_FILE=wendelin-standalone.yml
+
+cd $PLAYBOOK_ROOT # cd into the playbook directory
+
+ansible-playbook $PLAYBOOK_FILE -i  hosts --connection=local

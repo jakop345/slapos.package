@@ -23,11 +23,21 @@
     - name: generate scripts
       template: src=roles/install-script/templates/dev.j2 dest={{ base_path }}/install/devbook mode=0666
 
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/index.html mode=0666
+
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/gnet/index.html mode=0666
+
+    - name: generate index.html
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/imt/index.html mode=0666
+
   roles:
     - { role: "install-script", playbook_yml: "slapos.yml", script_path: "install/slapos" }
     - { role: "install-script", playbook_yml: "re6stnet.yml", script_path: "install/re6st"}
     - { role: "install-script", playbook_yml: "vifib.yml", script_path: "install/vifib"}
     - { role: "install-script", playbook_yml: "erp5-standalone.yml", script_path: "install/erp5-standalone"}
+    - { role: "install-script", playbook_yml: "wendelin-standalone.yml", script_path: "install/wendelin-standalone"}
     - { role: "install-script", playbook_yml: "slapos-test-node.yml", script_path: "install/slapos-test-node"}
     - { role: "install-script", playbook_yml: "gnet-re6stnet.yml", script_path: "install/gnet/re6st"}
     - { role: "install-script", playbook_yml: "gnet-server.yml", script_path: "install/gnet/slapos"}
