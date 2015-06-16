@@ -7,18 +7,25 @@ import glob
 import time
 import getopt
 import sqlite3
-
+from urllib2 import urlopen
 from xml.dom import minidom
-#from slapos.proxy.db_version import DB_VERSION
 import json
 
 def fmt_date():
   return time.strftime("%Y%m%d")
 
-def get_connection_information():
+# get all of the installed software types by checking the SR urls
+# return a list, and run routine on all of them
+def discover_software():
   conn = sqlite3.connect("/opt/slapos/slapproxy.db")
   cur = conn.cursor()
-  qry = cur.execute("SELECT connection_xml FROM partition11 WHERE connection_xml IS NOT NULL AND software_type='create-erp5-site'")
+  qry = cur.execute("SELECT DISTINCT software_release FROM partition11")
+  return [row[0] for row in qry]
+
+def get_connection_information(software_release):
+  conn = sqlite3.connect("/opt/slapos/slapproxy.db")
+  cur = conn.cursor()
+  qry = cur.execute("SELECT connection_xml FROM partition11 WHERE connection_xml IS NOT NULL AND software_release=?", (software_release,) )
   for row in qry:
     xml = str(row[0])
     break 
@@ -27,21 +34,25 @@ def get_connection_information():
   try:
     el = instance.getElementsByTagName('parameter')[0]
     value = el.childNodes[0].nodeValue
-    json_text = json.loads(value)
+  except:
+    return "error"
+  if not value.startswith("{"):
+    value = "\"" + value + "\""
+  json_text = json.loads(value)
+
+  if 'family-admin' in json_text:
     return (json_text['family-admin'], json_text['inituser-password'])
-  except Exception, e:
-    print e
-    print "empty" 
-  return (None, None)  
+  elif 'insecure' in json_text:
+    return (json_text, None)
+  else:
+    return (None, None)
 
 def check_tables():
   conn = sqlite3.connect("/opt/slapos/slapproxy.db")
   cur = conn.cursor()
-  qry = cur.execut("SELECT CASE WHEN tbl_name = 'partition11' THEN 1 ELSE 0 END FROM sqlite_master WHERE tbl_name = 'partition11' AND type = 'table'")
+  qry = cur.execute("SELECT CASE WHEN tbl_name = 'partition11' THEN 1 ELSE 0 END FROM sqlite_master WHERE tbl_name = 'partition11' AND type = 'table'")
 
-  if qry:
-    pass
-  else:
+  if qry is None:
     print "tables aren't ready yet, your build may have failed, check logs in /opt/slapos/log/"
     sys.exit(0)
 
@@ -54,7 +65,7 @@ def get_build_status():
   if "Finished software releases" not in lines[-1]:
     return False
   if "ERROR" in lines[-3]:
-    return "err"
+    return "error"
   return True
 
 # Check if the last two lines show the software finished building.
@@ -62,18 +73,28 @@ def get_build_status():
 # Otherwise it passed and we can move on.
 # We want to open today's log, as it is most up to date
 
-def status():
+def status(software_release):
   build = get_build_status()
   if build:
-    zope_ip, pw = get_connection_information()
+    zope_ip, pw = get_connection_information(software_release)
     print ("Build successful, connect to:\n"
-           "  " + zope_ip + " with\n"
-           "  username: zope  password: " + pw)
+           "  " + zope_ip)
+    if pw is not None:
+      print (" with\n"
+             "  username: zope  password: " + pw)
   elif not build:
     print "Your software is still building, be patient it can take awhile"
-  elif build == "err":
+  elif build == "error":
     print "An error occurred while building, check /opt/slapos/log/slapos-node-software-" + \
           fmt_date() + ".log for details"
+
+  # check if the services are actually running (run slapos node and parse output)
+  if pw is None:
+    zope_ip = "https://" + zope_ip[zope_ip.index("@")+1:]
+  r1 = urlopen(zope_ip)
+  if r1.getcode() != 200:
+    print "At least one of your services isn't running! Check with slapos node"
+    print "restart a service with slapos node restart slappart:service"
 
 def info():
   if get_build_status():
@@ -99,6 +120,9 @@ def main(argv):
   except getopt.error, msg:
     usage()
     sys.exit(2)
+  if len(opts) == 0:
+    usage()
+    sys.exit(2)
   # process arguments
   for opt, arg in opts:
     if opt in ("-h", "--help"):
@@ -106,10 +130,12 @@ def main(argv):
        sys.exit()
     elif opt in ("-s", "--status"):
       check_tables()
-      status()
+      for sr in discover_software():
+        status(sr)
     elif opt in ("-i", "--info"):
       check_tables()
-      info()
+      for sr in discover_software():
+        info(sr)
     elif opt in ("-d", "--dump"):
       dump()
  

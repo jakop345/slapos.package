@@ -1,0 +1,4 @@
+---
+  - name: create erp5-show
+    copy: src=erp5-show dest=/usr/local/bin/erp5-show mode=755
+ 

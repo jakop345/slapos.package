@@ -19,5 +19,8 @@
     wait_for: host=127.0.0.1 port=8080 delay=10
 
   - name: Run slapos format for initial bootstrap
-    service: "slapos node format --now --alter_user=True"
+    shell: "slapos node format --now --alter_user=True"
     when: slapos_cfg.stat.exists == False
+
+  - name: Set ownership for /opt/slapgrid
+    shell: "chown slapsoft:slapsoft /opt/slapgrid"
