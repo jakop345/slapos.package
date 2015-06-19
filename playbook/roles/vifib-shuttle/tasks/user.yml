@@ -1,0 +1,7 @@
+---
+  - name: remove other unwanted users
+    user: name={{ item }} state=absent
+    with_items:
+      - slapos
+      - nexedi
+

@@ -6,7 +6,7 @@
     shell: modprobe coretemp > /dev/null  2>&1
   
   - name: "Load f71882fg"
-    shell: modprobe f71882fg > /dev/null  2>&1
+    shell: echo "DISABLED modprobe f71882fg > /dev/null  2>&1"
 
   - name: "Do sysctl"
     shell: sysctl -w net.ipv4.neigh.default.gc_thresh1=512 net.ipv4.neigh.default.gc_thresh2=1024 net.ipv4.neigh.default.gc_thresh3=2048 net.ipv6.neigh.default.gc_thresh1=512 net.ipv6.neigh.default.gc_thresh2=1024 net.ipv6.neigh.default.gc_thresh3=2048
@@ -14,7 +14,4 @@
   - name: echo 1 > /sys/kernel/mm/ksm/run
     shell: echo 1 > /sys/kernel/mm/ksm/run
 
-  - name: "Install firmware-realtek"
-    apt: name=firmware-realtek
-    apt: name=firmware-realtek state=latest update_cache=yes cache_valid_time=3600
-    when: ansible_os_family == "Debian"
+  - include: user.yml

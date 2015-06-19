@@ -11,13 +11,15 @@
 
   - shell: rm -rf /opt/upgrader/playbook/
   
-  - file: path=/opt/upgrader/playbook/ state=directory mode=0755
+  - shell: mkdir -p /opt/upgrader/playbook 
 
   - name: Periodically download the latest playbook 
     shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
 
   - name: Uncompress
-    unarchive: src=/opt/upgrader/archive.tar.gz dest=/opt/upgrader/playbook/
+    shell: tar -xzvf /opt/upgrader/archive.tar.gz 
+    args:
+      chdir: /opt/upgrader/playbook/
 
   - name: Save new archive MD5
     stat: path=/opt/upgrader/archive.tar.gz
