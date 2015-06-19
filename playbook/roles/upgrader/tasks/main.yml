@@ -1,4 +1,6 @@
 ---
+  - file: path=/opt/upgrader state=directory mode=0755
+
   - stat: path=/opt/upgrader/last-upgrade
     register: last_upgrade
 
