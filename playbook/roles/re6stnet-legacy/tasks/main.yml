@@ -13,7 +13,7 @@
     when: ansible_distribution == "Debian" 
 
   - name: Install re6stnet package
-    apt: name=babeld=1.5.1-nxd2 state={{ package_state }} update_cache=yes
+    apt: name=babeld=1.5.1-nxd2 state=present update_cache=yes
     when: ansible_distribution == "Debian"
 
   - name: Install re6stnet package
