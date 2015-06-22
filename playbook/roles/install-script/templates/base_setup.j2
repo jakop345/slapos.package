@@ -98,4 +98,4 @@ if is_ubuntu && [[ $DISTRO == "trusty" ]]; then
 fi
 
 
-ansible localhost -m easy_install -a name=slapcache
+ansible localhost -m easy_install -a name=slapcache --connection=local
