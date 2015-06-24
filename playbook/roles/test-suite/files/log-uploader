@@ -1,0 +1,52 @@
+#!/usr/bin/python2.7
+
+import sys
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+class MyHandler(FileSystemEventHandler):
+  def on_modified(self, event):
+    print vars(event)
+    
+  def on_created(self, event):
+    if ".completed" in event.file:
+      print "partition completed!"
+      f = open("tmp/tmpupload", 'w')
+      f.write(fmt_date() + ": partition completed") 
+      f.close()
+      upload_file(event.file, open("tmp/tmpupload", 'rb')
+   else:
+      return
+
+def fmt_date():
+  return time.strftime("[ %Y%m%d %H:%M:%S ]")
+
+class uploader():
+  system_name = ""
+  url = 'LATER'
+
+  # takes a file handler and a name (where it should be saved on server)
+  def upload_file(file_name, contents):
+    files = {'file': f}
+    values = {'file_path': system_name+file_name}
+    r = requests.post(url, files=files, data=values)
+
+
+if __name__ == "__main__":
+  event_handler = MyHandler()
+  observer = Observer()
+  observer.schedule(event_handler, path='/opt/slapos/log', recursive=False)
+  observer.start()
+
+
+  # check if .completed exists or not, and write it to the server log
+  observer.schedule(event_handler, path='/opt/slapgrid/', recursive=True, patterns=".completed")
+  observer.start()
+
+  try:
+    while True:
+      time.sleep(1)
+  except KeyboardInterrupt:
+    observer.stop()
+  observer.join()

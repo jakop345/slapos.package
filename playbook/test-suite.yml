@@ -1,31 +1,7 @@
 ---
+  roles:
+    - test-suite
+    - standalone-shared
+
   
-  - file: path=/opt/ansible-install state=directory mode=0755
 
-  - stat path=/opt/ansible-install/software
-    register: software_release
-
-  - name: download software_release name
-    get_url: url=https://lab.nexedi.cn/krruzic/test-repository/raw/master/software
-             dest=software_release
-
-  - name: download log_uploader
-    get_url: url=https://lab.nexedi.cn/krruzic/test-repository/raw/master/log_uploader
-             dest=/usr/local/bin/log_uploader
-
-  - name: run ansible playbook
-    shell: ansible-playbook "{{ lookup('file', {{ software_release }}) }}" -i hosts
-  
-  - name: add log_uploader to cron
-    cron: name="Ensure log_uploader is running" 
-          second="10" 
-          job="usr/local/bin/log_uploader"
-
-  - name: install watchdog
-    shell: easy_install watchdog
-
-  - name: install pip
-    shell: easy_install pip
- 
-  - name: install python requests from pip
-    shell: pip install requests
