@@ -16,15 +16,15 @@ class MyHandler(FileSystemEventHandler):
       f.write(fmt_date() + ": partition completed") 
       f.close()
       upload_file(event.file, open("tmp/tmpupload", 'rb')
-   else:
+    else:
       return
 
 def fmt_date():
   return time.strftime("[ %Y%m%d %H:%M:%S ]")
 
 class uploader():
-  system_name = ""
-  url = 'LATER'
+  system_name = "first-machine" # possibly generate later?
+  url = 'https://[2001:67c:1254:e:a9::bafb]:???/post'
 
   # takes a file handler and a name (where it should be saved on server)
   def upload_file(file_name, contents):
