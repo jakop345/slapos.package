@@ -23,6 +23,9 @@
     - name: generate scripts
       template: src=roles/install-script/templates/dev.j2 dest={{ base_path }}/install/devbook mode=0666
 
+    - name: generate ansible-only
+      template: src=roles/install-script/templates/ansible-only.j2 dest={{ base_path }}/install/ansible mode=0666
+
     - name: generate index.html
       copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/index.html mode=0666
 

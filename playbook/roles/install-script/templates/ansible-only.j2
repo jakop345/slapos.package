@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#### Setup Ansible and load few libraries #####
+BASE_SETUP_SCRIPT_MD5={{ base_setup.stat.md5 }}
+
+wget --no-check-certificate https://deploy.nexedi.cn/base-setup -O /tmp/base-setup
+
+if [ "`md5sum /tmp/base-setup | cut -f1 -d\  `" !=  "$BASE_SETUP_SCRIPT_MD5" ]; then
+  echo "ERROR: base-setup has wrong md5 `md5sum /tmp/base-setup | cut -f1 -d\  ` != $BASE_SETUP_SCRIPT_MD5"
+  exit 1
+fi
+
+source /tmp/base-setup
