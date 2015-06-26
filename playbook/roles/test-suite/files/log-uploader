@@ -1,5 +1,6 @@
 #!/usr/bin/python2.7
 
+import os
 import sys
 import time
 import requests
@@ -26,16 +27,40 @@ def dir_date():
 
 class uploader():
   url = 'http://[2001:67c:1254:e:a9::bafb]:9000/post'
-
   # takes a file name and contents to append. Generates server file_path (where it should be saved on server)
   def upload_file(self, file_name, contents):
     values = {'file_path': dir_date() + file_name, 'contents': contents}
     r = requests.post(self.url, data=values)
 
+def scan_files(files):
+  try:  
+    with open("lines", 'r') as myfile:
+      software_line = myfile.readlines()
+  except:
+    software_line = [0] * len(files)
+  with open("lines", 'w'):
+    pass  
+  place = 0
+
+  for f in files:
+    print software_line[place]
+    print software_line
+    with open(f, 'r') as myfile:
+      new_lines = myfile.readlines()[software_line[place]:]
+    with open("lines", 'a') as myfile:
+      myfile.write(str(software_line[place]) + str(len(new_lines)))
+    print "Uploading " + f + "..."
+    c.upload_file(os.path.basename(f), new_lines)
+    print f + " finished uploading!"
+    place += 1
+  print "Files uploaded"
+
 
 if __name__ == "__main__":
   c = uploader()
-  c.upload_file("blah", "new test content")
+  files = ["/opt/slapos/log/slapos-node-software.log", "/opt/slapos/log/slapos-node-format.log", "/opt/slapos/log/slapos-node-instance.log"]
+  scan_files(files)
+
 
  #  event_handler = MyHandler()
  # observer = Observer()
