@@ -2,6 +2,7 @@
 
 import sys
 import time
+import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -15,38 +16,41 @@ class MyHandler(FileSystemEventHandler):
       f = open("tmp/tmpupload", 'w')
       f.write(fmt_date() + ": partition completed") 
       f.close()
-      upload_file(event.file, open("tmp/tmpupload", 'rb')
-    else:
-      return
+      upload_file(event.file, open("tmp/tmpupload", 'rb'))
 
 def fmt_date():
   return time.strftime("[ %Y%m%d %H:%M:%S ]")
 
-class uploader():
-  system_name = "first-machine" # possibly generate later?
-  url = 'https://[2001:67c:1254:e:a9::bafb]:???/post'
+def dir_date():
+  return time.strftime("%Y%m%d/")
 
-  # takes a file handler and a name (where it should be saved on server)
-  def upload_file(file_name, contents):
-    files = {'file': f}
-    values = {'file_path': system_name+file_name}
-    r = requests.post(url, files=files, data=values)
+class uploader():
+  url = 'http://[2001:67c:1254:e:a9::bafb]:9000/post'
+
+  # takes a file name and contents to append. Generates server file_path (where it should be saved on server)
+  def upload_file(self, file_name, contents):
+    values = {'file_path': dir_date() + file_name, 'contents': contents}
+    r = requests.post(self.url, data=values)
 
 
 if __name__ == "__main__":
-  event_handler = MyHandler()
-  observer = Observer()
-  observer.schedule(event_handler, path='/opt/slapos/log', recursive=False)
-  observer.start()
+  c = uploader()
+  c.upload_file("blah", "new test content")
+
+ #  event_handler = MyHandler()
+ # observer = Observer()
+ # observer.schedule(event_handler, path='/opt/slapos/log', recursive=False)
+ # observer.start()
 
 
   # check if .completed exists or not, and write it to the server log
-  observer.schedule(event_handler, path='/opt/slapgrid/', recursive=True, patterns=".completed")
-  observer.start()
+# """ observer.schedule(event_handler, path='/opt/slapgrid/', recursive=True)
+ # observer.start()
 
-  try:
-    while True:
-      time.sleep(1)
-  except KeyboardInterrupt:
-    observer.stop()
-  observer.join()
+#  try:
+ #   while True:
+  #    time.sleep(1)
+ # except KeyboardInterrupt:
+ #   observer.stop()
+ # observer.join()
+#"""
