@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    software_release_url: https://lab.nexedi.cn/nexedi/slapos/raw/1.0/software/wendelin/software.cfg
+    software_release_url: https://lab.nexedi.cn/nexedi/slapos/raw/1.0.1/software/wendelin/software.cfg
 
   roles:
     - wendelin-standalone
