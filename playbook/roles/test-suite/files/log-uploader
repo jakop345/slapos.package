@@ -3,21 +3,16 @@
 import os
 import sys
 import time
+from glob import glob
 import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 class MyHandler(FileSystemEventHandler):
-  def on_modified(self, event):
-    print vars(event)
-    
   def on_created(self, event):
     if ".completed" in event.file:
       print "partition completed!"
-      f = open("tmp/tmpupload", 'w')
-      f.write(fmt_date() + ": partition completed") 
-      f.close()
-      upload_file(event.file, open("tmp/tmpupload", 'rb'))
+      upload_file(event.file, fmt_date() + ": partition completed")
 
 def fmt_date():
   return time.strftime("[ %Y%m%d %H:%M:%S ]")
@@ -32,13 +27,24 @@ class uploader():
     values = {'file_path': dir_date() + file_name, 'contents': contents}
     r = requests.post(self.url, data=values)
 
+def check_startup():
+  pid = str(os.getpid())
+  pidfile = "/tmp/slaplogger.pid"
+
+  if os.path.isfile(pidfile):
+    print "%s already exists, exiting" % pidfile
+    sys.exit()
+  else:
+    file(pidfile, 'w').write(pid)
+  os.unlink(pidfile)
+
 def scan_files(files):
   try:  
-    with open("lines", 'r') as myfile:
+    with open("/opt/slapos/lines", 'r') as myfile:
       software_line = myfile.readlines()
   except:
     software_line = [0] * len(files)
-  with open("lines", 'w'):
+  with open("/opt/slapos/lines", 'w'):
     pass  
   place = 0
 
@@ -47,7 +53,7 @@ def scan_files(files):
     print software_line
     with open(f, 'r') as myfile:
       new_lines = myfile.readlines()[software_line[place]:]
-    with open("lines", 'a') as myfile:
+    with open("/opt/slapos/lines", 'a') as myfile:
       myfile.write(str(software_line[place]) + str(len(new_lines)))
     print "Uploading " + f + "..."
     c.upload_file(os.path.basename(f), new_lines)
@@ -57,25 +63,30 @@ def scan_files(files):
 
 
 if __name__ == "__main__":
+  check_startup()
   c = uploader()
   files = ["/opt/slapos/log/slapos-node-software.log", "/opt/slapos/log/slapos-node-format.log", "/opt/slapos/log/slapos-node-instance.log"]
-  scan_files(files)
 
+  # first check if .completed exists in any partitions
+  paths = ["/opt/slapgrid/slappart" + p + ".completed" for p in glob('/opt/slapgrid/*')]
+  for p in paths: 
+    try:
+      f = open(p, 'r')
+      upload_file(p, fmt_date() + ": partition completed")    
+    except IOError as e:
+      pass
 
- #  event_handler = MyHandler()
- # observer = Observer()
- # observer.schedule(event_handler, path='/opt/slapos/log', recursive=False)
- # observer.start()
+  event_handler = MyHandler()
+  observer = Observer()
 
 
   # check if .completed exists or not, and write it to the server log
-# """ observer.schedule(event_handler, path='/opt/slapgrid/', recursive=True)
- # observer.start()
+  observer.schedule(event_handler, path='/opt/slapgrid/', recursive=True)
+  observer.start()
 
-#  try:
- #   while True:
-  #    time.sleep(1)
- # except KeyboardInterrupt:
- #   observer.stop()
- # observer.join()
-#"""
+  try:
+    while True:
+      scan.files(files)
+  except KeyboardInterrupt:
+    observer.stop()
+  observer.join()
