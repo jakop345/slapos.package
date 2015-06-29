@@ -1,0 +1,20 @@
+---
+  - name: download software_release name
+    get_url: url=https://lab.nexedi.cn/krruzic/test-repository/raw/master/software
+             dest=/tmp/playbook_software_name
+
+  - name: create log-uploader
+    copy: src=log-uploader dest=/usr/local/bin/log-uploader mode=755
+
+  - name: add log-uploader to cron
+    cron: name="Ensure log-uploader is running" 
+          minute="*/6"
+          job="usr/local/bin/log-uploader"
+
+  - name: run ansible playbook
+    shell: ansible-playbook "{{ lookup('file', '/tmp/playbook_software_name') }}" -i hosts
+
+  # install dependencies
+  - easy_install: name=pip
+  - pip: name=requests
+  - pip: name=watchdog
