@@ -1,0 +1,19 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+
+    - name: Remove slapos.package setup and configuration
+      shell: rm -rf /usr/local/lib/python2.*/dist-packages/slapos.package*
+    
+    - name: Remove slapos.package setup and configuration
+      file: path={{ item }} state=absent
+      with_items:
+        - /usr/local/bin/slappkg-discover
+        - /usr/local/bin/slappkg-conf
+        - /usr/local/bin/slappkg-update
+        - /usr/local/bin/slappkg-update-raw
+        - /usr/local/bin/slappkg-upload-key
+        - /etc/opt/update.cfg
+         
