@@ -1,6 +1,6 @@
 import json
 # copied from the request-erp5-cluster script, only changed the url to point to wendelin
-software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/1.0/software/wendelin/software.cfg'
+software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/1.0.2/software/wendelin/software.cfg'
 # Choose a SlapOS Node
 # If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
 computer_id = 'local_computer'
