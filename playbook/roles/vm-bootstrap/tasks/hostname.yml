@@ -41,7 +41,7 @@
     when: hostname_file.stat.exists == True
 
   - name: setting cluster 
-    get_url: url="{{ lookup('file', '/tmp/cluster.hash') }}/hosts" dest=/tmp/hosts mode=666 validate_certs=no
+    shell: wget --no-check-certificate "{{ lookup('file', '/tmp/cluster.hash') }}/hosts" -O /tmp/hosts
     when: cluster_hash.stat.exists == True
 
   - name: stat /tmp/hosts
