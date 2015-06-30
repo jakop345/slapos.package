@@ -3,5 +3,5 @@
   connection: local
 
   roles:
-    - re6st # make sure we have ipv6
+    - re6stnet # make sure we have ipv6
     - test-suite
