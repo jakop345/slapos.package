@@ -1,4 +1,30 @@
 ---
+  - name: create partition script
+    template: src={{ request_instance_template }} dest=/tmp/playbook-request-{{ playbook_name }} mode=700
+
+  - name: Supply and Request ERP5 Cluster
+    shell: /tmp/playbook-request-{{ playbook_name }} | slapos console
+
   - name: create erp5-show
     copy: src=erp5-show dest=/usr/local/bin/erp5-show mode=755
- 
+
+  - name: Add startup script
+    copy: src={{ playbook_name }}-startup dest=/usr/local/bin/{{ playbook_name }}-startup mode=755
+
+  - name: Add to rc.local
+    lineinfile:
+      dest=/etc/rc.local insertbefore=BOF
+      line='bash /usr/local/bin/{{ playbook_name }}-startup &'
+      state=present
+
+  - name: Get slapos.playbook directory name
+    shell: cd /tmp/tmpplaybookerp5-standalone.*/slapos.playbook.git/playbook/; echo $(pwd)/
+    register: tmp_dir
+
+  - name: Check if /opt/slapos.playbook already exists
+    stat: path=/opt/slapos.playbook/
+    register: playbook_state
+
+  - name: Copy slapos.playbook
+    copy: src={{ tmp_dir.stdout }} dest=/opt/slapos.playbook/
+    when: playbook_state.stat.exists == False

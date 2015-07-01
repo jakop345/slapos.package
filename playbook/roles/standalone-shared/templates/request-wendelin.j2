@@ -1,0 +1,14 @@
+software_url = '{{ software_release_url }}'
+computer_id = 'local_computer'
+
+# Choose a title
+title = "instance-of-{{ playbook_name }}"
+
+supply(software_url, computer_id)
+
+request(software_url,
+  title,
+  filter_kw={'computer_guid': computer_id},
+  software_type='default',
+  partition_parameter_kw={}
+)

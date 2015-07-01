@@ -1,30 +1,6 @@
 ---
-  - name: Supply erp5 software release
-    shell: slapos supply {{ software_release_url }} local_computer
-
   - name: create partition script
-    copy: src=request-erp5-cluster dest=/tmp/playbook-request-erp5-cluster mode=700
+    template: src=request-instance.j2 dest=/tmp/playbook-request-erp5-cluster mode=700
 
-  - name: Request ERP5 Cluster
+  - name: Supply and Request ERP5 Cluster
     shell: cat /tmp/playbook-request-erp5-cluster | slapos console 
-
-  - name: Add startup script
-    copy: src=erp5-startup dest=/usr/local/bin/erp5-startup mode=755
-  
-  - name: Add to rc.local
-    lineinfile: 
-      dest=/etc/rc.local insertbefore=BOF 
-      line='bash /usr/local/bin/erp5-startup &'
-      state=present
-
-  - name: Get slapos.playbook directory name
-    shell: cd /tmp/tmpplaybookerp5-standalone.*/slapos.playbook.git/playbook/; echo $(pwd)/
-    register: tmp_dir
-
-  - name: Check if /opt/slapos.playbook already exists
-    stat: path=/opt/slapos.playbook/
-    register: playbook_state
-
-  - name: Copy slapos.playbook
-    copy: src={{ tmp_dir.stdout }} dest=/opt/slapos.playbook/
-    when: playbook_state.stat.exists == False

@@ -1,8 +1,11 @@
 import json
-software_url = 'https://lab.nexedi.cn/nexedi/slapos/raw/erp5-cluster-0.1/software/erp5/software.cfg' 
+
+software_url = '{{ software_release_url }}'
 # Choose a SlapOS Node
 # If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
 computer_id = 'local_computer'
+
+supply(software_url, computer_id)
 
 parameter_dict = {
   "timezone": "UTC",
@@ -33,7 +36,7 @@ parameter_dict = {
 }
 
 # Choose a title
-title = "instance-of-erp5-cluster"
+title = "instance-of-{{ playbook_name }}"
 
 request(software_url,
   title,
