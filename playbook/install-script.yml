@@ -46,3 +46,4 @@
     - { role: "install-script", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/vm-bootstrap"}
     - { role: "install-script", playbook_yml: "imt-vm-cloudera-manager.yml", script_path: "install/imt/vm-cloudera-manager"}
     - { role: "install-script", playbook_yml: "imt-re6stnet.yml", script_path: "install/imt/re6st"}
+    - { role: "install-script", playbook_yml: "test-suite.yml", script_path: "install/test-suite"}
