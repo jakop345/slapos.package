@@ -3,13 +3,13 @@
     template: src={{ request_instance_template }} dest=/tmp/playbook-request-{{ playbook_name }} mode=700
 
   - name: Supply and Request ERP5 Cluster
-    shell: /tmp/playbook-request-{{ playbook_name }} | slapos console
+    shell: cat /tmp/playbook-request-{{ playbook_name }} | slapos console
 
   - name: create erp5-show
     copy: src=erp5-show dest=/usr/local/bin/erp5-show mode=755
 
   - name: Add startup script
-    copy: src={{ playbook_name }}-startup dest=/usr/local/bin/{{ playbook_name }}-startup mode=755
+    template: src=start-script.j2 dest=/usr/local/bin/{{ playbook_name }}-startup mode=755
 
   - name: Add to rc.local
     lineinfile:

@@ -1,6 +1,0 @@
----
-  - name: create partition script
-    template: src=request-instance.j2 dest=/tmp/playbook-request-erp5-cluster mode=700
-
-  - name: Supply and Request ERP5 Cluster
-    shell: cat /tmp/playbook-request-erp5-cluster | slapos console 
