@@ -1,6 +1,8 @@
 {{ lookup('file', 'roles/install-script/files/function-common') }}
 
 
+export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+
 # Include Additional Functions
 function download_playbook {
     if [ ! -f /etc/opt/slapcache.cfg ]; then
