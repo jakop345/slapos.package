@@ -7,7 +7,8 @@ import glob
 import time
 import getopt
 import sqlite3
-from urllib2 import urlopen
+import ssl
+import urllib2
 from xml.dom import minidom
 import json
 
@@ -20,15 +21,21 @@ def discover_software():
   conn = sqlite3.connect("/opt/slapos/slapproxy.db")
   cur = conn.cursor()
   qry = cur.execute("SELECT DISTINCT software_release FROM partition11")
-  return [row[0] for row in qry]
+  return [row[0] for row in qry if row[0]]
 
 def get_connection_information(software_release):
   conn = sqlite3.connect("/opt/slapos/slapproxy.db")
   cur = conn.cursor()
   qry = cur.execute("SELECT connection_xml FROM partition11 WHERE connection_xml IS NOT NULL AND software_release=?", (software_release,) )
+  xml = None
   for row in qry:
     xml = str(row[0])
     break 
+
+  if xml is None:
+    print software_release
+    return (None, None)
+
   instance = minidom.parseString(xml)
 
   try:
@@ -90,13 +97,51 @@ def status(software_release):
           fmt_date() + ".log for details"
     sys.exit(2)
 
+  ipv6 = None
   # check if the services are actually running (run slapos node and parse output)
   if pw is None:
     zope_ip = "https://" + zope_ip[zope_ip.index("@")+1:]
-  r1 = urlopen(zope_ip)
+  
+  original_zope_ip = zope_ip
+  if "[" in zope_ip and "]" in zope_ip:
+    ipv6 = zope_ip[zope_ip.index("[")+1:zope_ip.index("]")]
+    with open("/etc/hosts", "ra+") as f:
+      if " erp5-instance" not in f.read():
+        f.write("\n%s   erp5-instance\n" % ipv6)
+    zope_ip = zope_ip.replace("[" + ipv6 + "]", "erp5-instance")
+
+  ctx = ssl.create_default_context()
+  ctx.check_hostname = False
+  ctx.verify_mode = ssl.CERT_NONE
+
+  try:
+    r1 = urllib2.urlopen(zope_ip, context=ctx)
+  except urllib2.URLError, e:
+    print "At least one of your services isn't running! Check with slapos node"
+    print "restart a service with slapos node restart slappart:service"
+    print ""
+    print "DEBUG information: %s" % e
+    sys.exit(2)
+  
   if r1.getcode() != 200:
     print "At least one of your services isn't running! Check with slapos node"
     print "restart a service with slapos node restart slappart:service"
+    sys.exit(2)
+
+  if ipv6:
+    print ""
+    print "The URL above may require extra configuration if you want to access it"
+    print "from another machine. You can install an apache locally and include the"
+    print "the follow rewrite rule (http version):"
+    print """ 
+  RewriteRule ^/(.*) %s/VirtualHostBase/http/%%{HTTP_HOST}/VirtualHostRoot/$1 [L,P]
+
+or (https version):
+
+  RewriteRule ^/(.*) %s/VirtualHostBase/https/%%{HTTP_HOST}/VirtualHostRoot/$1 [L,P]
+
+""" % (original_zope_ip, original_zope_ip) 
+
 
 def info(software_release):
   if get_build_status():
