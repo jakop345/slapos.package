@@ -39,7 +39,7 @@ fi
 
 # Warn users who aren't on an explicitly supported distro, but allow them to
 # override check and attempt installation with ``export FORCE=yes``
-if [[ ! ${DISTRO} =~ (wheezy|jessie|trusty|rhel7) ]]; then
+if [[ ! ${DISTRO} =~ (wheezy|jessie|trusty|rhel7|rhel6) ]]; then
     echo "WARNING: this script has not been tested on $DISTRO"
     if [[ "$FORCE" != "yes" ]]; then
         die $LINENO "If you wish to run this script anyway run with FORCE=yes"
@@ -52,7 +52,7 @@ if [[ $DISTRO == "wheezy" ]]; then
 fi
 
 if is_fedora && [[ $DISTRO == "rhel7" ]]; then
-    # RHEL requires EPEL for many Open Stack dependencies
+    # RHEL requires EPEL for many Ansible dependencies
 
     # NOTE: We always remove and install latest -- some environments
     # use snapshot images, and if EPEL version updates they break
@@ -91,6 +91,31 @@ EOF
 
 fi
 
+if is_fedora && [[ $DISTRO == "rhel6" ]]; then
+    if sudo yum repolist enabled epel | grep -q 'epel'; then
+        uninstall_package epel-release || true
+    fi
+
+    cat <<EOF | sudo tee /etc/yum.repos.d/epel-bootstrap.repo
+[epel-bootstrap]
+name=Bootstrap EPEL
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=\$basearch
+failovermethod=priority
+enabled=0
+gpgcheck=0
+EOF
+    yum-config-manager --enable epel-bootstrap
+    yum_install epel-release || \
+        die $LINENO "Error installing EPEL repo, cannot continue"
+    # EPEL rpm has installed it's version
+    rm -f /etc/yum.repos.d/epel-bootstrap.repo
+
+    is_package_installed yum-utils || install_package yum-utils
+    yum-config-manager --enable rhel-6-server-optional-rpms
+
+    is_package_installed libselinux-python || install_package libselinux-python
+fi
+
 is_package_installed ansible || install_package ansible
 is_package_installed python-setuptools || install_package python-setuptools
 
@@ -98,6 +123,5 @@ if is_ubuntu && [[ $DISTRO == "trusty" ]]; then
   is_package_installed python-apt || install_package python-apt
   is_package_installed python-pycurl || install_package python-pycurl
 fi
-
 
 ansible localhost -m easy_install -a name=slapcache --connection=local
