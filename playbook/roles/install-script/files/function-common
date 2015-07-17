@@ -62,10 +62,10 @@ function trueorfalse {
     $xtrace
 }
 
-function isset {
-    [[ -v "$1" ]]
-}
-
+#function isset {
+#    [[ -v "$1" ]]
+#}
+#
 # Control Functions
 # =================
 
@@ -1839,17 +1839,18 @@ function cp_it {
 #
 #     http_proxy=http://proxy.example.com:3128/ no_proxy=repo.example.net ./stack.sh
 
-function export_proxy_variables {
-    if isset http_proxy ; then
-        export http_proxy=$http_proxy
-    fi
-    if isset https_proxy ; then
-        export https_proxy=$https_proxy
-    fi
-    if isset no_proxy ; then
-        export no_proxy=$no_proxy
-    fi
-}
+# Unused function
+#function export_proxy_variables {
+#    if isset http_proxy ; then
+#        export http_proxy=$http_proxy
+#    fi
+#    if isset https_proxy ; then
+#        export https_proxy=$https_proxy
+#    fi
+#    if isset no_proxy ; then
+#        export no_proxy=$no_proxy
+#    fi
+#}
 
 # Returns true if the directory is on a filesystem mounted via NFS.
 function is_nfs_directory {
