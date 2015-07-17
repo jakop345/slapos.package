@@ -3,7 +3,7 @@
   connection: local
 
   roles:
-    - vm-bootstrap
+    - { role: vm-bootstrap, startup_playbook_id: imt-vm-bootstrap.yml }
     - ntp
     - { role: vm-disks, vd_disk: b, data_n: 1 } 
     - { role: vm-disks, vd_disk: c, data_n: 2 } 

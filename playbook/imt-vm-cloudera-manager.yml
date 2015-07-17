@@ -3,6 +3,6 @@
   connection: local
 
   roles:
-    - vm-bootstrap
+    - { role: vm-bootstrap, startup_playbook_id: imt-vm-bootstrap.yml } 
     - ntp
     - vm-cloudera-manager
