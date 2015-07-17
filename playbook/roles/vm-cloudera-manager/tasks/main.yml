@@ -19,10 +19,10 @@
     raw: "apt-get install -y python-apt"
 
   - name: install sudo
-    apt: name=sudo state=latest
+    apt: name=sudo state=latest update_cache=no
 
   - name: install tree
-    apt: name=tree state=latest
+    apt: name=tree state=latest  update_cache=no
 
   - name: install curl
     apt: name=curl state=latest

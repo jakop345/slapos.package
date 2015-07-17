@@ -1,10 +1,10 @@
 ---
   - name: Install ntp
-    apt: name=ntp state=latest
+    apt: name=ntp state=latest update_cache=no 
     when: ansible_os_family == "Debian"
 
   - name: Install ntp
-    yum: name=ntp state=latest
+    yum: name=ntp state=latest update_cache=no  
     when: ansible_os_family == "RedHat"
 
   - name: ensure ntp is runing
