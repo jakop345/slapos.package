@@ -1,0 +1,29 @@
+---
+  - name: Add startup script
+    template: src=start-script.j2 dest=/usr/local/bin/vm-bootstrap-update mode=755
+
+  - name: Add a periodical update on the VM
+    cron: name="Update vm bootstrap"
+          minute="*/12"
+          job="/usr/local/bin/vm-bootstrap-update"
+
+  - name: Check if /opt/slapos.playbook already exists
+    file: path=/opt/slapos.playbook/ state=directory
+
+  - name: check if playbook is there
+    stat: path=/opt/slapos.playbook/playbook.tar.gz
+    register: playbook_archive
+
+  - name: Download playbook
+    shell: slapcache-download --destination=playbook.tar.gz
+    when: playbook_archive.stat.exists == False
+    args:
+      chdir: /opt/slapos.playbook
+
+  - name: Copy slapos.playbook
+    shell: tar -xzvf /opt/slapos.playbook/playbook.tar.gz
+    when: playbook_archive.stat.exists == False
+    args:
+      chdir: /opt/slapos.playbook
+
+

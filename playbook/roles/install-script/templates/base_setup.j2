@@ -1,7 +1,9 @@
 {{ lookup('file', 'roles/install-script/files/function-common') }}
 
-
 export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+
+# XXX a bit brutal but otherwise it cannot work, without tty enabled.  
+sed -i "/requiretty/d" /etc/sudoers
 
 # Include Additional Functions
 function download_playbook {
@@ -92,6 +94,7 @@ EOF
 fi
 
 if is_fedora && [[ $DISTRO == "rhel6" ]]; then
+    sed -i "/requiretty/d" /etc/sudoers
     if sudo yum repolist enabled epel | grep -q 'epel'; then
         uninstall_package epel-release || true
     fi
