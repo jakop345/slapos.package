@@ -5,7 +5,7 @@
   - name: Add a periodical update on the VM
     cron: name="Update vm bootstrap"
           minute="*/12"
-          job="/usr/local/bin/vm-bootstrap-update"
+          job="bash -lc /usr/local/bin/vm-bootstrap-update > /var/log/vm-bootstrap.cron.log"
 
   - name: Check if /opt/slapos.playbook already exists
     file: path=/opt/slapos.playbook/ state=directory
