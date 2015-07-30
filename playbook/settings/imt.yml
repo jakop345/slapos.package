@@ -1,5 +1,5 @@
 ---
 re6st_registry_url: http://re6stnet.imt.vifib.com/
-slapos_master_url: https://slap.imt.vifib.com/
-slapos_web_master_url: https://imt.vifib.com/
+slapos_master_url: https://slap.tl.teralab-datascience.fr/
+slapos_web_master_url: https://slapos.tl.teralab-datascience.fr/
 interface_name: lo
