@@ -8,9 +8,11 @@ class uploader():
   
   log_path = '/var/log/ansible/hosts'
   url = ''
+  host = '127.0.0.1'
   
-  def __init__(self, url='http://10.0.2.100/'):
+  def __init__(self, url='http://10.0.2.100/', host='127.0.0.1'):
     self.url = url
+    self.host = host
   
   def upload_file(self, file_name, content, override=False):
     values = {'path': file_name, 'content': content}
@@ -20,6 +22,7 @@ class uploader():
     return result
 
   def upload_result(self):
+    has_failure = False
     for filename in os.listdir(self.log_path):
       filepath = os.path.join(self.log_path, filename)
       to_path = 'ansible/%s' % filename
@@ -29,6 +32,12 @@ class uploader():
           content = ','.join(fd.readlines())
         r = self.upload_file(to_path, '[%s]' % content, True)
         print 'Content uploaded to %s' % to_path, r
+      if filename.endswith('FAILED'):
+        has_failure = True
+    if not has_failure:
+      to_path = 'ansible/%s_FAILED' % self.host
+      r = self.upload_file(to_path, '[]', True)
+      print 'Content uploaded to %s' % to_path, r
 
   def readFileFrom(self, f, lastPosition, limit=20000):
     """
@@ -83,7 +92,7 @@ if __name__ == "__main__":
   if len(sys.argv) >= 3:
     ansible_log = sys.argv[2]
 
-  uploader = uploader()
+  uploader = uploader(url=url)
   state_file = "/opt/.ansible_log.state"
   log_destination = "ansible/vm-bootstrap.log"
   current_state = 0
