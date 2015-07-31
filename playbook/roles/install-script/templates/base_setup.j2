@@ -128,4 +128,9 @@ if is_ubuntu && [[ $DISTRO == "trusty" ]]; then
   is_package_installed python-pycurl || install_package python-pycurl
 fi
 
+ANSIBLE_PLUGIN_LOCATION="/usr/share/ansible_plugins/callback_plugins/"
+mkdir -p $ANSIBLE_PLUGIN_LOCATION
+{{ lookup('file', 'roles/install-script/files/log_parse') }}
+
 ansible localhost -m easy_install -a name=slapcache --connection=local
+ansible localhost -m easy_install -a name=requests --connection=local
