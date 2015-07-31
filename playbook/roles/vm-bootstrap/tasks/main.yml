@@ -1,4 +1,6 @@
 
+  - include: uploadlog.yml
+
   - include: rerun.yml
 
   - name: Create /etc/opt dir
