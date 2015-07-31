@@ -1,0 +1,35 @@
+#!/usr/bin/python
+
+import os
+import sys
+from subprocess import Popen, PIPE
+
+def check_ping(host_list):
+  for host in host_list:
+    process = Popen("ping -c 1 %s" % host, shell=True, stdout=PIPE)
+    result = process.communicate()[0]
+  
+    if process.returncode == 0:
+      continue
+    raise Exception('PING fail: host at %s didn\'t send response.\n%s' % (
+                      host, result))
+
+def ping_cluster(hpath):
+  if os.path.exists(hpath):
+    for content in open(hpath, 'r').readlines():
+      if content:
+        items = content.strip().split(' ')
+        check_ping(items)
+      
+if __name__ == "__main__":
+
+  if len(sys.argv) < 3:
+    print "Use: %s TYPE [HOST LIST] OR [HOST-FILE]" % sys.argv[0]
+    print "ex: %s host google.com slapos.org; %s cluster /tmp/hosts" % (
+                                        sys.argv[0], sys.argv[0])
+    exit(1)
+  if sys.argv[1] == 'host':
+    check_ping(sys.argv[2:])
+  elif sys.argv[1] == 'cluster':
+    ping_cluster(sys.argv[2])
+

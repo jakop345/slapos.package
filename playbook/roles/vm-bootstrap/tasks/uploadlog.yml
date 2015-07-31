@@ -5,5 +5,5 @@
   - name: Add a periodical upload of logs and result
     cron: name="Upload ansible files to http server"
           minute="*/7"
-          job="bash -lc /usr/local/bin/ansible-upload-vm-logs http://10.0.2.100/ /var/log/vm-bootstrap.log > /var/log/ansible-upload.log"
+          job="/usr/local/bin/ansible-upload-vm-logs http://10.0.2.100/ /var/log/vm-bootstrap.log > /var/log/ansible-upload.log"
 

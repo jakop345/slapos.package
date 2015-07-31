@@ -46,7 +46,7 @@
 
   - name: stat /tmp/hosts
     stat: path=/tmp/hosts
-    register: hostname_file
+    register: hosts_file
 
   - name: Format hosts
     script: format_hosts /tmp/hosts tl.teralab-datascience.fr 
@@ -57,3 +57,12 @@
 
   - name: adding entry from workspace
     lineinfile: dest=/etc/resolv.conf line="nameserver 10.200.218.1"
+
+  - name: ping current host
+    script: ping host {{ lookup('file', '/etc/opt/ipv4') }} {{ lookup('file', '/etc/opt/hostname') }}
+    when: hostname_file.stat.exists == True
+
+  - name: ping cluster hosts
+    script: ping cluster /tmp/hosts
+    when: hosts_file.stat.exists == True
+    ignore_errors: True
