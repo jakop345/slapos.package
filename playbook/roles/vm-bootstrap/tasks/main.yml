@@ -23,6 +23,7 @@
     when: netconfig_file.stat.exists == True
     ignore_errors: True
 
+  - include: network.yml
   - include: hostname.yml
   - include: user.yml
   - include: sudo.yml
