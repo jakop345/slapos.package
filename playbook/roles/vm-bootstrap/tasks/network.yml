@@ -1,0 +1,26 @@
+---
+
+  - name: Download network geteway ip
+    get_url: url=http://10.0.2.100/gateway dest=/etc/opt/gateway mode=666
+    ignore_errors: True
+
+  - name: stat /etc/opt/gateway
+    stat: path=/etc/opt/gateway
+    register: gateway_file
+
+  - name: Check default route
+    shell: /sbin/ip route list | grep default
+    register: default_route
+    ignore_errors: True
+
+  - name: Check interface eth1 exists
+    shell: /sbin/ifconfig | grep eth1 | wc -l
+    register: iface_eth1
+
+  - name: Delete default route to eth0
+    command: /sbin/ip route del default
+    when: gateway_file.stat.exists == True and iface_eth1.stdout == '1' and 'eth0' in default_route.stdout
+
+  - name: Set eth1 as default route
+    command: /sbin/ip route add default via {{ lookup('file', '/etc/opt/gateway') }} dev eth1
+    when: gateway_file.stat.exists == True and iface_eth1.stdout == '1' and not 'eth1' in default_route.stdout

@@ -58,6 +58,9 @@
   - name: adding entry from workspace
     lineinfile: dest=/etc/resolv.conf line="nameserver 10.200.218.1"
 
+  - name: Delete default nameserver
+    lineinfile: dest=/etc/resolv.conf line="nameserver 10.0.2.3" state=absent
+
   - name: ping current host
     script: ping host {{ lookup('file', '/etc/opt/ipv4') }} {{ lookup('file', '/etc/opt/hostname') }}
     when: hostname_file.stat.exists == True
