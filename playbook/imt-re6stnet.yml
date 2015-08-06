@@ -16,5 +16,28 @@
       private: no
       default: "noname"
 
+    - name: "interface_name"
+      prompt: "What is the interface used by re6st:"
+      private: no
+      default: "noname"
+
+  post_tasks:
+
+    - name: Add default
+      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="default"
+
+    - name: Max Clients
+      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="max-clients 1"
+
+    - name: Client count 
+      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="client-count 0"
+
+    - name: Include interface
+      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="client-count {{ interface_name }}"
+      when: interface_name != "noname"
+
+    - name: restart re6st-node service
+      service: name=re6st-node state=restarted enabled=yes
+
   roles:
     - re6stnet
