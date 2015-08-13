@@ -4,17 +4,20 @@ import sys
 
 print sys.argv[1:]
 
-host_content = open('/etc/hosts', 'r').read()
+host_content = open('/etc/hosts', 'r').readlines()
 hpath = sys.argv[1]
 domain = sys.argv[2]
+lines_entry = ""
 
-with open('/etc/hosts', 'a') as hosts:
-  for content in open(hpath, 'r').readlines():
-    if content:
-      items = content.strip().split(' ')
-      entry = "%s  %s.%s %s" % (items[1], items[0], domain, items[0])
-      print entry
-      if not entry in host_content:
-        hosts.write(entry)
-        hosts.write('\n')
-  
+for content in open(hpath, 'r').readlines():
+  if content:
+    items = content.strip().split(' ')
+    entry = "%s  %s.%s %s" % (items[1], items[0], domain, items[0])
+    print entry
+    if not entry in host_content:
+      lines_entry += entry + "\n"
+
+if lines_entry:
+  with open('/etc/hosts', 'a') as hosts:
+    hosts.write(lines_entry)
+
