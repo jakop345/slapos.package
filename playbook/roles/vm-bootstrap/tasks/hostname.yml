@@ -33,7 +33,7 @@
     when: hostname_file.stat.exists == True
 
   - name: managing hosts file 
-    lineinfile: dest=/etc/hosts regexp="^127.0.1.1" line=""
+    lineinfile: dest=/etc/hosts regexp="^127.0.1.1" line="" state=absent
     when: hostname_file.stat.exists == True
 
   - name: setting hosts special line
