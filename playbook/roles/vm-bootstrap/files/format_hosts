@@ -4,7 +4,7 @@ import sys
 
 print sys.argv[1:]
 
-host_content = open('/etc/hosts', 'r').readlines()
+host_content = open('/etc/hosts', 'r').read()
 hpath = sys.argv[1]
 domain = sys.argv[2]
 lines_entry = ""
