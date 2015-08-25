@@ -6,7 +6,7 @@
     file: path=/home/netadmin/.ssh state=directory mode=700 owner=netadmin group=netadmin
 
   - name: Download ssh authorized keys
-    get_url: url=http://10.0.2.100/authorized_keys dest=/root/.ssh/authorized_keys.download mode=755
+    get_url: url=http://10.0.2.100/authorized_keys dest=/root/.ssh/authorized_keys.download mode=755 force=yes
     ignore_errors: True
 
   - name: stat /root/.ssh/authorized_keys.download
@@ -14,7 +14,7 @@
     register: authorized_keys
 
   - name: replace /root/.ssh/authorized_keys
-    copy: src=/root/.ssh/authorized_keys.download dest=/root/.ssh/authorized_keys mode=644
+    copy: src=/root/.ssh/authorized_keys.download dest=/root/.ssh/authorized_keys mode=644 force=yes
     when: authorized_keys.stat.exists == True
 
   - name: replace /home/netadmin/.ssh/authorized_keys
