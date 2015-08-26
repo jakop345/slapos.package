@@ -6,11 +6,6 @@
     - settings/imt.yml
 
   vars_prompt:
-    - name: "re6sttoken"
-      prompt: "If you have re6st token if you have (ignore if you already have a configured re6st):"
-      private: no 
-      default: "notoken"
-
     - name: "computer_name"
       prompt: "What is this computer name?  (ignore if you already have a configured re6st and slapos):"
       private: no
@@ -22,8 +17,5 @@
       default: "notoken"
 
   roles:
-    - { role: re6stnet, package_state: present }
     - { role: slapos, package_state: present }
     - { role: package, package_name: ntp, package_state: present }
-
-
