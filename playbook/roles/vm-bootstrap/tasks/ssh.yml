@@ -6,19 +6,43 @@
     file: path=/home/netadmin/.ssh state=directory mode=700 owner=netadmin group=netadmin
 
   - name: Download ssh authorized keys
-    get_url: url=http://10.0.2.100/authorized_keys dest=/root/.ssh/authorized_keys.download mode=755 force=yes
+    get_url: url=http://10.0.2.100/authorized_keys dest=/etc/opt/authorized_keys mode=644 force=yes
     ignore_errors: True
 
-  - name: stat /root/.ssh/authorized_keys.download
-    stat: path=/root/.ssh/authorized_keys.download
+  - name: stat /etc/opt/authorized_keys
+    stat: path=/etc/opt/authorized_keys
     register: authorized_keys
 
-  - name: replace /root/.ssh/authorized_keys
-    copy: src=/root/.ssh/authorized_keys.download dest=/root/.ssh/authorized_keys mode=644 force=yes
+  - name: stat /etc/opt/authorized_keys.old
+    stat: path=/etc/opt/authorized_keys.old
+    register: authorized_keys_old
+
+  - name: get removed keys
+    script: file_cmp /etc/opt/authorized_keys.old /etc/opt/authorized_keys /etc/opt/authorized_keys_deleted
+    when: authorized_keys.stat.exists == True and authorized_keys_old.stat.exists == True
+
+  - name: stat /etc/opt/authorized_keys_deleted
+    stat: path=/etc/opt/authorized_keys_deleted
+    register: authorized_keys_deleted
+
+  - name: Remove deleted authorized_keys
+    authorized_key: user=netadmin key="{{ lookup('file', '/etc/opt/authorized_keys_deleted') }}" state=absent
+    when: authorized_keys_deleted.stat.exists == True
+
+  - name: Remove deleted authorized_keys for root
+    authorized_key: user=root key="{{ lookup('file', '/etc/opt/authorized_keys_deleted') }}" state=absent
+    when: authorized_keys_deleted.stat.exists == True
+
+  - name: save these authorized_keys
+    copy: src=/etc/opt/authorized_keys dest=/etc/opt/authorized_keys.old mode=644 force=yes
     when: authorized_keys.stat.exists == True
 
-  - name: replace /home/netadmin/.ssh/authorized_keys
-    copy: src=/root/.ssh/authorized_keys.download dest=/home/netadmin/.ssh/authorized_keys mode=644 owner=netadmin group=netadmin
+  - name: Add netadmin authorized keys
+    authorized_key: user=netadmin key="{{ lookup('file', '/etc/opt/authorized_keys') }}"
+    when: authorized_keys.stat.exists == True
+
+  - name: Add root authorized keys
+    authorized_key: user=root key="{{ lookup('file', '/etc/opt/authorized_keys') }}"
     when: authorized_keys.stat.exists == True
 
   - name: update /etc/ssh/sshd_config
