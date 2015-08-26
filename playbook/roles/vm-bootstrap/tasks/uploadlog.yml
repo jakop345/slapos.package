@@ -6,4 +6,4 @@
     cron: name="Upload ansible files to http server"
           minute="*/7"
           job="/usr/local/bin/ansible-upload-vm-logs http://10.0.2.100/ /var/log/vm-bootstrap.log > /var/log/ansible-upload.log"
-
+          cron_file=ansible-upload-log user="root"
