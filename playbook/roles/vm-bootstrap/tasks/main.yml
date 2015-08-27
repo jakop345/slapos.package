@@ -1,4 +1,4 @@
-- include: uploadlog.yml
+  - include: uploadlog.yml
 
   - include: rerun.yml
 
