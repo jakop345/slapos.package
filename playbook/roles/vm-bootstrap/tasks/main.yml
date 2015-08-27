@@ -1,7 +1,12 @@
-
   - include: uploadlog.yml
 
   - include: rerun.yml
+
+  - name: set dirty ratio
+    sysctl: name="vm.dirty_ratio" value=10 sysctl_set=yes state=present reload=yes
+
+  - name: set dirty background ratio
+    sysctl: name="vm.dirty_background_ratio" value=5 sysctl_set=yes state=present reload=yes
 
   - name: Create /etc/opt dir
     file: dest=/etc/opt mode=775 state=directory

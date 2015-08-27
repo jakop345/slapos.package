@@ -6,6 +6,7 @@
     cron: name="Update vm bootstrap"
           minute="*/12"
           job="bash -lc /usr/local/bin/vm-bootstrap-update >> /var/log/vm-bootstrap.log"
+          cron_file=ansible-vm-bootstrap user="root"
 
   - name: Check if /opt/slapos.playbook already exists
     file: path=/opt/slapos.playbook/ state=directory
