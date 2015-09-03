@@ -45,14 +45,17 @@
     authorized_key: user=root key="{{ lookup('file', '/etc/opt/authorized_keys') }}"
     when: authorized_keys.stat.exists == True
 
+  - name: Check whether sshd_config is well configured
+    command: grep -wq "^PermitRootLogin no" /etc/ssh/sshd_config
+    register: permitrootlogin
+    always_run: True
+    ignore_errors: True
+    changed_when: False
+
   - name: update /etc/ssh/sshd_config
-    lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin (?!no)" line="PermitRootLogin no"
+    lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin (.*)" line="PermitRootLogin no" state=present
     notify:
       - restart ssh
       - restart sshd
+    when: permitrootlogin.rc != 0
 
-  - name: update /etc/ssh/sshd_config
-    lineinfile: dest=/etc/ssh/sshd_config line="PermitRootLogin no"
-    notify: 
-      - restart ssh
-      - restart sshd

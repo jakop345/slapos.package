@@ -61,6 +61,10 @@
   - name: Delete default nameserver
     lineinfile: dest=/etc/resolv.conf line="nameserver 10.0.2.3" state=absent
 
+  - name: Turn off dhclient if it's running
+    shell: pkill dhclient
+    ignore_errors: True
+
   - name: ping current host
     script: ping host {{ lookup('file', '/etc/opt/ipv4') }} {{ lookup('file', '/etc/opt/hostname') }}
     when: hostname_file.stat.exists == True
