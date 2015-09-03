@@ -1,14 +1,51 @@
+import json
+
 software_url = '{{ software_release_url }}'
+# Choose a SlapOS Node
+# If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
 computer_id = 'local_computer'
+
+supply(software_url, computer_id)
+
+parameter_dict = {
+  "timezone": "UTC",
+  "site-id": "erp5",
+  "bt5": "erp5_full_text_myisam_catalog erp5_configurator_standard erp5_wendelin_configurator",
+  "developer-list": ["zope"],
+  "inituser-login": "zope",
+  "inituser-password": "insecure",
+  "zope-partition-dict": {
+    "admin": {
+      "family": "admin",
+      "thread-amount": 4,
+      "port-base": 2220,
+      "instance-count": 1
+    },
+    "activities-node": {
+      "family": "activities",
+      "thread-amount": 4,
+      "instance-count": 1,
+      "timerserver-interval": 1,
+      "port-base": 2230
+    },
+    "distribution-node": {
+      "family": "distribution",
+      "thread-amount": 1,
+      "instance-count": 1,
+      "port-base": 2210,
+      "timerserver-interval": 1
+    }
+  }
+}
 
 # Choose a title
 title = "instance-of-{{ playbook_name }}"
 
-supply(software_url, computer_id)
-
 request(software_url,
   title,
   filter_kw={'computer_guid': computer_id},
-  software_type='default',
-  partition_parameter_kw={}
+  software_type='create-erp5-site',
+  partition_parameter_kw={
+   '_': json.dumps(parameter_dict, sort_keys=True, indent=2),
+  }
 )
