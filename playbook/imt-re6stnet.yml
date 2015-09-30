@@ -16,7 +16,7 @@
       private: no
       default: "noname"
 
-    - name: "interface_name"
+    - name: "lan_iface_name"
       prompt: "What is the interface used by re6st:"
       private: no
       default: "noname"
@@ -33,7 +33,7 @@
       lineinfile: dest=/etc/re6stnet/re6stnet.conf line="client-count 0"
 
     - name: Include interface
-      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="client-count {{ interface_name }}"
+      lineinfile: dest=/etc/re6stnet/re6stnet.conf line="interface {{ lan_iface_name }}"
       when: interface_name != "noname"
 
     - name: restart re6st-node service
