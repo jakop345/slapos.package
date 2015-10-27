@@ -60,6 +60,8 @@ Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools
 
 AutoReqProv: no
 
+Conflicts: firewalld
+
 %description
  Client-side to deploy applications with SlapOS 
  SlapOS allows one to turn any application into SaaS (Service as a System),

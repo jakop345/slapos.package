@@ -25,6 +25,7 @@ Depends: ${misc:Depends},
          g++ | c++-compiler,
          make,
          patch
+Conflicts: firewalld
 Description: Client-side to deploy applications with SlapOS 
  SlapOS allows one to turn any application into SaaS (Service as a System),
  PaaS (Platform as a Service) or IaaS (Infrastructure as a Service) without
