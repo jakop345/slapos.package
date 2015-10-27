@@ -13,5 +13,7 @@ install: all
 	cp slapos-tweak $(DESTDIR)/usr/sbin/
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
+	mkdir -p $(DESTDIR)/etc/firewalld/
+	cp -R $(DESTDIR)/opt/slapos/parts/firewalld/etc/firewalld/* $(DESTDIR)/etc/firewalld/
 clean:
 #	cd slapos; make clean
