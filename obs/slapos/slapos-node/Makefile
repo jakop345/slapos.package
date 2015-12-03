@@ -15,5 +15,6 @@ install: all
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
 	mkdir -p $(DESTDIR)/etc/firewalld/
 	cp -R $(DESTDIR)/opt/slapos/parts/firewalld/etc/firewalld/* $(DESTDIR)/etc/firewalld/
+	mkdir -p $(DESTDIR)/opt/slapos/parts/dbus/var/run/dbus
 clean:
 #	cd slapos; make clean
