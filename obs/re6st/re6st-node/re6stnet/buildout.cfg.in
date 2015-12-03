@@ -51,11 +51,3 @@ eggs =
   six
   pyasn1
 
-[re6stnet]
-entry-points =
-  re6stnet=re6st.re6stnet:main
-  re6st-conf=re6st.re6stconf:main
-  re6st-registry=re6st.re6stregistry:main
-
-[versions]
-re6stnet = 0.426

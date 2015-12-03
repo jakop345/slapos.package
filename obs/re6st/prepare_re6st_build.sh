@@ -1,12 +1,12 @@
 #!/bin/sh -e
 
 # Edit for release
-VERSION=0.426
+VERSION=0.435
 # Edit for release
-RECIPE_VERSION=0.265
+RECIPE_VERSION=1.0.18
 # Edit for release
-RELEASE=2
-GITHASH=1ddbb2be20b224e7618bd7904bf846fd947b8b16
+RELEASE=1
+GITHASH=ded003246fc9a65d6030a8f77a770c33bf9d254b
 
 CURRENT_DIRECTORY="$(pwd)"
 # Define URL to compile
