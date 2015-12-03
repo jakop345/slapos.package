@@ -105,6 +105,7 @@ rm -rf $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_ea
 /etc/opt
 /etc/systemd
 /etc/systemd/system
+/etc/firewalld
 /usr/bin/slapos
 /usr/sbin/slapos-tweak
 %defattr(-,root,root)
