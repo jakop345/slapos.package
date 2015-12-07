@@ -1,0 +1,9 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE peer (
+  prefix TEXT PRIMARY KEY NOT NULL,
+  address TEXT NOT NULL);
+CREATE TABLE config (
+  name TEXT PRIMARY KEY NOT NULL,
+  value);
+COMMIT;

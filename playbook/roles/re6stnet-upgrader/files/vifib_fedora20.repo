@@ -1,0 +1,7 @@
+[home_VIFIBnexedi]
+name=SlapOS-Node (Fedora_20)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/VIFIBnexedi/Fedora_20/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/VIFIBnexedi/Fedora_20//repodata/repomd.xml.key
+enabled=1
