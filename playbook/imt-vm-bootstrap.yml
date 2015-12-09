@@ -25,4 +25,15 @@
     - { role: vm-disks, vd_disk: s, data_n: 12 } 
     - { role: vm-disks, vd_disk: t, data_n: 12 } 
     - { role: vm-disks, vd_disk: u, data_n: 12 } 
+    - role: logrotate
+      logrotate_scripts:
+        - name: vm-bootstrap
+          path: /var/log/vm-bootstrap.log
+          options:
+            - weekly
+            - compress
+            - rotate 5
+            - notifempty
+            - create
+            - dateext
 
