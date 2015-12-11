@@ -23,8 +23,39 @@
     when: netconfig_file.stat.exists == True
     ignore_errors: True
 
+  - name: Download cluster.hash
+    get_url: url=http://10.0.2.100/cluster.hash dest=/etc/opt/cluster.hash mode=644
+    ignore_errors: True
+
+  - name: stat cluster.hash
+    stat: path=/etc/opt/cluster.hash
+    register: cluster_hash
+
+  - name: get upgrade file if exists
+    shell: wget --no-check-certificate "{{ lookup('file', '/etc/opt/cluster.hash') }}/data" -O /etc/opt/upgrade.after
+    when: cluster_hash.stat.exists == True
+    ignore_errors: True
+
+  - name: stat file upgrade.after
+    stat: path=/etc/opt/upgrade.after
+    register: upgrade_set
+
+  - name: check if the plabook should be upgraded
+    shell: cat /etc/opt/upgrade.after
+    register: upgrade_time
+    when: upgrade_set.stat.exists == True
+
   - include: network.yml
   - include: hostname.yml
   - include: user.yml
   - include: sudo.yml
   - include: ssh.yml
+
+  - stat: path=/opt/upgrader/last-upgrade
+    register: last_upgrade
+
+  - shell: echo 1 > /opt/upgrader/last-upgrade
+    when: last_upgrade.stat.exists == False
+
+  - include: upgrader.yml upgrade_after={{ upgrade_time.stdout }}
+    when: upgrade_set.stat.exists == True and (upgrade_time.stdout|int > lookup('file', '/opt/upgrader/last-upgrade')|int)

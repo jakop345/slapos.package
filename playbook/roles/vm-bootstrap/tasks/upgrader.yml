@@ -1,0 +1,37 @@
+---
+  - file: path=/opt/upgrader state=directory mode=0755
+
+  - stat: path=/opt/upgrader/current-upgrade-signature
+    register: current_upgrade_signature
+
+  - file: path=/opt/upgrader/ state=directory mode=0755
+
+  - shell: rm -rf /opt/upgrader/playbook/
+
+  - shell: rm -rf /opt/upgrader/archive.tar.gz
+  
+  - shell: mkdir -p /opt/upgrader/playbook 
+
+  - name: Download the latest playbook 
+    shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
+
+  - name: Save new archive MD5
+    stat: path=/opt/upgrader/archive.tar.gz
+    register: archive
+
+  - name: Update playbook md5
+    shell: echo {{ archive.stat.md5 }} > /opt/upgrader/next-upgrade-signature
+
+  - name: Stat Current Upgrade Signature
+    file: path=/opt/upgrader/current-upgrade-signature state=touch mode="0666"
+    when: current_upgrade_signature.stat.exists == False
+
+  - name: Copy slapos.playbook
+    shell: tar -xzvf /opt/upgrader/archive.tar.gz
+    when: (upgrade_after|int > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
+    args:
+      chdir: /opt/slapos.playbook
+
+  - name: Upgrade Current Upgrade Signature
+    shell: echo /opt/upgrader/next-upgrade-signature > /opt/upgrader/current-upgrade-signature && echo {{ ansible_date_time.epoch }} > /opt/upgrader/last-upgrade
+    when: (upgrade_after|int > lookup('file', '/opt/upgrader/last-upgrade')|int )

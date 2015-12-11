@@ -8,10 +8,6 @@
     get_url: url=http://10.0.2.100/ipv4 dest=/etc/opt/ipv4 mode=666
     ignore_errors: True
 
-  - name: Download cluster.hash
-    get_url: url=http://10.0.2.100/cluster.hash dest=/tmp/cluster.hash mode=666
-    ignore_errors: True
-
   - name: stat /etc/opt/hostname
     stat: path=/etc/opt/hostname
     register: hostname_file
@@ -20,8 +16,8 @@
     stat: path=/etc/opt/ipv4
     register: ipv4_file
 
-  - name: stat /tmp/cluster.hash
-    stat: path=/tmp/cluster.hash
+  - name: stat cluster.hash
+    stat: path=/etc/opt/cluster.hash
     register: cluster_hash
 
   - name: replace /etc/hostname
