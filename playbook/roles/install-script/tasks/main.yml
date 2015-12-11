@@ -6,6 +6,14 @@
   - name: generate scripts
     template: src=install_unstable.j2 dest={{ base_path }}/{{ script_path }} mode=0666
     when: channel == "unstable"
+
+  - name: generate scripts
+    template: src=install_slapos.j2 dest={{ base_path }}/{{ script_path }} mode=0666
+    when: channel == "slapos"
+
+  - name: generate scripts
+    template: src=install_slapos_testing.j2 dest={{ base_path }}/{{ script_path }} mode=0666
+    when: channel == "slapos_testing"
  
   - name: Set ansible playbook on scripts
     lineinfile: dest={{ base_path }}/{{ script_path }} line="ansible-playbook {{ playbook_yml }} -i hosts --connection=local" state=present

@@ -3,7 +3,6 @@
   connection: local
 
   vars:
-   - playbook_file: https://lab.nexedi.cn/rafael/slapos.playbook/repository/archive.tar.gz?ref=master 
    - base_path: .
 
   pre_tasks:
@@ -12,6 +11,7 @@
       with_items:
         - install/gnet/
         - install/unstable/gnet/
+        - install/testing/gnet/
         - install/imt/
         - install/unstable/imt/
 
@@ -28,42 +28,53 @@
     - name: generate ansible-only
       template: src=roles/install-script/templates/ansible-only.j2 dest={{ base_path }}/install/ansible mode=0666
 
-    - name: generate index.html
-      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/index.html mode=0666
+    - name: generate main index.html
+      copy: src=roles/install-script/files/main_index.html dest={{ base_path }}/install/index.html mode=0666
 
     - name: generate index.html
-      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/gnet/index.html mode=0666
+      copy: src=roles/install-script/files/index.html dest={{ base_path }}/{{ item }}/index.html mode=0666
+      with_items:
+        - install/gnet
+        - install/imt
+        - install/unstable
+        - install/unstable/imt
+        - install/testing/gnet
+        - install/testing
 
-    - name: generate index.html
-      copy: src=roles/install-script/files/index.html dest={{ base_path }}/install/imt/index.html mode=0666
+  post_tasks:
+    - shell: tree | grep -v index.html | grep -v \ directories > map.txt
+      args:
+        chdir: install/
 
   roles:
-    - { role: "install-script", channel: "stable", playbook_yml: "slapos.yml", script_path: "install/slapos" }
-    - { role: "install-script", channel: "stable", playbook_yml: "re6stnet.yml", script_path: "install/re6st"}
-    - { role: "install-script", channel: "stable", playbook_yml: "vifib.yml", script_path: "install/vifib"}
-    - { role: "install-script", channel: "stable", playbook_yml: "vifib-shuttle.yml", script_path: "install/vifib-shuttle"}
-    - { role: "install-script", channel: "stable", playbook_yml: "erp5-standalone.yml", script_path: "install/erp5-standalone"}
-    - { role: "install-script", channel: "stable", playbook_yml: "wendelin-standalone.yml", script_path: "install/wendelin-standalone"}
-    - { role: "install-script", channel: "stable", playbook_yml: "slapos-test-node.yml", script_path: "install/slapos-test-node"}
-    - { role: "install-script", channel: "stable", playbook_yml: "gnet-re6stnet.yml", script_path: "install/gnet/re6st"}
-    - { role: "install-script", channel: "stable", playbook_yml: "gnet-server.yml", script_path: "install/gnet/slapos"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "slapos.yml", script_path: "install/slapos" }
+    - { role: "install-script", channel: "slapos", playbook_yml: "re6stnet.yml", script_path: "install/re6st"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "vifib.yml", script_path: "install/vifib"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "vifib-shuttle.yml", script_path: "install/vifib-shuttle"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "erp5-standalone.yml", script_path: "install/erp5-standalone"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "wendelin-standalone.yml", script_path: "install/wendelin-standalone"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "slapos-test-node.yml", script_path: "install/slapos-test-node"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "gnet-re6stnet.yml", script_path: "install/gnet/re6st"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "gnet-server.yml", script_path: "install/gnet/slapos"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "test-suite.yml", script_path: "install/test-suite"}
+
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server-update.yml", script_path: "install/imt/slapos-update"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server.yml", script_path: "install/imt/slapos"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/vm-bootstrap"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-cloudera-manager.yml", script_path: "install/imt/vm-cloudera-manager"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-re6stnet.yml", script_path: "install/imt/re6st"}
-    - { role: "install-script", channel: "stable", playbook_yml: "test-suite.yml", script_path: "install/test-suite"}
 
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "slapos.yml", script_path: "install/testing/slapos" }
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "re6stnet.yml", script_path: "install/testing/re6st"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "vifib.yml", script_path: "install/testing/vifib"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "vifib-shuttle.yml", script_path: "install/testing/vifib-shuttle"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "erp5-standalone.yml", script_path: "install/testing/erp5-standalone"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "wendelin-standalone.yml", script_path: "install/testing/wendelin-standalone"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "slapos-test-node.yml", script_path: "install/testing/slapos-test-node"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "gnet-re6stnet.yml", script_path: "install/testing/gnet/re6st"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "gnet-server.yml", script_path: "install/testing/gnet/slapos"}
+    - { role: "install-script", channel: "slapos_testing", playbook_yml: "test-suite.yml", script_path: "install/testing/test-suite"}
 
-    - { role: "install-script", channel: "unstable", playbook_yml: "slapos.yml", script_path: "install/unstable/slapos" }
-    - { role: "install-script", channel: "unstable", playbook_yml: "re6stnet.yml", script_path: "install/unstable/re6st"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "vifib.yml", script_path: "install/unstable/vifib"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "vifib-shuttle.yml", script_path: "install/unstable/vifib-shuttle"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "erp5-standalone.yml", script_path: "install/unstable/erp5-standalone"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "wendelin-standalone.yml", script_path: "install/unstable/wendelin-standalone"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "slapos-test-node.yml", script_path: "install/unstable/slapos-test-node"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "gnet-re6stnet.yml", script_path: "install/unstable/gnet/re6st"}
-    - { role: "install-script", channel: "unstable", playbook_yml: "gnet-server.yml", script_path: "install/unstable/gnet/slapos"}
     - { role: "install-script", channel: "unstable", playbook_yml: "imt-server-update.yml", script_path: "install/unstable/imt/slapos-update"}
     - { role: "install-script", channel: "unstable", playbook_yml: "imt-server.yml", script_path: "install/unstable/imt/slapos"}
     - { role: "install-script", channel: "unstable", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/unstable/imt/vm-bootstrap"}
