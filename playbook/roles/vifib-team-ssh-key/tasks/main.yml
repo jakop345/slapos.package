@@ -1,3 +1,6 @@
 
  - name: Add rafael SSH Key
    authorized_key: user=root key="{{ lookup('file', 'rafael_key') }}"
+
+ - name: Add rafael SSH Key
+   authorized_key: user=root key="{{ lookup('file', 'alain_key') }}"

@@ -24,6 +24,6 @@
     - { role: re6stnet-legacy, package_state: present }
     - { role: slapos, package_state: present } 
     - { role: package, package_name: ntp, package_state: present }
-    - rafael_ssh_key
+    - vifib-team-ssh-key
     - vifib-shuttle
     - upgrader

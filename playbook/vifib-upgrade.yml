@@ -10,7 +10,6 @@
     - settings/vifib.yml
 
   roles:
-    - { role: re6stnet-legacy, package_state: latest }
-    - { role: slapos, package_state: latest }
     - { role: package, package_name: ntp, package_state: latest }
-    - vifib-server
+    - { role: package, package_name: wget, package_state: latest }
+    - vifib-team-ssh-key

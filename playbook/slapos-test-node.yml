@@ -23,4 +23,4 @@
   roles:
     - { role: slapos, package_state: present } 
     - { role: package, package_name: ntp, package_state: present }
-    - rafael_ssh_key
+    - vifib-team-ssh-key
