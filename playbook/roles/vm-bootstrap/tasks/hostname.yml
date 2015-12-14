@@ -37,7 +37,7 @@
     when: hostname_file.stat.exists == True
 
   - name: setting cluster 
-    shell: wget --no-check-certificate "{{ lookup('file', '/tmp/cluster.hash') }}/hosts" -O /tmp/hosts
+    shell: wget --no-check-certificate "{{ lookup('file', '/etc/opt/cluster.hash') }}/hosts" -O /tmp/hosts
     when: cluster_hash.stat.exists == True
 
   - name: stat /tmp/hosts
@@ -56,6 +56,9 @@
 
   - name: Delete default nameserver
     lineinfile: dest=/etc/resolv.conf line="nameserver 10.0.2.3" state=absent
+
+  - name: Delete nameserver 8.8.8.8
+    lineinfile: dest=/etc/resolv.conf line="nameserver 8.8.8.8" state=absent
 
   - name: Turn off dhclient if it's running
     shell: pkill dhclient
