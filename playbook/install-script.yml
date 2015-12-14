@@ -57,6 +57,8 @@
     - { role: "install-script", channel: "slapos", playbook_yml: "gnet-re6stnet.yml", script_path: "install/gnet/re6st"}
     - { role: "install-script", channel: "slapos", playbook_yml: "gnet-server.yml", script_path: "install/gnet/slapos"}
     - { role: "install-script", channel: "slapos", playbook_yml: "test-suite.yml", script_path: "install/test-suite"}
+    - { role: "install-script", channel: "slapos", playbook_yml: "vifib-upgrader-install.yml", script_path: "install/vifib-upgrader-install"}
+
 
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server-update.yml", script_path: "install/imt/slapos-update"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server.yml", script_path: "install/imt/slapos"}
