@@ -57,3 +57,5 @@
 
   - name: Set Cron  
     cron: name="Launch Upgrader" minute="0" hour="*/3" job='ansible-playbook upgrader-run.yml --with-vars "upgrader-playbook={{ upgrader_playbook }}" -i hosts >> /opt/upgrader/latest_upgrade.log' 
+
+  - include: remove-legacy.yml

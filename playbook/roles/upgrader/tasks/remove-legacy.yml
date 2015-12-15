@@ -1,0 +1,12 @@
+
+  - name: Remoce cron entry
+    file: path={{ item }} state=absent
+    with_items:
+      - /etc/cron.d/slapkg-update 
+      - /usr/local/bin/slappkg-conf 
+      - /usr/local/bin/slappkg-update      
+      - /usr/local/bin/slappkg-upload-key
+      - /usr/local/bin/slappkg-discover  
+      - /usr/local/bin/slappkg-update-raw
+      - /etc/opt/update.cfg  
+      - /usr/local/lib/python2.7/dist-packages/slapos.package-0.2.1.1-py2.7.egg
