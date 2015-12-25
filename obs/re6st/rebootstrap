@@ -1,0 +1,24 @@
+#!/usr/bin/python2 -S
+import glob, os, sys, zipfile
+d = "download-cache/dist"
+p = "setuptools-*"
+x, = glob.glob(d + "/" + p)
+zipfile.ZipFile(x).extractall()
+sys.path[:0] = p = glob.glob(p)
+from setuptools.command.easy_install import main
+for x in "bin", "eggs":
+    try:
+        os.mkdir(x)
+    except OSError, e:
+        pass
+main(["-f", d, "-mxd", x, "zc.buildout"])
+p.append(*glob.glob("eggs/zc.buildout-*"))
+os.write(os.open("bin/buildout", os.O_CREAT|os.O_WRONLY|os.O_TRUNC, 0777), """\
+#!%s -S
+import os, sys
+d = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
+d = os.path.dirname(d) + os.sep
+sys.path[:0] = (%s)
+from zc.buildout.buildout import main
+sys.exit(main())
+""" % (sys.executable, ", ".join("d + %r" % p for p in p)))

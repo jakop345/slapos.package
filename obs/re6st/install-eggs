@@ -1,0 +1,34 @@
+#!/usr/bin/python2
+import errno, os, shutil, sys
+
+path = set()
+
+class Stop(Exception):
+    pass
+
+class SysPath(tuple):
+    def __setitem__(self, i, v):
+        path.update(v)
+        raise Stop
+
+sys_path = sys.path
+try:
+    sys.path = SysPath(sys_path)
+    for x in sys.argv[2:]:
+        try:
+            execfile(os.path.join("bin", x))
+        except Stop:
+            pass
+finally:
+    sys.path = sys_path
+
+dest = sys.argv[1]
+for x in path:
+    x = os.path.relpath(x)
+    d = os.path.join(dest, x)
+    try:
+        os.mkdir(os.path.basename(x))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    shutil.copytree(x, d, True)

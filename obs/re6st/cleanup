@@ -1,0 +1,38 @@
+#!/bin/sh -e
+(cd parts
+
+# Buildout files
+rm -r *-patch-download *-hooks-download || :
+
+# Removing gdb, locales, terminfo and base_completion.d directories
+find -type d \
+  \( -name gdb -name locale -o -name terminfo -o -name bash_completion.d \) \
+  -print0 -prune |xargs -0 rm -rf
+
+rm ncurses/lib/terminfo || :
+
+# Removing gettext archive tarball containing all versions
+rm gettext/share/gettext/archive.dir.tar.* || :
+
+# Removing include/pkgconfig files
+find -name 'python*' -prune -o \
+  \( -type d \( -name include -o -name pkgconfig \) \
+  -o -type f -executable -name '*-config' \
+  \) -print0 -prune |xargs -0 rm -rf
+)
+
+# Removing documentations
+find -regextype posix-extended -type d \
+  -iregex '.*/(gtk-)?(doc[s]?|man|info|test[s]?)$' \
+  -print0 -prune |xargs -0 rm -rf
+
+find -regextype posix-extended -type f \
+  -iregex '.*(COPYING|LICENSE).*' -delete
+
+# Removing Python byte-compiled files (as it will be done upon
+# package installation) and static libraries
+find -regextype posix-extended -type f \
+  -iregex '.*/*\.(py[co]|[l]?a|exe|bat)$' -delete
+
+# Removing empty directories
+find -type d -empty -delete

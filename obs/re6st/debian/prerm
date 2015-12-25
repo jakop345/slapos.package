@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+pyclean() {
+  local x IFS='
+'
+  x=`dpkg -L $1`
+  rm -f `for x in $x; do
+    case $x in *.py) echo $x[co];; esac
+  done`
+}
+pyclean $DPKG_MAINTSCRIPT_PACKAGE
+
+#DEBHELPER#

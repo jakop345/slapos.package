@@ -1,0 +1,68 @@
+# Note that this file and related scripts (rebootstrap, install-eggs) don't
+# contain anything specific to re6stnet. They could be reused as is for SlapOS.
+
+# We don't strip ELF files because all dists automatically do it.
+# For those that produce debug packages, these packages are anyway quite small
+# (debug information also compresses quite well).
+
+BUILD = $(TARGET)
+
+PATH := $(patsubst %,$(CURDIR)/$(BUILD)/parts/%/bin:,chrpath file perl)$(PATH)
+PYTHON2 = $(firstword $(wildcard /usr/bin/python2 /usr/bin/python))
+
+all: $(BUILD)/.installed.cfg
+ifneq ($(wildcard upstream.mk),)
+	make -f upstream.mk
+%: _%
+	make -f upstream.mk $@
+_install%: _install;
+Makefile:;
+else
+install: _install
+endif
+
+$(BUILD)/bin/buildout:
+	cd $(BUILD) && $(PYTHON2) -S $(CURDIR)/rebootstrap
+
+$(BUILD)/.installed.cfg: $(BUILD)/bin/buildout $(BUILD)/buildout.cfg
+	cd $(BUILD) && bin/buildout
+	touch $@
+
+PROGS = $(patsubst %,$(DESTDIR)/usr/bin/%,$(BIN))
+
+_install: $(DESTDIR)/$(TARGET) $(PROGS);
+
+$(PROGS): $(BUILD)/.installed.cfg
+	mkdir -p $(@D)
+	sed s,$(CURDIR)/$(BUILD),/$(TARGET),g $(BUILD)/bin/$(@F) > $@
+	chmod +x $@
+
+$(DESTDIR)/$(TARGET): $(BUILD)/.installed.cfg
+	rm -rf $@ && mkdir -p $@/parts
+	cd $(BUILD) && $(PYTHON2) $(CURDIR)/install-eggs $@ $(BIN)
+	for x in $(filter-out $(NOPART),$(shell cd $(BUILD)/parts && echo *)); \
+	do cp --preserve=links -r $(BUILD)/parts/$$x $@/parts; done
+	cd $@ && $(CURDIR)/cleanup && chmod -R u+w .
+
+# Fix paths in files, first ELF, then non-binary
+	set -e $(CURDIR)/$(BUILD) /$(TARGET); set $$* "s:\\Q$$1\\E:$$2:g"; \
+	x=`find $@ -type f \( -executable -o -name '*.so*' \) | \
+	xargs -r file |sed -n 's/:.*ELF.*\(executable\|shared\).*//p' | \
+	xargs -r chrpath -k |perl -ne "$$3"'; \
+		s/(.*): R(UN)?PATH=(.*)/chrpath -r $$3 $$1/ and print'`; \
+	eval "$$x"; \
+	if x=`grep -rIlF $$1 $@`; then \
+		echo "Fixing path to $$2 rather than $$1:" $$x; \
+		perl -pi -e "$$3" $$x; fi
+
+# Fix symlinks at the end because they'll become broken inside DESTDIR.
+# Maybe we should generate relative symlinks, or let dists do it.
+	set -e $(CURDIR)/$(BUILD)/; \
+	find $@ -type l -lname "$$1*" -printf '%l %p\n' |cut -c"$${#1}"- | \
+	while read s d; do echo "Fixing symlink $$d"; \
+		rm $$d; ln -s /$(TARGET)$$s $$d; \
+	done
+
+clean:
+	find $(BUILD) -mindepth 1 -maxdepth 1 \
+		$(patsubst %,! -name %,$(BUILD_KEEP)) |xargs rm -rf

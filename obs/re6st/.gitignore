@@ -1,0 +1,9 @@
+/re6stnet/
+/slapos/
+/upstream.mk
+/re6st-node_*.tar.gz
+/re6st-node_*.dsc
+/debian/control
+/debian/changelog
+/re6stnet.spec
+/PKGBUILD

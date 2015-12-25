@@ -1,0 +1,35 @@
+[buildout]
+extends =
+  file://%(SLAPOS)s/stack/slapos.cfg
+  file://%(SLAPOS)s/component/chrpath/buildout.cfg
+  file://%(SLAPOS)s/component/re6stnet/buildout.cfg
+
+extends-cache = extends-cache
+download-cache = download-cache
+
+develop =
+extensions =
+newest = false
+
+parts += chrpath python
+
+[python]
+recipe = zc.recipe.egg
+interpreter = ${:_buildout_section_name_}
+eggs = setuptools
+python = buildout
+scripts =
+
+# Uguu, upstream buildout.cfg must be patched as it works the other way
+# around from a packager point of view at least, thus at the end static
+# path, such as Python HOME directory, are wrong...
+#
+# Currently:
+# ./configure --prefix=BUILD_DIRECTORY && make install
+# Instead of:
+# ./configure --prefix=INSTALL_DIRECTORY && make install DESTDIR=BUILD_DIRECTORY
+[python2.7]
+configure-options +=
+  --prefix=%(TARGET)s/parts/${:_buildout_section_name_}
+environment +=
+  DESTDIR=%(ROOT)s

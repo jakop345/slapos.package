@@ -1,0 +1,23 @@
+# Maintainer: Rafael Monnerat <rafael@nexedi.com>
+pkgname=re6st-node
+pkgver=%VERSION%
+pkgdesc="resilient, scalable, IPv6 network application"
+pkgrel=1
+arch=('x86_64' 'i686')
+license=('GPL')
+depends=('iproute2')
+makedepends=('gcc' 'make' 'python2')
+install='re6stnet.install'
+source=(${pkgname}_${pkgver}.tar.gz)
+
+SKIPCHECKSUMS=1
+
+build() {
+	cd "${srcdir}/${pkgname}-${pkgver}"
+	make
+}
+
+package() {
+	cd "${srcdir}/${pkgname}-${pkgver}"
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
