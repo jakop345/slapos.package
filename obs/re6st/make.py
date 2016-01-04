@@ -2,17 +2,17 @@
 # It automatically clones missing repositories but doesn't automatically pull.
 # You have to choose by using git manually.
 
-# Run with SLAPOS_EPOCH=<N> (where <N> is an integer > 1)
+# Run with SLAPOS_EPOCH=<N> environment variable (where <N> is an integer > 1)
 # if rebuilding for new SlapOS version but same re6stnet.
 
 # Non-obvious dependencies:
 # - Debian: python-debian, python-docutils | python3-docutils
 # We could avoid them by doing like for setuptools, but I'd rather go the
-# opposite way: simplify the upload part by using the system setuptools and
-# recent features from Make 4.
+# opposite way: simplify the upload part by using the system setuptools.
 
-# This Makefile tries to be smart by only rebuilding the necessary parts after
-# some change. But as always, it does not handle all cases, so once everything
+# This "makefile" is quite smart at only rebuilding the necessary parts after
+# some change. The main exception concerns the download-cache & extends-cache,
+# because the 'buildout' step is really long. In doubt, and once everything
 # works, you should clean up everything before the final prepare+upload.
 
 # TODO:
@@ -33,17 +33,6 @@
 #   - re6stnet sdist
 #   - a tarball of remaining download-cache
 #   - 1 tarball with everything else
-# - Make tarballs "reproducible". If the contents does not change, and we don't
-#   really care about modification times, the result should always be the same.
-#   It's really annoying that we can't rely on 'osc status' to know whether
-#   there are real changes or not. 2 ways:
-#   - This is doable with a very recent of tar (not even in Jessie), in order
-#     to sort files by name (--sort option). Then there are timestamps:
-#     see -n option of gzip, and --mtime option of tar.
-#   - But the best one is probably to use Python instead of tar+gzip.
-#     And in fact, such Python script should not be limited to that, since many
-#     intermediate files like re6stnet.spec are so quick to generate that they
-#     should be produced in RAM.
 #
 # Note that package don't contain *.py[co] files and they're not generated
 # at installation. For this package, it's better like this because it minimizes
@@ -51,124 +40,216 @@
 # If this way of packaging is reused for other software, postinst scripts
 # should be implemented.
 
-BOOTSTRAP_URL = http://downloads.buildout.org/1/bootstrap.py
-RE6STNET_URL = http://git.erp5.org/repos/re6stnet.git
-SLAPOS_URL = http://git.erp5.org/repos/slapos.git
+import os, rfc822, shutil, time, urllib
+from glob import glob
+from cStringIO import StringIO
+from subprocess import check_call
+from make import *
+from debian.changelog import Changelog
+from debian.deb822 import Deb822
 
-PACKAGE = re6st-node
-BIN = re6st-conf re6st-registry re6stnet
-NOPART = chrpath flex glib lunzip m4 patch perl popt site_perl xz-utils
-TARGET = opt/re6st
+BOOTSTRAP_URL = "http://downloads.buildout.org/1/bootstrap.py"
+PACKAGE = "re6st-node"
 
-ROOT = build
-BUILD = $(ROOT)/$(TARGET)
+BIN = "re6st-conf re6st-registry re6stnet".split()
+BUILD_KEEP = "buildout.cfg", "extends-cache", "download-cache"
+NOPART = "chrpath flex glib lunzip m4 patch perl popt site_perl xz-utils".split()
+TARGET = "opt/re6st"
 
-BUILD_KEEP = buildout.cfg extends-cache download-cache
+ROOT = "build"
+BUILD = ROOT + "/" + TARGET
+DIST = "dist"
+OSC = "osc" # usually a symlink to the destination osc folder
 
-all: tarball debian.tar.gz re6stnet.spec PKGBUILD re6stnet.install
+re6stnet = git("re6stnet", "http://git.erp5.org/repos/re6stnet.git",
+               "docs".__eq__)
+slapos = git("slapos", "http://git.erp5.org/repos/slapos.git",
+             ctime=False) # ignore ctime due to hardlinks to *-cache
 
-re6stnet:
-	git clone $(RE6STNET_URL) $@
+os.environ["TZ"] = "UTC"; time.tzset()
 
-slapos:
-	git clone $(SLAPOS_URL) $@
+@task("buildout.cfg.in", BUILD + "/buildout.cfg")
+def cfg(task):
+    cfg = open(task.input).read() % dict(
+        SLAPOS=os.path.abspath("slapos"),
+        ROOT="${buildout:directory}/" + os.path.relpath(ROOT, BUILD),
+        TARGET="/"+TARGET)
+    mkdir(BUILD)
+    open(task.output, "w").write(cfg)
 
-$(BUILD)/buildout.cfg: buildout.cfg.in
-	mkdir -p $(@D)
-	python2 -c 'import os; cfg = open("$<").read() % dict( \
-		SLAPOS="$(CURDIR)/slapos", ROOT="$${buildout:directory}/" \
-			+ os.path.relpath("$(ROOT)", "$(BUILD)"), \
-		TARGET="/$(TARGET)"); open("$@", "w").write(cfg)'
+@task((cfg, slapos), (BUILD + "/bin/buildout", BUILD + "/bin/python"))
+def bootstrap(task):
+    try:
+        os.utime(task.outputs[1], None)
+    except OSError:
+        bootstrap = urllib.urlopen(BOOTSTRAP_URL).read()
+        mkdir(BUILD + "/download-cache")
+        with cwd(BUILD):
+            rmtree("extends-cache")
+            os.mkdir("extends-cache")
+            check_output((sys.executable, "-S"), input=bootstrap)
+            check_call(("bin/buildout", "buildout:parts=python"))
 
-$(BUILD)/bin/python: $(BUILD)/buildout.cfg slapos
-	if [ -e $@ ]; then touch $@; else cd $(BUILD) \
-	&& rm -rf extends-cache && mkdir -p download-cache extends-cache \
-	&& wget -qO - $(BOOTSTRAP_URL) | python2 -S \
-	&& bin/buildout buildout:parts=$(@F); fi
+def sdist_version(egg):
+    global MTIME, VERSION
+    MTIME = os.stat(egg).st_mtime
+    VERSION = "%s+slapos%s.g%s" % (
+        egg.rsplit("-", 1)[1].split(".tar.")[0],
+        os.getenv("SLAPOS_EPOCH", ""),
+        check_output(("git", "rev-parse", "--short", "HEAD"),
+                     cwd="slapos").strip())
+    tarball.provides = "%s/%s_%s.tar.gz" % (DIST, PACKAGE, VERSION),
+    deb.provides = deb.provides[0], "%s/%s_%s.dsc" % (DIST, PACKAGE, VERSION)
+    mkdir(DIST)
+    return egg
 
-re6stnet/re6stnet.egg-info: $(BUILD)/bin/python re6stnet
-	rm -f $(BUILD)/download-cache/dist/re6stnet-*
-	cd re6stnet && ../$< setup.py sdist -d ../$(BUILD)/download-cache/dist
-	# Touch target because the current directory is used as temporary
-	# storage, and it is cleaned up after that setup.py runs egg_info.
-	touch $@
+def sdist(task):
+    o = glob(BUILD + "/download-cache/dist/re6stnet-*")
+    try:
+        return sdist_version(*o),
+    except TypeError:
+        return None,
 
-$(BUILD)/.installed.cfg: re6stnet/re6stnet.egg-info
-	cd $(BUILD) && bin/buildout
-	# Touch target in case that buildout had nothing to do.
-	touch $@
+@task((bootstrap, re6stnet), ("re6stnet/re6stnet.egg-info", sdist))
+def sdist(task):
+    # XXX: We'd like to produce a reproducible tarball, so that 'make_tar_gz'
+    #      is really useful for the main tarball.
+    d = BUILD + "/download-cache/dist"
+    g = d + "/re6stnet-*"
+    map(os.remove, glob(g))
+    check_call((os.path.abspath(task.inputs[1]), "setup.py", "sdist",
+                "-d", os.path.abspath(d)), cwd="re6stnet")
+    task.outputs[1] = sdist_version(*glob(g))
+    # Touch target because the current directory is used as temporary
+    # storage, and it is cleaned up after that setup.py runs egg_info.
+    os.utime(task.outputs[0], None)
 
-$(ROOT)/Makefile: Makefile.in Makefile
-	($(foreach x,BIN NOPART BUILD_KEEP TARGET, \
-	echo $(x) = $($(x)) &&) cat $<) > $@
+@task(sdist, BUILD + "/.installed.cfg")
+def buildout(task):
+    check_call(("bin/buildout",), cwd=BUILD)
+    # Touch target in case that buildout had nothing to do.
+    os.utime(task.output, None)
 
-prepare: $(BUILD)/.installed.cfg $(ROOT)/Makefile
-	$(eval VERSION = $(shell cd $(BUILD)/download-cache/dist \
-	&& set re6stnet-* && set $${1#*-} \
-	&& echo -n $${1%.tar.*}+slapos$(SLAPOS_EPOCH).g \
-	&& cd $(CURDIR)/slapos && git rev-parse --short HEAD))
-	make -C re6stnet
+def tarfile_addfileobj(tarobj, name, dataobj, statobj):
+    tarinfo = tarobj.gettarinfo(arcname=name, fileobj=statobj)
+    dataobj.seek(0, 2)
+    tarinfo.size = dataobj.tell()
+    dataobj.reset()
+    tarobj.addfile(tarinfo, dataobj)
 
-upstream.mk: re6stnet Makefile
-	(echo 'override PYTHON = /$(TARGET)/parts/python2.7/bin/python' \
-	&& cat $</Makefile) > $@
+@task(re6stnet)
+def upstream(task):
+    check_call(("make", "-C", "re6stnet"))
+    task.outputs = glob("re6stnet/docs/*.[1-9]")
 
-tarball: upstream.mk prepare
-	tar -caf $(PACKAGE)_$(VERSION).tar.gz \
-		--xform s,^re6stnet/,, \
-		--xform s,^,$(PACKAGE)-$(VERSION)/, \
-		cleanup install-eggs rebootstrap $< \
-		re6stnet/daemon re6stnet/docs/*.1 re6stnet/docs/*.8 \
-		-C $(ROOT) Makefile $(patsubst %,$(TARGET)/%,$(BUILD_KEEP))
+@task((upstream, buildout, __file__,
+       "Makefile.in", "cleanup", "install-eggs", "rebootstrap"))
+def tarball(task):
+    prefix = "%s-%s/" % (PACKAGE, VERSION)
+    def xform(path):
+        for p in "re6stnet/", "build/", "":
+            if path.startswith(p):
+                return prefix + path[len(p):]
+    with make_tar_gz(task.output, MTIME, xform) as t:
+        s = StringIO()
+        for k in "BIN", "NOPART", "BUILD_KEEP", "TARGET":
+            v = globals()[k]
+            s.write("%s = %s\n" % (k, v if type(v) is str else " ".join(v)))
+        with open(task.inputs[-4]) as x:
+            s.write(x.read())
+            tarfile_addfileobj(t, "Makefile", s, x)
+        s.truncate(0)
+        s.write("override PYTHON = /%s/parts/python2.7/bin/python\n" % TARGET)
+        with open("re6stnet/Makefile") as x:
+            s.write(x.read())
+            tarfile_addfileobj(t, "upstream.mk", s, x)
+        for x in task.inputs[-3:]:
+            t.add(x)
+        t.add("re6stnet/daemon")
+        for x in upstream.outputs:
+            t.add(x)
+        for x in BUILD_KEEP:
+            t.add(BUILD + "/" + x)
 
-debian/changelog: prepare
-	cd re6stnet && sed s,$@,../$@, debian/common.mk | \
-	make -f - PACKAGE=$(PACKAGE) VERSION=$(VERSION) ../$@
+@task(sdist, "debian/changelog")
+def dch(task):
+    with cwd("re6stnet") as p:
+        p += "/" + task.output
+        check_output(("make", "-f", "-", p,
+                      "PACKAGE=" + PACKAGE, "VERSION=" + VERSION),
+            input=open("debian/common.mk").read().replace(task.output, p))
 
-debian/control: debian/source/format prepare Makefile
-	$(eval DSC = $(PACKAGE)_$(VERSION).dsc)
-	python2 -c 'from debian.deb822 import Deb822; d = Deb822(); \
-		b = open("re6stnet/$@"); s = Deb822(b); b = Deb822(b); \
-		d["Format"] = open("$<").read().strip(); \
-		d["Source"] = s["Source"] = b["Package"] = "$(PACKAGE)"; \
-		d["Version"] = "$(VERSION)"; \
-		d["Architecture"] = b["Architecture"] = "any"; \
-		d["Build-Depends"] = s["Build-Depends"] = \
-		"python (>= 2.6), debhelper (>= 8)"; \
-		b["Depends"] = "$${shlibs:Depends}, iproute2 | iproute"; \
-		b["Conflicts"] = b["Provides"] = b["Replaces"] = "re6stnet"; \
-		open("$@", "w").write("%s\n%s" % (s, b)); \
-		open("$(DSC)", "w").write(str(d))'
+@task((dch, tree("debian")), DIST + "/debian.tar.gz")
+def deb(task):
+    control = open("re6stnet/debian/control")
+    d = Deb822(); s = Deb822(control); b = Deb822(control)
+    d["Format"] = open("debian/source/format").read().strip()
+    d["Source"] = s["Source"] = b["Package"] = PACKAGE
+    d["Version"] = VERSION
+    d["Architecture"] = b["Architecture"] = "any"
+    d["Build-Depends"] = s["Build-Depends"] = \
+        "python (>= 2.6), debhelper (>= 8)"
+    b["Depends"] = "${shlibs:Depends}, iproute2 | iproute"
+    b["Conflicts"] = b["Provides"] = b["Replaces"] = "re6stnet"
+    patched_control = StringIO(str("%s\n%s" % (s, b))) # BBB: cast to str for Python 2.6
+    open(task.outputs[1], "w").write(str(d))
+    date = rfc822.parsedate_tz(Changelog(open(dch.output)).date)
+    mtime = time.mktime(date[:9]) - date[9]
+    # Unfortunately, OBS does not support symlinks.
+    with make_tar_gz(task.outputs[0], mtime, dereference=True) as t:
+        added = glob("debian/*")
+        t.add("debian")
+        x = "debian/control"
+        tarfile_addfileobj(t, x, patched_control, control)
+        added.append(x)
+        with cwd("re6stnet"):
+            upstream = set(glob("debian/*"))
+            upstream.difference_update((x, "debian/rules", "debian/source"))
+            # check we are aware of any upstream file we override
+            assert upstream.isdisjoint(added), upstream.intersection(added)
+            map(t.add, sorted(upstream))
 
-debian.tar.gz: $(patsubst %,debian/%,changelog control prerm postinst rules source/*)
-# Unfortunately, OBS does not support symlinks.
-	set -e; cd re6stnet; [ ! -e debian/postinst ]; \
-	x=`find debian ! -type d $(patsubst %,! -path %,$^))`; \
-	tar -chaf ../$@ $$x -C .. $^
+@task((sdist, __file__), DIST + "/re6stnet.spec")
+def rpm(task):
+    check_call(("sed", "-r", r"""
+# https://fedoraproject.org/wiki/Packaging:Python_Appendix#Manual_byte_compilation
+1i%%global __os_install_post %%(echo '%%{__os_install_post}' |grep -v brp-python-bytecompile)
+/^%%define (_builddir|ver)/d
+s/^(Name:\s*).*/\1%s/
+s/^(Version:\s*).*/\1%s/
+s/^(Release:\s*).*/\11/
+/^BuildArch:/cAutoReqProv: no\
+BuildRequires: gcc-c++, make, python\
+#!BuildIgnore: rpmlint-Factory\
+Source: %%{name}_%%{version}.tar.gz
+/^Requires:/{
+    /iproute/!d
+}
+/^Recommends:/d
+s/^(Conflicts:\s*).*/\1re6stnet/
+/^%%description$/a%%prep\n%%setup -q
+/^%%preun$/,/^$/{
+    /^$/ifind /%s -type f -name '*.py[co]' -delete
+}
+""" % (PACKAGE, VERSION, TARGET), "re6stnet/re6stnet.spec"),
+    stdout=open(task.output, "w"))
 
-define SED_SPEC
-	# https://fedoraproject.org/wiki/Packaging:Python_Appendix#Manual_byte_compilation
-	1i%global __os_install_post %(echo '%{__os_install_post}' |grep -v brp-python-bytecompile)
-	/^%define (_builddir|ver)/d
-	s/^(Name:\s*).*/\1$(PACKAGE)/
-	s/^(Version:\s*).*/\1$(VERSION)/
-	s/^(Release:\s*).*/\11/
-	/^BuildArch:/cAutoReqProv: no\nBuildRequires: gcc-c++, make, python\n#!BuildIgnore: rpmlint-Factory\nSource: %{name}_%{version}.tar.gz
-	/^Requires:/{/iproute/!d}
-	/^Recommends:/d
-	s/^(Conflicts:\s*).*/\1re6stnet/
-	/^%description$$/a%prep\n%setup -q
-	/^%preun$$/,/^$$/{/^$$/ifind /$(TARGET) -type f -name '*.py[co]' -delete
-	}
-endef
+@task((sdist, "PKGBUILD.in"), DIST + "/PKGBUILD")
+def arch(task):
+    pkgbuild = open(task.inputs[-1]).read().replace("%VERSION%", VERSION)
+    open(task.output, "w").write(pkgbuild)
 
-re6stnet.spec: prepare
-	$(eval export SED_SPEC)
-	sed -r "$$SED_SPEC" re6stnet/$@ > $@
+@task((tarball, deb, rpm, arch, "re6stnet.install"))
+def build(task):
+    pass
 
-PKGBUILD: PKGBUILD.in prepare
-	sed 's/%VERSION%/$(VERSION)/' $< > $@
-
-clean:
-	rm -rf "$(ROOT)" *.dsc *.tar.gz re6stnet.spec \
-		upstream.mk debian/control debian/changelog
+@task(build)
+def osc(task):
+    check_call(("osc", "up"), cwd=OSC)
+    old = set(glob(OSC + "/re6st-node_*"))
+    for path in build.inputs:
+        shutil.copy2(path, OSC)
+        old.discard(OSC + "/" + os.path.basename(path))
+    for path in old:
+        os.remove(path)
+    check_call(("osc", "addremove"), cwd=OSC)

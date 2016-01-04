@@ -1,0 +1,323 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2016 Julien Muchembled <jm@nexedi.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+"""
+  Very basic Python implementation of a build system similar to the well-known
+  'make'. The main concept is the same:
+    input files --( recipe )-> output files
+  with comparison of timestamps to trigger recipes
+  (i.e. no temporary files generated to track the status of the build).
+  The main differences are:
+  - no parallelism
+  - no implicit rule, no predefined rule
+  + inputs can be whole directory
+  + change time of inputs is also taken into account
+  + multiple list of outputs for a recipe
+  + dynamic list of outputs
+  + no need to care about wrongly/partially written files in case of failure
+  + Python...
+"""
+import argparse, atexit, errno, gzip, os, shutil, subprocess, sys, tarfile
+from contextlib import contextmanager
+
+INF = float("inf")
+_INF = - INF
+
+class _task(object):
+
+    def __init__(self, *src):
+        self.outputs = src
+
+    def __str__(self):
+        o = self.outputs
+        return repr(o[0]) if len(o) == 1 else str(o)
+
+    @property
+    def output(self):
+        o, = self.outputs
+        return o
+
+    def __call__(self, dry_run):
+        run = self._run
+        if callable(run):
+            self._run = run = run(dry_run)
+        return run
+
+    @staticmethod
+    def _time(path):
+        return os.stat(path).st_mtime
+
+    def _run(self, dry_run=None):
+        x = self.outputs
+        return max(map(self._time, x)) if x else _INF
+
+class files(_task):
+
+    def __init__(self, *src, **kw):
+        if not kw.pop("ctime", True):
+            self._time = _task._time
+        _task.__init__(self, *src, **kw)
+
+    @staticmethod
+    def _time(path):
+        s = os.stat(path)
+        return max(s.st_ctime, s.st_mtime)
+
+class tree(files):
+    """
+    e.g. @task(tree("some/folder"), "some/output")
+    """
+
+    def __init__(self, root, ignore=None, **kw):
+        files.__init__(self, root, **kw)
+        self.ignore = ignore
+
+    def __iter__(self):
+        root, = self.outputs
+        yield root
+        ignore = self.ignore
+        n = len(root) + 1
+        for dirpath, dirs, files in os.walk(root):
+            dirpath += os.sep
+            if ignore:
+                x = dirpath[n:]
+                dirs[:] = (name for name in dirs if not ignore(x + name))
+            for name in dirs:
+                yield dirpath + name
+            for name in files:
+                x = dirpath + name
+                if not (ignore and ignore(x[n:])):
+                    yield x
+
+    def _run(self, dry_run=None):
+        return max(map(self._time, self))
+
+class task(_task):
+    """
+    @task(depends, provides)
+    def mytask(task):
+        # task.inputs
+        # task.outputs
+
+    'depends' is a sequence of other tasks or file paths. The order is important
+    because it defines the order of task.inputs: not however that paths are
+    automatically moved after tasks.
+
+    'provides' is a sequence of callables or file paths. Callables are always
+    called to complete task.outputs. Recipe is always called if task.outputs
+    is empty.
+
+    For both 'depends' and 'provides', if you have only 1 element, you can pass
+    it directly instead of making a 1-size sequence.
+
+    'input' and 'output' properties are shortcut to get the only path.
+    'why' is a list of tasks explaining why the recipe is called.
+    """
+
+    def __new__(cls, *args, **kw):
+        def task_gen(func):
+            self = _task.__new__(cls)
+            self.__init__(func, *args, **kw)
+            return self
+        return task_gen
+
+    def __init__(self, run, depends, provides=(),
+                 __str_or_task = (basestring, _task)):
+        self.run = run
+        self.depends = []
+        f = []
+        for x in (depends,) if isinstance(depends, __str_or_task) else depends:
+            (f if isinstance(x, basestring) else self.depends).append(x)
+        f and self.depends.append(files(*f))
+        self.provides = ((provides,)
+            if isinstance(provides, basestring) or callable(provides)
+            else provides)
+        self.why = self,
+
+    def __str__(self):
+        return self.run.__name__
+
+    @property
+    def input(self):
+        i, = self.inputs
+        return i
+
+    def _run(self, dry_run, _otime=INF):
+        self.inputs = x = []
+        deps = []
+        for dep in self.depends:
+            deps.append((dep, dep(dry_run)))
+            x += dep.outputs
+        self.outputs = x = []
+        for p in self.provides:
+            if callable(p):
+                x += p(self)
+            else:
+                x.append(p)
+        if None not in x:
+            try:
+                _otime = _task._run(self)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+            else:
+                if deps:
+                    self.why = [dep for dep, itime in deps if _otime < itime]
+        if self.why:
+            print "# Processing %s: %s -> %s" % (self,
+                ", ".join(map(str, self.depends)),
+                ", ".join("<%s>" % x.__name__ if callable(x) else x
+                          for x in self.provides or "?"))
+            if not dry_run:
+                try:
+                    self.run(self)
+                except:
+                    if _otime is INF:
+                        _otime = max(x[1] for x in deps) - 1
+                    # Files may still be open due to references in tracebacks.
+                    # Make sure they're all closed before reverting mtimes.
+                    atexit.register(self._revert, self.outputs, _otime)
+                    raise
+                return _task._run(self) if self.outputs else INF
+        return _otime
+
+    @classmethod
+    def _revert(cls, outputs, mtime):
+        try:
+            for x in outputs:
+                if mtime < cls._time(x):
+                    os.utime(x, (mtime, mtime))
+        except Exception:
+            pass
+
+def main():
+    parser = argparse.ArgumentParser()
+    _ = parser.add_argument
+    _("-f", "--file", type=argparse.FileType("r"), default="make.py",
+      help="Python script describing how to build the project"
+           " (default: make.py).")
+    _("-l", "--list", action="store_true",
+      help="List defined tasks.")
+    _("-n", "--dry-run", action="store_true",
+      help="Print the tasks that would be executed.")
+    _("task", nargs="*", default=("build",),
+      help="Tasks to process (default: build).")
+    args = parser.parse_args()
+
+    sys.modules["make"] = sys.modules.pop(__name__)
+    f = args.file
+    tasks = {"__file__": f.name}
+    exec(compile(f.read(), f.name, "exec"), tasks)
+    if args.list:
+        print " ".join(sorted(k for k, v in tasks.iteritems()
+                                if isinstance(v, _task)))
+        return
+    for t in args.task:
+        if not isinstance(tasks.get(t), _task):
+            sys.exit("%s is not a valid task." % t)
+    for t in args.task:
+        tasks[t](args.dry_run)
+
+##
+# Helpers
+#
+
+class git(tree):
+
+    def __init__(self, root, url=None, ignore=None, **kw):
+        _ignore = lambda x: x == ".git" or ignore and ignore(x)
+        tree.__init__(self, root, _ignore, **kw)
+        self.url = url
+
+    def _run(self, dry_run):
+        root, = self.outputs
+        if os.path.isdir(root):
+            return tree._run(self)
+        dry_run or subprocess.check_call(("git", "clone", self.url, root))
+        return _INF
+
+def check_output(*args, **kw):
+    # BBB: 'input' arg is a backport from Python 3.4
+    input = kw.pop("input", None)
+    if input is not None:
+        kw["stdin"] = subprocess.PIPE
+    p = subprocess.Popen(stdout=subprocess.PIPE, *args, **kw)
+    out = p.communicate(input)[0]
+    if p.returncode:
+        raise subprocess.CalledProcessError(p.returncode,
+            args[0] if args else kw["args"])
+    return out
+
+@contextmanager
+def cwd(path):
+    p = os.getcwd()
+    try:
+        os.chdir(path)
+        yield p
+    finally:
+        os.chdir(p)
+
+def mkdir(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != errno.EEXIST or not os.path.isdir(path):
+            raise
+
+def remove(path):
+    try:
+        os.remove(path)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
+
+def rmtree(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+@contextmanager
+def make_tar_gz(path, mtime, xform=(lambda x: x), **kw):
+    # Make reproducible tarball. Otherwise, it's really annoying that we can't
+    # rely on 'osc status' to know whether there are real changes or not.
+    # BBB: Results differ between Python 2.6 and 2.7 because of tarfile.
+    __init__ = gzip.GzipFile.__init__
+    listdir = os.listdir
+    try:
+        if sys.version_info >= (2, 7):
+            gzip.GzipFile.__init__ = lambda *args: __init__(mtime=mtime, *args)
+        os.listdir = lambda path: sorted(listdir(path))
+        t = tarfile.open(path, "w:gz", **kw)
+        _gettarinfo = t.gettarinfo
+        def gettarinfo(name=None, arcname=None, fileobj=None):
+            tarinfo = _gettarinfo(name, xform(arcname or name), fileobj)
+            tarinfo.mtime = mtime
+            return tarinfo
+        t.gettarinfo = gettarinfo
+        yield t
+    except:
+        remove(path)
+        raise
+    finally:
+        gzip.GzipFile.__init__ = __init__
+        os.listdir = listdir
+        t.close()
+    if sys.version_info < (2, 7):
+        with open(path, "r+") as t:
+            t.seek(4)
+            gzip.write32u(t, long(mtime))
+
+if __name__ == "__main__":
+    sys.exit(main())

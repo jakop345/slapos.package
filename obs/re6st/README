@@ -1,11 +1,33 @@
-preparing the package
----------------------
+Building the files to be sent to OBS
+------------------------------------
 
 First make sure all files are ready and you have all necessary packages installed.
-You need in particular an OBS directory (for example, the vifib test directory)::
 
-  $ cd <directory_to_contain_prepare_script>
-  $ osc checkout home:VIFIBnexedi:branches:home:VIFIBnexedi/Re6stnet
-  $ cd home:VIFIBnexedi:branches:home:VIFIBnexedi/Re6stnet
-  $ osc up
+  $ ./make
 
+All output files are in the 'dist' folder, which is created automatically.
+
+Upload to OBS
+-------------
+
+For this, you need a checkout of the OBS repository, and make a 'osc' symlink
+pointing to it. For example, the vifib test directory::
+
+  A$ cd <where_you_want>
+  B$ osc checkout home:VIFIBnexedi:branches:home:VIFIBnexedi/Re6stnet
+  B$ cd home:VIFIBnexedi:branches:home:VIFIBnexedi/Re6stnet
+  B$ osc up
+  B$ cd A
+  A$ ln -s B/home:VIFIBnexedi:branches:home:VIFIBnexedi/Re6stnet osc
+
+And whenever you want to push updates::
+
+  A$ ./make osc
+  A$ (cd osc; osc commit)
+
+Warning about SlapOS updates
+----------------------------
+
+When a SlapOS update would add new files to download-cache or extends-cache,
+everything should be rebuilt by deleting the 'build' folder, in order to remove
+unused files from the caches.
