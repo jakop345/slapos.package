@@ -33,3 +33,14 @@ configure-options +=
   --prefix=%(TARGET)s/parts/${:_buildout_section_name_}
 environment +=
   DESTDIR=%(ROOT)s
+
+[openssl]
+configure-options =
+  -I${zlib:location}/include
+  -L${zlib:location}/lib
+  --openssldir=${buildout:parts-directory}/${:_buildout_section_name_}/etc/ssl
+  --prefix=%(TARGET)s/parts/${:_buildout_section_name_}
+  --libdir=lib
+  shared no-idea no-mdc2 no-rc5 zlib
+  -Wl,-rpath=${zlib:location}/lib -Wl,-rpath=${buildout:parts-directory}/${:_buildout_section_name_}/lib
+  && make depend

@@ -1,12 +1,15 @@
 ---
+    - apt_key:
+            data: "{{ lookup('file', 'key_1A716324.gpg') }}"
+
+    - apt_key:
+            data: "{{ lookup('file', 'key_2EB4D2F994A63987.gpg') }}"
+
     - name: Install vifib package repository
       apt_repository:
             repo: "deb http://download.opensuse.org/repositories/home:/VIFIBnexedi/Debian_{{ ansible_distribution_major_version }}.0 ./"
             state: present
             update_cache: yes
-
-    - apt_key:
-            data: "{{ lookup('file', 'key_1A716324.gpg') }}"
 
     - name: Purge old re6stnet package
       apt: name=re6stnet state=absent purge=yes
@@ -14,4 +17,4 @@
     - include: fill_cache.yml
 
     - name: Install re6st-node package
-      apt: name=re6st-node update_cache=yes state=latest
+      apt: name=re6st-node state=latest

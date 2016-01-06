@@ -20,4 +20,7 @@
     - include: rhel.yml
       when: ansible_os_family == "Centos" or ansible_os_family == "RedHat"
 
+    - name: Enable re6stnet service
+      service: name=re6stnet enabled=yes
+
     - command: rm {{ export_csv.stdout }}

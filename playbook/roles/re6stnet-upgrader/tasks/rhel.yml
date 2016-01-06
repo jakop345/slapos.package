@@ -16,4 +16,4 @@
       yum: name=re6st-node update_cache=yes state=latest
 
     - name: Restart re6stnet service
-      service: name=re6stnet enabled=yes state=restarted
+      service: name=re6stnet state=restarted
