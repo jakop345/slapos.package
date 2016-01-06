@@ -10,5 +10,10 @@
     - name: Purge old re6stnet package
       yum: name=re6stnet state=absent
 
+    - include: fill_cache.yml
+
     - name: Install re6st-node package
       yum: name=re6st-node update_cache=yes state=latest
+
+    - name: Restart re6stnet service
+      service: name=re6stnet enabled=yes state=restarted

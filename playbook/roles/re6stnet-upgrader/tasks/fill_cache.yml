@@ -1,0 +1,15 @@
+---
+    - copy:
+        src: re6st_db_create.sql
+        dest: /tmp/
+        owner: root
+        group: root
+        mode: 0644
+
+    - file: path=/var/lib/re6stnet owner=root group=root mode=0755 state=directory
+
+    - name: Create new cache
+      shell: sqlite3 /var/lib/re6stnet/cache.db < /tmp/re6st_db_create.sql && rm /tmp/re6st_db_create.sql
+
+    - name: Fill new cache
+      command: sqlite3 -noheader -csv /var/lib/re6stnet/cache.db ".import {{ export_csv.stdout }} peer"

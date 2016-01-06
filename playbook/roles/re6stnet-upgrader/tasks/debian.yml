@@ -8,11 +8,10 @@
     - apt_key:
             data: "{{ lookup('file', 'key_1A716324.gpg') }}"
 
-    - apt_key:
-            data: "{{ lookup('file', 'key_2EB4D2F994A63987.gpg') }}"
-
     - name: Purge old re6stnet package
       apt: name=re6stnet state=absent purge=yes
+
+    - include: fill_cache.yml
 
     - name: Install re6st-node package
       apt: name=re6st-node update_cache=yes state=latest
