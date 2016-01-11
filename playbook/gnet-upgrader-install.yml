@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    - upgrader_playbook: gnet-upgrade.yml
+    - upgrader_playbook: gnet-upgrader.yml
 
   vars_files:
     - settings/upgrader.yml
