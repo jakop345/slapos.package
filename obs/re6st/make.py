@@ -61,7 +61,7 @@ BUILD = ROOT + "/" + TARGET
 DIST = "dist"
 OSC = "osc" # usually a symlink to the destination osc folder
 
-re6stnet = git("re6stnet", "http://git.erp5.org/repos/re6stnet.git",
+re6stnet = git("re6stnet", "https://lab.nexedi.com/nexedi/re6stnet.git",
                "docs".__eq__)
 slapos = git("slapos", "http://git.erp5.org/repos/slapos.git",
              ctime=False) # ignore ctime due to hardlinks to *-cache
