@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    - upgrader_playbook: vifib-upgrader.yml
+    - upgrader_playbook: vifib-upgrade.yml
 
   vars_files:
     - settings/vifib.yml
