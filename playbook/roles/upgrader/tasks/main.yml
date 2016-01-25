@@ -1,6 +1,9 @@
 ---
   - file: path=/opt/upgrader state=directory mode=0755
 
+  - stat: path=/opt/upgrader/playbook
+    register: playbook_folder
+
   - stat: path=/opt/upgrader/last-upgrade
     register: last_upgrade
 
@@ -9,9 +12,9 @@
 
   - file: path=/opt/upgrader/ state=directory mode=0755
 
-  - shell: rm -rf /opt/upgrader/playbook/
+  - shell: rm -rf /opt/upgrader/playbook-tmp
   
-  - shell: mkdir -p /opt/upgrader/playbook 
+  - shell: mkdir -p /opt/upgrader/playbook-tmp
 
   - name: Periodically download the latest playbook 
     shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
@@ -19,7 +22,10 @@
   - name: Uncompress
     shell: tar -xzvf /opt/upgrader/archive.tar.gz 
     args:
-      chdir: /opt/upgrader/playbook/
+      chdir: /opt/upgrader/playbook-tmp
+
+  - shell: cp -R /opt/upgrader/playbook-tmp /opt/upgrader/playbook
+    when: playbook_folder.stat.exists == False  
 
   - name: Save new archive MD5
     stat: path=/opt/upgrader/archive.tar.gz
@@ -43,10 +49,10 @@
       current_upgrade_signature
 
   - name: Do upgrade
-    shell: ansible-playbook {{ upgrader_playbook }} -i hosts >> /opt/upgrader/latest_upgrade.log 
+    shell: ansible-playbook {{ upgrader_playbook }} -i hosts 2>>/opt/upgrader/latest_upgrade.log  >> /opt/upgrader/latest_upgrade.log 
     when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
     args:
-      chdir: /opt/upgrader/playbook/
+      chdir: /opt/upgrader/playbook-tmp/
 
   - name: Upgrade Current Upgrade Signature
     shell: cat /opt/upgrader/next-upgrade-signature > /opt/upgrader/current-upgrade-signature 
@@ -56,6 +62,8 @@
     when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
 
   - name: Set Cron  
-    cron: name="Launch Upgrader" minute="0" hour="*/3" job='ansible-playbook upgrader-run.yml --with-vars "upgrader-playbook={{ upgrader_playbook }}" -i hosts >> /opt/upgrader/latest_upgrade.log' 
+    cron: name="Launch Upgrader with ansible" minute="0" hour="*/3" job='rm -rf /opt/upgrader/playbook && mv /opt/upgrader/playbook-tmp /opt/upgrader/playbook && cd /opt/upgrader/playbook && ansible-playbook upgrader-run.yml --extra-vars "upgrader_playbook={{ upgrader_playbook }}" -i hosts 2>>/opt/upgrader/latest_upgrade.log >> /opt/upgrader/latest_upgrade.log' 
+
+  - cron: name="Launch Upgrader" state=absent
 
   - include: remove-legacy.yml
