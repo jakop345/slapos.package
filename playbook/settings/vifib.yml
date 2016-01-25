@@ -3,3 +3,5 @@ re6st_registry_url: http://re6stnet.nexedi.com/
 slapos_master_url: https://slap.vifib.com/
 slapos_web_master_url: https://slapos.vifib.com/
 interface_name: lo
+re6st_annon: True
+re6sttoken: noname

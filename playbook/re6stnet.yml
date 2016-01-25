@@ -5,13 +5,15 @@
   vars_files:
     - settings/vifib.yml
 
+  vars:
+    - re6sttoken: noname 
+
   vars_prompt:
     - name: "computer_name"
-      prompt: "What is this computer name?  (ignore if you already have a configured re6st and slapos):"
+      prompt: "Please insert your email or a name of this computer:"
       private: no
       default: "noname"
 
   roles:
-    - { role: re6stnet-legacy, package_state: present }
-    - { role: package, package_name: ntp, package_state: present }
+    - { role: re6stnet, package_state: present }
 

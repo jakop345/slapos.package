@@ -5,7 +5,15 @@
 
   - name: Configure Re6st with re6st-conf
     shell: "re6st-conf --registry {{ re6st_registry_url }} --token {{ re6sttoken }} -r title {{ computer_name }}  -d /etc/re6stnet"
-    when: re6stnet_conf.stat.exists == False and "{{ re6sttoken }}" != "notoken" and "{{ computer_name }}" != "noname"
+    when: re6st_annon == False and re6stnet_conf.stat.exists == False and "{{ re6sttoken }}" != "notoken" and "{{ computer_name }}" != "noname"
+
+  - name: Configure Re6st with re6st-conf
+    shell: "re6st-conf --registry {{ re6st_registry_url }} --token {{ re6sttoken }} -r title {{ re6sttoken }}  -d /etc/re6stnet"
+    when: re6st_annon == False and re6stnet_conf.stat.exists == False and "{{ re6sttoken }}" != "notoken" and "{{ computer_name }}" == "noname"
+
+  - name: Configure Re6st with re6st-conf
+    shell: "re6st-conf --registry {{ re6st_registry_url }} -r title {{ computer_name }}  -d /etc/re6stnet --anonymous"
+    when: re6st_annon == True and re6stnet_conf.stat.exists == False and "{{ computer_name }}" != "noname"
 
   - name: Check if configuration exists already
     stat: path=/etc/re6stnet/re6stnet.conf
@@ -24,5 +32,5 @@
     when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7' and re6stnet.stat.exists == True and re6stnode.stat.exists == False
 
   - name: Start re6st-node service
-    service: name=re6st-node state=started enabled=yes
+    service: name=re6stnet state=started enabled=yes
     when: recheck_re6stnet_conf.stat.exists == True
