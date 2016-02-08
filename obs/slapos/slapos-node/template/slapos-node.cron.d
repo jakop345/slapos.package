@@ -1,7 +1,6 @@
 SHELL=/bin/sh
 PATH=/usr/bin:/usr/sbin:/sbin:/bin
 MAILTO=""
-SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt
 
 # Run "Installation/Destruction of Software Releases" and "Deploy/Start/Stop Partitions" once per minute
 * * * * * root /opt/slapos/bin/slapos node software --maximal_delay=30 --verbose --logfile=/opt/slapos/log/slapos-node-software.log > /dev/null 2>&1
