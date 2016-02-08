@@ -14,8 +14,6 @@ PATCHES_DIRECTORY := $(shell pwd)/patches
 #Use to get path of buildout correct
 ORIGINAL_DIRECTORY := $(shell cat ./original_directory)
 
-BOOTSTRAP_URL := 'http://svn.zope.org/*checkout*/zc.buildout/trunk/bootstrap/bootstrap.py?rev=127518'
-
 build: build-stamp
 build-stamp:
 
