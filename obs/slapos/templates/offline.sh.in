@@ -7,7 +7,7 @@ BUILDOUT_URL=%BUILDOUT_URL%
 TARGET_DIRECTORY=/opt/slapos
 BUILD_ROOT_DIRECTORY="$(pwd)/build"
 BUILD_DIRECTORY=$BUILD_ROOT_DIRECTORY$TARGET_DIRECTORY
-BOOTSTRAP_URL='https://raw.githubusercontent.com/buildout/buildout/1/bootstrap/bootstrap.py' 
+BOOTSTRAP_URL='https://bootstrap.pypa.io/bootstrap-buildout.py' 
 
 #./configure --prefix=/opt/slapos/parts/<NAME>
 
