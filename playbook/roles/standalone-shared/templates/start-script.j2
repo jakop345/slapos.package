@@ -1,6 +1,6 @@
 #!/bin/bash
 # Reruns the ansible playbook, does nothing else
 
-cd /opt/slapos.playbook/playbook/
+cd /opt/slapos.playbook/
 
 ansible-playbook {{ startup_playbook_id }}  -i  hosts --connection=local
