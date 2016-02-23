@@ -27,3 +27,6 @@
 
   - name: Set ownership for /opt/slapgrid
     shell: "chown slapsoft:slapsoft /opt/slapgrid"
+
+  - name: Disable "slapos node boot"
+    lineinfile: dest="/etc/cron.d/slapos-node" regexp="^@reboot root /opt/slapos/bin/slapos node boot" state=absent
