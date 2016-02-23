@@ -15,3 +15,6 @@ slapprepare/slapprepare.egg-info
 build/
 dist
 playbook/install
+packer/log
+packer/output-*
+packer/packer_cache

@@ -1,0 +1,35 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+
+
+  tasks:
+
+    - file: path=log state=directory mode=0755
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian7.json >> log/debian7.log
+      args:
+        creates: output-debian7
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8.json >> log/debian8.log
+      args:
+        creates: output-debian8
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64.json >> log/ubuntu-14.04-server-amd64.log
+      args:
+        creates: output-ubuntu-14-04-server
+
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64.json >> log/ubuntu-15.04-server-amd64.log
+      args:
+        creates: output-ubuntu-15-04-server
+
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7.json >> log/centos-6.7.log
+      args:
+        creates: output-centos67
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2.json >> log/centos-7.2.log
+      args:
+        creates: output-centos72
