@@ -11,11 +11,8 @@
   - name: Add startup script
     template: src=start-script.j2 dest=/usr/local/bin/{{ playbook_name }}-startup mode=755
 
-  - name: Add to rc.local
-    lineinfile:
-      dest=/etc/rc.local insertbefore=BOF
-      line='bash /usr/local/bin/{{ playbook_name }}-startup &'
-      state=present
+  - name: Include on reboot
+    cron: name="Start Up script" special_time=reboot job="/usr/local/bin/{{ playbook_name }}-startup >> /var/log/{{ playbook_name }}-startup.log 2>&1"
 
   - name: Get slapos.playbook directory name
     shell: cd /tmp/tmpplaybookerp5-standalone.*/slapos.playbook.git/playbook/; echo $(pwd)/

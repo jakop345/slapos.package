@@ -23,7 +23,7 @@
     ignore_errors: True
 
   - name: Run slapos format for initial bootstrap
-    shell: "slapos node format --now --alter_user=True"
+    shell: "PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/slapos/bin slapos node format --now --alter_user=True"
 
   - name: Set ownership for /opt/slapgrid
     shell: "chown slapsoft:slapsoft /opt/slapgrid"

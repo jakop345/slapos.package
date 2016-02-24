@@ -3,4 +3,13 @@
 
 cd /opt/slapos.playbook/
 
-ansible-playbook {{ startup_playbook_id }}  -i  hosts --connection=local
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+for i in `seq 1 10`; do
+  echo "Try $i"
+  ansible-playbook {{ startup_playbook_id }}  -i  hosts --connection=local
+  if [ "$?" == 0 ]; then
+    exit 0
+  fi  
+  sleep 30
+done
