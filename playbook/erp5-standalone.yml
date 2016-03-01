@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    software_release_url: https://lab.nexedi.cn/nexedi/slapos/raw/erp5-cluster-0.1.1/software/erp5/software.cfg
+    software_release_url: https://lab.node.vifib.com/nexedi/slapos/raw/1.0.20/software/erp5/software.cfg 
     startup_playbook_id: erp5-standalone.yml 
     playbook_name: erp5
     request_instance_template: request-erp5-cluster.j2
