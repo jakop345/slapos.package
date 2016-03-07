@@ -10,4 +10,4 @@
 
   roles:
     - standalone-shared
-    - { role: socat, package_state: present }    
+    - { role: package, package_name: socat, package_state: present }
