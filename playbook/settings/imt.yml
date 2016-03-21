@@ -3,3 +3,4 @@ re6st_registry_url: http://slapos.tl.teralab-datascience.fr:8088/
 slapos_master_url: https://slap.imt.vifib.com/
 slapos_web_master_url: https://slapos.tl.teralab-datascience.fr/
 interface_name: lo
+re6st_annon: False
