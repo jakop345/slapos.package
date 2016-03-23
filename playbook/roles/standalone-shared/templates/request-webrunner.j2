@@ -1,0 +1,21 @@
+import json
+
+software_url = '{{ software_release_url }}'
+# Choose a SlapOS Node
+# If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
+computer_id = 'local_computer'
+
+supply(software_url, computer_id)
+
+parameter_dict = {
+  'instance-amount': 30,
+}
+
+# Choose a title
+title = "instance-of-{{ playbook_name }}"
+
+request(software_url,
+  title,
+  filter_kw={'computer_guid': computer_id},
+  partition_parameter_kw=parameter_dict}
+)
