@@ -15,6 +15,6 @@
     - { role: package, package_name: openssl, package_state: latest }
     - { role: package, package_name: ca-certificates, package_state: latest }
     - { role: package, package_name: openssh-server, package_state: latest }
-    - { role: package, package_name: slapos-node, package: latest }
+    - { role: package, package_name: slapos-node, package_state: latest }
     - vifib-team-ssh-key
 
