@@ -31,6 +31,14 @@
     apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_14.04/ ./' state=present
     when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04" 
 
+  - name: Install Ubuntu 14.04 repository key (Linuxmint 17.2)
+    apt_key: url={{ base_open_build_url }}/xUbuntu_14.04/Release.key state=present
+    when: ansible_distribution == "Linuxmint" and ansible_distribution_version == "17.2"
+
+  - name: Install Ubuntu 14.04 repository (Linuxmint 17.2)
+    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_14.04/ ./' state=present
+    when: ansible_distribution == "Linuxmint" and ansible_distribution_version == "17.2"
+
   - name: Install Ubuntu 15.04 repository key
     apt_key: url={{ base_open_build_url }}/xUbuntu_15.04/Release.key state=present
     when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.04"
