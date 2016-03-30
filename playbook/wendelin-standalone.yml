@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    software_release_url: https://lab.node.vifib.com/nexedi/slapos/raw/1.0.20/software/wendelin/software.cfg 
+    software_release_url: https://lab.node.vifib.com/nexedi/slapos/raw/1.0.21/software/wendelin/software.cfg
     startup_playbook_id: wendelin-standalone.yml
     playbook_name: wendelin
     request_instance_template: request-wendelin.j2
