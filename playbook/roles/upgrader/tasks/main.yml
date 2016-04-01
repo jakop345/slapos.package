@@ -12,9 +12,9 @@
 
   - file: path=/opt/upgrader/ state=directory mode=0755
 
-  - shell: rm -rf /opt/upgrader/playbook-tmp
+  - shell: rm -rf /opt/upgrader/tmp
   
-  - shell: mkdir -p /opt/upgrader/playbook-tmp
+  - shell: mkdir -p /opt/upgrader/tmp
 
   - name: Periodically download the latest playbook 
     shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
@@ -22,10 +22,19 @@
   - name: Uncompress
     shell: tar -xzvf /opt/upgrader/archive.tar.gz 
     args:
-      chdir: /opt/upgrader/playbook-tmp
+      chdir: /opt/upgrader/tmp
 
-  - shell: cp -R /opt/upgrader/playbook-tmp /opt/upgrader/playbook
-    when: playbook_folder.stat.exists == False  
+  - shell: cp -R /opt/upgrader/tmp /opt/upgrader/playbook
+    when: playbook_folder.stat.exists == False
+
+  - stat: path=/opt/upgrader/tmp/hosts
+    register: hosts_file 
+
+  - shell: rm -rf /opt/upgrader/playbook-tmp
+    when: hosts.stat.exists == True
+
+  - shell: cp -R /opt/upgrader/tmp /opt/upgrader/playbook-tmp
+    when: hosts.stat.exists == True
 
   - name: Save new archive MD5
     stat: path=/opt/upgrader/archive.tar.gz
@@ -62,7 +71,7 @@
     when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
 
   - name: Set Cron  
-    cron: name="Launch Upgrader with ansible" minute="0" hour="*/3" job='rm -rf /opt/upgrader/playbook && mv /opt/upgrader/playbook-tmp /opt/upgrader/playbook && cd /opt/upgrader/playbook && ansible-playbook upgrader-run.yml --extra-vars "upgrader_playbook={{ upgrader_playbook }}" -i hosts 2>>/opt/upgrader/latest_upgrade.log >> /opt/upgrader/latest_upgrade.log' 
+    cron: name="Launch Upgrader with ansible" minute="0" hour="*/3" job='rm -rf /opt/upgrader/playbook && cp -R /opt/upgrader/playbook-tmp /opt/upgrader/playbook && cd /opt/upgrader/playbook && ansible-playbook upgrader-run.yml --extra-vars "upgrader_playbook={{ upgrader_playbook }}" -i hosts 2>>/opt/upgrader/latest_upgrade.log >> /opt/upgrader/latest_upgrade.log' 
 
   - cron: name="Launch Upgrader" state=absent
 
