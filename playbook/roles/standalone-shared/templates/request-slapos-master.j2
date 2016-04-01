@@ -1,0 +1,71 @@
+import json
+
+software_url = '{{ software_release_url }}'
+# Choose a SlapOS Node
+# If you are deploying SlapOS Master with Webrunner, then computer_id is 'slaprunner'
+computer_id = 'local_computer'
+
+supply(software_url, computer_id)
+
+parameter_dict = {
+  "timezone": "UTC",
+  "site-id": "erp5",
+  "bt5": "erp5_full_text_myisam_catalog slapos_configurator",
+  "developer-list": ["zope"],
+  "inituser-login": "zope",
+  "inituser-password": "insecure",
+  "zope-partition-dict": {
+    "activities-node": {
+      "family": "activities",
+      "thread-amount": 3,
+      "instance-count": 1,
+      "timerserver-interval": 1
+    },
+    "distribution-node": {
+      "family": "distribution",
+      "thread-amount": 1,
+      "instance-count": 1,
+      "port-base": 2210,
+      "timerserver-interval": 1
+    },
+    "admin-node": {
+      "family": "admin",
+      "thread-amount": 1,
+      "instance-count": 1,
+      "port-base": 2220
+    },
+    "web-node": {
+      "family": "web",
+      "thread-amount": 2,
+      "instance-count": 1,
+      "port-base": 2230
+    },
+    "service-slapos": {
+      "family": "service",
+      "thread-amount": 2,
+      "instance-count": 1,
+      "port-base": 2240,
+      "ssl-authentication": True,
+      "backend-path": "/%(site-id)s/portal_slap"
+    }
+  },
+  "mariadb": {
+    "test-database-amount": 0
+  },
+  "zodb-software-type": "zeo"
+}
+
+ca_path = '/etc/slapos-ssl' 
+parameter_dict["shared-certificate-authority-path"] = ca_path 
+
+# Choose a title
+title = "instance-of-{{ playbook_name }}"
+
+request(software_url,
+  title,
+  filter_kw={'computer_guid': computer_id},
+  software_type='create-erp5-site',
+  partition_parameter_kw={
+   '_': json.dumps(parameter_dict, sort_keys=True, indent=2),
+  }
+)

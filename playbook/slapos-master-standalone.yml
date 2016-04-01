@@ -1,0 +1,17 @@
+- name: a play that runs entirely on the ansible host
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    software_release_url: https://lab.node.vifib.com/nexedi/slapos/raw/1.0.21/software/slapos-master/software.cfg
+    startup_playbook_id: slapos-master-standalone.yml
+    playbook_name: slapos-master
+    request_instance_template: request-slapos-master.j2
+
+  pre_tasks:
+
+    - file: path=/etc/slapos-ssl owner=root group=root mode=0777 state=directory
+
+  roles:
+    - standalone-shared
+    - { role: package, package_name: socat, package_state: present }
