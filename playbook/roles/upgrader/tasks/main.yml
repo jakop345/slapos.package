@@ -31,10 +31,10 @@
     register: hosts_file 
 
   - shell: rm -rf /opt/upgrader/playbook-tmp
-    when: hosts.stat.exists == True
+    when: hosts_file.stat.exists == True
 
   - shell: cp -R /opt/upgrader/tmp /opt/upgrader/playbook-tmp
-    when: hosts.stat.exists == True
+    when: hosts_file.stat.exists == True
 
   - name: Save new archive MD5
     stat: path=/opt/upgrader/archive.tar.gz
