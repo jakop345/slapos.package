@@ -80,6 +80,7 @@ failovermethod=priority
 enabled=0
 gpgcheck=0
 EOF
+    yum update
     # Enable a bootstrap repo.  It is removed after finishing
     # the epel-release installation.
     yum-config-manager --enable epel-bootstrap
@@ -108,6 +109,7 @@ failovermethod=priority
 enabled=0
 gpgcheck=0
 EOF
+    yum update
     yum-config-manager --enable epel-bootstrap
     yum_install epel-release || \
         die $LINENO "Error installing EPEL repo, cannot continue"
