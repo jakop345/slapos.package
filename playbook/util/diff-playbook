@@ -1,0 +1,11 @@
+HERE=`pwd`
+rm -rf /tmp/tmpplaybook_*
+DFILE="/tmp/tmpplaybook_unstable$(basename $0).$$/"
+TFILE="archive.tar.gz"
+mkdir -p $DFILE
+cd $DFILE
+slapcache-download --destination=$TFILE
+tar -xzf $TFILE
+rm $TFILE
+
+diff -ruw $HERE $DFILE

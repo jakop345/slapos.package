@@ -1,0 +1,1 @@
+grep ^key /etc/opt/slapcache.cfg | cut -f3 -d\ 

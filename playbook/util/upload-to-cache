@@ -1,0 +1,1 @@
+rm /tmp/archive.tar.gz && tar -czvf /tmp/archive.tar.gz . && slapcache-upload --file=/tmp/archive.tar.gz
