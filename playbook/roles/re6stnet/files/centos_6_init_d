@@ -13,10 +13,10 @@
 
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 NAME=re6stnet
 DESC="Resilient, Scalable, IPv6 Network application"
-DAEMON=/opt/re6st/bin/$NAME
+DAEMON=/usr/bin/$NAME
 CONFDIR=/etc/re6stnet
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
@@ -26,37 +26,41 @@ LOCKFILE=/var/lock/subsys/re6stnet
 # Source function library.
 . /etc/init.d/functions
 
-
-
-
 start() {
         echo -n "Starting $NAME: "
-        daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR -- $DAEMON @re6stnet.conf 
+        /usr/local/bin/daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR -- $DAEMON @re6stnet.conf 
         RETVAL=$?
         [ $RETVAL -eq 0 ] && touch $LOCKFILE
+        [ $RETVAL -eq 0 ] && echo OK || echo FAIL
         echo
         return $RETVAL
 }
 
 stop() {
         echo -n "Shutting down $NAME: "
-        daemon --user root -n $NAME --pidfile=$PIDFILE --stop
+        /usr/local/bin/daemon --user root -n $NAME --pidfile=$PIDFILE --stop
         RETVAL=$?
         [ $RETVAL -eq 0 ] && rm -rf $LOCKFILE
+        [ $RETVAL -eq 0 ] && echo OK || echo FAIL
         echo
         return $RETVAL
 }
 
 status() {
         echo -n "Status for $NAME: "
-        daemon --user root -n $NAME --pidfile=$PIDFILE --running                               
+        /usr/local/bin/daemon --user root -n $NAME --pidfile=$PIDFILE --running                               
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo OK || echo FAIL
+        echo
+        return $RETVAL
 }
 
 restart() {
         echo -n "Restarting $NAME: "
-        daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR --restart -- $DAEMON @re6stnet.conf
+        /usr/local/bin/daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR --restart -- $DAEMON @re6stnet.conf
         RETVAL=$?
         [ $RETVAL -eq 0 ] && touch $LOCKFILE
+        [ $RETVAL -eq 0 ] && echo OK || echo FAIL
         echo
         return $RETVAL
 }
