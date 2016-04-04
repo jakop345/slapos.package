@@ -34,7 +34,7 @@
   - include: daemon.yml
     
   - name: Create centos 6 init.d missing file
-    copy: src=files/centos_6_init_d dest=/etc/init.d/re6stnet
+    copy: src=centos_6_init_d dest=/etc/init.d/re6stnet mode=755
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6' and recheck_re6stnet_conf.stat.exists == True
 
   - name: Start re6st-node service
