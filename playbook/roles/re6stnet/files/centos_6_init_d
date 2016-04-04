@@ -1,15 +1,21 @@
 #!/bin/bash
 #
-#       /etc/rc.d/init.d/<servicename>
+# re6stnet  Resilient, Scalable, IPv6 Network application
 #
-#       <description of the *service*>
-#       <any general comments about this init script>
+# chkconfig: 2345 08 92
+# description: Start, stops and restart re6stnet
 #
-# <tags -- see below for tag definitions.  *Every line* from the top
-#  of the file to the end of the tags section must begin with a #
-#  character.  After the tags section, there should be a blank line.
-#  This keeps normal comments in the rest of the file from being
-#  mistaken for tags, should they happen to fit the pattern.>
+# config: /etc/re6stnet/re6stnet.cfg
+#
+### BEGIN INT INFO
+# Provides: re6stnet
+# Required-Start:
+# Required-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start, stops and restart re6stnet
+# Description: Start, stops and restart re6stnet
+### END INIT INFO
 
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
