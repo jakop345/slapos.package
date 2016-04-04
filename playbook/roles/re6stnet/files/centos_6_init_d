@@ -22,7 +22,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 NAME=re6stnet
 DESC="Resilient, Scalable, IPv6 Network application"
-DAEMON=/usr/bin/$NAME
+DAEMON=/usr/sbin/$NAME
 CONFDIR=/etc/re6stnet
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
