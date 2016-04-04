@@ -34,6 +34,46 @@
       args:
         creates: output-centos72
 
+
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian7-testing-version.json >> log/debian7-testing-version.log
+      args:
+        creates: output-debian7-testing-version
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8-testing-version.json >> log/debian8-testing-version.log
+      args:
+        creates: output-debian8-testing-version
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64-testing-version.json >> log/ubuntu-14.04-server-amd64-testing-version.log
+      args:
+        creates: output-ubuntu-14-04-server-testing-version
+
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64-testing-version.json >> log/ubuntu-15.04-server-amd64-testing-version.log
+      args:
+        creates: output-ubuntu-15-04-server-testing-version
+
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7-testing-version.json >> log/centos-6.7-testing-version.log
+      args:
+        creates: output-centos67-testing-version
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2-testing-version.json >> log/centos-7.2-testing-version.log
+      args:
+        creates: output-centos72-testing-version
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8-erp5-standalone.json >> log/debian8-erp5-standalone.log
+      args:
+        creates: output-debian8-erp5-standalone
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8-wendelin-standalone.json >> log/debian8-wendelin-standalone.log
+      args:
+        creates: output-debian8-wendelin-standalone
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8-webrunner-standalone.json >> log/debian8-webrunner-standalone.log
+      args:
+        creates: output-debian8-webrunner-standalone
+
     - file: path={{ item }} state=directory mode=0755
       with_items:
         - repository
@@ -83,6 +123,51 @@
         creates: output-centos72/packer-centos72.gz
       ignore_errors: True
 
+    - shell: gzip output-debian8-testing-version/packer-debian8-testing-version
+      args:
+        creates: output-debian8-testing-version/packer-debian8-testing-version.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian7-testing-version/packer-debian7-testing-version 
+      args:
+        creates: output-debian7-testing-version/packer-debian7-testing-version.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version 
+      args:
+        creates: output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version
+      args:
+        creates: output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos67-testing-version/packer-centos67-testing-version 
+      args:
+        creates: output-centos67-testing-version/packer-centos67.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos72-testing-version/packer-centos72-testing-version
+      args:
+        creates: output-centos72-testing-version/packer-centos72-testing-version.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone
+      args:
+        creates: output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian8-erp5-standalone/packer-debian8-erp5-standalone
+      args:
+        creates: output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone
+      args:
+        creates: output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone.gz
+      ignore_errors: True
+
     - shell: mv output-debian8/packer-debian8.gz repository/debian/8/amd64/base-image.qcow2.gz 
       args:
         creates: repository/debian/8/amd64/base-image.qcow2.gz
@@ -106,4 +191,70 @@
     - shell: mv output-centos72/packer-centos72.gz repository/centos/7/x86_64/base-image.qcow2.gz 
       args:
         creates: repository/centos/7/x86_64/base-image.qcow2.gz
+
         
+    - shell: mv output-debian8-testing-version/packer-debian8-testing-version.gz repository/debian/8/amd64/testing-image.qcow2.gz 
+      args:
+        creates: repository/debian/8/amd64/testing-image.qcow2.gz
+
+    - shell: mv output-debian7-testing-version/packer-debian7-testing-version.gz repository/debian/7/amd64/testing-image.qcow2.gz 
+      args:
+        creates: repository/debian/7/amd64/testing-image.qcow2.gz 
+
+    - shell: mv output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version.gz repository/ubuntu/14.04/amd64/testing-image.qcow2.gz
+      args:
+        creates: repository/ubuntu/14.04/amd64/testing-image.qcow2.gz
+
+    - shell: mv output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version.gz repository/ubuntu/15.04/amd64/testing-image.qcow2.gz 
+      args:
+        creates: repository/ubuntu/15.04/amd64/testing-image.qcow2.gz
+
+    - shell: mv output-centos67-testing-version/packer-centos67-testing-version.gz repository/centos/6/x86_64/testing-image.qcow2.gz
+      args:
+        creates: repository/centos/6/x86_64/testing-image.qcow2.gz
+
+    - shell: mv output-centos72-testing-version/packer-centos72-testing-version.gz repository/centos/7/x86_64/testing-image.qcow2.gz 
+      args:
+        creates: repository/centos/7/x86_64/testing-image.qcow2.gz
+
+    - shell: mv output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone.gz repository/debian/8/amd64/erp5-image.qcow2.gz
+      args:
+        creates: repository/debian/8/amd64/erp5-image.qcow2.gz
+
+    - shell: mv output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz repository/debian/8/amd64/erp5-image.qcow2.gz
+      args:
+        creates: repository/debian/8/amd64/erp5-image.qcow2.gz
+
+    - shell: mv output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone.gz repository/debian/8/amd64/wendelin-image.qcow2.gz
+      args:
+        creates: repository/debian/8/amd64/wendelin-image.qcow2.gz
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/debian/8/amd64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/debian/7/amd64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/debian/7/amd64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/ubuntu/14.04/amd64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/ubuntu/15.04/amd64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/centos/6/x86_64/
+
+    - shell: md5sum * > MD5SUM.txt
+      args:
+        chdir: repository/centos/7/x86_64/
+
+
