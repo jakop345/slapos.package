@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+#       /etc/rc.d/init.d/<servicename>
+#
+#       <description of the *service*>
+#       <any general comments about this init script>
+#
+# <tags -- see below for tag definitions.  *Every line* from the top
+#  of the file to the end of the tags section must begin with a #
+#  character.  After the tags section, there should be a blank line.
+#  This keeps normal comments in the rest of the file from being
+#  mistaken for tags, should they happen to fit the pattern.>
+
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin
+NAME=re6stnet
+DESC="Resilient, Scalable, IPv6 Network application"
+DAEMON=/opt/re6st/bin/$NAME
+CONFDIR=/etc/re6stnet
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+LOCKFILE=/var/lock/subsys/re6stnet
+
+# Source function library.
+. /etc/init.d/functions
+
+
+
+
+start() {
+        echo -n "Starting $NAME: "
+        daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR -- $DAEMON @re6stnet.conf 
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch $LOCKFILE
+        echo
+        return $RETVAL
+}
+
+stop() {
+        echo -n "Shutting down $NAME: "
+        daemon --user root -n $NAME --pidfile=$PIDFILE --stop
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -rf $LOCKFILE
+        echo
+        return $RETVAL
+}
+
+status() {
+        echo -n "Status for $NAME: "
+        daemon --user root -n $NAME --pidfile=$PIDFILE --running                               
+}
+
+restart() {
+        echo -n "Restarting $NAME: "
+        daemon --user root -n $NAME --pidfile=$PIDFILE -D $CONFDIR --restart -- $DAEMON @re6stnet.conf
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch $LOCKFILE
+        echo
+        return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo "Usage: <servicename> {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+exit $?

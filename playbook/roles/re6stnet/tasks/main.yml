@@ -28,8 +28,14 @@
     register: re6stnode
   
   - name: set re6st-node.service file
-    copy: src=/etc/systemd/re6stnet.service dest=/etc/systemd/system/re6st-node.service
+    copy: src=/etc/systemd/re6stnet.service dest=/etc/systemd/system/re6stnet.service
     when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7' and re6stnet.stat.exists == True and re6stnode.stat.exists == False
+
+  - include: daemon.yml
+    
+  - name: Create centos 6 init.d missing file
+    copy: src=files/centos_6_init_d dest=/etc/init.d/re6stnet
+    when: ansible_distribution == 'CentOS' and ansible_distribution_version == '6' and recheck_re6stnet_conf.stat.exists == True
 
   - name: Start re6st-node service
     service: name=re6stnet state=started enabled=yes
