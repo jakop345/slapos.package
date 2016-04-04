@@ -1,10 +1,10 @@
 ---
   - name: Install Daemon for CentOS 6
     yum: name=http://libslack.org/daemon/download/daemon-0.6.4-1.x86_64.rpm state=present
-    when: ansible_distribution == 'CentOS' and ansible_distribution_version <= '6' and ansible_architecture == 'x86_64'
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version <= '6' and ansible_architecture == 'x86_64'
 
   - name: Install Daemon for CentOS 6 (i686)
     yum: name=http://libslack.org/daemon/download/daemon-0.6.4-1.i686.rpm state=present
-    when: ansible_distribution == 'CentOS' and ansible_distribution_version <= '6' and ansible_architecture == 'i386'                               
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version <= '6' and ansible_architecture == 'i386'                               
 
   
