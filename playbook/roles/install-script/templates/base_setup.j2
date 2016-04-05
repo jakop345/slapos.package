@@ -124,6 +124,7 @@ EOF
     is_package_installed libselinux-python || install_package libselinux-python
 fi
 
+is_package_installed openssl || install_package openssl
 is_package_installed ansible || install_package ansible
 is_package_installed python-setuptools || install_package python-setuptools
 
