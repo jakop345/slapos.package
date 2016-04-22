@@ -63,7 +63,7 @@ OSC = "osc" # usually a symlink to the destination osc folder
 
 re6stnet = git("re6stnet", "https://lab.nexedi.com/nexedi/re6stnet.git",
                "docs".__eq__)
-slapos = git("slapos", "http://git.erp5.org/repos/slapos.git",
+slapos = git("slapos", "https://lab.nexedi.com/nexedi/slapos.git",
              ctime=False) # ignore ctime due to hardlinks to *-cache
 
 os.environ["TZ"] = "UTC"; time.tzset()
