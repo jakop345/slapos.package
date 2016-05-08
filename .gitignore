@@ -18,3 +18,4 @@ playbook/install
 packer/log
 packer/output-*
 packer/packer_cache
+archive.tar.gz*
