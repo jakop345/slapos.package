@@ -33,3 +33,77 @@
     - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2.json >> log/centos-7.2.log
       args:
         creates: output-centos72
+
+    - file: path={{ item }} state=directory mode=0755
+      with_items:
+        - repository
+        - repository/centos
+        - repository/centos/6
+        - repository/centos/7
+        - repository/ubuntu/
+        - repository/ubuntu/15.04
+        - repository/ubuntu/14.04
+        - repository/debian
+        - repository/debian/7
+        - repository/debian/8
+        - repository/centos/6/x86_64
+        - repository/centos/7/x86_64
+        - repository/ubuntu/15.04/amd64
+        - repository/ubuntu/14.04/amd64
+        - repository/debian/7/amd64
+        - repository/debian/8/amd64
+
+    - shell: gzip output-debian8/packer-debian8 
+      args:
+        creates: output-debian8/packer-debian8.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian7/packer-debian7 
+      args:
+        creates: output-debian7/packer-debian7.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-14-04-server/packer-ubuntu-14-04-server 
+      args:
+        creates: output-ubuntu-14-04-server/packer-ubuntu-14-04-server.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-15-04-server/packer-ubuntu-15-04-server 
+      args:
+        creates: output-ubuntu-15-04-server/packer-ubuntu-15-04-server.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos67/packer-centos67 
+      args:
+        creates: output-centos67/packer-centos67.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos72/packer-centos72 
+      args:
+        creates: output-centos72/packer-centos72.gz
+      ignore_errors: True
+
+    - shell: mv output-debian8/packer-debian8.gz repository/debian/8/amd64/base-image.qcow2.gz 
+      args:
+        creates: repository/debian/8/amd64/base-image.qcow2.gz
+
+    - shell: mv output-debian7/packer-debian7.gz repository/debian/7/amd64/base-image.qcow2.gz 
+      args:
+        creates: repository/debian/7/amd64/base-image.qcow2.gz 
+
+    - shell: mv output-ubuntu-14-04-server/packer-ubuntu-14-04-server.gz repository/ubuntu/14.04/amd64/base-image.qcow2.gz
+      args:
+        creates: repository/ubuntu/14.04/amd64/base-image.qcow2.gz
+
+    - shell: mv output-ubuntu-15-04-server/packer-ubuntu-15-04-server.gz repository/ubuntu/15.04/amd64/base-image.qcow2.gz 
+      args:
+        creates: repository/ubuntu/15.04/amd64/base-image.qcow2.gz
+
+    - shell: mv output-centos67/packer-centos67.gz repository/centos/6/x86_64/base-image.qcow2.gz
+      args:
+        creates: repository/centos/6/x86_64/base-image.qcow2.gz
+
+    - shell: mv output-centos72/packer-centos72.gz repository/centos/7/x86_64/base-image.qcow2.gz 
+      args:
+        creates: repository/centos/7/x86_64/base-image.qcow2.gz
+        
