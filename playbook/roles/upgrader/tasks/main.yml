@@ -68,7 +68,7 @@
     when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
 
   - shell: echo {{ ansible_date_time.epoch }} > /opt/upgrader/last-upgrade
-    when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
+    when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) 
 
   - name: Set Cron  
     cron: name="Launch Upgrader with ansible" minute="0" hour="*/3" job='rm -rf /opt/upgrader/playbook && cp -R /opt/upgrader/playbook-tmp /opt/upgrader/playbook && cd /opt/upgrader/playbook && ansible-playbook upgrader-run.yml --extra-vars "upgrader_playbook={{ upgrader_playbook }}" -i hosts 2>>/opt/upgrader/latest_upgrade.log >> /opt/upgrader/latest_upgrade.log' 
