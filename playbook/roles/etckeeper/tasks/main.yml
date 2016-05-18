@@ -1,0 +1,64 @@
+---
+
+  - stat: path=/etc/etckeeper/etckeeper.conf
+    register: etckeeper_configuration
+
+  - stat: path:/etc/.gitignore
+    register: gitignore_file
+
+  - name: Install git
+    apt: name=git state=latest update_cache=no 
+    when: ansible_os_family == "Debian"
+
+  - name: Install git
+    yum: name=git state=latest update_cache=no  
+    when: ansible_os_family == "RedHat"
+
+  - name: Install etckeeper
+    apt: name=etckeeper state=latest update_cache=no 
+    when: ansible_os_family == "Debian"
+
+  - name: Install etckeeper
+    yum: name=etckeeper state=latest update_cache=no  
+    when: ansible_os_family == "RedHat"
+
+  - shell: etckeeper uninit
+    args:
+      chdir: /etc
+
+  - shell: etckeeper init
+    args:
+      chdir: /etc
+
+    # invoke git checkout -b `hostname ` or `COMP-XXX` for initial registration.
+
+  - lineinfile: path=/etc/.gitignore line={{ item }}
+    with_items:
+      - ~*
+      - shadow*
+      - passwd*
+      - groups*
+      - re6stnet/ca.crt
+      - re6stnet/cert.crt
+      - re6stnet/cert.key
+      - opt/slapos/ssl
+
+  
+  # Get this configuration from /etc/opt/vifib-etckeeper-email
+  - shell: git config user.email 
+    args:
+      chdir: /etc
+
+  # Get this configuration from /etc/opt/vifib-etckeeper-name
+  - shell: git config user.name 
+    args:
+      chdir: /etc
+
+  - shell: git checkout -b `???`
+
+  - shell: git commit -a -m "Initial Commit"
+
+  # get URL of repos at a local file on /etc/opt/vifib-etckeeper-repository instead
+  - shell: git remote add origin 
+
+  # edit /etc/etckeeper/
