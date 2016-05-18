@@ -10,7 +10,7 @@
     - settings/vifib.yml
 
   roles:
-    - { role: package, package_name: ntp, package_state: latest }
+    - ntp
     - { role: package, package_name: wget, package_state: latest }
     - { role: package, package_name: openssl, package_state: latest }
     - { role: package, package_name: ca-certificates, package_state: latest }
