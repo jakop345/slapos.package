@@ -23,6 +23,8 @@ TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
 SLAPOS_ORGINAL_DIRECTORY=slapos-node
 SLAPOS_DIRECTORY=slapos-node_$VERSION+$RECIPE_VERSION+$RELEASE
 
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 function prepare_template_files
 {
 
