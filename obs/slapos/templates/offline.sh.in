@@ -25,11 +25,10 @@ echo "$BUILD_ROOT_DIRECTORY" > ./original_directory
 
 sed  "s!\%BUILDOUT_URL\%!$BUILDOUT_URL!g;s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s|\%PATCHES_DIRECTORY\%|$PATCHES_DIRECTORY|g;s|\%TARGET_DIRECTORY\%|$TARGET_DIRECTORY|g;s|\%BUILD_ROOT_DIRECTORY\%|$BUILD_ROOT_DIRECTORY|g;s|\%BUILD_DIRECTORY\%|$BUILD_DIRECTORY|g" buildout.cfg.in > $BUILD_DIRECTORY/buildout.cfg 
 
-
 # Build first time to get download-cache and extends-cache ready
 cd $BUILD_DIRECTORY
 wget $BOOTSTRAP_URL --no-check-certificate -O bootstrap.py
-(python -S bootstrap.py && \
+(python -S bootstrap.py --buildout-version 2.5.1.post2 --setuptools-to-dir eggs -f http://www.nexedi.org/static/packages/source/ -f http://www.nexedi.org/static/packages/source/slapos.buildout/ && cat ./bin/buildout > /tmp/test && \
     ./bin/buildout) || (echo "Failed to run buildout, exiting." && exit 1)
 
 cd $BUILD_ROOT_DIRECTORY/..
