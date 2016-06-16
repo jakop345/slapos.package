@@ -2,9 +2,16 @@
 import os
 import time
 import json
-from ansible.plugins.callback import CallbackBase
+import ansible
 
-class CallbackModule(CallbackBase):
+baseModule = object
+ANSIBLE_VERSION = 1
+
+if hasattr(ansible, 'plugins') and  hasattr(ansible.plugins, 'callback'):
+  baseModule = ansible.plugins.callback.CallbackBase
+  ANSIBLE_VERSION = 2
+
+class CallbackModule(baseModule):
     """
     logs playbook results, per host, in /var/log/ansible/hosts
     """
@@ -13,7 +20,8 @@ class CallbackModule(CallbackBase):
 
     def __init__(self):
 
-        super(CallbackModule, self).__init__()
+        if ANSIBLE_VERSION > 1:
+            super(baseModule, self).__init__()
 
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
