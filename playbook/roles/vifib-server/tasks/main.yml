@@ -1,15 +1,30 @@
 ---
+
+  - name: Set kernel.panic for force reboot after kernel panic
+    sysctl: name="kernel.panic" value=120 sysctl_set=yes state=present reload=yes
+
+  - name: Set fs.aio-max-nr for increase default aio-max-nr for sql servers
+    sysctl: name="fs.aio-max-nr" value=16777216 sysctl_set=yes state=present reload=yes
+
+  - name: Set kernel.sem for increase semaphore limits
+    sysctl: name="kernel.sem" value="1250 256000 100 1024" sysctl_set=yes state=present reload=yes
+
+  - sysctl: name="net.ipv4.neigh.default.gc_thresh1" value=512 sysctl_set=yes state=present reload=yes
+  - sysctl: name="net.ipv4.neigh.default.gc_thresh2" value=1024 sysctl_set=yes state=present reload=yes
+  - sysctl: name="net.ipv4.neigh.default.gc_thresh3" value=2048 sysctl_set=yes state=present reload=yes
+  - sysctl: name="net.ipv6.neigh.default.gc_thresh1" value=512 sysctl_set=yes state=present reload=yes
+  - sysctl: name="net.ipv6.neigh.default.gc_thresh2" value=1024 sysctl_set=yes state=present reload=yes
+  - sysctl: name="net.ipv6.neigh.default.gc_thresh3" value=2048 sysctl_set=yes state=present reload=yes
+
+  - include: kvm.yml 
+  - include: shuttle-modprobe.yml
+
   - name: Include table 0 on re6st
     shell: echo "TODO"
 
   - name: interface on re6st
     shell: echo "TODO"
 
-  - name: Load kvm_intel
-    shell: echo "TODO if machine has support."
-
-  - name: Set 666 on /dev/kvm
-    shell: echo "TODO if machine has support."
-
   - name: Increase ulimit
     shell: echo "TODO"
+

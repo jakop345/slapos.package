@@ -1,0 +1,13 @@
+---
+
+  - modprobe: name=kvm_intel state=present
+    ignore_errors: True
+
+  - pause: seconds=2
+
+  - stat: path=/dev/kvm
+    register: dev_kvm
+    
+  - name: Set 666 on /dev/kvm
+    shell: chmod 666 /dev/kvm                 
+    when: dev_kvm.stat.exists == True

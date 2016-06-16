@@ -1,0 +1,10 @@
+---
+  - modprobe: name=acpi_cpufreq state=present
+    ignore_errors: True
+
+  - modprobe: name=coretemp state=present
+    ignore_errors: True
+
+  - modprobe: name=f71882fg state=present
+    ignore_errors: True
+
