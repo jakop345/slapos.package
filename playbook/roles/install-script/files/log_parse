@@ -2,8 +2,9 @@
 import os
 import time
 import json
+from ansible.plugins.callback import CallbackBase
 
-class CallbackModule(object):
+class CallbackModule(CallbackBase):
     """
     logs playbook results, per host, in /var/log/ansible/hosts
     """
@@ -11,6 +12,8 @@ class CallbackModule(object):
     log_path = '/var/log/ansible/hosts'
 
     def __init__(self):
+
+        super(CallbackModule, self).__init__()
 
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
@@ -21,6 +24,7 @@ class CallbackModule(object):
               os.unlink(filepath)
 
     def log(self, host, category, data, ignore_errors=False):
+
         if type(data) == dict:
             if '_ansible_verbose_override' in data:
                 # avoid logging extraneous data
@@ -30,7 +34,7 @@ class CallbackModule(object):
                 data = json.dumps(data)
 
             if ignore_errors:
-              category = '%s_INGORED' % category
+              category = '%s_IGNORED' % category
             path = os.path.join("/var/log/ansible/hosts", '%s_%s' % (host, category))
             with open(path, "a") as fd:
               fd.write(data)
