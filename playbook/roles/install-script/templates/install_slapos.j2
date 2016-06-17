@@ -2,19 +2,13 @@
 
 set -e
 
-#### Setup Ansible and load few libraries #####
-BASE_SETUP_SCRIPT_MD5={{ base_setup.stat.md5 }} 
+#
+#  Paste content of function-common
+#    https://lab.nexedi.com/nexedi/slapos.package/blob/master/playbook/roles/install-script/files/function-common
+#
 
-type wget >/dev/null 2>&1 || { echo >&2 "I require wget but it's not installed.  Aborting."; exit 1; }
 
-wget --no-check-certificate https://deploy.erp5.cn/base-setup -O /tmp/base-setup
-
-if [ "`md5sum /tmp/base-setup | cut -f1 -d\  `" !=  "$BASE_SETUP_SCRIPT_MD5" ]; then
-  echo "ERROR: base-setup has wrong md5 `md5sum /tmp/base-setup | cut -f1 -d\  ` != $BASE_SETUP_SCRIPT_MD5"
-  exit 1
-fi
-
-source /tmp/base-setup
+{{ lookup('file', base_path+'/install/base-setup') }}
 
 # Include Additional Functions
 if [ ! -f /etc/opt/slapcache.cfg ]; then
