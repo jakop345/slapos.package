@@ -1,0 +1,35 @@
+#!/bin/bash
+
+{{ lookup('file', base_path+'/roles/install-script/files/vm_bootstrap_network') }}
+
+set -e
+
+#
+#  Paste content of function-common
+#    https://lab.nexedi.com/nexedi/slapos.package/blob/master/playbook/roles/install-script/files/function-common
+#
+
+
+{{ lookup('file', base_path+'/install/base-setup') }}
+
+
+# Include Additional Functions
+if [ ! -f /etc/opt/slapcache.cfg ]; then
+  slapcache-conf
+fi
+sed -i "s/key = slapos-global-key/key = slapos-global-unstable-key/g" /etc/opt/slapcache.cfg 
+
+DFILE="/tmp/tmpplaybook_unstable$(basename $0).$$/"
+TFILE="archive.tar.gz"
+mkdir -p $DFILE
+cd $DFILE
+slapcache-download --destination=$TFILE
+tar -xzvf $TFILE
+rm $TFILE
+
+clear
+
+echo "Starting Ansible playbook:"
+
+
+{{ lookup('file', base_path+'/roles/install-script/files/vm_bootstrap_check') }}

@@ -1,0 +1,18 @@
+
+# Check if playbook has been correctly extracted
+ANSIBLE_CRON_FILE="/etc/cron.d/ansible-vm-bootstrap"
+COUNT=$(ls /opt/slapos.playbook | wc -l)
+if [[ ! $COUNT -gt 1 ]]
+then
+  rm -f $ANSIBLE_CRON_FILE
+  rm -f /opt/slapos.playbook/playbook.tar.gz
+  exit 1
+fi
+
+# check if Ansible cron task was added
+if [[ ! -s "$ANSIBLE_CRON_FILE" ]]
+then
+  exit 1
+fi
+
+exit 0
