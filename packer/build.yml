@@ -74,6 +74,34 @@
       args:
         creates: output-debian8-webrunner-standalone
 
+
+    - file: path=log state=directory mode=0755
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian7-vm-bootstrap.json >> log/debian7-vm-bootstrap.log
+      args:
+        creates: output-debian7-vm-bootstrap
+
+    - shell: PATH=$PATH:/opt/packer/ packer build debian8-vm-boostrap.json >> log/debian8-vm-boostrap.log
+      args:
+        creates: output-debian8-vm-boostrap
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64-vm-bootstrap.json >> log/ubuntu-14.04-server-amd64-vm-bootstrap.log
+      args:
+        creates: output-ubuntu-14.04-server-amd64-vm-bootstrap
+
+    - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64-vm-bootstrap.json >> log/ubuntu-15.04-server-amd64-vm-bootstrap.log
+      args:
+        creates: output-ubuntu-15.04-server-amd64-vm-bootstrap
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7-vm-boostrap.json >> log/centos-6.7-vm-boostrap.log
+      args:
+        creates: output-centos67-vm-boostrap
+
+    - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2-vm-bootstrap.json >> log/centos-7.2-vm-bootstrap.log
+      args:
+        creates: output-centos72-vm-bootstrap
+
+
     - file: path={{ item }} state=directory mode=0755
       with_items:
         - repository
@@ -168,6 +196,38 @@
         creates: output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone.gz
       ignore_errors: True
 
+
+    - shell: gzip output-debian8-vm-boostrap/packer-debian8-slapos
+      args:
+        creates: output-debian8-vm-boostrap/packer-debian8-slapos.gz
+      ignore_errors: True
+
+    - shell: gzip output-debian7-vm-bootstrap/packer-debian7-slapos
+      args:
+        creates: output-debian7-vm-bootstrap/packer-debian7-slapos.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos
+      args:
+        creates: output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos.gz
+      ignore_errors: True
+
+    - shell: gzip output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos
+      args:
+        creates: output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos67/packer-centos68-slapos
+      args:
+        creates: output-centos67/packer-centos68-slapos.gz
+      ignore_errors: True
+
+    - shell: gzip output-centos72-vm-bootstrap/packer-centos72-slapos 
+      args:
+        creates: output-centos72-vm-bootstrap/packer-centos72-slapos.gz
+      ignore_errors: True
+
+
     - shell: mv output-debian8/packer-debian8.gz repository/debian/8/amd64/base-image.qcow2.gz 
       args:
         creates: repository/debian/8/amd64/base-image.qcow2.gz
@@ -228,6 +288,32 @@
     - shell: mv output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone.gz repository/debian/8/amd64/wendelin-image.qcow2.gz
       args:
         creates: repository/debian/8/amd64/wendelin-image.qcow2.gz
+
+
+    - shell: mv output-debian8-vm-boostrap/packer-debian8-slapos.gz repository/debian/8/amd64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/debian/8/amd64/base-slapos-image.qcow2.gz
+
+    - shell: mv output-debian7-vm-bootstrap/packer-debian7-slapos.gz repository/debian/7/amd64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/debian/7/amd64/base-slapos-image.qcow2.gz
+
+    - shell: mv output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos.gz repository/ubuntu/14.04/amd64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/ubuntu/14.04/amd64/base-slapos-image.qcow2.gz
+
+    - shell: mv output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos.gz repository/ubuntu/15.04/amd64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/ubuntu/15.04/amd64/base-slapos-image.qcow2.gz
+
+    - shell: mv output-centos67/packer-centos68-slapos.gz repository/centos/6/x86_64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/centos/6/x86_64/base-slapos-image.qcow2.gz
+
+    - shell: mv output-centos72-vm-bootstrap/packer-centos72-slapos.gz repository/centos/7/x86_64/base-slapos-image.qcow2.gz
+      args:
+        creates: repository/centos/7/x86_64/base-slapos-image.qcow2.gz
+
 
     - shell: md5sum * > MD5SUM.txt
       args:

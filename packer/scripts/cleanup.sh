@@ -32,3 +32,6 @@ rm -f /root/.bash_history
 
 # Clean up log files
 find /var/log -type f | while read f; do echo -ne '' > $f; done;
+
+# Make sure keyboard language is french
+sed -i 's#XKBLAYOUT=.*#XKBLAYOUT="fr"#' /etc/default/keyboard

@@ -1,0 +1,55 @@
+{
+    "variables": {
+        "user": "slapos",
+        "password": "slapos",
+        "disk_size": "200000",
+        "domain": ""
+    },
+
+    "builders":
+    [
+        {
+            "name": "centos68-slapos",
+
+            "type": "qemu",
+            "format": "qcow2",
+            "accelerator": "kvm",
+            "disk_size": "{{ user `disk_size`}}",
+
+            "iso_url": "http://mirrors.kernel.org/centos/6.8/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+            "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
+            "iso_checksum_type": "md5",
+
+
+            "http_directory": "http",
+
+            "ssh_username": "{{user `user`}}",
+            "ssh_password": "{{user `password`}}",
+            "ssh_wait_timeout": "1800s",
+            "shutdown_command": "sudo poweroff",
+
+            "headless": false,
+            "boot_wait": "2s",
+            "boot_command": [
+              "<esc>",
+              "<wait>",
+              "linux ks=http://{{.HTTPIP}}:{{.HTTPPort}}/centos67-anaconda-ks.cfg",
+              "<enter>"
+            ]
+        }
+    ],
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+            "scripts": [
+                "scripts/update-centos.sh",
+                "scripts/packages-centos.sh",
+                "scripts/cleanup-centos.sh",
+                "scripts/centos6-install-base.sh",
+                "scripts/vm-bootstrap.sh"
+            ]
+        }
+    ]
+}

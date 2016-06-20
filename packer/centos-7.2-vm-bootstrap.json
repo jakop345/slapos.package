@@ -1,0 +1,54 @@
+{
+    "variables": {
+        "user": "slapos",
+        "password": "slapos",
+        "disk_size": "200000",
+        "domain": ""
+    },
+
+    "builders":
+    [
+        {
+            "name": "centos72-slapos",
+
+            "type": "qemu",
+            "format": "qcow2",
+            "accelerator": "kvm",
+            "disk_size": "{{ user `disk_size`}}",
+
+            "iso_url": "http://mirrors.kernel.org/centos/7.2.1511/isos/x86_64/CentOS-7-x86_64-NetInstall-1511.iso",
+            "iso_checksum": "9ed9ffb5d89ab8cca834afce354daa70a21dcb410f58287d6316259ff89758f5",
+            "iso_checksum_type": "sha256",
+
+            "http_directory": "http",
+
+            "ssh_username": "{{user `user`}}",
+            "ssh_password": "{{user `password`}}",
+            "ssh_wait_timeout": "1800s",
+            "shutdown_command": "sudo poweroff",
+
+            "headless": false,
+            "boot_wait": "2s",
+            "boot_command": [
+              "<esc>",
+              "<wait>",
+              "linux ks=http://{{.HTTPIP}}:{{.HTTPPort}}/centos72-anaconda-ks.cfg biosdevname=0 net.ifnames=0",
+              "<enter>"
+            ]
+        }
+    ],
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+            "scripts": [
+                "scripts/update-centos.sh",
+                "scripts/packages-centos.sh",
+                "scripts/cleanup-centos.sh",
+                "scripts/centos7-install-base.sh",
+                "scripts/vm-bootstrap.sh"
+            ]
+        }
+    ]
+}
