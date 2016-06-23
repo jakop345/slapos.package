@@ -22,4 +22,5 @@
     - { role: package, package_name: exim4-base, package_state: absent }
     - { role: package, package_name: slapos-node, package_state: latest }
     - vifib-team-ssh-key
-
+    - vifib-server
+    - vifib-kernel
