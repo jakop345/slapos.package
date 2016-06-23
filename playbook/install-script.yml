@@ -66,7 +66,6 @@
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server-update.yml", script_path: "install/imt/slapos-update"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-server.yml", script_path: "install/imt/slapos"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/vm-bootstrap"}
-    - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/generic-vm-bootstrap"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-cloudera-manager.yml", script_path: "install/imt/vm-cloudera-manager"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-re6stnet.yml", script_path: "install/imt/re6st"}
 
