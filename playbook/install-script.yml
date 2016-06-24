@@ -69,6 +69,8 @@
     - { role: "install-script", channel: "stable", playbook_yml: "imt-vm-cloudera-manager.yml", script_path: "install/imt/vm-cloudera-manager"}
     - { role: "install-script", channel: "stable", playbook_yml: "imt-re6stnet.yml", script_path: "install/imt/re6st"}
 
+    - { role: "install-script", channel: "stable2", playbook_yml: "imt-vm-bootstrap.yml", script_path: "install/imt/generic-vm-bootstrap"}
+
     - { role: "install-script", channel: "slapos_testing", playbook_yml: "slapos.yml", script_path: "install/testing/slapos" }
     - { role: "install-script", channel: "slapos_testing", playbook_yml: "re6stnet.yml", script_path: "install/testing/re6st"}
     - { role: "install-script", channel: "slapos_testing", playbook_yml: "vifib.yml", script_path: "install/testing/vifib"}

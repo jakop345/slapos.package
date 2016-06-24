@@ -5,7 +5,7 @@
 
   - name: generate scripts
     template: src=vm_bootstrap.j2 dest={{ base_path }}/{{ script_path }} mode=0666
-    when: channel == "stable" and "generic-vm-bootstrap" in script_path
+    when: channel == "stable2" and "generic-vm-bootstrap" in script_path
 
   - name: generate scripts
     template: src=install_unstable.j2 dest={{ base_path }}/{{ script_path }} mode=0666
