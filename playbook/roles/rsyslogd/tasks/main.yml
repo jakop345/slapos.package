@@ -1,0 +1,4 @@
+---
+  - name: Make rsyslogd listen on localhost
+    lineinfile: line="*.* @127.0.0.1:42185" dest=/etc/rsyslog.conf
+    notify: [ 'Restart rsyslogd' ]

@@ -24,3 +24,4 @@
     - vifib-team-ssh-key
     - vifib-server
     - vifib-kernel
+    - rsyslogd
