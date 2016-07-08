@@ -3,4 +3,28 @@
     apt: name=linux-image-4.6.0-0.bpo.1-amd64  state=latest default_release=jessie-backports update_cache=yes
     when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"        
 
+  - name: Download kernel 4.6 from Debian8 repository to install on Debian 7
+    get_url: url=http://ftp.fr.debian.org/debian/pool/main/l/linux-base/linux-base_4.3~bpo8+1_all.deb dest=/tmp/linux-base_4.3~bpo8+1_all.deb
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+  - name: Download kernel 4.6 from Debian8 repository to install on Debian 7
+    get_url: url=http://ftp.fr.debian.org/debian/pool/main/l/linux/linux-image-4.6.0-0.bpo.1-amd64_4.6.1-1~bpo8+1_amd64.deb dest=/tmp/linux-image-4.6.0-0.bpo.1-amd64_4.6.1-1~bpo8+1_amd64.deb
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+  - name: Install initramfs-tools on debian 7
+    apt: name=initramfs-tools state=latest default_release=wheezy-backports update_cache=yes
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+  - name: Install udev on debian 7
+    apt: name=udev state=latest default_release=wheezy-backports update_cache=yes
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+  - name: Install linux base 4.3 on debian 7
+    apt: deb=/tmp/linux-base_4.3~bpo8+1_all.deb
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+  - name: Install kernel 4.6 on debian 7.0
+    apt: deb=/tmp/linux-image-4.6.0-0.bpo.1-amd64_4.6.1-1~bpo8+1_amd64.deb
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
 
