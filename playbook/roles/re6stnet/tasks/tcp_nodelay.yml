@@ -1,0 +1,12 @@
+---
+
+  - name: Check if configuration exists already
+    stat: path=/etc/re6stnet/re6stnet.conf
+    register: re6stnet_conf
+
+  - lineinfile: dest=/etc/re6stnet/re6stnet.conf line="O--socket-flags" state=present
+    when: re6stnet_conf.stat.exists == True
+
+  - lineinfile: dest=/etc/re6stnet/re6stnet.conf line='O"TCP_NODELAY"' state=present insertafter="O--socket-flags"
+    notify: restart re6stnet
+    when: re6stnet_conf.stat.exists == True

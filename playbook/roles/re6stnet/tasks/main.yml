@@ -44,7 +44,7 @@
 
   - shell: /usr/bin/re6stnet-ip6tables-check
 
-  - cron: name="ip6tables at reboot" special_time=reboot job="sleep 20 && /usr/bin/re6stnet-ip6tables-check"
+  - include: tcp_nodelay.yml
 
   - name: Start re6st-node service
     service: name=re6stnet state=started enabled=yes
