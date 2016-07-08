@@ -39,10 +39,14 @@
     copy: src=centos_6_init_d dest=/etc/init.d/re6stnet mode=755
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6' and recheck_re6stnet_conf.stat.exists == True
 
-  - name: Create centos 6 init.d missing file
+  - name: Add script for check ip6tables well configured
     copy: src=ip6tables dest=/usr/bin/re6stnet-ip6tables-check mode=755
 
-  - shell: /usr/bin/re6stnet-ip6tables-check
+  - name: Run re6stnet-ip6tables-check
+    shell: /usr/bin/re6stnet-ip6tables-check
+
+  - name: Include re6stnet-ip6tables-check at reboot on cron
+    cron: name="ip6tables at reboot" special_time=reboot job="sleep 20 && /usr/bin/re6stnet-ip6tables-check"
 
   - include: tcp_nodelay.yml
 
