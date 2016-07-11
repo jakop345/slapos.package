@@ -11,6 +11,7 @@
 
   roles:
     - ntp
+    - { role: package, package_name: lm-sensors, package_state: latest }
     - { role: package, package_name: wget, package_state: latest }
     - { role: package, package_name: openssl, package_state: latest }
     - { role: package, package_name: ca-certificates, package_state: latest }
@@ -22,7 +23,7 @@
     - { role: package, package_name: exim4-base, package_state: absent }
     - { role: package, package_name: slapos-node, package_state: latest }
     - { role: package, package_name: re6st-node, package_state: latest }
+    - re6stnet
     - vifib-team-ssh-key
     - vifib-server
-    - vifib-kernel
     - rsyslogd
