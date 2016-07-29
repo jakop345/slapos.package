@@ -1,0 +1,31 @@
+- name: Upload a list of images to shacache, be sure you know what you are doing.
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+
+    - name: Upload a list of images to shacache, there is no verification for now
+      shell: networkcache-upload --prefix-key packerimage- --url {{ item }} --file {{ item }} shacache/shacache.cfg
+      with_items:
+           - output-debian8/packer-debian8.gz
+           - output-debian7/packer-debian7.gz
+           - output-ubuntu-14-04-server/packer-ubuntu-14-04-server.gz
+           - output-ubuntu-15-04-server/packer-ubuntu-15-04-server.gz
+           - output-centos72/packer-centos72.gz
+           - output-centos67/packer-centos67.gz
+           - output-debian8-testing-version/packer-debian8-testing-version.gz
+           - output-debian7-testing-version/packer-debian7-testing-version.gz
+           - output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version.gz
+           - output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version.gz
+           - output-centos67-testing-version/packer-centos67-testing-version.gz
+           - output-centos72-testing-version/packer-centos72-testing-version.gz
+           - output-debian8-webrunner/packer-debian8-webrunner.gz
+           - output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz
+           - output-debian8-wendelin/packer-debian8-wendelin.gz
+           - output-debian8-vm-bootstrap/packer-debian8-vm-bootstrap.gz 
+           - output-debian7-vm-bootstrap/packer-debian7-vm-bootstrap.gz
+           - output-ubuntu-14-04-server-vm-bootstrap/packer-ubuntu-14-04-server-vm-bootstrap.gz
+           - output-ubuntu-15-04-server-vm-bootstrap/packer-ubuntu-15-04-server-vm-bootstrap.gz
+           - output-centos68-vm-bootstrap/packer-centos68-vm-bootstrap.gz
+           - output-centos72-vm-bootstrap/packer-centos72-vm-bootstrap.gz
+
