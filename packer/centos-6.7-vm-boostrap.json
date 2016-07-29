@@ -9,7 +9,7 @@
     "builders":
     [
         {
-            "name": "centos68-slapos",
+            "name": "centos68-vm-bootstrap",
 
             "type": "qemu",
             "format": "qcow2",

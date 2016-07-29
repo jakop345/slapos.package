@@ -9,7 +9,7 @@
     "builders":
     [
         {
-            "name": "debian8",
+            "name": "debian8-webrunner",
 
             "type": "qemu",
             "format": "qcow2",

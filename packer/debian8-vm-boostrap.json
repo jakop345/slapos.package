@@ -9,7 +9,7 @@
     "builders":
     [
         {
-            "name": "debian8-slapos",
+            "name": "debian8-vm-bootstrap",
 
             "type": "qemu",
             "format": "qcow2",
