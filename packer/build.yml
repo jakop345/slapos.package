@@ -2,124 +2,118 @@
   hosts: 127.0.0.1
   connection: local
 
-
-
   tasks:
 
+### Build instances 
     - file: path=log state=directory mode=0755
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian7.json >> log/debian7.log
       args:
         creates: output-debian7
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8.json >> log/debian8.log
       args:
         creates: output-debian8
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64.json >> log/ubuntu-14.04-server-amd64.log
       args:
         creates: output-ubuntu-14-04-server
-
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64.json >> log/ubuntu-15.04-server-amd64.log
       args:
         creates: output-ubuntu-15-04-server
-
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7.json >> log/centos-6.7.log
       args:
         creates: output-centos67
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2.json >> log/centos-7.2.log
       args:
         creates: output-centos72
-
-
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian7-testing-version.json >> log/debian7-testing-version.log
       args:
         creates: output-debian7-testing-version
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8-testing-version.json >> log/debian8-testing-version.log
       args:
         creates: output-debian8-testing-version
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64-testing-version.json >> log/ubuntu-14.04-server-amd64-testing-version.log
       args:
         creates: output-ubuntu-14-04-server-testing-version
-
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64-testing-version.json >> log/ubuntu-15.04-server-amd64-testing-version.log
       args:
         creates: output-ubuntu-15-04-server-testing-version
-
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7-testing-version.json >> log/centos-6.7-testing-version.log
       args:
         creates: output-centos67-testing-version
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2-testing-version.json >> log/centos-7.2-testing-version.log
       args:
         creates: output-centos72-testing-version
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8-erp5-standalone.json >> log/debian8-erp5-standalone.log
       args:
         creates: output-debian8-erp5-standalone
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8-wendelin-standalone.json >> log/debian8-wendelin-standalone.log
       args:
-        creates: output-debian8-wendelin-standalone
+        creates: output-debian8-wendelin
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8-webrunner-standalone.json >> log/debian8-webrunner-standalone.log
       args:
-        creates: output-debian8-webrunner-standalone
-
-
-    - file: path=log state=directory mode=0755
+        creates: output-debian8-webrunner
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian7-vm-bootstrap.json >> log/debian7-vm-bootstrap.log
       args:
         creates: output-debian7-vm-bootstrap
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build debian8-vm-boostrap.json >> log/debian8-vm-boostrap.log
       args:
-        creates: output-debian8-vm-boostrap
+        creates: output-debian8-vm-bootstrap
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-14.04-server-amd64-vm-bootstrap.json >> log/ubuntu-14.04-server-amd64-vm-bootstrap.log
       args:
-        creates: output-ubuntu-14.04-server-amd64-vm-bootstrap
+        creates: output-ubuntu-14-04-server-vm-bootstrap
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build ubuntu-15.04-server-amd64-vm-bootstrap.json >> log/ubuntu-15.04-server-amd64-vm-bootstrap.log
       args:
-        creates: output-ubuntu-15.04-server-amd64-vm-bootstrap
+        creates: output-ubuntu-15-04-server-vm-bootstrap
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-6.7-vm-boostrap.json >> log/centos-6.7-vm-boostrap.log
       args:
-        creates: output-centos67-vm-boostrap
+        creates: output-centos68-vm-bootstrap
+      ignore_errors: True
 
     - shell: PATH=$PATH:/opt/packer/ packer build centos-7.2-vm-bootstrap.json >> log/centos-7.2-vm-bootstrap.log
       args:
         creates: output-centos72-vm-bootstrap
+      ignore_errors: True
 
-
-    - file: path={{ item }} state=directory mode=0755
-      with_items:
-        - repository
-        - repository/centos
-        - repository/centos/6
-        - repository/centos/7
-        - repository/ubuntu/
-        - repository/ubuntu/15.04
-        - repository/ubuntu/14.04
-        - repository/debian
-        - repository/debian/7
-        - repository/debian/8
-        - repository/centos/6/x86_64
-        - repository/centos/7/x86_64
-        - repository/ubuntu/15.04/amd64
-        - repository/ubuntu/14.04/amd64
-        - repository/debian/7/amd64
-        - repository/debian/8/amd64
+#### Genetation of images are over.
+#### Start compress everything
 
     - shell: gzip output-debian8/packer-debian8 
       args:
@@ -173,7 +167,7 @@
 
     - shell: gzip output-centos67-testing-version/packer-centos67-testing-version 
       args:
-        creates: output-centos67-testing-version/packer-centos67.gz
+        creates: output-centos67-testing-version/packer-centos67-testing-version.gz
       ignore_errors: True
 
     - shell: gzip output-centos72-testing-version/packer-centos72-testing-version
@@ -181,9 +175,9 @@
         creates: output-centos72-testing-version/packer-centos72-testing-version.gz
       ignore_errors: True
 
-    - shell: gzip output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone
+    - shell: gzip output-debian8-wendelin/packer-debian8-wendelin
       args:
-        creates: output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone.gz
+        creates: output-debian8-wendelin/packer-debian8-wendelin.gz
       ignore_errors: True
 
     - shell: gzip output-debian8-erp5-standalone/packer-debian8-erp5-standalone
@@ -191,156 +185,69 @@
         creates: output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz
       ignore_errors: True
 
-    - shell: gzip output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone
+    - shell: gzip output-debian8-webrunner/packer-debian8-webrunner
       args:
-        creates: output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone.gz
+        creates: output-debian8-webrunner/packer-debian8-webrunner.gz
       ignore_errors: True
 
-
-    - shell: gzip output-debian8-vm-boostrap/packer-debian8-slapos
+    - shell: gzip output-debian8-vm-bootstrap/packer-debian8-vm-bootstrap
       args:
-        creates: output-debian8-vm-boostrap/packer-debian8-slapos.gz
+        creates: output-debian8-vm-bootstrap/packer-debian8-vm-bootstrap.gz 
       ignore_errors: True
 
-    - shell: gzip output-debian7-vm-bootstrap/packer-debian7-slapos
+    - shell: gzip output-debian7-vm-bootstrap/packer-debian7-vm-bootstrap
       args:
-        creates: output-debian7-vm-bootstrap/packer-debian7-slapos.gz
+        creates: output-debian7-vm-bootstrap/packer-debian7-vm-bootstrap.gz
       ignore_errors: True
 
-    - shell: gzip output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos
+    - shell: gzip output-ubuntu-14-04-server-vm-bootstrap/packer-ubuntu-14-04-server-vm-bootstrap
       args:
-        creates: output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos.gz
+        creates: output-ubuntu-14-04-server-vm-bootstrap/packer-ubuntu-14-04-server-vm-bootstrap.gz
       ignore_errors: True
 
-    - shell: gzip output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos
+    - shell: gzip output-ubuntu-15-04-server-vm-bootstrap/packer-ubuntu-15-04-server-vm-bootstrap
       args:
-        creates: output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos.gz
+        creates: output-ubuntu-15-04-server-vm-bootstrap/packer-ubuntu-15-04-server-vm-bootstrap.gz
       ignore_errors: True
 
-    - shell: gzip output-centos67/packer-centos68-slapos
+    - shell: gzip output-centos68-vm-bootstrap/packer-centos68-vm-bootstrap
       args:
-        creates: output-centos67/packer-centos68-slapos.gz
+        creates: output-centos68-vm-bootstrap/packer-centos68-vm-bootstrap.gz
       ignore_errors: True
 
-    - shell: gzip output-centos72-vm-bootstrap/packer-centos72-slapos 
+    - shell: gzip output-centos72-vm-bootstrap/packer-centos72-vm-bootstrap 
       args:
-        creates: output-centos72-vm-bootstrap/packer-centos72-slapos.gz
+        creates: output-centos72-vm-bootstrap/packer-centos72-vm-bootstrap.gz
       ignore_errors: True
 
+#### Gzip is over, start to upload to shacache
+#### Build SHA512SUM.txt of every file.
 
-    - shell: mv output-debian8/packer-debian8.gz repository/debian/8/amd64/base-image.qcow2.gz 
-      args:
-        creates: repository/debian/8/amd64/base-image.qcow2.gz
+    - shell: rm -f SHA512SUM.txt
 
-    - shell: mv output-debian7/packer-debian7.gz repository/debian/7/amd64/base-image.qcow2.gz 
-      args:
-        creates: repository/debian/7/amd64/base-image.qcow2.gz 
-
-    - shell: mv output-ubuntu-14-04-server/packer-ubuntu-14-04-server.gz repository/ubuntu/14.04/amd64/base-image.qcow2.gz
-      args:
-        creates: repository/ubuntu/14.04/amd64/base-image.qcow2.gz
-
-    - shell: mv output-ubuntu-15-04-server/packer-ubuntu-15-04-server.gz repository/ubuntu/15.04/amd64/base-image.qcow2.gz 
-      args:
-        creates: repository/ubuntu/15.04/amd64/base-image.qcow2.gz
-
-    - shell: mv output-centos67/packer-centos67.gz repository/centos/6/x86_64/base-image.qcow2.gz
-      args:
-        creates: repository/centos/6/x86_64/base-image.qcow2.gz
-
-    - shell: mv output-centos72/packer-centos72.gz repository/centos/7/x86_64/base-image.qcow2.gz 
-      args:
-        creates: repository/centos/7/x86_64/base-image.qcow2.gz
-
-        
-    - shell: mv output-debian8-testing-version/packer-debian8-testing-version.gz repository/debian/8/amd64/testing-image.qcow2.gz 
-      args:
-        creates: repository/debian/8/amd64/testing-image.qcow2.gz
-
-    - shell: mv output-debian7-testing-version/packer-debian7-testing-version.gz repository/debian/7/amd64/testing-image.qcow2.gz 
-      args:
-        creates: repository/debian/7/amd64/testing-image.qcow2.gz 
-
-    - shell: mv output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version.gz repository/ubuntu/14.04/amd64/testing-image.qcow2.gz
-      args:
-        creates: repository/ubuntu/14.04/amd64/testing-image.qcow2.gz
-
-    - shell: mv output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version.gz repository/ubuntu/15.04/amd64/testing-image.qcow2.gz 
-      args:
-        creates: repository/ubuntu/15.04/amd64/testing-image.qcow2.gz
-
-    - shell: mv output-centos67-testing-version/packer-centos67-testing-version.gz repository/centos/6/x86_64/testing-image.qcow2.gz
-      args:
-        creates: repository/centos/6/x86_64/testing-image.qcow2.gz
-
-    - shell: mv output-centos72-testing-version/packer-centos72-testing-version.gz repository/centos/7/x86_64/testing-image.qcow2.gz 
-      args:
-        creates: repository/centos/7/x86_64/testing-image.qcow2.gz
-
-    - shell: mv output-debian8-webrunner-standalone/packer-debian8-webrunner-standalone.gz repository/debian/8/amd64/erp5-image.qcow2.gz
-      args:
-        creates: repository/debian/8/amd64/erp5-image.qcow2.gz
-
-    - shell: mv output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz repository/debian/8/amd64/erp5-image.qcow2.gz
-      args:
-        creates: repository/debian/8/amd64/erp5-image.qcow2.gz
-
-    - shell: mv output-debian8-wendelin-standalone/packer-debian8-wendelin-standalone.gz repository/debian/8/amd64/wendelin-image.qcow2.gz
-      args:
-        creates: repository/debian/8/amd64/wendelin-image.qcow2.gz
-
-
-    - shell: mv output-debian8-vm-boostrap/packer-debian8-slapos.gz repository/debian/8/amd64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/debian/8/amd64/base-slapos-image.qcow2.gz
-
-    - shell: mv output-debian7-vm-bootstrap/packer-debian7-slapos.gz repository/debian/7/amd64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/debian/7/amd64/base-slapos-image.qcow2.gz
-
-    - shell: mv output-ubuntu-14.04-server-amd64-vm-bootstrap/packer-ubuntu-14-04-server-slapos.gz repository/ubuntu/14.04/amd64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/ubuntu/14.04/amd64/base-slapos-image.qcow2.gz
-
-    - shell: mv output-ubuntu-15.04-server-amd64-vm-bootstrap/packer-ubuntu-15-04-server-slapos.gz repository/ubuntu/15.04/amd64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/ubuntu/15.04/amd64/base-slapos-image.qcow2.gz
-
-    - shell: mv output-centos67/packer-centos68-slapos.gz repository/centos/6/x86_64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/centos/6/x86_64/base-slapos-image.qcow2.gz
-
-    - shell: mv output-centos72-vm-bootstrap/packer-centos72-slapos.gz repository/centos/7/x86_64/base-slapos-image.qcow2.gz
-      args:
-        creates: repository/centos/7/x86_64/base-slapos-image.qcow2.gz
-
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/debian/8/amd64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/debian/7/amd64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/debian/7/amd64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/ubuntu/14.04/amd64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/ubuntu/15.04/amd64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/centos/6/x86_64/
-
-    - shell: md5sum * > MD5SUM.txt
-      args:
-        chdir: repository/centos/7/x86_64/
+    - shell: sha512sum {{ item }} >> SHA512SUM.txt
+      with_items:
+           - output-debian8/packer-debian8.gz
+           - output-debian7/packer-debian7.gz
+           - output-ubuntu-14-04-server/packer-ubuntu-14-04-server.gz
+           - output-ubuntu-15-04-server/packer-ubuntu-15-04-server.gz
+           - output-centos72/packer-centos72.gz
+           - output-centos67/packer-centos67.gz
+           - output-debian8-testing-version/packer-debian8-testing-version.gz
+           - output-debian7-testing-version/packer-debian7-testing-version.gz
+           - output-ubuntu-15-04-server-testing-version/packer-ubuntu-15-04-server-testing-version.gz
+           - output-ubuntu-14-04-server-testing-version/packer-ubuntu-14-04-server-testing-version.gz
+           - output-centos67-testing-version/packer-centos67-testing-version.gz
+           - output-centos72-testing-version/packer-centos72-testing-version.gz
+           - output-debian8-webrunner/packer-debian8-webrunner.gz
+           - output-debian8-erp5-standalone/packer-debian8-erp5-standalone.gz
+           - output-debian8-wendelin/packer-debian8-wendelin.gz
+           - output-debian8-vm-bootstrap/packer-debian8-vm-bootstrap.gz 
+           - output-debian7-vm-bootstrap/packer-debian7-vm-bootstrap.gz
+           - output-ubuntu-14-04-server-vm-bootstrap/packer-ubuntu-14-04-server-vm-bootstrap.gz
+           - output-ubuntu-15-04-server-vm-bootstrap/packer-ubuntu-15-04-server-vm-bootstrap.gz
+           - output-centos68-vm-bootstrap/packer-centos68-vm-bootstrap.gz
+           - output-centos72-vm-bootstrap/packer-centos72-vm-bootstrap.gz
+#### End of build SHA512SUM.txt
 
 
