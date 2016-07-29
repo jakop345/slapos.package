@@ -17,4 +17,6 @@ do
   sleep 5
 done
 
+wget https://lab.nexedi.com/nexedi/wendelin/raw/master/utils/wendelin-standalone-bind.sh -O /root/wendelin-standalone-bind.sh
 
+bash /root/wendelin-standalone-bind.sh
