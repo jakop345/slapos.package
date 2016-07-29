@@ -1,4 +1,0 @@
-#/bin/bash -e
-# Quick command to test the VM image with output file.
-
-/usr/bin/qemu-system-x86_64 -display sdl -drive file=$1,if=virtio,cache=writeback,discard=ignore -boot once=d -m 512M -name test -machine type=pc,accel=kvm -netdev user,id=user.0,hostfwd=tcp::3213-:22 -device virtio-net,netdev=user.0 -vnc 0.0.0.0:47
