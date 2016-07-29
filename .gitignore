@@ -21,3 +21,4 @@ packer/packer_cache
 archive.tar.gz*
 packer/shacache/*.crt
 packer/shacache/*.key
+packer/SHA512SUM.txt
