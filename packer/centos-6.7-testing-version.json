@@ -28,7 +28,7 @@
             "ssh_wait_timeout": "1800s",
             "shutdown_command": "sudo poweroff",
 
-            "headless": false,
+            "headless": true,
             "boot_wait": "2s",
             "boot_command": [
               "<esc>",

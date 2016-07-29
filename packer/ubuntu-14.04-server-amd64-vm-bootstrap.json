@@ -14,6 +14,7 @@
             "format": "qcow2",
             "accelerator": "kvm",
             "disk_size": "{{ user `disk_size`}}",
+            "headless": true,
 
             "iso_url": "http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso",
             "iso_checksum": "2ac1f3e0de626e54d05065d6f549fa3a",
