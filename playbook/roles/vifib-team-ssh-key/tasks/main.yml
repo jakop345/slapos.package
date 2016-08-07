@@ -5,6 +5,9 @@
  - name: Add A SSH Key
    authorized_key: user=root key="{{ lookup('file', 'alain_key') }}"
 
+ - name: Add N SSH Key
+   authorized_key: user=root key="{{ lookup('file', 'nicolas_key') }}"
+
  - name: Remove C Key
    authorized_key: user=root key="{{ lookup('file', 'remove_key_0') }}" state=absent
 
