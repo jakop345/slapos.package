@@ -52,7 +52,15 @@
 
   - name: Install Ubuntu 15.04 repository
     apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_15.04/ ./' state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.04" 
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.04"
+
+  - name: Install Ubuntu 16.04 repository key
+    apt_key: url={{ base_open_build_url }}/xUbuntu_16.04/Release.key state=present
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+
+  - name: Install Ubuntu 16.04 repository
+    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_16.04/ ./' state=present
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04" 
 
   - name: Install CentOS 7 Repository
     get_url: url=http://download.opensuse.org/repositories/home:/VIFIBnexedi/CentOS_7/home:VIFIBnexedi.repo dest=/etc/yum.repos.d/slapos.repo mode=0440
