@@ -3,20 +3,13 @@
 # Edit for release
 VERSION=1.3.15
 # Edit for release
-RECIPE_VERSION=1.0.20
+RECIPE_VERSION=1.0.32
 # Edit for release
-RELEASE=4
-GITHASH=81f31e29f0aeaef521fe827f43b767d82440bad7
+RELEASE=7
 
 CURRENT_DIRECTORY="$(pwd)"
-# Define URL to compile
-BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/refs/tags/slapos-$RECIPE_VERSION:/component/slapos/buildout.cfg
-OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi/SlapOS-Node
-
-# Development Section [Uncomment for use] 
+# Development Section 
 OBS_DIRECTORY=$CURRENT_DIRECTORY/home:VIFIBnexedi:branches:home:VIFIBnexedi/SlapOS-Node
-BUILDOUT_URL=http://git.erp5.org/gitweb/slapos.git/blob_plain/$GITHASH:/component/slapos/buildout.cfg
-
 
 VERSION_REGEX="s!\%BUILDOUT_URL\%!$BUILDOUT_URL!g;s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s/\%VERSION\%/$VERSION/g;s/\%RELEASE\%/$RELEASE/g"
 TEMPLATES_DIRECTORY=$CURRENT_DIRECTORY/templates
@@ -32,15 +25,16 @@ function prepare_template_files
     mkdir -p $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY 
     cp -rf $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/* $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY
 
+    rm -rf $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/slapos_repository
+    cp -R slapos_repository $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
     sed $VERSION_REGEX $TEMPLATES_DIRECTORY/Makefile.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/Makefile
-    sed $VERSION_REGEX $TEMPLATES_DIRECTORY/offline.sh.in > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/offline.sh
 }
 
 function prepare_download_cache
 {
     cd $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/
     rm -rf build/
-    bash offline.sh || (echo "Impossible to build SlapOS, exiting." && exit 1)
+    bash $CURRENT_DIRECTORY/prepare_download_cache.sh $VERSION $BUILDOUT_URL $RECIPE_VERSION || (echo "Impossible to build SlapOS, exiting." && exit 1)
     # Go back to starting point
     cd $CURRENT_DIRECTORY
 }
@@ -54,16 +48,15 @@ function prepare_deb_packaging
 {
 
     # Add entry to changelog
-    cd $TEMPLATES_DIRECTORY/debian
+    cd $CURRENT_DIRECTORY/debian
     dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
 
     # Add cron and logrotate files
-    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $TEMPLATES_DIRECTORY/debian/cron.d
-    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $TEMPLATES_DIRECTORY/debian/slapos-node.logrotate
-    cd $TEMPLATES_DIRECTORY
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.cron.d $CURRENT_DIRECTORY/debian/cron.d
+    cp $CURRENT_DIRECTORY/$SLAPOS_ORGINAL_DIRECTORY/template/slapos-node.logrotate $CURRENT_DIRECTORY/debian/slapos-node.logrotate
+    cd $CURRENT_DIRECTORY
     tar -czf debian.tar.gz debian
-    cd $OBS_DIRECTORY
-    cp $TEMPLATES_DIRECTORY/debian.tar.gz .
+    cp $CURRENT_DIRECTORY/debian.tar.gz $OBS_DIRECTORY
 }
 
 function obs_upload
