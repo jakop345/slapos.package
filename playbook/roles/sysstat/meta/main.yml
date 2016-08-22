@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: package, package_name: sysstat, package_state: latest }

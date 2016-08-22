@@ -16,7 +16,6 @@
     - { role: package, package_name: openssl, package_state: latest }
     - { role: package, package_name: ca-certificates, package_state: latest }
     - { role: package, package_name: openssh-server, package_state: latest }
-    - { role: package, package_name: sysstat, package_state: latest }
     - { role: package, package_name: strace, package_state: latest }
     - { role: package, package_name: htop, package_state: latest }
     - { role: package, package_name: ioping, package_state: latest }
@@ -27,3 +26,4 @@
     - vifib-team-ssh-key
     - vifib-server
     - rsyslogd
+    - sysstat
