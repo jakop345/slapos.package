@@ -38,9 +38,9 @@ Release:%{release_number}
 License:GPL
 Group: Application/Network
 Source0: slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}.tar.gz
-URL: http://www.slapos.org/ 
+URL: http://community.slapos.org/ 
 Vendor: Vifib
-Packager: Arnaud Fontaine <arnaud.fontaine@nexedi.com>, Cédric Le Ninivin <cedric.leninivin@tiolive.com>, Cédric de Saint Martin <cedric.dsm@nexedi.com>, Rafael Monnerat <rafael@nexedi.com>
+Packager: Rafael Monnerat <rafael@nexedi.com>
 
 %if 0%{?suse_version}
 %if 0%{?suse_version} == 1210
@@ -91,9 +91,9 @@ make
 cd $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/
 make DESTDIR=$RPM_BUILD_ROOT install 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
-cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.cron.d $RPM_BUILD_ROOT/etc/cron.d/slapos-node
+cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/slapos-node.cron.d $RPM_BUILD_ROOT/etc/cron.d/slapos-node
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
-cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/template/slapos-node.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/slapos.logrotate.conf
+cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_number}/slapos-node.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/slapos.logrotate.conf
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 rm -rf $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_easy_install.py
@@ -111,21 +111,10 @@ rm -rf $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_ea
 %defattr(-,root,root)
 
 %pre
-if [ -f /etc/openvpn/vifib.conf ]; then
-    cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
-    mkdir -p /etc/openvpn/vifib-keys
-    cp -rf /etc/openvpn/vifib-keys /etc/openvpn/vifib-backup-keys
-    sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
-fi
 
 %post
 echo """To generate slapos configuration run 'slapos node register'"""
 
 %preun
-if [ -f /etc/openvpn/vifib.conf ]; then 
-    cp -f /etc/openvpn/vifib.conf /etc/openvpn/vifib.backup.conf
-    cp -rf /etc/openvpn/vifib-keys/ /etc/openvpn/vifib-backup-keys
-    sed -i "s/\/etc\/openvpn\/vifib-keys/\/etc\/openvpn\/vifib-backup-keys/g"  /etc/openvpn/vifib.backup.conf
-fi
 
 %postun
