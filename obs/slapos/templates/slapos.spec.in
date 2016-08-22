@@ -97,6 +97,7 @@ cp $RPM_BUILD_DIR/slapos-node_%{unmangled_version}+%{slapversion}+%{release_numb
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 rm -rf $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_easy_install.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/test_httpservers.py
 
 %files
 /opt/slapos
