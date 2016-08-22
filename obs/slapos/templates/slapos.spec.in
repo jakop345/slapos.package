@@ -98,6 +98,13 @@ mkdir -p $RPM_BUILD_ROOT/etc/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/opt/slapos/log
 rm -rf $RPM_BUILD_ROOT/opt/slapos/eggs/setuptools-*.egg/setuptools/tests/test_easy_install.py
 rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/test_httpservers.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/badsyntax_nocaret.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/badsyntax_future*.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/bad_*.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/lib2to3/tests/data/py3_test_grammar.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/test_grammar.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/test_compile.py
+rm -rf $RPM_BUILD_ROOT/opt/slapos/rebootstrap/parts/python2.7/lib/python2.7/test/_mock_backport.py
 
 %files
 /opt/slapos
