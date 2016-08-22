@@ -1,9 +1,11 @@
 [buildout]
+rootdir = %TARGET_DIRECTORY%
+destdir = %BUILD_ROOT_DIRECTORY% 
 extends =
-  %BUILDOUT_URL%
+  %BUILD_ROOT_DIRECTORY%/../slapos_repository/component/slapos/buildout.cfg
 
 # Don't load extensions
-extensions = 
+extensions =
   slapos.rebootstrap
 
 extends-cache= extends-cache
@@ -19,9 +21,9 @@ download-cache= download-cache
 # ./configure --prefix=INSTALL_DIRECTORY && make install DESTDIR=BUILD_DIRECTORY
 [python2.7]
 configure-options +=
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+  --prefix=${buildout:rootdir}/parts/${:_buildout_section_name_}
 environment +=
-  DESTDIR=%BUILD_ROOT_DIRECTORY%
+  DESTDIR=${buildout:destdir}
 
 [gettext]
 # Add gettext library path to RPATH as its binaries are used to build
@@ -70,9 +72,9 @@ post-install =
 #url = http://ftp.vim.org/security/openssl/openssl-1.0.2d.tar.gz
 url = ftp://ftp.openssl.org/source/openssl-1.0.2h.tar.gz
 
-prefix = %TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-make-options +=
-  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
+#prefix = %TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+#make-options +=
+#  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
 
 
 [bison-go]
