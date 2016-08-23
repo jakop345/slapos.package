@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source release_configuration.sh
+
 # Add entry to changelog
 cd $CURRENT_DIRECTORY/debian
 dch -pm -v $VERSION+$RECIPE_VERSION+$RELEASE  --check-dirname-level=0 "New version of slapos ($VERSION+$RECIPE_VERSION+$RELEASE)"
