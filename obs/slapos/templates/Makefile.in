@@ -58,14 +58,22 @@ cleanup-build-stamp: build
 		$(BUILD_DIRECTORY)/parts/glib/share/gdb
 
 	rm -rf $(BUILD_DIRECTORY)/parts/ncurses/lib/terminfo
+	rm -rf $(BUILD_DIRECTORY)/rebootstrap/parts/ncurses/lib/terminfo
 
 	# Removing gettext archive tarball containing all versions
 	rm -fv $(BUILD_DIRECTORY)/parts/gettext/share/gettext/archive.dir.tar.gz
+	rm -fv $(BUILD_DIRECTORY)/rebootstrap/parts/gettext/share/gettext/archive.dir.tar.gz
 
 	# Removing documentations
 	find $(BUILD_DIRECTORY)/parts -regextype posix-extended -type d \
 		-iregex '.*/(gtk-)?(doc[s]?|man|info|test[s]?)$$' \
 		-prune -exec rm -rfv '{}' ';'
+
+	# Removing documentations
+	find $(BUILD_DIRECTORY)/rebootstrap/parts -regextype posix-extended -type d \
+		-iregex '.*/(gtk-)?(doc[s]?|man|info|test[s]?)$$' \
+		-prune -exec rm -rfv '{}' ';'
+
 
 	find $(BUILD_DIRECTORY) -regextype posix-extended -type f \
 		-iregex '.*(COPYING|LICENSE).*' -exec rm -f '{}' ';'
