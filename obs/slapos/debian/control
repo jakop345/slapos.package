@@ -7,8 +7,7 @@ Build-Depends: debhelper (>= 4.1.16),
                po-debconf,
                wget,
                python,
-               python-dev,
-               python-setuptools
+               python-dev
 Homepage: http://www.slapos.org
 
 Package: slapos-node

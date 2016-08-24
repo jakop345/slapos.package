@@ -44,18 +44,18 @@ Packager: Rafael Monnerat <rafael@nexedi.com>
 
 %if 0%{?suse_version}
 %if 0%{?suse_version} == 1210
-BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-distribute, openssl-devel, python-xml
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, openssl-devel, python-xml
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-distribute, python-xml
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-xml
 %else
-BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-setuptools, openssl-devel, python-xml
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, openssl-devel, python-xml
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools, python-xml
+Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-xml
 %endif
 %else
-BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, python-setuptools, openssl-devel
+BuildRequires: gcc-c++, make, patch, wget, python, python-devel, chrpath, openssl-devel
 
-Requires: bridge-utils, python, gcc-c++, make, patch, wget, python-setuptools
+Requires: bridge-utils, python, gcc-c++, make, patch, wget
 %endif
 
 AutoReqProv: no
