@@ -9,8 +9,10 @@ source release_configuration.sh
 TARGET_DIRECTORY=/opt/slapos
 BUILD_ROOT_DIRECTORY="$CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/build"
 BUILD_DIRECTORY=$BUILD_ROOT_DIRECTORY$TARGET_DIRECTORY
+BUILDOUT_VERSION=2.5.2+slapos002
+SETUPTOOL_VERSION=19.6.2
 
-#rm -rf $BUILD_ROOT_DIRECTORY
+rm -rf $BUILD_ROOT_DIRECTORY
 
 #./configure --prefix=/opt/slapos/parts/<NAME>
 
@@ -33,8 +35,8 @@ echo "$BUILD_ROOT_DIRECTORY" > ./original_directory
 wget https://bootstrap.pypa.io/bootstrap-buildout.py --no-check-certificate -O bootstrap.py
 
 
-(python -S bootstrap.py --buildout-version 2.5.1.post2 \
-                        --setuptools-version 19.6.2 \
+(python -S bootstrap.py --buildout-version $BUILDOUT_VERSION \
+                        --setuptools-version $SETUPTOOL_VERSION \
                         --setuptools-to-dir eggs \
                         -f http://www.nexedi.org/static/packages/source/ \
                         -f http://www.nexedi.org/static/packages/source/slapos.buildout/ && \
@@ -52,12 +54,12 @@ cp -R eggs/slapos.rebootstrap* $BUILD_ROOT_DIRECTORY/..
 rm -fv .installed.cfg environment.*
 rm -rfv ./{downloads,parts,eggs,develop-eggs,bin,rebootstrap}
 
-# Removing empty directories
+ Removing empty directories
 find . -type d -empty -prune -exec rmdir '{}' ';'
 
 mkdir -p $BUILD_DIRECTORY/eggs
-python -S bootstrap.py --setuptools-version 19.6.2 \
-                       --buildout-version 2.5.1.post2 \
+python -S bootstrap.py --setuptools-version $SETUPTOOL_VERSION \
+                       --buildout-version $BUILDOUT_VERSION \
                        --setuptools-to-dir eggs \
                        -f http://www.nexedi.org/static/packages/source/ \
                        -f http://www.nexedi.org/static/packages/source/slapos.buildout/ 

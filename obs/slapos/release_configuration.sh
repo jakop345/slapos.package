@@ -5,9 +5,9 @@
 # Edit for release
 VERSION=1.3.15
 # Edit for release
-RECIPE_VERSION=1.0.32
+RECIPE_VERSION=1.0.35
 # Edit for release
-RELEASE=7
+RELEASE=1
 
 CURRENT_DIRECTORY="$(pwd)"
 # Development Section
