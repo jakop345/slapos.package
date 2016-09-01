@@ -24,6 +24,6 @@
     - { role: re6stnet, package_state: present }
     - { role: slapos, package_state: present } 
     - { role: package, package_name: ntp, package_state: present }
-    - vifib-server
     - vifib-team-ssh-key
     - upgrader
+    - vifib-server

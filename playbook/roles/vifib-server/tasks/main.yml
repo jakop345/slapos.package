@@ -28,3 +28,6 @@
   - name: Increase ulimit
     shell: echo "TODO"
 
+  - name: Set Cron
+    cron: name="Launch Startup with ansible" special_time=reboot job='cd /opt/upgrader/playbook && ansible-playbook vifib-startup.yml -i hosts 2>>/opt/upgrader/startup.log >> /opt/upgrader/startup.log'
+
