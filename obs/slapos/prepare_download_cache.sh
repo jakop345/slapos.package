@@ -14,8 +14,6 @@ SETUPTOOL_VERSION=19.6.2
 
 rm -rf $BUILD_ROOT_DIRECTORY
 
-#./configure --prefix=/opt/slapos/parts/<NAME>
-
 echo "Preparing source tarball (recipe version: $RECIPE_VERSION)"
 echo " Build Directory: $BUILD_DIRECTORY "
 echo " Buildroot Directory: $BUILD_ROOT_DIRECTORY "
@@ -26,14 +24,14 @@ set -e
 
 sed  "s/\%RECIPE_VERSION\%/$RECIPE_VERSION/g;s|\%PATCHES_DIRECTORY\%|$PATCHES_DIRECTORY|g;s|\%TARGET_DIRECTORY\%|$TARGET_DIRECTORY|g;s|\%BUILD_ROOT_DIRECTORY\%|$BUILD_ROOT_DIRECTORY|g;s|\%BUILD_DIRECTORY\%|$BUILD_DIRECTORY|g" $BUILD_ROOT_DIRECTORY/../buildout.cfg.in > $BUILD_DIRECTORY/buildout.cfg 
 
+
 # Build first time to get download-cache and extends-cache ready
 cd $BUILD_DIRECTORY
 
-echo "$BUILD_ROOT_DIRECTORY" > ./original_directory
+echo "$BUILD_ROOT_DIRECTORY" > $CURRENT_DIRECTORY/$SLAPOS_DIRECTORY/slapos/original_directory
 
 # Download  bootstrap file
 wget https://bootstrap.pypa.io/bootstrap-buildout.py --no-check-certificate -O bootstrap.py
-
 
 (python -S bootstrap.py --buildout-version $BUILDOUT_VERSION \
                         --setuptools-version $SETUPTOOL_VERSION \
@@ -54,7 +52,7 @@ cp -R eggs/slapos.rebootstrap* $BUILD_ROOT_DIRECTORY/..
 rm -fv .installed.cfg environment.*
 rm -rfv ./{downloads,parts,eggs,develop-eggs,bin,rebootstrap}
 
- Removing empty directories
+# Removing empty directories
 find . -type d -empty -prune -exec rmdir '{}' ';'
 
 mkdir -p $BUILD_DIRECTORY/eggs
