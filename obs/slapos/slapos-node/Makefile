@@ -15,6 +15,8 @@ install: all
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
 	mkdir -p $(DESTDIR)/etc/firewalld/
+	rm -rf $(DESTDIR)/opt/slapos/rebootstrap/parts/openssl
+	cp -R $(DESTDIR)/opt/slapos/parts/openssl $(DESTDIR)/opt/slapos/rebootstrap/parts/openssl
 	cp -R $(DESTDIR)/opt/slapos/parts/firewalld/etc/firewalld/* $(DESTDIR)/etc/firewalld/
 	mkdir -p $(DESTDIR)/opt/slapos/parts/dbus/var/run/dbus
 clean:
