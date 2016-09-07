@@ -35,20 +35,20 @@ environment =
 
 [bison]
 configure-options +=
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+  --prefix=${buildout:rootdir}/parts/${:_buildout_section_name_}
 make-options +=
-  DESTDIR=%BUILD_ROOT_DIRECTORY%
+  DESTDIR=${buildout:destdir}
 
 [dbus]
 configure-options +=
-  --prefix=%TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
+  --prefix=${buildout:rootdir}/parts/${:_buildout_section_name_}
 make-options +=
-  DESTDIR=%BUILD_ROOT_DIRECTORY%
+  DESTDIR=${buildout:destdir}
 environment +=
   LDFLAGS=-L${libexpat:location}/lib -L${buildout:parts-directory}/${:_buildout_section_name_}/lib -Wl,-rpath=${buildout:parts-directory}/${:_buildout_section_name_}/lib
   LD_LIBRARY_PATH=${buildout:parts-directory}/${:_buildout_section_name_}/lib
 post-install =
-  mkdir -p %BUILD_DIRECTORY%/parts/${:_buildout_section_name_}/var/run/dbus
+  mkdir -p ${buildout:destdir}/parts/${:_buildout_section_name_}/var/run/dbus
 
 [dbus-glib]
 environment +=
@@ -72,10 +72,9 @@ post-install =
 #url = http://ftp.vim.org/security/openssl/openssl-1.0.2d.tar.gz
 url = ftp://ftp.openssl.org/source/openssl-1.0.2h.tar.gz
 
-#prefix = %TARGET_DIRECTORY%/parts/${:_buildout_section_name_}
-#make-options +=
-#  INSTALL_PREFIX=%BUILD_ROOT_DIRECTORY%
-
+prefix = ${buildout:rootdir}/parts/${:_buildout_section_name_}
+make-options +=
+  INSTALL_PREFIX=${buildout:destdir}
 
 [bison-go]
 <= bison
