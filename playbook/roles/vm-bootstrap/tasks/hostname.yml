@@ -37,7 +37,7 @@
     when: hostname_file.stat.exists == True
 
   - name: setting cluster 
-    shell: wget --no-check-certificate "{{ lookup('file', '/etc/opt/cluster.hash') }}/hosts" -O /tmp/hosts
+    get_url: url={{ lookup('file', '/etc/opt/cluster.hash') }}/hosts dest=/tmp/hosts validate_certs=no
     when: cluster_hash.stat.exists == True
 
   - name: stat /tmp/hosts

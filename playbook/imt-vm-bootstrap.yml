@@ -2,6 +2,18 @@
   hosts: 127.0.0.1
   connection: local
 
+  vars:
+    logrotate_args:
+      - name: vm-bootstrap
+        path: /var/log/vm-bootstrap.log
+        options:
+          - weekly
+          - compress
+          - rotate 5
+          - notifempty
+          - create
+          - dateext
+
   roles:
     - { role: vm-bootstrap, startup_playbook_id: imt-vm-bootstrap.yml }
     - ntp
@@ -26,14 +38,5 @@
     - { role: vm-disks, vd_disk: t, data_n: 12 } 
     - { role: vm-disks, vd_disk: u, data_n: 12 } 
     - role: logrotate
-      logrotate_scripts:
-        - name: vm-bootstrap
-          path: /var/log/vm-bootstrap.log
-          options:
-            - weekly
-            - compress
-            - rotate 5
-            - notifempty
-            - create
-            - dateext
+      logrotate_scripts: "{{logrotate_args}}"
 

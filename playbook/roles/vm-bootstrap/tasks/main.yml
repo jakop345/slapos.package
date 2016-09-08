@@ -51,7 +51,7 @@
   - include: sudo.yml
   - include: ssh.yml
 
-  - shell: mkdir -p /opt/upgrader
+  - file: path=/opt/upgrader state=directory 
 
   - stat: path=/opt/upgrader/last-upgrade
     register: last_upgrade
