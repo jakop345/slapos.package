@@ -125,7 +125,16 @@ EOF
 fi
 
 is_package_installed openssl || install_package openssl
-is_package_installed ansible || install_package ansible
+# stick to a specific ansible package version
+if is_ubuntu; then
+  # is_ubuntu also handle debian distro
+  is_package_installed ansible || install_package ansible=1.*
+elif is_fedora; then
+  # is_fedora also handle CentOS distro
+  is_package_installed ansible || install_package ansible1.9.noarch
+else
+  is_package_installed ansible || install_package ansible
+fi
 is_package_installed python-setuptools || install_package python-setuptools
 
 if is_ubuntu && [[ $DISTRO == "trusty" ]]; then
