@@ -1,0 +1,8 @@
+---
+  - apt_key: data="{{ lookup('file', 'key_1A716324.gpg') }}"
+  - apt_repository: repo='deb http://git.erp5.org/dist/deb ./'
+  - apt: update_cache=yes
+
+  - apt: name=linux-image-4.1.0-rina.1-amd64
+  - apt: name=librinad-dev
+  - apt: name=rinad

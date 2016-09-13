@@ -1,8 +1,5 @@
 ---
     - apt_key:
-            data: "{{ lookup('file', 'key_1A716324.gpg') }}"
-
-    - apt_key:
             data: "{{ lookup('file', 'key_2EB4D2F994A63987.gpg') }}"
 
     - name: Install vifib package repository

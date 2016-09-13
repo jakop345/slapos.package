@@ -1,7 +1,7 @@
 ---
   - name: Remove legacy repositories from git.erp5.org
     apt_key: id=1A716324 state=absent
-    when: ansible_distribution == "Debian"
+    when: ansible_distribution == "Debian" and not rina
 
   - name: Remove {{ base_open_build_url }} key (and add later) on every upgrade, as expiration date is quite short (2 months).
     apt_key: id=94A63987 state=absent
