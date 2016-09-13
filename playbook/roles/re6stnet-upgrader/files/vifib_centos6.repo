@@ -1,7 +1,0 @@
-[home_VIFIBnexedi]
-name=SlapOS-Node (CentOS_CentOS-6)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/VIFIBnexedi/CentOS_CentOS-6/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/VIFIBnexedi/CentOS_CentOS-6//repodata/repomd.xml.key
-enabled=1

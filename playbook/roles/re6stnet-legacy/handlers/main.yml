@@ -1,4 +1,0 @@
----
-
- - name: restart re6stnet
-   service: name=re6stnet state=restarted
