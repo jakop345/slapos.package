@@ -23,13 +23,13 @@ class CallbackModule(baseModule):
       if ANSIBLE_VERSION > 1:
         super(CallbackModule, self).__init__()
 
-        if not os.path.exists(self.log_path):
-          os.makedirs(self.log_path)
-        else:
-          for filename in os.listdir(self.log_path):
-            filepath = os.path.join(self.log_path, filename)
-            if os.path.exists(filepath) and os.path.isfile(filepath):
-              os.unlink(filepath)
+      if not os.path.exists(self.log_path):
+        os.makedirs(self.log_path)
+      else:
+        for filename in os.listdir(self.log_path):
+          filepath = os.path.join(self.log_path, filename)
+          if os.path.exists(filepath) and os.path.isfile(filepath):
+            os.unlink(filepath)
 
     def writeLog(self, host, category, content):
       if not self.fd_list.has_key(category):
