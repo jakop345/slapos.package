@@ -2,9 +2,14 @@
   - name: Add startup script
     template: src=start-script.j2 dest=/usr/local/bin/vm-bootstrap-update mode=755
 
+  - name: get periodicity time
+    shell: cat /etc/opt/periodicity || echo 10
+    register: periodicity
+    ignore_errors: True
+
   - name: Add a periodical update on the VM
     cron: name="Update vm bootstrap"
-          minute="*/12"
+          minute="*/{{ periodicity.stdout }}"
           job="bash -lc /usr/local/bin/vm-bootstrap-update >> /var/log/vm-bootstrap.log"
           cron_file=ansible-vm-bootstrap user="root"
 
