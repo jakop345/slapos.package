@@ -1,0 +1,27 @@
+---
+
+- name: Check when last checked
+  stat: path=/etc/opt/ansible-yum-latest-{{ name }}
+  register: check_path
+  changed_when: false
+
+- name: Calculate age target
+  shell: echo {{ check_path.stat.mtime|int + cache_valid_time|int }}
+  register: age_target
+  when: check_path.stat.exists == true
+  changed_when: false
+
+- name: Install/update package {{ name }}
+  yum:
+    name={{ name }}
+    state=latest
+    update_cache=yes
+  when: check_path.stat.exists == false or age_target.stdout|int <= ansible_date_time.epoch|int
+
+- name: Update Cache File
+  file:
+    path=/etc/opt/ansible-yum-latest-{{ name }}
+    mode=0600
+    state=touch
+  when: check_path.stat.exists == false or age_target.stdout|int <= ansible_date_time.epoch|int
+  changed_when: false
