@@ -1,4 +1,7 @@
 ---
+  - name: Remove playbook completed file
+    file: path=/etc/opt/vm-bootstrap-completed state=absent
+
   - file: path=/opt/upgrader state=directory mode=0755
 
   - stat: path=/opt/upgrader/current-upgrade-signature

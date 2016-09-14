@@ -2,7 +2,16 @@
   hosts: 127.0.0.1
   connection: local
 
+  pre_tasks:
+    - name: Get mounted disk list
+      script: roles/vm-bootstrap/files/mounted_disk
+      register: vd_list
+    - name: resgister completed variable
+      stat: path=/etc/opt/vm-bootstrap-completed
+      register: ansible_completed
+
   vars:
+    is_playbook_ok: "{{ ansible_completed.stat.exists }}"
     logrotate_args:
       - name: vm-bootstrap
         path: /var/log/vm-bootstrap.log
@@ -13,11 +22,6 @@
           - notifempty
           - create
           - dateext
-
-  pre_tasks:
-    - name: Get mounted disk list
-      script: roles/vm-bootstrap/files/mounted_disk
-      register: vd_list
 
   roles:
     - { role: vm-bootstrap, startup_playbook_id: imt-vm-bootstrap.yml }
@@ -44,4 +48,9 @@
     - { role: vm-disks, vd_disk: u, data_n: 12, when: vd_list.stdout.find("vdu") != -1 }
     - role: logrotate
       logrotate_scripts: "{{logrotate_args}}"
+      when: ansible_completed.stat.exists == False
 
+  tasks:
+    - name: Set tasks complete
+      file: path=/etc/opt/vm-bootstrap-completed state=touch
+      changed_when: false

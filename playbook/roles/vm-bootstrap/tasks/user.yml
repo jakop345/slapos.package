@@ -8,3 +8,4 @@
     with_items:
       - slapos
       - nexedi
+    when: is_playbook_ok == "False"

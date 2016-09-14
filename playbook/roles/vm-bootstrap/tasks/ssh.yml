@@ -51,11 +51,12 @@
     always_run: True
     ignore_errors: True
     changed_when: False
+    when: is_playbook_ok == "False"
 
   - name: update /etc/ssh/sshd_config
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin (.*)" line="PermitRootLogin no" state=present
     notify:
       - restart ssh
       - restart sshd
-    when: permitrootlogin.rc != 0
+    when: is_playbook_ok == "False" and permitrootlogin.rc != 0
 
