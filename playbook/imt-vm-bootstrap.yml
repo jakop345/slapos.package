@@ -14,29 +14,34 @@
           - create
           - dateext
 
+  pre_tasks:
+    - name: Get mounted disk list
+      script: roles/vm-bootstrap/files/mounted_disk
+      register: vd_list
+
   roles:
     - { role: vm-bootstrap, startup_playbook_id: imt-vm-bootstrap.yml }
     - ntp
-    - { role: vm-disks, vd_disk: b, data_n: 1 } 
-    - { role: vm-disks, vd_disk: c, data_n: 2 } 
-    - { role: vm-disks, vd_disk: d, data_n: 3 } 
-    - { role: vm-disks, vd_disk: e, data_n: 4 } 
-    - { role: vm-disks, vd_disk: f, data_n: 5 } 
-    - { role: vm-disks, vd_disk: g, data_n: 6 } 
-    - { role: vm-disks, vd_disk: h, data_n: 7 } 
-    - { role: vm-disks, vd_disk: i, data_n: 8 } 
-    - { role: vm-disks, vd_disk: j, data_n: 9 } 
-    - { role: vm-disks, vd_disk: k, data_n: 10 } 
-    - { role: vm-disks, vd_disk: l, data_n: 11 } 
-    - { role: vm-disks, vd_disk: m, data_n: 12 } 
-    - { role: vm-disks, vd_disk: n, data_n: 12 } 
-    - { role: vm-disks, vd_disk: o, data_n: 12 } 
-    - { role: vm-disks, vd_disk: p, data_n: 12 } 
-    - { role: vm-disks, vd_disk: q, data_n: 12 } 
-    - { role: vm-disks, vd_disk: r, data_n: 12 } 
-    - { role: vm-disks, vd_disk: s, data_n: 12 } 
-    - { role: vm-disks, vd_disk: t, data_n: 12 } 
-    - { role: vm-disks, vd_disk: u, data_n: 12 } 
+    - { role: vm-disks, vd_disk: b, data_n: 1, when: vd_list.stdout.find("vdb") != -1 }
+    - { role: vm-disks, vd_disk: c, data_n: 2, when: vd_list.stdout.find("vdc") != -1 }
+    - { role: vm-disks, vd_disk: d, data_n: 3, when: vd_list.stdout.find("vdd") != -1 }
+    - { role: vm-disks, vd_disk: e, data_n: 4, when: vd_list.stdout.find("vde") != -1 }
+    - { role: vm-disks, vd_disk: f, data_n: 5, when: vd_list.stdout.find("vdf") != -1 }
+    - { role: vm-disks, vd_disk: g, data_n: 6 ,when: vd_list.stdout.find("vdg") != -1 }
+    - { role: vm-disks, vd_disk: h, data_n: 7, when: vd_list.stdout.find("vdh") != -1 }
+    - { role: vm-disks, vd_disk: i, data_n: 8, when: vd_list.stdout.find("vdi") != -1 }
+    - { role: vm-disks, vd_disk: j, data_n: 9, when: vd_list.stdout.find("vdj") != -1 }
+    - { role: vm-disks, vd_disk: k, data_n: 10, when: vd_list.stdout.find("vdk") != -1 }
+    - { role: vm-disks, vd_disk: l, data_n: 11, when: vd_list.stdout.find("vdl") != -1 }
+    - { role: vm-disks, vd_disk: m, data_n: 12, when: vd_list.stdout.find("vdm") != -1 }
+    - { role: vm-disks, vd_disk: n, data_n: 12, when: vd_list.stdout.find("vdn") != -1 }
+    - { role: vm-disks, vd_disk: o, data_n: 12, when: vd_list.stdout.find("vdo") != -1 }
+    - { role: vm-disks, vd_disk: p, data_n: 12, when: vd_list.stdout.find("vdp") != -1 }
+    - { role: vm-disks, vd_disk: q, data_n: 12, when: vd_list.stdout.find("vdq") != -1 }
+    - { role: vm-disks, vd_disk: r, data_n: 12, when: vd_list.stdout.find("vdr") != -1 }
+    - { role: vm-disks, vd_disk: s, data_n: 12, when: vd_list.stdout.find("vds") != -1 }
+    - { role: vm-disks, vd_disk: t, data_n: 12, when: vd_list.stdout.find("vdt") != -1 }
+    - { role: vm-disks, vd_disk: u, data_n: 12, when: vd_list.stdout.find("vdu") != -1 }
     - role: logrotate
       logrotate_scripts: "{{logrotate_args}}"
 

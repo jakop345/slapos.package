@@ -1,0 +1,13 @@
+#!/bin/sh
+
+RESULT=""
+
+for i in a b c d e f g h i j k l m n o p q r s t u
+do
+  if [ -e "/dev/vd$i" ]
+  then
+    R=$(ls /dev/vd$i | cut -d '/' -f3)
+    RESULT="$RESULT $R"
+  fi  
+done
+echo $RESULT
