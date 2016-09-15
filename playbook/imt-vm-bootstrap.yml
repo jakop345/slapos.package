@@ -53,4 +53,5 @@
   tasks:
     - name: Set tasks complete
       file: path=/etc/opt/vm-bootstrap-completed state=touch
+      when: ansible_completed.stat.exists == False
       changed_when: false
