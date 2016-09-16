@@ -1,0 +1,67 @@
+#!/usr/bin/python
+import errno, json, os
+
+with open("/etc/ipcmanager.conf") as f:
+   conf = json.load(f)
+
+conf["difConfigurations"][:] = (
+  {
+    "name": "shim",
+    "template": "shim-tcp-udp.dif",
+  },
+)
+conf["ipcProcessesToCreate"][:] = (
+  {
+    "apInstance": "1",
+    "apName": "re6st",
+    "difName": "shim",
+    "type": "shim-tcp-udp",
+  },
+)
+
+with open("/etc/default.dif") as f:
+    default = json.load(f)
+
+del default["knownIPCProcessAddresses"][:]
+
+d = "/etc/ipcm-re6st"
+os.path.isdir(d) or os.makedirs(d)
+os.chdir(d)
+
+def write(path, text):
+    try:
+        with open(path, "r") as f:
+            if f.read() == text:
+                return
+    except IOError as e:
+        if e.errno != errno.ENOENT:
+            raise
+    with open(path, "w") as f:
+        f.write(text)
+
+def write_json(path, obj):
+    write(path, json.dumps(obj, indent=2, sort_keys=True))
+
+write_json("ipcmanager.conf", conf)
+write_json("da.map", {})
+write_json("default.dif", default)
+write_json("shim-tcp-udp.dif", {"difType": "shim-tcp-udp"})
+
+write("/etc/modules-load.d/rina.conf", """\
+#shim-eth-vlan
+shim-tcp-udp
+rina-default-plugin
+""")
+
+write("/etc/systemd/system/ipcm-re6st.service", """\
+[Unit]
+Description=RINA IPC Manager
+ConditionPathExists=/sys/rina
+
+[Service]
+ExecStart=/usr/bin/ipcm -c %s/ipcmanager.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+""" % d)

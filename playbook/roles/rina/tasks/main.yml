@@ -2,3 +2,8 @@
   #- include: "{{ ansible_distribution |lower }}.yml"
   - assert: { that: "ansible_distribution == 'Debian'" }
   - include: debian.yml
+
+  #- command: "{{role_path}}/gen-ipcm-conf"
+  - command: roles/rina/gen-ipcm-conf
+
+  - service: name=ipcm-re6st enabled=yes
