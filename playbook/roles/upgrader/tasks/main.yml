@@ -13,14 +13,14 @@
   - file: path=/opt/upgrader/ state=directory mode=0755
 
   - shell: rm -rf /opt/upgrader/tmp
-  
+
   - shell: mkdir -p /opt/upgrader/tmp
 
-  - name: Periodically download the latest playbook 
+  - name: Periodically download the latest playbook
     shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
 
   - name: Uncompress
-    shell: tar -xzvf /opt/upgrader/archive.tar.gz 
+    shell: tar -xzvf /opt/upgrader/archive.tar.gz
     args:
       chdir: /opt/upgrader/tmp
 
@@ -28,7 +28,7 @@
     when: playbook_folder.stat.exists == False
 
   - stat: path=/opt/upgrader/tmp/hosts
-    register: hosts_file 
+    register: hosts_file
 
   - shell: rm -rf /opt/upgrader/playbook-tmp
     when: hosts_file.stat.exists == True
@@ -45,11 +45,11 @@
     shell: echo {{ archive.stat.md5 }} > /opt/upgrader/next-upgrade-signature
 
   - name: Stat Current Upgrade Signature
-    file: path=/opt/upgrader/current-upgrade-signature state=touch mode="0666" 
+    file: path=/opt/upgrader/current-upgrade-signature state=touch mode="0666"
 
   - name: Get /opt/upgrader/next-upgrade-signature content
     shell: cat /opt/upgrader/next-upgrade-signature
-    register: 
+    register:
       next_upgrade_signature
 
   - name: Get /opt/upgrader/current-upgrade-signature content
@@ -64,7 +64,7 @@
       chdir: /opt/upgrader/playbook-tmp/
 
   - name: Upgrade Current Upgrade Signature
-    shell: cat /opt/upgrader/next-upgrade-signature > /opt/upgrader/current-upgrade-signature 
+    shell: cat /opt/upgrader/next-upgrade-signature > /opt/upgrader/current-upgrade-signature
     when: (upgrade_after > lookup('file', '/opt/upgrader/last-upgrade')|int ) and (lookup('file', '/opt/upgrader/next-upgrade-signature') != lookup('file', '/opt/upgrader/current-upgrade-signature'))
 
   - shell: echo {{ ansible_date_time.epoch }} > /opt/upgrader/last-upgrade
