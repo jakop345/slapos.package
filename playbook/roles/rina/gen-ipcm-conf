@@ -24,6 +24,17 @@ with open("/etc/default.dif") as f:
 
 del default["knownIPCProcessAddresses"][:]
 
+# Avoid enrollment failures due to unknown IPCP address.
+enrollment = {
+  "maxEnrollmentRetries": 0,
+  "declaredDeadIntervalInMs": 60000,
+}
+for x in default["enrollmentTaskConfiguration"]["policySet"]["parameters"]:
+    try:
+        x["value"] = str(enrollment[x["name"]])
+    except KeyError:
+        pass
+
 d = "/etc/ipcm-re6st"
 os.path.isdir(d) or os.makedirs(d)
 os.chdir(d)
