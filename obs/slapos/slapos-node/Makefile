@@ -11,6 +11,7 @@ install: all
 	mkdir -p $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/usr/sbin/
 	cp slapos-tweak $(DESTDIR)/usr/sbin/
+	sed -i "s/\/opt\/slapos\/rebootstrap\/parts/\/opt\/slapos\/parts/g" $(DESTDIR)/opt/slapos/bin/*
 	cp $(DESTDIR)/opt/slapos/bin/slapos $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/etc/opt/slapos/
 	mkdir -p $(DESTDIR)/etc/firewalld/
