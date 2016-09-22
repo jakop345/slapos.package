@@ -1,9 +1,12 @@
 #!/usr/bin/python2 -S
-import glob, os, sys, zipfile
+import glob, os, sys, tarfile, zipfile
 d = "download-cache/dist"
 p = "setuptools-*"
 x, = glob.glob(d + "/" + p)
-zipfile.ZipFile(x).extractall()
+if x.endswith(".zip"):
+    zipfile.ZipFile(x).extractall()
+else:
+    tarfile.TarFile.open(x, "r:*").extractall()
 sys.path[:0] = p = glob.glob(p)
 from setuptools.command.easy_install import main
 for x in "bin", "eggs":
