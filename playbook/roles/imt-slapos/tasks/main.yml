@@ -1,0 +1,62 @@
+---
+
+  - name: stat directory {{ mount_directory }}
+    stat: path={{ mount_directory }}
+    register: slapos_directory
+    when: mount_directory is defined
+
+  - name: create slapos folders
+    shell: mkdir -p /opt/slapos /opt/slapgrid /srv/slapgrid
+    when: mount_directory is defined and slapos_directory.stat.exists == True
+
+  - name: create slapos mount point folders
+    shell: mkdir -p {{ mount_directory }}/opt/slapos {{ mount_directory }}/opt/slapgrid {{ mount_directory }}/srv/slapgrid
+    when: mount_directory is defined and slapos_directory.stat.exists == True
+
+  - name: mount srv/slapgrid directory
+    mount: name="{{ mount_directory }}/srv/slapgrid" src=/srv/slapgrid opts=bind state=mounted fstype=none
+    when: mount_directory is defined and slapos_directory.stat.exists == True
+
+  - name: mount opt/slapgrid directory
+    mount: name="{{ mount_directory }}/opt/slapgrid" src=/opt/slapgrid opts=bind state=mounted fstype=none
+    when: mount_directory is defined and slapos_directory.stat.exists == True
+
+  - name: mount srv/slapgrid directory
+    mount: name="{{ mount_directory }}/opt/slapos" src=/opt/slapos opts=bind state=mounted fstype=none
+    when: mount_directory is defined and slapos_directory.stat.exists == True
+
+  - name: stat slapos.cfg file
+    stat: path=/etc/opt/slapos/slapos.cfg
+    register: slapos_cfg
+    when: post_config is defined
+ 
+  - name: update slapos.cfg configuration
+    lineinfile: dest=/etc/opt/slapos/slapos.cfg regexp="{{ item.regexp }}" line="{{ item.line }}" backup=yes insertafter="^interface_name ="
+    with_items:
+      - { regexp: '^create_tap\s*=', line: 'create_tap = True' }
+      - { regexp: '^tap_gateway_interface\s*=', line: 'tap_gateway_interface = re6stnet-tcp' }
+      - { regexp: '^partition_amount\s*=', line: 'partition_amount = 15' }
+    when: post_config is defined and slapos_cfg.stat.exists == True
+
+  - name: update slapos.cfg configuration storage/network
+    lineinfile: dest=/etc/opt/slapos/slapos.cfg regexp="{{ item.regexp }}" line="{{ item.line }}" backup=yes insertafter="^instance_root ="
+    with_items:
+     - { regexp: '^ipv4_global_network\s*=', line: 'ipv4_global_network = 10.32.0.0/13' }
+     - { regexp: '^instance_storage_home\s*=', line: 'instance_storage_home = /data' }
+    when: post_config is defined and slapos_cfg.stat.exists == True
+
+  - modprobe: name=kvm state=present
+    when: post_config is defined
+  - modprobe: name=kvm_intel state=present
+    when: post_config is defined
+  - modprobe: name=vhost-net state=present
+    when: post_config is defined
+
+  - file: path=/dev/kvm mode=0666
+    when: post_config is defined
+  - file: path=/dev/vhost-net mode=0666
+    when: post_config is defined
+
+  - name: Run slapos format for update configs
+    shell: "slapos node format -v --now"  
+    when: post_config is defined and slapos_cfg.stat.exists == True
