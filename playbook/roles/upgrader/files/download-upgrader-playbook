@@ -10,7 +10,7 @@ TFILE="archive.tar.gz"
 mkdir -p $DFILE
 cd $DFILE
 
-slapcache-download --destination=$TFILE
+/usr/local/bin/slapcache-download --destination=$TFILE
 tar -xzvf $TFILE
 
 md5sum $TFILE > "/opt/upgrader/next-upgrader-md5sum"

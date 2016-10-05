@@ -17,7 +17,7 @@
   - shell: mkdir -p /opt/upgrader/tmp
 
   - name: Periodically download the latest playbook
-    shell: slapcache-download --destination=/opt/upgrader/archive.tar.gz
+    shell: /usr/local/bin/slapcache-download --destination=/opt/upgrader/archive.tar.gz
 
   - name: Uncompress
     shell: tar -xzvf /opt/upgrader/archive.tar.gz
