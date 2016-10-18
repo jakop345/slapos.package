@@ -2,7 +2,11 @@
 # Reruns the ansible playbook, does nothing else
 
 cd /opt/slapos.playbook
-WAIT_TIME=$((1 + RANDOM % 300))
+
+if [ -z "$WAIT_TIME" ]; then
+  WAIT_TIME=$((1 + RANDOM % 300));
+fi
+
 echo "Sleeping for $WAIT_TIME seconds..."
 sleep $WAIT_TIME
 
