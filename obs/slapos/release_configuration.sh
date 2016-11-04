@@ -3,9 +3,9 @@
 ####################################################
 
 # Edit for release
-VERSION=1.3.15
+VERSION=1.3.18
 # Edit for release
-RECIPE_VERSION=1.0.35
+RECIPE_VERSION=1.0.42
 # Edit for release
 RELEASE=1
 
