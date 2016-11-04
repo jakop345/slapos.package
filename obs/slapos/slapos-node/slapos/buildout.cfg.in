@@ -58,19 +58,19 @@ environment +=
 
 [dbus-python]
 pre-configure =
+  sed -i 's#!/opt/slapos/parts/python2.7/bin/python2.7#!${python2.7:location}/bin/python2.7#' ${python2.7:location}/bin/python-config
   sed -i 's#/opt/slapos/parts/dbus/lib/libdbus-1.la#${dbus:location}/lib/libdbus-1.la#' ${dbus-glib:location}/lib/libdbus-glib-1.la
 environment +=
   LD_LIBRARY_PATH=${dbus:location}/lib
   LDFLAGS=-L${glib:location}/lib -Wl,-rpath=${glib:location}/lib -L${dbus:location}/lib -Wl,-rpath=${dbus:location}/lib
 post-install =
   sed -i 's#${dbus:location}/lib/libdbus-1.la#/opt/slapos/parts/dbus/lib/libdbus-1.la#' ${dbus-glib:location}/lib/libdbus-glib-1.la
+  sed -i 's#!${python2.7:location}/bin/python2.7#!/opt/slapos/parts/python2.7/bin/python2.7#' ${python2.7:location}/bin/python-config
 
 [openssl]
 # HTTPS is not work on debian 6 where the package is originally
 # prepared to be upload.
-#url = http://www.openssl.org/source/openssl-1.0.2d.tar.gz
-#url = http://ftp.vim.org/security/openssl/openssl-1.0.2d.tar.gz
-url = ftp://ftp.openssl.org/source/openssl-1.0.2h.tar.gz
+url = ftp://ftp.openssl.org/source/openssl-1.0.2j.tar.gz
 
 prefix = ${buildout:rootdir}/parts/${:_buildout_section_name_}
 make-options +=
@@ -120,6 +120,12 @@ configure-options =
   --without-debug
   --without-gpm
   --enable-rpath
+
+[flex]
+url = http://downloads.sourceforge.net/project/flex/flex/flex-2.5.35/flex-2.5.35.tar.gz
+md5sum = 201d3f38758d95436cbc64903386de0b
+environment =
+  M4=${m4:location}/bin/m4
 
 [versions]
 cliff = 1.4.5
