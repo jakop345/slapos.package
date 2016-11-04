@@ -1,7 +1,7 @@
-  - name: Install packages using apt
+  - name: Install {{ package_name }} using apt
     apt: name={{ package_name }} state={{ package_state }} update_cache=yes cache_valid_time=3600
     when: ansible_os_family == "Debian" or ansible_os_family == "Linuxmint"
 
-  - name: Install re6stnet on CentOS
+  - name: Install {{ package_name }} using yum
     yum: name={{ package_name }} state={{ package_state }} update_cache=yes
     when: ansible_os_family == "RedHat"
