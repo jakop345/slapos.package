@@ -6,6 +6,7 @@
     - settings/vifib.yml
 
   roles:
+    - repository
     - ntp
     - { role: package, package_name: lm-sensors, package_state: latest }
     - { role: package, package_name: wget, package_state: latest }
