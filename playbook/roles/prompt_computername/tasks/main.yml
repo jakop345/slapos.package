@@ -1,0 +1,9 @@
+---
+  - name: "Your Computer Name"
+    pause: prompt="Please input the computer name please..."
+    register: computer_name_input
+
+  - set_fact: computer_name={{ computer_name_input.user_input }}
+    when: computer_name_input.user_input
+
+

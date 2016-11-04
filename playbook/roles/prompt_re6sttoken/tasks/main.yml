@@ -1,0 +1,7 @@
+---
+  - name: "Your Re6stnet Token"
+    pause: prompt="Input your re6stnet token..."
+    register: re6sttoken_input
+
+  - set_fact: re6sttoken={{ re6sttoken_input.user_input }}
+    when: re6sttoken_input.user_input

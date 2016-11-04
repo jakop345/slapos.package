@@ -1,0 +1,7 @@
+---
+  - name: "Your SlapOS token"
+    pause: prompt="Please slapostoken name please..."
+    register: slapostoken_input
+
+  - set_fact: slapostoken={{ slapostoken_input.user_input }}
+    when: slapostoken_input.user_input
