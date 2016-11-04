@@ -4,3 +4,6 @@ slapos_master_url: https://slap.grandenet.cn/
 slapos_web_master_url: https://slapos.grandenet.cn/
 interface_name: lo
 re6st_annon: False
+computer_name: noname
+slapostoken: noname
+re6sttoken: noname
