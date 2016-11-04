@@ -10,37 +10,21 @@
   - file: path=/etc/apt/sources.list.d/re6stnet.list state=absent
     when: ansible_distribution == "Debian"
 
-  - name: Install Debian 8 repository key
-    apt_key: url={{ base_open_build_url }}/Debian_8.0/Release.key state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
+  - name: Install Debian {{ ansible_distribution_major_version }} repository key
+    apt_key: url={{ base_open_build_url }}/Debian_{{ ansible_distribution_major_version }}.0/Release.key state=present
+    when: ansible_distribution == "Debian"
 
-  - name: Install Debian 7 repository key
-    apt_key: url={{ base_open_build_url }}/Debian_7.0/Release.key state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+  - name: Install Debian {{ ansible_distribution_major_version }} repository
+    apt_repository: repo='deb {{ base_open_build_url }}/Debian_{{ ansible_distribution_major_version }}.0/ ./' state=present
+    when: ansible_distribution == "Debian"
 
-  - name: Install Debian 6 repository key
-    apt_key: url={{ base_open_build_url }}/Debian_6.0/Release.key state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "6"
-
-  - name: Install Debian 8 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/Debian_8.0/ ./' state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
-
-  - name: Install Debian 7 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/Debian_7.0/ ./' state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
-
-  - name: Install Debian 6 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/Debian_6.0/ ./' state=present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == "6"
-
-  - name: Install Ubuntu 14.04 repository key
+  - name: Install Ubuntu {{ ansible_distribution_version }} repository key
     apt_key: url={{ base_open_build_url }}/xUbuntu_14.04/Release.key state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+    when: ansible_distribution == "Ubuntu"
 
-  - name: Install Ubuntu 14.04 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_14.04/ ./' state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04" 
+  - name: Install Ubuntu {{ ansible_distribution_version }} repository
+    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_{{ ansible_distribution_version }}/ ./' state=present
+    when: ansible_distribution == "Ubuntu" 
 
   - name: Install Ubuntu 14.04 repository key (Linuxmint 17.2)
     apt_key: url={{ base_open_build_url }}/xUbuntu_14.04/Release.key state=present
@@ -49,22 +33,6 @@
   - name: Install Ubuntu 14.04 repository (Linuxmint 17.2)
     apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_14.04/ ./' state=present
     when: ansible_distribution == "Linuxmint" and ansible_distribution_version == "17.2"
-
-  - name: Install Ubuntu 15.04 repository key
-    apt_key: url={{ base_open_build_url }}/xUbuntu_15.04/Release.key state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.04"
-
-  - name: Install Ubuntu 15.04 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_15.04/ ./' state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.04"
-
-  - name: Install Ubuntu 16.04 repository key
-    apt_key: url={{ base_open_build_url }}/xUbuntu_16.04/Release.key state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
-
-  - name: Install Ubuntu 16.04 repository
-    apt_repository: repo='deb {{ base_open_build_url }}/xUbuntu_16.04/ ./' state=present
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04" 
 
   - name: Install CentOS 7 Repository
     get_url: url=http://download.opensuse.org/repositories/home:/VIFIBnexedi/CentOS_7/home:VIFIBnexedi.repo dest=/etc/yum.repos.d/slapos.repo mode=0440
@@ -81,3 +49,4 @@
   - name: Install CentOS 6 RPM Key
     rpm_key: state=present key=http://download.opensuse.org/repositories/home:/VIFIBnexedi/CentOS_CentOS-6/repodata/repomd.xml.key
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+
