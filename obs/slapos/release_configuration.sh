@@ -7,7 +7,7 @@ VERSION=1.3.18
 # Edit for release
 RECIPE_VERSION=1.0.42
 # Edit for release
-RELEASE=1
+RELEASE=2
 
 CURRENT_DIRECTORY="$(pwd)"
 # Development Section
